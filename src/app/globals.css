@@ -1,0 +1,700 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens for Vixerra's own identity — deliberately moved off the
+ * violet→pink "AI SaaS" gradient (what this file used to be, modeled on
+ * leonardo.ai) toward a palette that actually means something for a video
+ * tool: a black/white/silver base broken by four saturated signal colors
+ * (lime, amber, orange, hot magenta). The base carries every structural
+ * surface; the four are confined to things that DO something or MEAN
+ * something — actions, credits, categories, announcements. Read the
+ * "signal set" note below before reaching for one, and before adding a
+ * fifth.
+ *
+ * Single source of truth for color/type/radius/shadow values — components
+ * should always reach for a Tailwind utility generated from one of these
+ * tokens (bg-surface, text-muted, rounded-2xl, shadow-glow-md, text-body,
+ * ...) rather than hardcoding a hex value or pixel size.
+ *
+ * Tailwind v4 is CSS-first: every key below auto-generates a matching
+ * utility class (no tailwind.config.ts needed). The default numeric
+ * spacing scale (p-1..p-32 at a 4px step) already matches a 4px grid
+ * exactly, so it isn't redeclared here. Breakpoints use Tailwind's stock
+ * sm(640)/md(768)/lg(1024).
+ */
+@theme {
+  /* Surfaces — true near-black with the faintest cool cast, no warm or
+     violet undertone. This palette is monochrome by design (black, white,
+     silver), so every bit of hierarchy has to come from VALUE rather than
+     hue: the ramp below is spaced widely enough that surface / card /
+     elevated stay distinguishable without a single colored tint doing the
+     work. Deeper than a typical #111 dark theme on purpose — the darker
+     the ground, the more silver reads as an actual metal catching light
+     rather than as another gray box. */
+  --color-surface: #050506; /* Background Primary */
+  --color-surface-2: #0f0f11; /* Background Secondary (cards) */
+  --color-surface-3: #17171a; /* Background Tertiary (elevated / card hover) */
+  --color-surface-dark: #0a0a0c; /* Input fields */
+  --color-overlay: #050506;
+  --color-dropdown-hover: #1f1f23; /* Hover states, dropdowns */
+
+  /* App-shell background — the authenticated app (dashboard/generate/
+     gallery/settings, see AppShell) uses a hair softer near-black than the
+     marketing site's pure --color-surface, and the sidebar sits one step
+     above that again — closer to ArtCraft's own studio UI (distinct body/
+     sidebar/canvas planes) than a single flat tone everywhere. */
+  --color-surface-app: #0b0b0d;
+  --color-surface-sidebar: #101013;
+
+  /* Text — cool neutrals, matching the silver below. In a monochrome
+     system the text ramp IS most of the design, so these three steps are
+     pulled further apart than they would be in a colored palette: primary
+     near-white, secondary clearly dimmer, tertiary dimmer again. Without
+     a hue to separate them, anything closer collapses into one gray. */
+  --color-ink: #f7f8fa; /* Text Primary — off-white, cool not warm */
+  --color-ink-soft: #f7f8fa;
+  --color-ink-softer: #f7f8fa;
+  --color-muted: #979ca6; /* Text Secondary */
+  --color-text-tertiary: #676c76; /* Labels, captions */
+
+  /* Borders — translucent white, not opaque gray */
+  --color-line: rgb(255 255 255 / 0.1); /* Default border */
+  --color-border-subtle: rgb(255 255 255 / 0.06); /* Subtle dividers */
+  --color-border-strong: rgb(255 255 255 / 0.16); /* Focus rings, active borders */
+
+  /* Silver — the base metal. Everything structural (surfaces, type,
+     borders) is black/white/grey, and this is the neutral accent that
+     belongs to that base rather than to the signal set below: identity
+     marks and any chrome that should read as material, not as an action.
+     Pitched below pure white on purpose — an accent sitting at the same
+     value as body text (#f7f8fa) stops being an accent. */
+  --color-silver: #bfc7d2;
+
+  /* ---- The signal set ------------------------------------------------
+     Four saturated colors that break the monochrome. The base stays black
+     and white; these are the interruptions, and they earn their loudness
+     by being confined to things that DO something or mean something —
+     actions, value, categories, one-off announcements. Nothing structural
+     ever takes one.
+     Each is assigned a job below rather than being used interchangeably:
+     a screen where every accent is a different color for no reason reads
+     as chaos, not as energy. All four are bright enough to carry black
+     glyphs (13.4:1 lime, 14.7:1 amber, 9.2:1 orange, 5.4:1 hot), and all
+     four clear 5:1 as text on the ground, so any of them can be a label
+     or a fill without a contrast exception. */
+
+  /* Lime — primary action. The default accent: buttons, active states,
+     focus rings, sliders, links, accent text. It is the loudest thing on
+     a black screen and the one color the eye should follow to find "what
+     do I press". */
+  --color-brand: #bbdc12;
+  --color-brand-hover: #cbe93a;
+  --color-brand-active: #a3c30d;
+
+  /* Ink for glyphs and labels sitting ON any light accent fill — all four
+     signal colors and silver. Every one of them is a LIGHT color, so
+     white-on-accent is unreadable (as low as 1.4:1); black is between 5:1
+     and 15:1 on all of them, and on a saturated fill it is also the only
+     choice that looks deliberate rather than washed. */
+  --color-on-brand: #050506;
+
+  /* Amber — value. Reserved for credits: the balance chips, the Zap
+     glyphs, the cost on the generate button. Money-adjacent UI reads
+     faster with a color of its own, and keeping it off the action color
+     means "what this costs" never gets confused with "what to press". */
+  --color-accent-amber: #ffd400;
+
+  /* Orange — the third categorical slot (per-section icons, chip
+     rotations). Sits between lime and hot in temperature, so a row of all
+     four still reads as a deliberate sequence. */
+  --color-accent-orange: #ff8f00;
+
+  /* Hot magenta — announcements. The loudest of the four and the most
+     rationed: exclusives, "new", the promo banner, the section beam.
+     Against an otherwise black-and-white page a single hot panel lands
+     without needing any extra size or weight. */
+  --color-accent-hot: #ff0052;
+
+  /* Status — separate from the signal set above, and deliberately so:
+     these mean something fixed, and must never be mistaken for
+     decoration. Warning is the one to watch — it sits closest to amber,
+     so it is kept clearly deeper and less acid than the credits color. */
+  --color-success: #3fbe80;
+  --color-warning: #d99a20; /* deeper + duller than accent-amber/-orange */
+  --color-accent: #e8404f; /* error — a true red, not the hot's magenta */
+  --color-info: #56a8e8;
+
+  /* Fonts (next/font variables set on <html> in layout.tsx). Three roles
+     instead of one: a geometric grotesk carries display/heading weight
+     (character, not another Inter headline), an italic serif is reserved
+     for editorial accent phrases (see .text-accent-script), and Inter
+     stays for body/UI copy where plain legibility wins over personality. */
+  --font-sans: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-display-face), var(--font-sans);
+  --font-accent: var(--font-accent-face), "Times New Roman", Georgia, serif;
+  --font-mono: var(--font-mono-face), "SF Mono", Monaco, "Cascadia Code",
+    "Roboto Mono", Consolas, "Courier New", monospace;
+
+  /* Radius scale — buttons/badges stay fully pill via radius-full; inputs
+     and gallery tiles at 24px; cards at 32px (dialed down slightly at
+     specific call sites where a softer, less "bubble" feel reads better). */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* Shadows — plain black depth shadows + a soft localized brand bloom.
+     Now that the brand is a saturated lime rather than a near-white
+     metal, the glows can carry a little more alpha again without turning
+     into haze: a coloured glow reads as a halo at a strength where a
+     white one would just look like fog. Still restrained — the point is
+     that a lime button looks lit from behind, not that it flares. */
+  --shadow-raised: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-floating: 0 8px 30px -4px rgb(0 0 0 / 0.5);
+  --shadow-modal: 0 20px 60px -12px rgb(0 0 0 / 0.6);
+  --shadow-inset: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+  --shadow-card: 0 4px 12px rgb(0 0 0 / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+  --shadow-glow-sm: 0 0 20px rgb(187 220 18 / 0.16);
+  --shadow-glow-md: 0 0 40px rgb(187 220 18 / 0.2);
+  --shadow-glow-lg: 0 0 80px rgb(187 220 18 / 0.16);
+  --shadow-glow-hot-sm: 0 0 20px rgb(255 0 82 / 0.18);
+  --shadow-glow-hot-md: 0 0 40px rgb(255 0 82 / 0.24);
+  --shadow-glow-white: 0 0 30px rgb(255 255 255 / 0.05);
+
+  /* No gradient() fills anywhere in this system, full stop — a two-hue
+     blend used to fill buttons/badges/icon chips/decor blobs app-wide, and
+     even the single-hue radial glow this token used to hold, read as
+     exactly the generic-AI-SaaS tell this palette was rebuilt to move away
+     from. Every surface below picks ONE flat, solid color from the palette
+     instead (--color-brand / -accent-amber / -accent-orange / -accent-hot) —
+     see buttonVariants' "accent" variant (was "gradient"), app-shell's
+     per-section nav colors, and the dashboard's icon chips.
+     --gradient-hero-glow is now a flat solid tint too (kept the old name
+     since call sites still consume it as a plain `background` value). */
+  --gradient-hero-glow: rgb(187 220 18 / 0.06);
+
+  /* Type scale: each pairs font-size with its line-height (and, where
+     useful, letter-spacing) in a single utility. Font-family is NOT
+     bundled here (apply font-display/font-accent/font-sans explicitly per
+     call site) and neither is font-weight — apply font-normal/medium/
+     semibold/bold alongside these. display=hero only. heading=section
+     title. subheading=card/app-page header. feature-title=card/step title. */
+  --text-display: 72px;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.03em;
+
+  --text-heading: 36px;
+  --text-heading--line-height: 1.15;
+  --text-heading--letter-spacing: -0.01em;
+
+  --text-subheading: 28px;
+  --text-subheading--line-height: 1.2;
+  --text-subheading--letter-spacing: -0.01em;
+
+  --text-feature-title: 22px;
+  --text-feature-title--line-height: 1.3;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.7;
+
+  --text-body: 16px;
+  --text-body--line-height: 1.65;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.6;
+
+  --text-label: 14px;
+  --text-label--line-height: 20px;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.02em;
+
+  --text-input: 14px;
+  --text-input--line-height: 20px;
+
+  /* Motion — landing-page-only decorative animation. Every utility built
+     from these is applied with a motion-safe:/motion-reduce: variant at
+     the call site, never bare, so prefers-reduced-motion always wins.
+     Scroll/viewport/spring animation lives in Framer Motion components
+     instead (see src/lib/animations.ts) — these keyframes are only for
+     effects that don't need JS. blob-float/blob-morph replace the old
+     plain-circle glow-float: same GPU-cheap transform-only technique, but
+     the shape's border-radius corners drift too, so ambient glows read as
+     organic/liquid instead of a static blurred disc — the literal "more
+     fluid" ask, not just a figure of speech. */
+  --animate-blob-float: blob-float 14s ease-in-out infinite;
+  --animate-marquee: marquee 32s linear infinite;
+  /* Vertical counterpart — the hero's film-reel strip (see hero.tsx) scrolls
+     up instead of sideways, same seamless-loop technique (track rendered
+     twice, translated exactly -50%). */
+  --animate-marquee-vertical: marquee-vertical 28s linear infinite;
+  --animate-fade-up: fade-up 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Mobile bottom-sheet entrance (see ui/bottom-sheet.tsx) — unlike the
+     above, this runs on every app page, not just the landing page, so it's
+     intentionally short and has no motion-reduce guard needed at the call
+     site: a 200ms translate is well under the threshold that triggers
+     vestibular discomfort, unlike the looping/parallax effects above. */
+  --animate-sheet-up: sheet-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* AppShell's floating mobile nav panel (see layout/app-shell.tsx) — same
+     reasoning/timing as sheet-up above, just sliding in from the edge the
+     panel is anchored to instead of the bottom. */
+  --animate-sheet-left: sheet-left 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Generation loader (see generate/generation-loader.tsx) — the generate
+     page's "working on it" state is an animated line icon of the thing
+     being made (a film frame for video, a photo for image), not a spinner
+     over a percentage bar: the provider reports progress in coarse jumps
+     and parks at 0 for most of a render, so the number was either frozen
+     or misleading.
+       icon-trace     — wipes a stroke on and back off along its own path,
+                        so the icon looks like it's being drawn. Needs a
+                        --dash var at the call site holding that path's
+                        length (see the SVGs).
+       icon-pulse     — the filled bits (play triangle, sun) breathing.
+       sparkle-twinkle — the little AI sparks popping in and out.
+       status-pulse   — the dot next to the status label.
+     icon-trace animates stroke-dashoffset, which isn't a compositor-only
+     property like the rest — fine here because it's two short paths in a
+     72px icon, not a full-screen effect. All are applied with motion-safe:
+     at the call site. */
+  --animate-icon-trace: icon-trace 2.4s ease-in-out infinite;
+  --animate-icon-pulse: icon-pulse 2s ease-in-out infinite;
+  --animate-sparkle-twinkle: sparkle-twinkle 2.2s ease-in-out infinite;
+  --animate-status-pulse: status-pulse 1.8s ease-in-out infinite;
+
+  /* The three /presets "How it works" step marks (see presets/step-icons.tsx).
+     Each one acts out its step rather than illustrating it — a card being
+     chosen out of a row, a photo dropping into an empty frame, a finished
+     clip being pulled down. Same rules as the icon-* set above: transform/
+     opacity only, long enough cycles (2.4-3.2s) to read as demonstration
+     rather than fidgeting, and applied with motion-safe: at the call site.
+     They share one duration family so three marks sitting in a carousel
+     never look like they're racing each other. */
+  --animate-preset-select: preset-select 3.2s ease-in-out infinite;
+  --animate-drop-into-frame: drop-into-frame 3.2s ease-in-out infinite;
+  --animate-arrow-dip: arrow-dip 2.4s ease-in-out infinite;
+}
+
+@keyframes blob-float {
+  0%,
+  100% {
+    transform: translateY(-10px) rotate(-2deg) scale(1);
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+  }
+  33% {
+    transform: translateY(8px) rotate(1.5deg) scale(1.04);
+    border-radius: 60% 40% 45% 55% / 35% 60% 40% 65%;
+  }
+  66% {
+    transform: translateY(4px) rotate(-1deg) scale(0.97);
+    border-radius: 50% 50% 38% 62% / 60% 45% 55% 40%;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheet-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes icon-trace {
+  0% {
+    stroke-dashoffset: var(--dash);
+    opacity: 0.5;
+  }
+  45% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: calc(var(--dash) * -1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes icon-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.82);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sparkle-twinkle {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* One card lifts out of the row and stays chosen for most of the cycle —
+   the dwell is the point, so it reads as "this one is picked" rather than a
+   card bobbing up and down. */
+@keyframes preset-select {
+  0%,
+  12% {
+    opacity: 0.35;
+    transform: translateY(0) scale(1);
+  }
+  30%,
+  78% {
+    opacity: 1;
+    transform: translateY(-2.5px) scale(1.08);
+  }
+  96%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* A photo falls into the empty frame, sits there long enough to register as
+   landed, then clears so the loop can show the drop again. */
+@keyframes drop-into-frame {
+  0% {
+    opacity: 0;
+    transform: translateY(-9px) scale(0.9);
+  }
+  22%,
+  72% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  90%,
+  100% {
+    opacity: 0;
+    transform: translateY(5px) scale(0.96);
+  }
+}
+
+/* Download arrow travelling from the frame down onto the tray line. */
+@keyframes arrow-dip {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  35%,
+  65% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    background: var(--color-surface);
+  }
+
+  /* Flat surface color — no ambient gradient washes. Layered on top: a
+     fixed film-grain texture (see body::before below) — the kind of
+     tactile, slightly-imperfect detail generic AI-template gradients never
+     bother with, and a deliberate nod to this being a *video* tool. */
+  body {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-surface);
+  }
+
+  /* Custom scrollbar — the default OS scrollbar (light gray, ~15-17px) reads
+     as unstyled chrome against this app's near-black surfaces. Thin,
+     translucent-white by default (echoes --color-line's translucent-white
+     border treatment rather than an opaque gray), brand-lime on hover —
+     the same "brand reserved for focus/active states" rule already used for
+     :focus-visible above. Applied to `*` (not just html/body) since
+     ::-webkit-scrollbar doesn't inherit — every internal scroll container
+     (dropdowns, modals, overflow panels) should look the same, not just the
+     page scrollbar. Firefox only supports the flat scrollbar-color pair (no
+     hover state); WebKit browsers get the full treatment below.
+     `background-clip: padding-box` on the thumb's transparent border insets
+     it slightly from the track edges instead of running flush; the track
+     itself stays transparent so it blends into whatever surface it sits on. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.15) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.15);
+    border-radius: var(--radius-full);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(187 220 18 / 0.55);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Belt-and-suspenders on top of the per-component motion-safe:/
+     motion-reduce: variants used everywhere above: forces any animation or
+     transition (ours or a future one) to be effectively instant when the
+     user has asked the OS for reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Shared page container: max-width 1440px, 32/20/16px padding across
+     desktop/tablet/mobile. */
+  .container-page {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 640px) {
+    .container-page {
+      padding-inline: 20px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-page {
+      padding-inline: 32px;
+    }
+  }
+
+  /* Accent text — used for hero accent words, stat numbers, wordmarks.
+     Solid lime, never gradient-clipped — this app doesn't use blended
+     gradient fills anywhere (see the note above --gradient-hero-glow). */
+  .text-gradient {
+    color: var(--color-brand);
+  }
+
+  /* Editorial italic accent — the "for artists." trick: one phrase per
+     hero/section set in a serif italic against the surrounding grotesk,
+     purely typographic emphasis (no color/weight change needed). Used
+     sparingly — one phrase per screen, never body copy. */
+  .text-accent-script {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  /* Glassmorphism surface — floating toolbars, demo widgets, overlays. */
+  .glass {
+    background: rgb(10 10 10 / 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgb(255 255 255 / 0.06);
+  }
+
+  /* "Liquid glass" button — frosted pill with a thin gradient-reflection
+     border instead of a flat 1px line, the signature CTA treatment from the
+     migration brief. Built as a single-element ::before overlay (padding +
+     mask-exclude trick) rather than the source's 3-nested-div structure —
+     same visual result, no extra wrapper markup needed at each call site.
+     The reflection gradient stays plain white (it's reading as *glass
+     material*, not a brand accent) so it drops straight into buttonVariants'
+     "glass" variant without touching color tokens.
+     No `position` here on purpose: this is applied alongside a Tailwind
+     position utility at each call site (relative/absolute/fixed), and
+     since both live in the same `utilities` layer, a `position` set here
+     would win over that utility by source order regardless of which one
+     the call site actually needs — broke BackToTop's `fixed` positioning
+     this way (silently fell back to `relative`, collapsing its containing
+     block to the button's own size). `isolation: isolate` alone still
+     creates the new stacking context the ::before overlay needs, with no
+     position requirement. */
+  .btn-glass {
+    isolation: isolate;
+    background: rgb(255 255 255 / 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .btn-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      -15deg,
+      rgb(255 255 255 / 0.9) 3%,
+      rgb(255 255 255 / 0.12) 40%,
+      rgb(255 255 255 / 0.12) 60%,
+      rgb(255 255 255 / 0.9) 99%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box exclude,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box exclude,
+      linear-gradient(#fff 0 0);
+    pointer-events: none;
+  }
+
+  /* Light-beam section divider — a blurred, multi-stop horizontal band used
+     as a dramatic separator (migration brief §3, step 5). Recolored to
+     Vixerra's own silver→accent pair instead of the source's blue→violet→red,
+     consistent with "no unrelated hues" (see --color-brand's own comment
+     above). Two layers: a soft wide glow plus a crisp thin line on top. */
+  .light-beam {
+    position: relative;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-brand) 35%,
+      var(--color-accent-hot) 65%,
+      transparent
+    );
+    opacity: 0.8;
+  }
+  .light-beam::before {
+    content: "";
+    position: absolute;
+    inset: -40px 0;
+    background: inherit;
+    filter: blur(32px);
+    opacity: 0.6;
+  }
+
+  /* Faint diagonal hairline grid — an ArtCraft-style texture for hero/
+     section backgrounds that want more surface interest than flat black
+     without reaching for another gradient blob. Opt-in per section. */
+  .grid-texture {
+    background-image:
+      linear-gradient(135deg, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(45deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
+  }
+
+  /* Marketing-only heading treatment — set in the display grotesk, still
+     uppercase/heavy for punch. Scoped to a wrapper class applied in
+     (marketing)/layout.tsx rather than a global h1..h4 base rule that
+     would also hit the dashboard/generate/settings shell (which stays
+     normal-case, smaller, functional type). */
+  .marketing-headings h1,
+  .marketing-headings h2,
+  .marketing-headings h3,
+  .marketing-headings h4 {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}

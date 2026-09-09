@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Tab icon = the Logo mark from src/components/layout/logo.tsx: silver
+       tile (color-silver), glyph in on-brand ink (color-on-brand). The mark
+       is scaled up relative to the header version because a favicon renders
+       at 16px, where the header's generous padding just disappears. -->
+  <rect width="100" height="100" rx="24" fill="#bfc7d2"/>
+  <g transform="translate(5 3.26) scale(0.9)" fill="#050506">
+    <rect x="37" y="18" width="26" height="64" rx="7" fill-opacity="0.5" transform="rotate(-20 50 82)"/>
+    <rect x="37" y="18" width="26" height="64" rx="7" transform="rotate(20 50 82)"/>
+  </g>
+</svg>
