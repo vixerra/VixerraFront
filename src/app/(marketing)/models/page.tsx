@@ -14,12 +14,12 @@ import { openGraph, SITE_NAME } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "All AI video and image models",
   description:
-    "Every AI video and image model on Vixerra — Seedance, Veo 3.1, Flux, Grok Imagine, GPT Image 2, Nano Banana, Recraft and more, with specs and prompts.",
+    "Every AI video and image model on Vixlens — Seedance, Veo 3.1, Flux, Grok Imagine, GPT Image 2, Nano Banana, Recraft and more, with specs and prompts.",
   alternates: { canonical: "/models" },
   openGraph: openGraph({
     title: "All AI video and image models",
     description:
-      "Every AI video and image model available on Vixerra, with specs and example prompts for each.",
+      "Every AI video and image model available on Vixlens, with specs and example prompts for each.",
     path: "/models",
   }),
 };

@@ -20,12 +20,12 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "AI video and image gallery",
   description:
-    "A public showcase of AI video and image generations from the Vixerra community — every one with the prompt and the model that made it.",
+    "A public showcase of AI video and image generations from the Vixlens community — every one with the prompt and the model that made it.",
   alternates: { canonical: "/gallery" },
   openGraph: openGraph({
     title: "AI video and image gallery",
     description:
-      "A public showcase of AI video and image generations from the Vixerra community — every one with the prompt and the model that made it.",
+      "A public showcase of AI video and image generations from the Vixlens community — every one with the prompt and the model that made it.",
     path: "/gallery",
   }),
 };
@@ -61,7 +61,7 @@ export default async function PublicGalleryPage() {
           Community <span className="text-gradient">gallery</span>
         </h1>
         <p className="mt-4 text-body text-muted">
-          A public showcase of generations from the Vixerra community — every one with the prompt
+          A public showcase of generations from the Vixlens community — every one with the prompt
           that produced it and the model that ran it. Open any of them to read the full prompt, or{" "}
           <Link href="/models" className="text-brand underline-offset-4 hover:underline">
             browse the models

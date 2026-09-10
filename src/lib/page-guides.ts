@@ -365,7 +365,7 @@ export const PAGE_GUIDES: PageGuide[] = [
   // ---------------------------------------------------------- marketing
   {
     path: "/",
-    title: "Welcome to Vixerra",
+    title: "Welcome to Vixlens",
     what: "Prompt, generate, cut, publish",
     plan: "any",
     art: "welcome",
@@ -426,7 +426,7 @@ export const PAGE_GUIDES: PageGuide[] = [
   },
   {
     path: "/about",
-    title: "About Vixerra",
+    title: "About Vixlens",
     what: "Who builds this",
     plan: "any",
     art: "welcome",

@@ -46,7 +46,7 @@ export function Logo({
           )}
         >
           <span className="text-ink">Vix</span>
-          <span className="text-brand">erra</span>
+          <span className="text-brand">lens</span>
         </span>
       )}
     </Link>

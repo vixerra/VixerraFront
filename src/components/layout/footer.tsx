@@ -36,7 +36,7 @@ export function Footer() {
           ))}
         </nav>
         <p className="text-caption text-muted">
-          © {new Date().getFullYear()} Vixerra. All rights reserved.
+          © {new Date().getFullYear()} Vixlens. All rights reserved.
         </p>
       </div>
     </footer>

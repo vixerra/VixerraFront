@@ -16,7 +16,7 @@ const GPT_IMAGE_2 = IMAGE_MODELS.find((m) => m.label === "GPT Image 2");
 
 // Two modality sections (Video, Image) instead of the old Create/Refine/
 // Scale grouping — the migration brief's "alternating product sections"
-// pattern, one per pillar. No standalone Audio section: Vixerra has no
+// pattern, one per pillar. No standalone Audio section: Vixlens has no
 // independent audio-generation model, so native audio is listed as a
 // Seedance video option instead of claiming a third pillar that doesn't
 // exist. Each section pairs its item list with one real media sample
@@ -118,7 +118,7 @@ export function FeaturesShowcase() {
       <Reveal className="container-page mx-auto max-w-2xl text-center">
         <h2 className="text-heading font-bold text-ink">Features that go beyond the basics</h2>
         <p className="mt-4 text-body text-muted">
-          Vixerra&apos;s AI tools help creators move from idea to finished shot without losing
+          Vixlens&apos; AI tools help creators move from idea to finished shot without losing
           quality or control.
         </p>
       </Reveal>

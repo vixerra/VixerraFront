@@ -150,7 +150,7 @@ export function Hero() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
             className="mx-auto mt-6 max-w-xl text-body-lg text-muted"
           >
-            Describe a scene, animate a photo, or edit an existing shot. Vixerra
+            Describe a scene, animate a photo, or edit an existing shot. Vixlens
             generates and refines broadcast-ready video and imagery in minutes —
             no crew, no timeline, no waiting.
           </motion.p>

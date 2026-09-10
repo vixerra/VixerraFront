@@ -63,7 +63,7 @@ export const MODEL_PAGES: ModelPageContent[] = [
     id: SEEDANCE_MODEL_ID,
     tagline: "Long-form AI video with reference control and native audio",
     intro:
-      "Seedance 2.5 is the longest-running video model on Vixerra, and the one to reach for when a shot has to hold. Give it a reference image and it keeps the same face, product or set across the whole clip instead of redrawing them shot to shot, with a soundtrack generated alongside the picture rather than dubbed on afterwards.",
+      "Seedance 2.5 is the longest-running video model on Vixlens, and the one to reach for when a shot has to hold. Give it a reference image and it keeps the same face, product or set across the whole clip instead of redrawing them shot to shot, with a soundtrack generated alongside the picture rather than dubbed on afterwards.",
     strengths: [
       "Holds a subject's identity across a long take from a single reference still",
       "Audio is generated with the picture, so footsteps and dialogue land on frame",
@@ -111,7 +111,7 @@ export const MODEL_PAGES: ModelPageContent[] = [
     intro:
       "Seedance 2.0 Mini is the draft pass. It runs the same family of prompts as the full Seedance models at a fraction of the cost, which makes it the right place to find out whether a shot idea works at all before spending a flagship generation on it.",
     strengths: [
-      "The lowest credit cost of any video model on Vixerra",
+      "The lowest credit cost of any video model on Vixlens",
       "Fixed-camera toggle and native audio, same as its larger sibling",
       "A virtual-avatar mode for presenter-style clips",
       "Accepts an optional reference image",
@@ -387,7 +387,7 @@ export const MODEL_PAGES: ModelPageContent[] = [
     id: "openai/gpt-image-2",
     tagline: "OpenAI's image model, and the one to trust with text in the frame",
     intro:
-      "GPT Image 2 is OpenAI's image model and the default choice on Vixerra when the picture contains words. Packaging copy, signage, UI mockups and dense small lettering come out readable rather than approximated, and its quality tiers let you spend more only on the renders that matter.",
+      "GPT Image 2 is OpenAI's image model and the default choice on Vixlens when the picture contains words. Packaging copy, signage, UI mockups and dense small lettering come out readable rather than approximated, and its quality tiers let you spend more only on the renders that matter.",
     strengths: [
       "Legible text rendering, including small type and multi-line layouts",
       "Low, medium and high quality tiers, so drafts cost less than finals",
@@ -410,7 +410,7 @@ export const MODEL_PAGES: ModelPageContent[] = [
     id: "google/nano-banana-pro",
     tagline: "Google's highest-fidelity Gemini image model, up to 4K",
     intro:
-      "Nano Banana Pro is the top of Google's Gemini image line and the highest-resolution image model on Vixerra. It accepts a reference image as well as a prompt, offers the widest set of aspect ratios in the catalog, and writes out JPEG, PNG or WebP directly.",
+      "Nano Banana Pro is the top of Google's Gemini image line and the highest-resolution image model on Vixlens. It accepts a reference image as well as a prompt, offers the widest set of aspect ratios in the catalog, and writes out JPEG, PNG or WebP directly.",
     strengths: [
       "Output up to 4K",
       "Reference image accepted alongside the prompt",

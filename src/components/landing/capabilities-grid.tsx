@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 // instead of every icon badge sharing one gradient fill.
 const CHIP_COLORS = ["bg-brand", "bg-accent-hot", "bg-accent-amber", "bg-accent-orange"];
 
-// "Why creatives choose Vixerra" — plain icon + copy cards. No per-card
+// "Why creatives choose Vixlens" — plain icon + copy cards. No per-card
 // video/image sample here: the page's real output examples are kept to the
 // one dedicated "See it in action" showcase section instead of being spread
 // across every section.
@@ -47,9 +47,9 @@ export function CapabilitiesGrid() {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="mx-auto max-w-2xl text-center"
       >
-        <h2 className="text-heading font-bold text-ink">Why creatives choose Vixerra</h2>
+        <h2 className="text-heading font-bold text-ink">Why creatives choose Vixlens</h2>
         <p className="mt-4 text-body text-muted">
-          Most AI tools promise fast results. Vixerra is built for the work that comes after —
+          Most AI tools promise fast results. Vixlens is built for the work that comes after —
           shots you can actually ship.
         </p>
       </motion.div>

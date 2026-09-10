@@ -15,7 +15,7 @@ const USE_CASES = [
   {
     id: "marketing",
     title: "Marketing and ad creatives",
-    body: "Vixerra is your AI creative companion for marketing. Generate promo videos, branded stories, and website hero visuals without booking a production schedule. Spin up variations from a single prompt and run A/B tests without re-sourcing creators or reshooting.",
+    body: "Vixlens is your AI creative companion for marketing. Generate promo videos, branded stories, and website hero visuals without booking a production schedule. Spin up variations from a single prompt and run A/B tests without re-sourcing creators or reshooting.",
     videoUrl: "/media/videos/marketing.mp4",
   },
   {
@@ -58,9 +58,9 @@ export function CreatorUseCases() {
   return (
     <section className="border-t border-line py-20 sm:py-28">
       <Reveal className="container-page mx-auto max-w-2xl text-center">
-        <h2 className="text-heading font-bold text-ink">How creators are using Vixerra&apos;s AI video maker</h2>
+        <h2 className="text-heading font-bold text-ink">How creators are using Vixlens&apos; AI video maker</h2>
         <p className="mt-4 text-body text-muted">
-          See how professionals and independent creators use Vixerra&apos;s AI video generator and
+          See how professionals and independent creators use Vixlens&apos; AI video generator and
           editor to ship content faster than ever.
         </p>
       </Reveal>

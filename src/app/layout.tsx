@@ -43,8 +43,8 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Vixerra — AI Video & Image Generation",
-    template: "%s · Vixerra",
+    default: "Vixlens — AI Video & Image Generation",
+    template: "%s · Vixlens",
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
@@ -56,14 +56,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: "Vixerra — AI Video & Image Generation",
+    title: "Vixlens — AI Video & Image Generation",
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vixerra — AI Video & Image Generation",
+    title: "Vixlens — AI Video & Image Generation",
     description: SITE_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE],
   },

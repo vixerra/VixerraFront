@@ -25,7 +25,7 @@ import { apiFetch } from "@/lib/api-client";
  */
 /** The seeded staff account, printed on the page below so nobody has to go
  *  hunting for it while the panel is being built. */
-const TEST_ADMIN = { email: "admin@vixerra.test", password: "Vx-Admin-2026!dev" };
+const TEST_ADMIN = { email: "admin@vixlens.test", password: "Vx-Admin-2026!dev" };
 
 /**
  * Working admin credentials on a login page are a hole, so showing them is
