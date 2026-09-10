@@ -5,12 +5,12 @@ import { openGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "The terms that govern use of Vixerra, including generation, credits and commercial use.",
+  description: "The terms that govern use of Vixlens, including generation, credits and commercial use.",
   alternates: { canonical: "/terms" },
   openGraph: openGraph({
     title: "Terms of Service",
     description:
-      "The terms that govern use of Vixerra, including generation, credits and commercial use.",
+      "The terms that govern use of Vixlens, including generation, credits and commercial use.",
     path: "/terms",
   }),
 };
@@ -32,8 +32,8 @@ function list(names: string[]): string {
 
 const SECTIONS = [
   {
-    title: "1. Using Vixerra",
-    body: "You need an account to generate, save, or share content. You're responsible for what you generate and for keeping your account credentials secure. Don't use Vixerra to create content that's illegal, infringes someone else's rights, or violates the acceptable-use terms of the underlying model providers.",
+    title: "1. Using Vixlens",
+    body: "You need an account to generate, save, or share content. You're responsible for what you generate and for keeping your account credentials secure. Don't use Vixlens to create content that's illegal, infringes someone else's rights, or violates the acceptable-use terms of the underlying model providers.",
   },
   {
     title: "2. Credits and billing",
@@ -41,7 +41,7 @@ const SECTIONS = [
   },
   {
     title: "3. Your content",
-    body: "You own what you generate, subject to the license terms of the underlying model you used. Vixerra doesn't claim ownership of your generations. Content marked public in the gallery can be viewed by other users; you can make it private at any time.",
+    body: "You own what you generate, subject to the license terms of the underlying model you used. Vixlens doesn't claim ownership of your generations. Content marked public in the gallery can be viewed by other users; you can make it private at any time.",
   },
   {
     title: "4. Commercial use",

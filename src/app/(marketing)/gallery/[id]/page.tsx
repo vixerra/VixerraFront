@@ -181,7 +181,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
             <p className="mt-6 text-body text-muted">
               Made from one of the{" "}
               <Link href="/prompts" className="text-brand underline-offset-4 hover:underline">
-                Vixerra video presets
+                Vixlens video presets
               </Link>
               . A preset writes the prompt for you — upload one photo and generate.
             </p>

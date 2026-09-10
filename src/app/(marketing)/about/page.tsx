@@ -4,12 +4,12 @@ import { openGraph } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Vixerra is an AI creative studio for teams that ship fast — describe a scene or animate a photo, and get broadcast-ready video and imagery back in minutes.",
+    "Vixlens is an AI creative studio for teams that ship fast — describe a scene or animate a photo, and get broadcast-ready video and imagery back in minutes.",
   alternates: { canonical: "/about" },
   openGraph: openGraph({
     title: "About",
     description:
-      "Vixerra is an AI creative studio for teams that ship fast — describe a scene, animate a photo, and get broadcast-ready video and imagery back in minutes.",
+      "Vixlens is an AI creative studio for teams that ship fast — describe a scene, animate a photo, and get broadcast-ready video and imagery back in minutes.",
     path: "/about",
   }),
 };
@@ -19,10 +19,10 @@ export default function AboutPage() {
     <div className="container-page py-20 sm:py-28">
       <div className="mx-auto max-w-2xl">
         <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
-          About <span className="text-gradient">Vixerra</span>
+          About <span className="text-gradient">Vixlens</span>
         </h1>
         <p className="mt-4 text-body text-muted">
-          Vixerra is an AI creative studio for teams that ship fast — describe a scene, animate a
+          Vixlens is an AI creative studio for teams that ship fast — describe a scene, animate a
           photo, or drop in audio, and get broadcast-ready video and imagery back in minutes.
         </p>
 

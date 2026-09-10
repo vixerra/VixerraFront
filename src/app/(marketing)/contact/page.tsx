@@ -5,12 +5,12 @@ import { openGraph } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Questions about plans, enterprise, or the Vixerra API? Send us a note and we'll get back to you within a day.",
+    "Questions about plans, enterprise, or the Vixlens API? Send us a note and we'll get back to you within a day.",
   alternates: { canonical: "/contact" },
   openGraph: openGraph({
     title: "Contact",
     description:
-      "Questions about plans, enterprise, or the Vixerra API? Send us a note and we'll get back to you within a day.",
+      "Questions about plans, enterprise, or the Vixlens API? Send us a note and we'll get back to you within a day.",
     path: "/contact",
   }),
 };

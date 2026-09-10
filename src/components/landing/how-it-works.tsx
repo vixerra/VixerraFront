@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 // leonardo.ai's real "How it works" section is a simple linear 4-step flow
 // (Prompt/upload → Pick a style → Refine & adjust → Export with ease) —
 // separate from their Create/Refine/Scale features section (see
-// features-showcase.tsx). Steps adapted to what Vixerra actually does.
+// features-showcase.tsx). Steps adapted to what Vixlens actually does.
 const STEPS = [
   {
     icon: Type,
@@ -39,7 +39,7 @@ export function HowItWorks() {
   return (
     <section className="container-page py-20 sm:py-28">
       <Reveal className="mx-auto max-w-2xl text-center">
-        <h2 className="text-heading font-bold text-ink">How Vixerra works</h2>
+        <h2 className="text-heading font-bold text-ink">How Vixlens works</h2>
         <p className="mt-4 text-body text-muted">
           Prompt, refine, and export — ready to share.
         </p>

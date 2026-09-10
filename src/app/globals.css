@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Design tokens for Vixerra's own identity — deliberately moved off the
+ * Design tokens for Vixlens' own identity — deliberately moved off the
  * violet→pink "AI SaaS" gradient (what this file used to be, modeled on
  * leonardo.ai) toward a palette that actually means something for a video
  * tool: a black/white/silver base broken by four saturated signal colors
@@ -648,7 +648,7 @@
 
   /* Light-beam section divider — a blurred, multi-stop horizontal band used
      as a dramatic separator (migration brief §3, step 5). Recolored to
-     Vixerra's own silver→accent pair instead of the source's blue→violet→red,
+     Vixlens' own silver→accent pair instead of the source's blue→violet→red,
      consistent with "no unrelated hues" (see --color-brand's own comment
      above). Two layers: a soft wide glow plus a crisp thin line on top. */
   .light-beam {

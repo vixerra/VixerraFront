@@ -72,7 +72,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       { type: "h2", text: "Pick a model that actually reads the image" },
       {
         type: "p",
-        text: "Not every model that accepts an upload uses it. Some providers list an image field in their schema, take the file, and then generate as though you had sent nothing — the request succeeds, you get billed, and your product is not in the video. On [Vixerra](/models) the model pages state this explicitly: the reference-image row on each one says *Required*, *Optional* or *Not used*.",
+        text: "Not every model that accepts an upload uses it. Some providers list an image field in their schema, take the file, and then generate as though you had sent nothing — the request succeeds, you get billed, and your product is not in the video. On [Vixlens](/models) the model pages state this explicitly: the reference-image row on each one says *Required*, *Optional* or *Not used*.",
       },
       {
         type: "p",
@@ -178,7 +178,7 @@ export const GUIDE_POSTS: GuidePost[] = [
     body: [
       {
         type: "p",
-        text: "Seedance 2.5 and Veo 3.1 are the two flagship video models on [Vixerra](/models), and the question of which to use comes up constantly. The short answer: Seedance wins on length and on keeping a specific subject consistent; Veo wins on physical plausibility and on data handling. The longer answer is below.",
+        text: "Seedance 2.5 and Veo 3.1 are the two flagship video models on [Vixlens](/models), and the question of which to use comes up constantly. The short answer: Seedance wins on length and on keeping a specific subject consistent; Veo wins on physical plausibility and on data handling. The longer answer is below.",
       },
       { type: "h2", text: "Clip length is the biggest single difference" },
       {
@@ -298,7 +298,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `On Vixerra, watermark-free video and a commercial licence both start at the ${STARTER.label} plan ($${STARTER.priceMonthly}/month). The ${TIER_INFO.free.label} plan watermarks video and does not include a commercial licence — it is there to try the models, not to ship with.`,
+        text: `On Vixlens, watermark-free video and a commercial licence both start at the ${STARTER.label} plan ($${STARTER.priceMonthly}/month). The ${TIER_INFO.free.label} plan watermarks video and does not include a commercial licence — it is there to try the models, not to ship with.`,
       },
       { type: "h2", text: "What else to check alongside the watermark" },
       { type: "h3", text: "Resolution ceiling" },

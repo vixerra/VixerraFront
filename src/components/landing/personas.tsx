@@ -71,7 +71,7 @@ export function Personas() {
       <Reveal className="mx-auto max-w-2xl text-center">
         <h2 className="text-heading font-bold text-ink">Built for how you already work</h2>
         <p className="mt-4 text-body text-muted">
-          Whatever you make, Vixerra fits into the workflow you already have.
+          Whatever you make, Vixlens fits into the workflow you already have.
         </p>
       </Reveal>
 

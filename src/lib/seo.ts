@@ -8,15 +8,15 @@
 // themselves instead of pointing every branch at production. It is read at
 // build time, so it must be set in the environment the site is built in.
 
-const RAW_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vixerra.com";
+const RAW_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vixlens.com";
 
 /** Absolute origin, never with a trailing slash. */
 export const SITE_URL = RAW_SITE_URL.replace(/\/+$/, "");
 
-export const SITE_NAME = "Vixerra";
+export const SITE_NAME = "Vixlens";
 
 export const SITE_DESCRIPTION =
-  "Generate cinematic video and imagery from text, images, or audio in seconds. Vixerra is an AI creative studio for teams that ship fast.";
+  "Generate cinematic video and imagery from text, images, or audio in seconds. Vixlens is an AI creative studio for teams that ship fast.";
 
 /** Default social card. There is no bespoke OG image yet, so this reuses a
  *  real generated still from public/media rather than a placeholder. */

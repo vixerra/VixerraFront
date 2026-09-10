@@ -54,7 +54,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-heading font-bold text-ink">See it in action</h2>
           <p className="mt-4 text-body text-muted">
-            Real output from the models behind Vixerra — no cherry-picked renders, just what
+            Real output from the models behind Vixlens — no cherry-picked renders, just what
             the pipeline produces. Tap any card to try that exact model yourself.
           </p>
         </div>

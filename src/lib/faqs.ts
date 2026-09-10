@@ -15,7 +15,7 @@ export type Faq = { question: string; answer: string };
 
 export const HOME_FAQS: Faq[] = [
   {
-    question: "What models does Vixerra support?",
+    question: "What models does Vixlens support?",
     answer:
       "Several video models — Seedance 2.5 and 2.0, Google's Veo 3.1, and more from ByteDance, Black Forest Labs, and xAI — and several image models, including Recraft, Stable Diffusion, and Google's Nano Banana — the model behind the example images throughout this page.",
   },

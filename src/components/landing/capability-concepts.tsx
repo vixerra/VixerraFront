@@ -5,17 +5,17 @@ import highResolution from "../../../public/media/concepts/high-resolution.webp"
 import portraitRestyle from "../../../public/media/concepts/portrait-restyle.webp";
 import videoQuality from "../../../public/media/concepts/video-quality.webp";
 
-// Local, licensed illustrative images (not Vixerra pipeline output — see
+// Local, licensed illustrative images (not Vixlens pipeline output — see
 // public/media/concepts/) used to give the capabilities described in
 // features-showcase.tsx some visual life. Deliberately kept separate from
 // ShowcaseTabs, which is explicitly "real output, not mockups" — mixing
 // licensed concept art into it would contradict that claim. Framed here as
-// illustrative, never captioned with a Vixerra model name (they weren't
+// illustrative, never captioned with a Vixlens model name (they weren't
 // made by one).
 const CONCEPTS = [
   {
     title: "Reframe any scene",
-    body: "Describe a new setting in plain language and Vixerra places the subject there — no masks, no manual compositing.",
+    body: "Describe a new setting in plain language and Vixlens places the subject there — no masks, no manual compositing.",
     image: sceneEditing,
   },
   {
