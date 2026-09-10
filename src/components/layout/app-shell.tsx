@@ -167,7 +167,7 @@ function NavItem({
         // Link box just happens to match the icon chip's width, so the
         // active item alone drifted out of that column. Same fixed width
         // for both keeps the whole rail in one column regardless of state.
-        collapsed ? "mx-auto w-8 justify-center px-0" : "pr-4 pl-3",
+        collapsed ? "mx-auto w-8 justify-center px-0" : "pr-3 pl-2",
         active
           ? // The accent bar's color MUST stay under the before: variant —
             // a bare `bg-brand` here (no `before:` prefix) would paint the
@@ -210,12 +210,16 @@ function NavLinks({ onNavigate, collapsed = false }: { onNavigate?: () => void; 
   // effectiveTier, not tier: a member of a Studio team has the owner's
   // capabilities because the owner's plan pays for their work.
   const creatorSuite = hasCreatorSuite(me?.effectiveTier);
+  // min-h-0 is what keeps the log-out footer inside the sidebar card: a flex
+  // child defaults to min-height:auto, so on a short viewport the nav refused
+  // to shrink below its content and pushed the footer out past the aside's
+  // fixed height. With min-h-0 the nav scrolls instead.
   return (
-    <nav className="flex-1 space-y-6 p-4">
+    <nav className="min-h-0 flex-1 space-y-6 overflow-y-auto px-3 py-4">
       {NAV_SECTIONS.map((section) => (
         <div key={section.label}>
           {!collapsed && (
-            <p className="px-4 pb-2 text-caption font-medium tracking-wide text-text-tertiary uppercase">
+            <p className="px-2 pb-2 text-caption font-medium tracking-wide text-text-tertiary uppercase">
               {section.label}
             </p>
           )}
@@ -291,7 +295,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-surface-app lg:gap-3">
       <aside
         className={cn(
-          "relative hidden shrink-0 flex-col rounded-2xl border border-line bg-surface-sidebar shadow-floating transition-[width] duration-300 lg:sticky lg:top-3 lg:my-3 lg:ml-3 lg:flex lg:h-[calc(100vh-1.5rem)]",
+          "relative hidden shrink-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface-sidebar shadow-floating transition-[width] duration-300 lg:sticky lg:top-3 lg:my-3 lg:ml-3 lg:flex lg:h-[calc(100vh-1.5rem)]",
           collapsed ? "lg:w-16" : "lg:w-60",
         )}
       >
@@ -304,33 +308,41 @@ export function AppShell({ children }: { children: ReactNode }) {
           <ChevronLeft className={cn("size-3.5 transition-transform duration-300", collapsed && "rotate-180")} aria-hidden="true" />
         </button>
 
-        <div className={cn("flex h-16 items-center border-b border-line", collapsed ? "justify-center px-2" : "px-4")}>
-          <Logo iconOnly={collapsed} />
+        {/* No border under the lockup: the sidebar is a floating card, and a
+            full-width rule right below the logo made the top read as a title
+            bar. px-5 puts the mark in the same column as the nav icon chips
+            (nav px-3 + item pl-2). */}
+        <div className={cn("flex h-16 shrink-0 items-center", collapsed ? "justify-center px-2" : "px-5")}>
+          <Logo iconOnly={collapsed} compact />
         </div>
         {/* Renders nothing unless this account is in a team. */}
-        <div className={cn(collapsed ? "flex justify-center px-2 pt-3" : "px-4 pt-3")}>
+        <div className={cn("shrink-0", collapsed ? "flex justify-center px-2" : "px-3")}>
           <WorkspaceSwitcher collapsed={collapsed} />
         </div>
         <NavLinks collapsed={collapsed} />
-        <div className="border-t border-line p-4">
+        <div className="shrink-0 border-t border-line px-3 py-3">
           {collapsed ? (
             <Tooltip content="Log out" side="right">
               <button
                 type="button"
                 onClick={() => logout.mutate()}
                 aria-label="Log out"
-                className="flex w-full items-center justify-center rounded-xl py-3 text-label text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+                className="mx-auto flex w-8 items-center justify-center rounded-xl py-2 text-label text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
               >
-                <LogOut className="size-4.5" aria-hidden="true" />
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                  <LogOut className="size-4 text-muted" aria-hidden="true" />
+                </span>
               </button>
             </Tooltip>
           ) : (
             <button
               type="button"
               onClick={() => logout.mutate()}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-label text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+              className="font-display flex w-full items-center gap-3 rounded-xl py-2 pr-3 pl-2 text-label font-medium text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
             >
-              <LogOut className="size-4.5" aria-hidden="true" />
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                <LogOut className="size-4 text-muted" aria-hidden="true" />
+              </span>
               Log out
             </button>
           )}
@@ -412,20 +424,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Dialog.Content
             className={cn(
               "animate-sheet-left fixed inset-y-3 left-3 z-[60] flex w-64 max-w-[calc(100%-1.5rem)]",
-              "flex-col overflow-y-auto rounded-2xl border border-line bg-surface-sidebar shadow-modal",
+              "flex-col overflow-hidden rounded-2xl border border-line bg-surface-sidebar shadow-modal",
               "focus:outline-none lg:hidden",
             )}
           >
             <Dialog.Title className="sr-only">Navigation</Dialog.Title>
-            <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
-              <Logo />
+            <div className="flex h-16 shrink-0 items-center justify-between px-4">
+              <Logo compact />
               <Dialog.Close asChild>
                 <Button variant="ghost" size="icon" aria-label="Close menu">
                   <X className="size-5" />
                 </Button>
               </Dialog.Close>
             </div>
-            <div className="px-4 pt-3">
+            <div className="shrink-0 px-3">
               <WorkspaceSwitcher collapsed={false} />
             </div>
             <NavLinks onNavigate={() => setDrawerOpen(false)} />
