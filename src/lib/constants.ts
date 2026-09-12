@@ -9,7 +9,7 @@ import { CLOUDFLARE_MODELS } from "@/lib/cloudflare-models";
 //
 // It is ALSO the base credit-estimate.ts prices generations from: a credit
 // may buy CREDIT_VALUE_USD × (1 - TARGET_GROSS_MARGIN) = $0.005 of provider
-// compute on video, or $0.0035 on images (they carry a steeper 65% margin).
+// compute on video, or $0.0045 on images (they carry a steeper 55% margin).
 // The margin therefore rides on every generation. Until 2026-08-30 it
 // worked the other way round — generations were priced at cost (1 credit =
 // $0.01 of compute) and the margin came from tiers granting fewer credits
@@ -36,14 +36,14 @@ const ESTIMATES_NOTE =
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
 
-// The Free plan can't reach Seedance 2.0 at all (its shortest clip costs 56
+// The Free plan can't reach Seedance 2.0 at all (its shortest clip costs 76
 // credits, past the 50-credit budget), so that card advertises the Mini variant
 // and its note says why.
 const ESTIMATES_NOTE_FREE =
   "Estimates. Every figure above is what these credits buy at each model's " +
   "cheapest settings — 480p, which is also this plan's ceiling, and the fast " +
-  "image models. Seedance 2.0 itself needs 56 credits for its shortest clip, " +
-  "just past the budget here, so its Mini variant is what these credits reach.";
+  "image models. Seedance 2.0 itself needs 76 credits for its shortest clip, " +
+  "past the budget here, so its Mini variant is what these credits reach.";
 
 export const TIER_INFO: Record<
   Tier,
@@ -96,14 +96,14 @@ export const TIER_INFO: Record<
   // CREDIT_VALUE_USD ($0.01) — $9.99 → 1,000, $24 → 2,500, $49 → 5,000 — and
   // the margin now comes from generation pricing instead (credit-estimate.ts
   // bills video at a 50% gross margin over real provider cost, images at
-  // 65%).
+  // 55%).
   // Spending a plan's credits in full on video therefore costs us half its
   // price: ~50% gross, ~39-40% net of the ~2.9%+$0.30 Stripe fee and the ~5%
   // storage/support/hosting overhead — still clearing the 40% net floor the
   // v2 pricing was built around, but with no headroom left, so a further
   // credit increase has to be paid for by raising prices or the margin in
   // credit-estimate.ts. That is the video-only worst case: images bill at a
-  // 66.7% gross margin (~56-57% net), so an image-heavy user is the
+  // 55% gross margin (~44-46% net), so an image-heavy user is the
   // comfortable one. maxResolution/maxDurationSeconds/
   // concurrentGenerations/videoWatermark/priorityQueue/apiAccess are enforced
   // server-side (see aiVideo-backend's generations.ts).
@@ -112,13 +112,15 @@ export const TIER_INFO: Record<
     priceMonthly: 0,
     monthlyCredits: 50,
     renewsMonthly: false,
-    // Capped at 480p (not 720p): the cheapest 5s 720p clip is 113 credits,
-    // more than the entire free budget. Even at 480p, 50 credits only
-    // reaches the shortest clip on the cheapest model (Seedance 2.0 Mini,
-    // 3s @ 480p = 32 credits) — Seedance 2.5's 4s floor is 82 credits, out
-    // of reach since generations started carrying the margin. Raising this
-    // to ~110 would put one 5s Seedance 2.5 480p clip (103 credits) back in
-    // range, if the free tier should demo the flagship model.
+    // Capped at 480p (not 720p). That cap used to be forced by price, when
+    // the cheapest 5s 720p clip cost more than the whole free budget; on
+    // kie.ai's real rates (2026-09-12) a 5s 720p Seedance 2.0 Mini clip is 41
+    // credits, so it is now a product choice rather than a necessity. At
+    // 480p, 50 credits buy ~13s of Mini (19 credits per 5s clip), while
+    // Seedance 2.0's 4s floor is 76 credits and Seedance 2.5's is 112, both
+    // out of reach. Raising this to ~140 would put one 5s Seedance 2.5 480p
+    // clip (140 credits) in range, if the free tier should demo the flagship
+    // model.
     maxResolution: "480p",
     maxDurationSeconds: 5,
     concurrentGenerations: 1,
@@ -134,7 +136,7 @@ export const TIER_INFO: Record<
     features: [
       "50 one-time credits, no monthly refill",
       "~16 images",
-      "~4s Seedance 2.0 Mini video",
+      "~13s Seedance 2.0 Mini video",
       "Credits never expire",
       "Video watermark",
       "Standard queue",
@@ -159,8 +161,8 @@ export const TIER_INFO: Record<
     features: [
       "1,000 credits / month",
       "~333 images",
-      "~71s Seedance 2.0 video",
-      "~21s Seedance 2.5 video",
+      "~52s Seedance 2.0 video",
+      "~35s Seedance 2.5 video",
       "Add credits as needed",
       "Up to 1080p",
       "No watermark",
@@ -187,8 +189,8 @@ export const TIER_INFO: Record<
     features: [
       "2,500 credits / month",
       "~833 images",
-      "~178s Seedance 2.0 video",
-      "~54s Seedance 2.5 video",
+      "~131s Seedance 2.0 video",
+      "~89s Seedance 2.5 video",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
       "Publish to TikTok, Instagram, YouTube & Facebook",
@@ -222,9 +224,9 @@ export const TIER_INFO: Record<
     features: [
       "5,000 credits / month",
       "~1,666 images",
-      "~357s Seedance 2.0 video",
-      "~108s Seedance 2.5 video",
-      "~32s Seedance 2.0 video (4K, exclusive)",
+      "~263s Seedance 2.0 video",
+      "~178s Seedance 2.5 video",
+      "~24s Seedance 2.0 video (4K, exclusive)",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
       "Publish to TikTok, Instagram, YouTube & Facebook",

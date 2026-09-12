@@ -82,7 +82,7 @@ export const PAGE_GUIDES: PageGuide[] = [
       { icon: "activity", title: "Read the 30-day chart", detail: "It shows where your credits actually went." },
       { icon: "play", title: "Reopen recent work", detail: "Every generation keeps its prompt and settings." },
     ],
-    note: "Per 1,000 credits: about 333 images, 71s of Seedance 2.0, or 21s of Seedance 2.5.",
+    note: "Per 1,000 credits: about 333 images, 52s of Seedance 2.0, or 35s of Seedance 2.5.",
   },
   {
     path: "/generate",
