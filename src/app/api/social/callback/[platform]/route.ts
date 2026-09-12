@@ -24,6 +24,8 @@ export async function GET(
   { params }: { params: Promise<{ platform: string }> },
 ) {
   const { platform } = await params;
+  // Default target. The success path replaces the origin with the one the
+  // creator actually started from — see returnOrigin below.
   const settingsUrl = new URL("/settings/social", request.nextUrl.origin);
 
   if (!PLATFORMS.has(platform)) {
@@ -59,6 +61,7 @@ export async function GET(
     const json = (await res.json().catch(() => ({}))) as {
       error?: string;
       account?: { displayName?: string };
+      returnOrigin?: string | null;
     };
 
     if (!res.ok) {
@@ -67,6 +70,17 @@ export async function GET(
     }
 
     settingsUrl.searchParams.set("connected", json.account?.displayName ?? platform);
+
+    // Google redirected the browser to the host APP_PUBLIC_URL names, which
+    // is not necessarily the host the creator was browsing — and the session
+    // cookie belongs to exactly one host. Land them back where they started
+    // so they arrive at Settings signed in, rather than at /login. The value
+    // comes out of the signed state token and has already been checked
+    // against ALLOWED_ORIGINS server-side, so it can't be an open redirect.
+    if (json.returnOrigin) {
+      const target = new URL(settingsUrl.pathname + settingsUrl.search, json.returnOrigin);
+      return NextResponse.redirect(target);
+    }
   } catch {
     settingsUrl.searchParams.set("error", "Couldn't reach the server to finish connecting.");
   }
