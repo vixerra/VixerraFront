@@ -6,13 +6,16 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { MailCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import { ResendVerificationButton } from "@/components/auth/resend-verification-button";
 import { registerSchema, type RegisterInput } from "@/lib/validation";
 import { apiFetch } from "@/lib/api-client";
+import { stashPostVerifyNext } from "@/lib/post-verify-next";
 import { TIER_INFO } from "@/lib/constants";
 import { formatCredits } from "@/lib/utils";
 
@@ -24,6 +27,10 @@ function SignupForm() {
   // have to navigate back out of.
   const next = searchParams.get("next");
   const [serverError, setServerError] = useState<string | null>(null);
+  // Set once the backend has created the account but is holding the session
+  // until the emailed link is clicked — the form is replaced by the
+  // "check your email" card below.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   const {
     register,
@@ -40,14 +47,48 @@ function SignupForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Something went wrong.");
-      return json;
+      return json as { pendingVerification?: boolean; email?: string };
     },
-    onSuccess: () => {
+    onSuccess: (json, data) => {
+      // Two shapes from POST /auth/register: verification on (the default)
+      // answers { pendingVerification, email } with no cookie; a deployment
+      // with verification switched off answers { user } and is signed in,
+      // exactly as before the check existed.
+      if (json.pendingVerification) {
+        stashPostVerifyNext(next);
+        setPendingEmail(json.email ?? data.email);
+        return;
+      }
       router.push(next || "/dashboard");
       router.refresh();
     },
     onError: (err: Error) => setServerError(err.message),
   });
+
+  if (pendingEmail) {
+    return (
+      <Card variant="standard" className="text-center">
+        <MailCheck className="mx-auto size-8 text-brand" aria-hidden="true" />
+        <h1 className="mt-4 text-subheading font-semibold text-ink">Check your email</h1>
+        <p className="mt-2 text-body-sm text-muted">
+          We sent a confirmation link to{" "}
+          <span className="font-medium text-ink">{pendingEmail}</span>. Click it to finish
+          creating your account — you&apos;ll be signed in straight away.
+        </p>
+        <ResendVerificationButton email={pendingEmail} className="mt-6" />
+        <p className="mt-6 text-caption text-muted">
+          Wrong address?{" "}
+          <button
+            type="button"
+            onClick={() => setPendingEmail(null)}
+            className="text-brand hover:text-brand-hover"
+          >
+            Go back
+          </button>
+        </p>
+      </Card>
+    );
+  }
 
   return (
     <Card variant="standard">
