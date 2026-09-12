@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -90,8 +90,20 @@ function VideoTile({ video }: { video: ShowcaseVideo }) {
 // carried once by the section header above the grid, not repeated on every
 // tile. The whole tile is still the tap target for "Try this model".
 function ImageTile({ image }: { image: GptImage2Image }) {
+  const imgRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
+
+  // On a full page load the image can finish (it's usually already cached —
+  // the hero collage uses the same files) before React hydrates and attaches
+  // onLoad, so the event is missed and the tile stays at opacity-0 until a
+  // client-side remount. Read the element's state once mounted instead.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!img?.complete) return;
+    if (img.naturalWidth > 0) setLoaded(true);
+    else setErrored(true);
+  }, []);
   const tryHref = GPT_IMAGE_2
     ? `/generate/image?model=${encodeURIComponent(GPT_IMAGE_2.id)}&prompt=${encodeURIComponent(image.prompt)}`
     : "/generate/image";
@@ -120,6 +132,7 @@ function ImageTile({ image }: { image: GptImage2Image }) {
           // masonry skeleton (that was the reason lazy was avoided there too).
           // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media
           <img
+            ref={imgRef}
             src={image.url}
             alt={image.prompt}
             className={cn(
