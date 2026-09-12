@@ -5,6 +5,7 @@ import { Reveal } from "@/components/marketing/reveal";
 import { buttonVariants } from "@/components/ui/button";
 import { useLazyVideo } from "@/hooks/use-lazy-video";
 import { cn } from "@/lib/utils";
+import { appHref } from "@/lib/hosts";
 
 // Replaces the old "Real output, not mockups" tile wall — an OpenArt-style
 // "how creators use this" section instead: one real clip per use case,
@@ -76,7 +77,7 @@ export function CreatorUseCases() {
             <div>
               <h3 className="text-subheading font-bold text-ink">{useCase.title}</h3>
               <p className="mt-4 text-body text-muted">{useCase.body}</p>
-              <Link href="/generate" className={buttonVariants({ variant: "primary", className: "mt-6" })}>
+              <Link href={appHref("/generate")} prefetch={false} className={buttonVariants({ variant: "primary", className: "mt-6" })}>
                 Try it now
               </Link>
             </div>

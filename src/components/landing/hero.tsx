@@ -6,6 +6,7 @@ import { ChevronDown, ArrowUpRight } from "lucide-react";
 import { HeroDemoWidget } from "./hero-demo-widget";
 import { SEEDANCE_MODEL_ID } from "@/lib/constants";
 import { heroContainerVariants, heroWordVariants } from "@/lib/animations";
+import { appHref } from "@/lib/hosts";
 
 // Bold grotesk statement + a short italic-serif line underneath — the same
 // two-beat structure ArtCraft uses for "Controllable AI / for artists.":
@@ -102,7 +103,7 @@ export function Hero() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             <Link
-              href={`/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}`}
+              href={appHref(`/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}`)} prefetch={false}
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1.5 pl-3 pr-2.5 text-caption text-white/80 backdrop-blur transition-colors hover:border-white/25 hover:text-white"
             >
               <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />

@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Reveal } from "@/components/marketing/reveal";
 import { GradientGlow } from "@/components/marketing/gradient-glow";
+import { appHref } from "@/lib/hosts";
 
 export function CtaSection() {
   return (
@@ -21,7 +22,7 @@ export function CtaSection() {
           <p className="max-w-lg text-body text-muted">
             Start free with 50 credits — no credit card required.
           </p>
-          <Link href="/signup" className={buttonVariants()}>
+          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants()}>
             Start creating free
           </Link>
         </Card>

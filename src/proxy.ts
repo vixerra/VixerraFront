@@ -84,7 +84,9 @@ export function proxy(req: NextRequest) {
   // header and still gets redirected. Crossing links are absolute anyway
   // (src/lib/hosts.ts), which stops the prefetch from happening at all —
   // this is the net under that.
-  if (req.headers.get("rsc") === "1") return NextResponse.next();
+  if (req.headers.has("rsc") || req.headers.has("next-router-prefetch")) {
+    return NextResponse.next();
+  }
 
   const { pathname, search } = req.nextUrl;
   const belongsToApp = isAppPath(pathname);

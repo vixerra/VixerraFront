@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { TIER_INFO } from "@/lib/constants";
 import { sortedGuides } from "@/lib/guides";
 import { absoluteUrl, openGraph, SITE_NAME } from "@/lib/seo";
+import { appHref } from "@/lib/hosts";
 
 export const metadata: Metadata = {
   title: "AI video and image generation guides",
@@ -95,7 +96,7 @@ export default function GuidesIndexPage() {
           every model on one balance.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/signup" className={buttonVariants({ variant: "accent" })}>
+          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
             Create a free account
           </Link>
           <Link href="/models" className={buttonVariants({ variant: "secondary" })}>

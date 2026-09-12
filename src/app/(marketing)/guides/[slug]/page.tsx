@@ -10,6 +10,7 @@ import { TIER_INFO } from "@/lib/constants";
 import { GUIDE_POSTS, guideBySlug, sortedGuides } from "@/lib/guides";
 import { modelCatalogEntry, modelPageBySlug } from "@/lib/model-seo";
 import { absoluteUrl, DEFAULT_OG_IMAGE, openGraph, SITE_NAME } from "@/lib/seo";
+import { appHref } from "@/lib/hosts";
 
 export const dynamicParams = false;
 
@@ -132,7 +133,7 @@ export default async function GuidePage(props: PageProps<"/guides/[slug]">) {
           {TIER_INFO.free.monthlyCredits} free credits on sign-up, no credit card required.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href="/signup" className={buttonVariants({ variant: "accent" })}>
+          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
             Start generating
           </Link>
           <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>

@@ -11,6 +11,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { faqPageJsonLd } from "@/lib/faqs";
 import { pricingProductJsonLd } from "@/lib/structured-data";
 import { openGraph } from "@/lib/seo";
+import { appHref } from "@/lib/hosts";
 
 export const metadata: Metadata = {
   title: "AI video generator pricing",
@@ -107,7 +108,7 @@ export default function PricingPage() {
                 className="mt-6 flex-1"
               />
               <Link
-                href="/signup"
+                href={appHref("/signup")} prefetch={false}
                 className={buttonVariants({
                   variant: isPopular ? "primary" : "secondary",
                   className: "mt-8 w-full",

@@ -33,6 +33,7 @@ import { PublishButton } from "@/components/social/publish-button";
 import { IMAGE_MODELS, SEEDANCE_DURATION_AUTO, VIDEO_MODELS } from "@/lib/constants";
 import { EDIT_GENERATION_MODEL } from "@/lib/editor/types";
 import { itemLabel, type GalleryItem } from "./generation-card";
+import { appHref } from "@/lib/hosts";
 
 export type PreviewAuthor = { name: string; avatarUrl: string | null };
 
@@ -557,7 +558,7 @@ function PreviewBody({
                 </Button>
               ) : (
                 <Link
-                  href="/presets"
+                  href={appHref("/presets")} prefetch={false}
                   className={buttonVariants({ variant: "accent", size: "sm", className: "flex-1" })}
                 >
                   <Sparkles className="size-4" aria-hidden="true" /> Try a preset
@@ -573,7 +574,7 @@ function PreviewBody({
             )}
             {canEditInStudio ? (
               <Link
-                href={`/editor?add=${item.id}`}
+                href={appHref(`/editor?add=${item.id}`)} prefetch={false}
                 className={buttonVariants({
                   variant: "secondary",
                   size: "sm",

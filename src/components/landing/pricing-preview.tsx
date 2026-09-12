@@ -7,6 +7,7 @@ import { TIERS, TIER_INFO } from "@/lib/constants";
 import { Reveal } from "@/components/marketing/reveal";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
 import { PlanPrice } from "@/components/pricing/plan-price";
+import { appHref } from "@/lib/hosts";
 
 export function PricingPreview() {
   return (
@@ -52,7 +53,7 @@ export function PricingPreview() {
                   className="mt-6 flex-1"
                 />
                 <Link
-                  href="/signup"
+                  href={appHref("/signup")} prefetch={false}
                   className={buttonVariants({
                     variant: isPopular ? "primary" : "secondary",
                     className: "mt-8 w-full",

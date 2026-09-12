@@ -4,6 +4,7 @@ import { PresetsGallery } from "@/components/presets/presets-gallery";
 import { modelCatalogEntry, modelPageHref } from "@/lib/model-seo";
 import { fetchPublicPresets } from "@/lib/public-content";
 import { openGraph } from "@/lib/seo";
+import { appHref } from "@/lib/hosts";
 
 // The public face of the preset catalogue. It keeps the /prompts URL the
 // site has always linked to (the in-app studio owns /presets, and two routes
@@ -49,7 +50,7 @@ export default async function PromptsPage() {
           Finished recipes — prompt, camera, length and audio already written. Pick a look, upload
           one photo, and generate. Nothing to configure and no prompt to write; if you&apos;d
           rather write your own,{" "}
-          <Link href="/generate" className="text-brand underline-offset-4 hover:underline">
+          <Link href={appHref("/generate")} prefetch={false} className="text-brand underline-offset-4 hover:underline">
             the full composer
           </Link>{" "}
           is one click away.

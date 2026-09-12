@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { appHref } from "@/lib/hosts";
 
 const NAV_LINKS = [
   { href: "/features", label: "Features" },
@@ -61,19 +62,19 @@ export function MobileNav({ isAuthed }: { isAuthed: boolean }) {
       </nav>
       <div className="mt-auto flex flex-col gap-3 pt-6">
         {isAuthed ? (
-          <Link href="/dashboard" onClick={close} className={buttonVariants({ className: "w-full" })}>
+          <Link href={appHref("/dashboard")} prefetch={false} onClick={close} className={buttonVariants({ className: "w-full" })}>
             Dashboard
           </Link>
         ) : (
           <>
             <Link
-              href="/login"
+              href={appHref("/login")} prefetch={false}
               onClick={close}
               className={buttonVariants({ variant: "secondary", className: "w-full" })}
             >
               Log in
             </Link>
-            <Link href="/signup" onClick={close} className={buttonVariants({ className: "w-full" })}>
+            <Link href={appHref("/signup")} prefetch={false} onClick={close} className={buttonVariants({ className: "w-full" })}>
               Start for Free
             </Link>
           </>

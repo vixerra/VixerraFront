@@ -21,6 +21,7 @@ import {
   relatedModelPages,
 } from "@/lib/model-seo";
 import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
+import { appHref } from "@/lib/hosts";
 
 // A public, statically generated landing page per model.
 //
@@ -166,7 +167,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
             <Sparkles className="size-4" aria-hidden="true" />
             Generate with {entry.label}
           </Link>
-          <Link href="/signup" className={buttonVariants({ variant: "secondary" })}>
+          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "secondary" })}>
             Start free — {TIER_INFO.free.monthlyCredits} credits
           </Link>
         </div>
@@ -349,7 +350,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           {TIER_INFO.free.monthlyCredits} free credits on sign-up, no credit card required.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/signup" className={buttonVariants({ variant: "accent" })}>
+          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
             Create a free account
           </Link>
           <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>

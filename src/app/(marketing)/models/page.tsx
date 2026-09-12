@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { TIER_INFO } from "@/lib/constants";
 import { CATEGORY_LABEL, MODEL_PAGES, modelCatalogEntry } from "@/lib/model-seo";
 import { openGraph, SITE_NAME } from "@/lib/seo";
+import { appHref } from "@/lib/hosts";
 
 // The hub every /generate/[model] page links back to, and the reason those
 // pages aren't orphans: without it they'd be reachable only from the sitemap,
@@ -65,7 +66,7 @@ export default function ModelsIndexPage() {
           credit balance, no per-provider subscriptions.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/signup" className={buttonVariants({ variant: "accent" })}>
+          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
             Start free — {TIER_INFO.free.monthlyCredits} credits
           </Link>
           <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>

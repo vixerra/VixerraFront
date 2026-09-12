@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/marketing/reveal";
 import { SEEDANCE_MODEL_ID } from "@/lib/constants";
+import { appHref } from "@/lib/hosts";
 
 /**
  * Promo spotlight for Seedance 2.5. Copy is deliberately scoped to what the
@@ -16,7 +17,7 @@ export function SeedancePromoBanner() {
     <section className="container-page py-4">
       <Reveal>
         <Link
-          href={`/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}`}
+          href={appHref(`/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}`)} prefetch={false}
           className="group relative block overflow-hidden rounded-[28px] border border-line bg-surface-2 p-8 transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-glow-sm sm:p-12"
         >
           {/* Halftone dot texture, cyan radial glow, and a large abstract
