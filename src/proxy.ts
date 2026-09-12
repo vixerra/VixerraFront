@@ -87,11 +87,17 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // /api is deliberately exempt. The social OAuth callback lands on
+  // Three exemptions, and /edge-api is the one that matters most: it is the
+  // same-origin rewrite to the Edge Function (next.config.ts), so it has to
+  // be served by whichever host the browser is already on. Redirecting it
+  // cross-host fails outright — "Redirect is not allowed for a preflight
+  // request" — and takes every API call on the app host with it.
+  //
+  // /api is exempt because the social OAuth callback lands on
   // /api/social/callback/[platform] carrying the provider's query string,
   // and a cross-host redirect there is one more thing that can drop it.
-  // Whichever host the provider is registered against serves it directly.
+  // _next and _vercel are framework-internal and never user-visible routes.
   matcher: [
-    "/((?!api|_next/static|_next/image|media|favicon.ico|icon.svg|apple-icon.png|robots.txt|sitemap.xml).*)",
+    "/((?!api|edge-api|_next|_vercel|media|favicon.ico|icon.svg|apple-icon.png|robots.txt|sitemap.xml).*)",
   ],
 };
