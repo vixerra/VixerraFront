@@ -11,6 +11,7 @@ import { Input, Label, FieldError } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
+import { ResendVerificationButton } from "@/components/auth/resend-verification-button";
 import { loginSchema, type LoginInput } from "@/lib/validation";
 import { apiFetch } from "@/lib/api-client";
 
@@ -22,6 +23,10 @@ function LoginForm() {
   // to signup too, so "don't have an account?" doesn't lose the errand.
   const next = searchParams.get("next");
   const [serverError, setServerError] = useState<string | null>(null);
+  // The password was right but the address was never confirmed. The backend
+  // has already re-sent the link by the time it answers (403,
+  // code "email_unverified"); this only decides what to show.
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const {
     register,
@@ -37,10 +42,17 @@ function LoginForm() {
         body: JSON.stringify(data),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong.");
+      if (!res.ok) {
+        if (json.code === "email_unverified") {
+          setUnverifiedEmail(data.email);
+          return null;
+        }
+        throw new Error(json.error ?? "Something went wrong.");
+      }
       return json;
     },
-    onSuccess: () => {
+    onSuccess: (json) => {
+      if (!json) return;
       router.push(next || "/dashboard");
       router.refresh();
     },
@@ -55,6 +67,7 @@ function LoginForm() {
       <form
         onSubmit={handleSubmit((data) => {
           setServerError(null);
+          setUnverifiedEmail(null);
           mutation.mutate(data);
         })}
         className="mt-6 space-y-5"
@@ -64,6 +77,19 @@ function LoginForm() {
           <p className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 text-caption text-accent">
             {serverError}
           </p>
+        )}
+        {unverifiedEmail && (
+          <div
+            role="status"
+            className="rounded-lg border border-brand/40 bg-brand/10 px-4 py-3 text-caption text-ink"
+          >
+            <p>
+              Your email isn&apos;t confirmed yet. We&apos;ve just sent a new link to{" "}
+              <span className="font-medium">{unverifiedEmail}</span> — click it to finish
+              signing in.
+            </p>
+            <ResendVerificationButton email={unverifiedEmail} className="mt-3" />
+          </div>
         )}
         <div>
           <Label htmlFor="email">Email</Label>

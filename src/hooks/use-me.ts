@@ -30,6 +30,10 @@ export type Me = {
     name: string;
     role: "owner" | "creator" | "editor" | "viewer";
   } | null;
+  /** When the address was confirmed (signup link, reset link or Google).
+   *  Null only for an account that predates the check and was never
+   *  backfilled — a session can't otherwise exist for an unverified one. */
+  emailVerifiedAt: string | null;
   createdAt: string;
 };
 
