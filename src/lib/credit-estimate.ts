@@ -85,8 +85,8 @@ function imageCreditsFor(costUsd: number): number {
 // older, higher derivation rather than being cut on the strength of a
 // price page.
 //
-// Entries kie.ai does not sell (Flux 3 Video, Vidu Q3, P-Video) are still
-// *estimates*, marked per entry below.
+// Flux 3 Video, Vidu Q3 and P-Video are not on kie.ai: their rates are the
+// per-second prices on Cloudflare's own model pages (2026-09-13).
 //
 // `minSeconds` is the shortest clip the model accepts — the floor cost is
 // that many seconds at the model's cheapest resolution, so a request can
@@ -101,6 +101,10 @@ const VIDEO_COST_USD: Record<
      *  rate for a run with sound would sell it below cost. Absent means audio
      *  changes nothing, which is true of every Cloudflare entry here. */
     withAudio?: Record<string, number>;
+    /** Rates in draft mode, for the models that sell a cheaper, faster
+     *  preview (the `draft` switch in cloudflare-models.ts). A resolution
+     *  missing here has no draft price and bills at its full rate. */
+    withDraft?: Record<string, number>;
     minSeconds: number;
     /** Floor for the withReferenceVideo table, when it differs. */
     minSecondsWithReferenceVideo?: number;
@@ -130,11 +134,14 @@ const VIDEO_COST_USD: Record<
     perSecond: { "480p": 0.019, "720p": 0.041 },
     minSeconds: 3,
   },
-  // Not on kie.ai — still an estimate: 1.33x (720p) / 1.3x (1080p) of
-  // Seedance 2.0's rates as they stood before 2026-09-12.
+  // Cloudflare lists Flux 3 as "hd" / "fhd" (our 720p / 1080p) and a draft
+  // price at hd only, so a draft 1080p run bills at the full fhd rate. Its
+  // separate video-to-video prices don't apply: this entry only runs text or
+  // keyframes to video.
   "black-forest-labs/flux-3-video": {
-    perSecond: { "720p": 0.1995, "1080p": 0.481 },
-    minSeconds: 3,
+    perSecond: { "720p": 0.17, "1080p": 0.29 },
+    withDraft: { "720p": 0.06 },
+    minSeconds: 5,
   },
   // kie.ai prices both Grok video models identically, text or image input.
   "xai/grok-imagine-video": {
@@ -196,24 +203,23 @@ const VIDEO_COST_USD: Record<
   // Google Veo 3.1 is priced per clip, not per second — see
   // VIDEO_CLIP_COST_USD below.
   //
-  // Vidu Q3 — not on kie.ai, still estimates. Pro at 1.33x and Turbo at 0.75x
-  // of Seedance 2.0's 720p/1080p cost as it stood before 2026-09-12, with 540p
-  // carried down proportionally. Both allow 1s clips.
+  // Vidu Q3. Cloudflare publishes one Q3 table, applied to both variants:
+  // Turbo is probably cheaper, so it is overcharged until its own rate is
+  // known, rather than guessed low. Audio doesn't change the price. Both
+  // allow 1s clips.
   "vidu/q3-pro": {
-    perSecond: { "540p": 0.093, "720p": 0.2, "1080p": 0.49 },
+    perSecond: { "540p": 0.05, "720p": 0.125, "1080p": 0.15 },
     minSeconds: 1,
   },
   "vidu/q3-turbo": {
-    perSecond: { "540p": 0.0525, "720p": 0.1125, "1080p": 0.2775 },
+    perSecond: { "540p": 0.05, "720p": 0.125, "1080p": 0.15 },
     minSeconds: 1,
   },
-  // Pruna P-Video — not on kie.ai and no published per-second cost to scale
-  // from, so this is parity with Seedance 2.0's 720p/1080p cost as it stood
-  // before 2026-09-12, as a placeholder until real numbers exist. It allows durations down to 1s, unlike everything else
-  // here. NOTE: the tables key on resolution only, so a 48fps clip bills
-  // the same as 24fps despite rendering twice the frames.
+  // Pruna P-Video. It allows durations down to 1s. Cloudflare's price does
+  // not vary with fps, so a 48fps clip bills the same as 24fps.
   "pruna/p-video": {
-    perSecond: { "720p": 0.15, "1080p": 0.37 },
+    perSecond: { "720p": 0.02, "1080p": 0.04 },
+    withDraft: { "720p": 0.005, "1080p": 0.01 },
     minSeconds: 1,
   },
   // MiniMax Hailuo 2.3. kie.ai sells it per clip — Pro tier, the dearer of
@@ -281,30 +287,30 @@ export function effectiveVideoSeconds(
 // OpenAI "1024x1024" — see cloudflare-models.ts); a size the table does not
 // list, "auto", or no size at all prices at the model's default size.
 //
-// Quality is not priced: none of these providers charge by it on kie.ai's
-// table, so gpt-image-2 "high" costs what "low" does.
+// Quality is not priced here: none of these providers charge by it on kie.ai's
+// table. The one model that does, gpt-image-2, lives in IMAGE_QUALITY_COST_USD
+// below instead.
 //
 // This replaced a two-bucket estimate ($0.01 "fast" / $0.05 "quality") scaled
-// by size, which kie.ai's table showed to be wrong both ways: Seedream 4.5 and
-// Nano Banana Pro at 1K were selling below cost, GPT Image 2 at five times it.
+// by size, which the real prices showed to be wrong both ways: Seedream 4.5 and
+// Nano Banana Pro at 1K were selling below cost, Grok Imagine Quality at six
+// times it.
 //
-// Not on kie.ai, so still estimates:
-//   - the Recraft trio keeps its old bucket, scaled by linear dimension from
-//     its default size (see recraftSizeRatio below);
-//   - Lucid Origin uses Cloudflare's own published rate, $0.007 per 512x512
-//     tile + $0.00013 per step: its default 1120x1120 is ~4.8 tiles, which at
-//     the 40-step ceiling is ~$0.039, rounded up to $0.04.
+// Not on kie.ai, so priced off Cloudflare's own model pages (2026-09-13):
+//   - Recraft: a flat price per image whatever the size — $0.04 for v4.1,
+//     $0.25 for Pro. Vector has no price of its own there; Recraft's API has
+//     sold vector output at twice its raster price, so it is held at $0.08
+//     until the real figure is known rather than assumed to match raster;
+//   - Lucid Origin: $0.007 per 512x512 tile + $0.00013 per step. Its default
+//     1120x1120 is ~4.8 tiles, which at the 40-step ceiling is ~$0.039,
+//     rounded up to $0.04.
 const IMAGE_COST_USD: Record<string, number | Record<string, number>> = {
-  "recraft/recraftv4-1": 0.01,
-  "recraft/recraftv4-1-vector": 0.01,
-  "recraft/recraftv4-1-pro": 0.05,
+  "recraft/recraftv4-1": 0.04,
+  "recraft/recraftv4-1-vector": 0.08,
+  "recraft/recraftv4-1-pro": 0.25,
   "@cf/leonardo/lucid-origin": 0.04,
   "google/nano-banana-2-lite": 0.02,
   "google/nano-banana-pro": { "1K": 0.09, "2K": 0.09, "4K": 0.12 },
-  // kie.ai only lists 1k/2k/4k tiers. The two non-square sizes carry ~1.5x
-  // the pixels of 1024x1024, and "auto" may pick one of them, so all three
-  // are priced at the 2k line rather than assumed to fit the 1k one.
-  "openai/gpt-image-2": { "1024x1024": 0.03, "1024x1536": 0.05, "1536x1024": 0.05, auto: 0.05 },
   // kie.ai quotes Grok Imagine at $0.02 — per call for two images on one
   // line, per image on its 2.0 line. The per-image reading is the dearer one.
   // Both resolutions cost the same.
@@ -313,6 +319,40 @@ const IMAGE_COST_USD: Record<string, number | Record<string, number>> = {
   "bytedance/seedream-5-pro": { "1K": 0.035, "2K": 0.07 },
   "bytedance/seedream-4.5": 0.0325,
   "bytedance/seedream-5-lite": 0.0275,
+};
+
+// Models the provider bills per TOKEN, so the cost moves with quality as much
+// as with size — keyed quality -> size.
+//
+// gpt-image-2: $30 per 1M output image tokens, the rate Cloudflare's model
+// page shows (2026-09-13). The per-image figures are that rate applied to
+// OpenAI's token counts, as tabulated on fal.ai/models/openai/gpt-image-2.
+// Portrait and landscape carry the same token count, and both genuinely
+// cost less than the square size. The spread is steep: "high" is ~35x "low",
+// which is why the flat $0.03 kie.ai lists for its own, fixed-quality run
+// sold a high-quality square image at a seventh of its cost.
+const IMAGE_QUALITY_COST_USD: Record<string, Record<string, Record<string, number>>> = {
+  "openai/gpt-image-2": {
+    low: { "1024x1024": 0.006, "1024x1536": 0.005, "1536x1024": 0.005 },
+    medium: { "1024x1024": 0.053, "1024x1536": 0.042, "1536x1024": 0.042 },
+    high: { "1024x1024": 0.211, "1024x1536": 0.165, "1536x1024": 0.165 },
+  },
+};
+
+// The quality an unset quality prices at — the model's `defaultValue` in
+// cloudflare-models.ts. "auto" is different: it hands the choice to the model,
+// which may well pick the top tier, so it prices as the dearest quality (and
+// an "auto" size as the dearest size) rather than guessing low.
+const IMAGE_DEFAULT_QUALITY: Record<string, string> = {
+  "openai/gpt-image-2": "medium",
+};
+
+// The prompt is billed as input tokens on top ($5 per 1M text tokens). At the
+// 2000-character cap that is ~500 tokens in English and up to ~1000 in
+// scripts that tokenize worse, so the allowance is the worst case, $0.005.
+// Negligible on a high image, but it doubles the cost of a low one.
+const IMAGE_PROMPT_COST_USD: Record<string, number> = {
+  "openai/gpt-image-2": 0.005,
 };
 
 // For a model missing from the table above. Priced high on purpose: the old
@@ -326,42 +366,31 @@ const IMAGE_DEFAULT_SIZE: Record<string, string> = {
   "google/nano-banana-pro": "2K",
   "openai/gpt-image-2": "1024x1024",
   "bytedance/seedream-5-pro": "2K",
-  "recraft/recraftv4-1": "1024x1024",
-  "recraft/recraftv4-1-vector": "1024x1024",
-  "recraft/recraftv4-1-pro": "2048x2048",
 };
 
-// The Recraft trio is the one place size is still scaled rather than looked
-// up: its size field is free text with a two-value picker, and there is no
-// provider price per size to read. It scales with the image's LINEAR
-// dimension (the square root of its pixel count), not with pixels — no
-// provider in this catalog charges anything close to 16x for 4x the width.
-function pixelDimension(value: string | undefined): number | undefined {
-  const match = value ? /^(\d+)x(\d+)$/.exec(value) : null;
-  if (!match) return undefined;
-  return Math.sqrt(Number(match[1]) * Number(match[2]));
+function dearest(table: Record<string, number>): number {
+  return Math.max(...Object.values(table));
 }
 
-/** 1 whenever either size is unreadable — never a silent up- or downcharge. */
-function recraftSizeRatio(model: string, requested: string | undefined): number {
-  const to = pixelDimension(requested);
-  const from = pixelDimension(IMAGE_DEFAULT_SIZE[model]);
-  if (to === undefined || from === undefined) return 1;
-  return to / from;
+/** A listed key prices as itself, a missing one as the default, and "auto" or
+ *  an unknown spelling as the dearest entry — never cheaper than it might be. */
+function quotedCost(table: Record<string, number>, key: string | undefined, fallback: string | undefined): number {
+  if (key === "auto") return dearest(table);
+  return table[key ?? fallback ?? ""] ?? dearest(table);
 }
 
-function imageCostUsd(model: string, size: string | undefined): number {
+function imageCostUsd(model: string, size: string | undefined, quality: string | undefined): number {
+  const byQuality = IMAGE_QUALITY_COST_USD[model];
+  if (byQuality) {
+    const picked = quality === "auto" ? undefined : byQuality[quality ?? IMAGE_DEFAULT_QUALITY[model] ?? ""];
+    const row = picked ?? Object.values(byQuality).reduce((a, b) => (dearest(a) >= dearest(b) ? a : b));
+    return quotedCost(row, size, IMAGE_DEFAULT_SIZE[model]) + (IMAGE_PROMPT_COST_USD[model] ?? 0);
+  }
+
   const cost = IMAGE_COST_USD[model];
   if (cost === undefined) return UNKNOWN_IMAGE_COST_USD;
-  if (typeof cost === "number") {
-    return model.startsWith("recraft/") ? cost * recraftSizeRatio(model, size) : cost;
-  }
-  const fallback = IMAGE_DEFAULT_SIZE[model];
-  return (
-    (size !== undefined ? cost[size] : undefined) ??
-    (fallback !== undefined ? cost[fallback] : undefined) ??
-    Math.max(...Object.values(cost))
-  );
+  if (typeof cost === "number") return cost;
+  return quotedCost(cost, size, IMAGE_DEFAULT_SIZE[model]);
 }
 
 // Seedance 2.5 at 1080p routes to kie.ai instead of Cloudflare — Cloudflare's
@@ -381,7 +410,7 @@ export function estimateVideoCredits(
   model: string,
   durationSeconds: number,
   resolution: VideoResolution | string,
-  options: { hasReferenceVideo?: boolean; hasReferenceAudio?: boolean; hasAudio?: boolean } = {},
+  options: { hasReferenceVideo?: boolean; hasReferenceAudio?: boolean; hasAudio?: boolean; isDraft?: boolean } = {},
 ) {
   // Reference audio raises the assumed length of an auto-duration clip the
   // same way a reference video does (both carry their own timeline the output
@@ -420,9 +449,14 @@ export function estimateVideoCredits(
   const minSeconds = useVideoRates
     ? (entry.minSecondsWithReferenceVideo ?? entry.minSeconds)
     : entry.minSeconds;
-  const perSecond = rates[resolution] ?? Math.max(...Object.values(rates));
+  // Draft discounts one resolution's own rate rather than swapping in a whole
+  // table: a resolution with no draft price (Flux 3 at 1080p) has to keep its
+  // full rate, not fall through to the cheapest draft one.
+  const draftRate = options.isDraft && !useVideoRates ? entry.withDraft?.[resolution] : undefined;
+  const perSecond = draftRate ?? rates[resolution] ?? Math.max(...Object.values(rates));
+  const floorRates = draftRate !== undefined ? entry.withDraft! : rates;
   return Math.max(
-    creditsFor(minSeconds, cheapestPerSecond(rates)),
+    creditsFor(minSeconds, cheapestPerSecond(floorRates)),
     creditsFor(effectiveDuration, perSecond),
   );
 }
@@ -431,15 +465,15 @@ export function estimateVideoCredits(
  * `settings` is the size/quality the user actually picked, straight out of
  * the model's own registry field (`size`, `imageSize` or `resolution` — the
  * three spellings different providers use for the same idea, see
- * cloudflare-models.ts). Omit it and every model bills at its default size.
- * `quality` is accepted so callers can pass imageSettingsFromParameters
- * straight through, but no model is priced on it (see IMAGE_COST_USD).
+ * cloudflare-models.ts). Omit it and every model bills at its default size
+ * and quality. Quality only moves the price of the models the provider bills
+ * per token (IMAGE_QUALITY_COST_USD); everywhere else it is ignored.
  */
 export function estimateImageCredits(
   model: string,
   settings: { size?: string; quality?: string } = {},
 ) {
-  return imageCreditsFor(imageCostUsd(model, settings.size));
+  return imageCreditsFor(imageCostUsd(model, settings.size, settings.quality));
 }
 
 /**
@@ -471,6 +505,12 @@ export function hasAudioFromParameters(parameters: Record<string, unknown>): boo
   return parameters.audio === true || parameters.sound === true || parameters.generateAudio === true;
 }
 
+/** Whether a saved parameter blob asked for draft mode — one spelling across
+ *  the registry so far (Flux 3 Video and P-Video both call it `draft`). */
+export function isDraftFromParameters(parameters: Record<string, unknown>): boolean {
+  return parameters.draft === true;
+}
+
 export function estimateCreditsForRequest(input: {
   type: GenerationType;
   model: string;
@@ -481,6 +521,9 @@ export function estimateCreditsForRequest(input: {
   /** Whether a soundtrack was asked for — a separate charge on Kling. Read
    *  off the saved parameters with hasAudioFromParameters. */
   hasAudio?: boolean;
+  /** Whether draft mode was asked for — cheaper on Flux 3 and P-Video. Read
+   *  off the saved parameters with isDraftFromParameters. */
+  isDraft?: boolean;
   /** Image only — the picked size and quality. See estimateImageCredits. */
   imageSize?: string;
   imageQuality?: string;
@@ -496,6 +539,7 @@ export function estimateCreditsForRequest(input: {
       hasReferenceVideo: input.hasReferenceVideo,
       hasReferenceAudio: input.hasReferenceAudio,
       hasAudio: input.hasAudio,
+      isDraft: input.isDraft,
     },
   );
 }

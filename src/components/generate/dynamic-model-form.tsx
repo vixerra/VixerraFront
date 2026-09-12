@@ -28,6 +28,7 @@ import {
   estimateImageCredits,
   imageSettingsFromParameters,
   hasAudioFromParameters,
+  isDraftFromParameters,
 } from "@/lib/credit-estimate";
 import { buildDynamicSchema } from "@/lib/validation";
 import type { CloudflareModelConfig } from "@/lib/cloudflare-models";
@@ -206,10 +207,10 @@ export function DynamicModelForm<T extends string>({
         config.id,
         typeof duration === "number" ? duration : durationOptionSeconds(String(duration)) || 5,
         (resolution as string) ?? "720p",
-        // Kling charges for its soundtrack, so the quote has to move with
-        // the switch — otherwise the pill under the form disagrees with what
-        // the backend actually deducts.
-        { hasAudio: hasAudioFromParameters(values) },
+        // Kling charges for its soundtrack and Flux 3 / P-Video discount draft
+        // mode, so the quote has to move with both switches — otherwise the
+        // pill under the form disagrees with what the backend deducts.
+        { hasAudio: hasAudioFromParameters(values), isDraft: isDraftFromParameters(values) },
       );
 
   const durationField = config.fields.find(

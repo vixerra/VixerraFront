@@ -49,7 +49,13 @@ import {
   SIZE_FIELD_KEYS,
   valueHint,
 } from "@/lib/composer-fields";
-import { estimateImageCredits, estimateVideoCredits, imageSettingsFromParameters } from "@/lib/credit-estimate";
+import {
+  estimateImageCredits,
+  estimateVideoCredits,
+  hasAudioFromParameters,
+  imageSettingsFromParameters,
+  isDraftFromParameters,
+} from "@/lib/credit-estimate";
 import {
   isDurationLocked,
   isResolutionLocked,
@@ -181,6 +187,9 @@ export function MarketingStudio() {
         config.id,
         durationSeconds(params.duration) || 5,
         (params.resolution as string) ?? "720p",
+        // Same switches the backend prices on, or the quote here would miss
+        // Kling's soundtrack charge and the draft discount.
+        { hasAudio: hasAudioFromParameters(params), isDraft: isDraftFromParameters(params) },
       );
 
   function selectStyle(next: MarketingStyle) {

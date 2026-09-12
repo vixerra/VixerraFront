@@ -186,7 +186,7 @@ export function Hero() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 1 }}
           className="relative z-10 mt-4 text-center text-caption text-white/50"
         >
-          50 free credits to start — no credit card required
+          20 free credits to start — no credit card required
         </motion.p>
       </div>
 

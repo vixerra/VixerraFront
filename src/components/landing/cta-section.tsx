@@ -20,7 +20,7 @@ export function CtaSection() {
             Ready to create your <span className="text-gradient">first video</span>?
           </h2>
           <p className="max-w-lg text-body text-muted">
-            Start free with 50 credits — no credit card required.
+            Start free with 20 credits — no credit card required.
           </p>
           <Link href={appHref("/signup")} prefetch={false} className={buttonVariants()}>
             Start creating free

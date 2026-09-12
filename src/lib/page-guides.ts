@@ -215,7 +215,7 @@ export const PAGE_GUIDES: PageGuide[] = [
     art: "share",
     steps: [
       { icon: "play", title: "Watch and browse", detail: "Read-only, and no sign-in needed." },
-      { icon: "sparkles", title: "Make your own", detail: "A free account opens with 50 credits." },
+      { icon: "sparkles", title: "Make your own", detail: "A free account opens with 20 credits." },
     ],
   },
   {
@@ -314,12 +314,12 @@ export const PAGE_GUIDES: PageGuide[] = [
   {
     path: "/signup",
     title: "Create an account",
-    what: "Free, with 50 credits",
+    what: "Free, with 20 credits",
     plan: "any",
     art: "auth",
     steps: [
       { icon: "mail", title: "Email and password", detail: "That is the whole form." },
-      { icon: "zap", title: "50 credits land", detail: "Waiting on your dashboard." },
+      { icon: "zap", title: "20 credits land", detail: "Waiting on your dashboard." },
       { icon: "video", title: "Spend them well", detail: "Seedance 2.0 Mini at 3s / 480p is what fits." },
     ],
     note: "Free output is watermarked and capped at 480p / 5s. The watermark goes away on Starter.",
@@ -372,7 +372,7 @@ export const PAGE_GUIDES: PageGuide[] = [
     steps: [
       { icon: "sparkles", title: "Try the hero demo", detail: "See the flow before signing up for anything." },
       { icon: "video", title: "Follow a try-it link", detail: "It opens the composer with that model selected." },
-      { icon: "zap", title: "Start free", detail: "50 credits, no card." },
+      { icon: "zap", title: "Start free", detail: "20 credits, no card." },
     ],
   },
   {

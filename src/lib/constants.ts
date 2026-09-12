@@ -37,7 +37,7 @@ const ESTIMATES_NOTE =
   "more per generation, so the same credits stretch proportionally less far.";
 
 // The Free plan can't reach Seedance 2.0 at all (its shortest clip costs 76
-// credits, past the 50-credit budget), so that card advertises the Mini variant
+// credits, past the 20-credit budget), so that card advertises the Mini variant
 // and its note says why.
 const ESTIMATES_NOTE_FREE =
   "Estimates. Every figure above is what these credits buy at each model's " +
@@ -56,7 +56,7 @@ export const TIER_INFO: Record<
     /**
      * Whether monthlyCredits is granted again every calendar month.
      *
-     * Free is a one-time welcome grant, not an allowance: 50 credits when
+     * Free is a one-time welcome grant, not an allowance: 20 credits when
      * the account is created, never refilled. rolloverMonths is not
      * consulted at all when this is false — credits that never come back
      * must not be taken away either, so the grant simply never expires.
@@ -110,17 +110,17 @@ export const TIER_INFO: Record<
   free: {
     label: "Free",
     priceMonthly: 0,
-    monthlyCredits: 50,
+    // 20 since 2026-09-13 (was 50). Existing accounts keep the grant they
+    // were issued: it is a one-time row, written when the account first
+    // reads its balance, and nothing re-issues it.
+    monthlyCredits: 20,
     renewsMonthly: false,
-    // Capped at 480p (not 720p). That cap used to be forced by price, when
-    // the cheapest 5s 720p clip cost more than the whole free budget; on
-    // kie.ai's real rates (2026-09-12) a 5s 720p Seedance 2.0 Mini clip is 41
-    // credits, so it is now a product choice rather than a necessity. At
-    // 480p, 50 credits buy ~13s of Mini (19 credits per 5s clip), while
-    // Seedance 2.0's 4s floor is 76 credits and Seedance 2.5's is 112, both
-    // out of reach. Raising this to ~140 would put one 5s Seedance 2.5 480p
-    // clip (140 credits) in range, if the free tier should demo the flagship
-    // model.
+    // Capped at 480p (not 720p): the cheapest 720p clip, a 4s Seedance 2.0
+    // Mini, is 33 credits, past the whole free budget. At 480p the budget
+    // reaches one 5s Mini clip (19 credits), while Seedance 2.0's 4s floor is
+    // 76 credits and Seedance 2.5's is 112, both out of reach. Raising this
+    // to ~140 would put one 5s Seedance 2.5 480p clip (140 credits) in range,
+    // if the free tier should demo the flagship model.
     maxResolution: "480p",
     maxDurationSeconds: 5,
     concurrentGenerations: 1,
@@ -134,9 +134,9 @@ export const TIER_INFO: Record<
     creatorSuite: false,
     apiAccess: false,
     features: [
-      "50 one-time credits, no monthly refill",
-      "~16 images",
-      "~13s Seedance 2.0 Mini video",
+      "20 one-time credits, no monthly refill",
+      "~6 images",
+      "~5s Seedance 2.0 Mini video",
       "Credits never expire",
       "Video watermark",
       "Standard queue",
