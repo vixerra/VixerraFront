@@ -65,7 +65,7 @@ export function SeedancePromoBanner() {
                 Exclusive access
               </span>
               <span className="rounded-md border border-accent-hot/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot uppercase">
-                Seedance 2.5 at 720p
+                Seedance 2.5 at 1080p
               </span>
             </div>
 

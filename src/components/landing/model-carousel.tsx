@@ -5,21 +5,22 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { SEEDANCE25_SHOWCASE_VIDEOS } from "@/lib/showcase-media";
 import { GPT_IMAGE_2_IMAGES } from "@/lib/gpt-image-2-showcase";
+import { NANO_BANANA_IMAGES } from "@/lib/nano-banana-showcase";
 import { VIDEO_MODELS, IMAGE_MODELS, SEEDANCE_MODEL_ID } from "@/lib/constants";
 import { useLazyVideo } from "@/hooks/use-lazy-video";
+import { appHref } from "@/lib/hosts";
 import { cn } from "@/lib/utils";
 
-// This first card leads with Seedance 2.5 and GPT Image 2 — the two flagship
-// models, each shown with its own real output (see showcase-media.ts /
-// gpt-image-2-showcase.ts) rather than borrowing a sample from a different
-// model like the previous Seedance 2.0 / Nano Banana version of this card did.
+// The four featured models — Seedance 2.5 and Kling 3.0 for video, GPT Image 2
+// and Nano Banana Pro for images — interleaved video/image so the "All models"
+// view doesn't read as two separate blocks.
 const SEEDANCE_25 = VIDEO_MODELS.find((m) => m.id === SEEDANCE_MODEL_ID);
 const GPT_IMAGE_2 = IMAGE_MODELS.find((m) => m.label === "GPT Image 2");
 // `.trim()` guards against the leading-whitespace id corruption some
 // CLOUDFLARE_MODELS entries carry (see cloudflare-models.ts) — matching on
 // label instead of id would be more fragile since ids are stable identifiers.
-const VEO_3_1 = VIDEO_MODELS.find((m) => m.id.trim() === "google/veo-3.1");
-const RECRAFT_4_1 = IMAGE_MODELS.find((m) => m.id.trim() === "recraft/recraftv4-1");
+const KLING_3 = VIDEO_MODELS.find((m) => m.id.trim() === "kling/3.0");
+const NANO_BANANA_PRO = IMAGE_MODELS.find((m) => m.id.trim() === "google/nano-banana-pro");
 // Deliberately a different id than Hero's BG_VIDEO (also from
 // SEEDANCE25_SHOWCASE_VIDEOS) so this card doesn't repeat the exact clip the
 // visitor just saw playing behind the hero copy.
@@ -27,13 +28,14 @@ const HERO_VIDEO =
   SEEDANCE25_SHOWCASE_VIDEOS.find((v) => v.id === "night-rally-car") ?? SEEDANCE25_SHOWCASE_VIDEOS[0];
 const HERO_IMAGE = GPT_IMAGE_2_IMAGES.find((i) => i.id === "hero") ?? GPT_IMAGE_2_IMAGES[0];
 
-// Local media only — one per additional model, sourced from public/media
-// (no external CDN), same as SEEDANCE25_SHOWCASE_VIDEOS / GPT_IMAGE_2_IMAGES.
-const VEO_3_1_VIDEO_URL = "/media/videos/makeup-girl.mp4";
-const VEO_3_1_PROMPT =
-  "First-person view soaring low over a medieval battlefield at dawn, gliding past clashing knights in armor, fire-lit arrows whizzing overhead, splintered catapults burning near fallen soldiers, flying inches above torn flags and mud-soaked ground, ambient sounds of swords striking, war cries, galloping hooves, and wind rushing in your ears, raw, terrifying, epic";
-const RECRAFT_4_1_IMAGE_URL = "/media/images/gpt-image-09.webp";
-const RECRAFT_4_1_PROMPT = "High-end skincare bottle floating on a swirl of cream texture, macro, soft pink palette";
+// Local media only, sourced from public/media (no external CDN), same as
+// SEEDANCE25_SHOWCASE_VIDEOS / GPT_IMAGE_2_IMAGES — picked so no two cards
+// share a file.
+const KLING_3_VIDEO_URL = "/media/videos/msc6H2R1htn6Mzjy_OPku_video.mp4";
+const KLING_3_PROMPT =
+  "A man dancing alone on a rain-soaked city rooftop at night, neon signs reflecting in puddles, slow cinematic dolly-in, synchronized beat and ambient city sound";
+const NANO_BANANA_IMAGE =
+  NANO_BANANA_IMAGES.find((i) => i.id === "coffee-mug-product") ?? NANO_BANANA_IMAGES[0];
 
 type ModelCard = {
   kind: "video" | "image";
@@ -44,10 +46,12 @@ type ModelCard = {
   mediaUrl: string;
 };
 
+// Workspace links live on the app host — see hosts.ts for why a same-origin
+// href to /generate from the public site breaks.
 const MODEL_CARDS: ModelCard[] = [
   SEEDANCE_25 && {
     kind: "video",
-    href: `/generate?model=${encodeURIComponent(SEEDANCE_25.id)}&prompt=${encodeURIComponent(HERO_VIDEO.prompt)}`,
+    href: appHref(`/generate?model=${encodeURIComponent(SEEDANCE_25.id)}&prompt=${encodeURIComponent(HERO_VIDEO.prompt)}`),
     label: SEEDANCE_25.label,
     provider: SEEDANCE_25.provider,
     description: SEEDANCE_25.description,
@@ -55,27 +59,27 @@ const MODEL_CARDS: ModelCard[] = [
   },
   GPT_IMAGE_2 && {
     kind: "image",
-    href: `/generate/image?model=${encodeURIComponent(GPT_IMAGE_2.id)}&prompt=${encodeURIComponent(HERO_IMAGE.prompt)}`,
+    href: appHref(`/generate/image?model=${encodeURIComponent(GPT_IMAGE_2.id)}&prompt=${encodeURIComponent(HERO_IMAGE.prompt)}`),
     label: GPT_IMAGE_2.label,
     provider: GPT_IMAGE_2.provider,
     description: GPT_IMAGE_2.description,
     mediaUrl: HERO_IMAGE.url,
   },
-  VEO_3_1 && {
+  KLING_3 && {
     kind: "video",
-    href: `/generate?model=${encodeURIComponent(VEO_3_1.id)}&prompt=${encodeURIComponent(VEO_3_1_PROMPT)}`,
-    label: VEO_3_1.label,
-    provider: VEO_3_1.provider,
-    description: VEO_3_1.description,
-    mediaUrl: VEO_3_1_VIDEO_URL,
+    href: appHref(`/generate?model=${encodeURIComponent(KLING_3.id)}&prompt=${encodeURIComponent(KLING_3_PROMPT)}`),
+    label: KLING_3.label,
+    provider: KLING_3.provider,
+    description: "Up to 4K video with native audio and optional reference image",
+    mediaUrl: KLING_3_VIDEO_URL,
   },
-  RECRAFT_4_1 && {
+  NANO_BANANA_PRO && {
     kind: "image",
-    href: `/generate/image?model=${encodeURIComponent(RECRAFT_4_1.id)}&prompt=${encodeURIComponent(RECRAFT_4_1_PROMPT)}`,
-    label: RECRAFT_4_1.label,
-    provider: RECRAFT_4_1.provider,
-    description: RECRAFT_4_1.description,
-    mediaUrl: RECRAFT_4_1_IMAGE_URL,
+    href: appHref(`/generate/image?model=${encodeURIComponent(NANO_BANANA_PRO.id)}&prompt=${encodeURIComponent(NANO_BANANA_IMAGE.prompt)}`),
+    label: NANO_BANANA_PRO.label,
+    provider: NANO_BANANA_PRO.provider,
+    description: NANO_BANANA_PRO.description,
+    mediaUrl: NANO_BANANA_IMAGE.url,
   },
 ].filter((c): c is ModelCard => Boolean(c));
 
@@ -148,6 +152,7 @@ export function ModelCarousel() {
         <Link
           key={card.label}
           href={card.href}
+          prefetch={false}
           className="group relative flex h-[320px] w-[85vw] max-w-sm flex-none snap-center overflow-hidden rounded-2xl border border-line bg-surface-2 sm:h-[380px] sm:w-[480px] sm:max-w-none"
         >
           {card.kind === "video" ? (

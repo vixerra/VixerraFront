@@ -6,11 +6,16 @@ import { useReducedMotion } from "framer-motion";
 import { ImagePlus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const MODEL_PILLS = ["Seedance 2.5", "Seedance 2.0", "Recraft"];
-// A real, in-range default for Seedance 2.5 (see SEEDANCE_RESOLUTIONS /
-// SEEDANCE_DURATION_MAX / SEEDANCE_ASPECT_RATIOS in constants.ts) — shown as
-// informational chrome only, not a claim that these are the only options.
-const SPECS_PILL = "720p · 30s · 16:9";
+// The four featured models. Specs are real, in-range maxima for each (see
+// SEEDANCE_RESOLUTIONS / SEEDANCE_DURATION_MAX in constants.ts and the Kling
+// 3.0 / GPT Image 2 / Nano Banana Pro entries in cloudflare-models.ts) —
+// shown as informational chrome only, not a claim these are the only options.
+const MODEL_PILLS = [
+  { label: "Seedance 2.5", specs: "1080p · 30s · 16:9", kind: "video" },
+  { label: "Kling 3.0", specs: "4K · 15s · audio", kind: "video" },
+  { label: "GPT Image 2", specs: "1536×1024 · high", kind: "image" },
+  { label: "Nano Banana Pro", specs: "4K · 21:9", kind: "image" },
+] as const;
 
 // Rotates the empty-state placeholder through a few real prompt ideas
 // (pulled from the same curated set shown in the Showcase section below)
@@ -34,7 +39,8 @@ export function HeroDemoWidget() {
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const [prompt, setPrompt] = useState("");
-  const [model, setModel] = useState(MODEL_PILLS[0]);
+  const [modelIndex, setModelIndex] = useState(0);
+  const model = MODEL_PILLS[modelIndex];
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   useEffect(() => {
@@ -51,8 +57,7 @@ export function HeroDemoWidget() {
   }
 
   function cycleModel() {
-    const i = MODEL_PILLS.indexOf(model);
-    setModel(MODEL_PILLS[(i + 1) % MODEL_PILLS.length]);
+    setModelIndex((i) => (i + 1) % MODEL_PILLS.length);
   }
 
   return (
@@ -80,15 +85,16 @@ export function HeroDemoWidget() {
           onClick={cycleModel}
           className="rounded-full border border-line bg-white/5 px-3 py-1.5 font-mono text-caption text-ink-soft transition-colors hover:border-muted"
         >
-          {model} <span className="text-muted">▾</span>
+          {model.label} <span className="text-muted">▾</span>
         </button>
 
         <span className="hidden rounded-full border border-line px-3 py-1.5 font-mono text-caption text-muted sm:inline-block">
-          {SPECS_PILL}
+          {model.specs}
         </span>
 
         <Button type="submit" variant="accent" className="ml-auto shrink-0">
-          Generate AI Video <Sparkles className="size-4" aria-hidden="true" />
+          {model.kind === "video" ? "Generate AI Video" : "Generate AI Image"}{" "}
+          <Sparkles className="size-4" aria-hidden="true" />
         </Button>
       </div>
       <p className="mt-2 px-3 text-caption text-muted">

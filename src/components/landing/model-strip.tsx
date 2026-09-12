@@ -3,7 +3,15 @@ import { Marquee } from "@/components/marketing/marquee";
 import { VIDEO_MODELS, IMAGE_MODELS } from "@/lib/constants";
 import { modelPageHref } from "@/lib/model-seo";
 
-const ALL_MODELS = [...VIDEO_MODELS, ...IMAGE_MODELS];
+// Featured models lead the marquee; everything else keeps registry order.
+const FEATURED_IDS = ["bytedance/seedance-2.5", "kling/3.0", "openai/gpt-image-2", "google/nano-banana-pro"];
+const featuredRank = (id: string) => {
+  const i = FEATURED_IDS.indexOf(id.trim());
+  return i === -1 ? FEATURED_IDS.length : i;
+};
+const ALL_MODELS = [...VIDEO_MODELS, ...IMAGE_MODELS].sort(
+  (a, b) => featuredRank(a.id) - featuredRank(b.id),
+);
 
 // Each pill links to that model's landing page. This strip renders on both /
 // and /features, which is what keeps the ~26 pages under /generate/[model] one

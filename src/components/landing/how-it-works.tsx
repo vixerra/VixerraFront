@@ -19,7 +19,7 @@ const STEPS = [
   {
     icon: Sparkles,
     title: "Pick a model",
-    body: "Choose from Seedance, Recraft, Nano Banana, and more.",
+    body: "Choose from Seedance 2.5, Kling 3.0, GPT Image 2, Nano Banana Pro, and more.",
   },
   {
     icon: Wand2,

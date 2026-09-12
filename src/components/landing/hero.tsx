@@ -17,6 +17,15 @@ const TITLE_WORDS = ["THE", "AI", "VIDEO", "& IMAGE"];
 const TITLE_ACCENT_WORD = "STUDIO";
 const TITLE_SCRIPT_LINE = "for ambitious creators.";
 
+// Featured models, each a direct link into its workspace — the first thing
+// above the headline, so the flagship lineup is what a visitor reads first.
+const FEATURED_MODELS = [
+  { label: "Seedance 2.5", path: `/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}` },
+  { label: "Kling 3.0", path: `/generate?model=${encodeURIComponent("kling/3.0")}` },
+  { label: "GPT Image 2", path: `/generate/image?model=${encodeURIComponent("openai/gpt-image-2")}` },
+  { label: "Nano Banana Pro", path: `/generate/image?model=${encodeURIComponent("google/nano-banana-pro")}` },
+];
+
 // Scattered photo/video collage around the central prompt card — an
 // OpenArt-style hero (small floating tiles surrounding the generator, not
 // one full-bleed background clip). All 5 tiles are local media from
@@ -101,15 +110,20 @@ export function Hero() {
             initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-wrap items-center justify-center gap-2"
           >
-            <Link
-              href={appHref(`/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}`)} prefetch={false}
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1.5 pl-3 pr-2.5 text-caption text-white/80 backdrop-blur transition-colors hover:border-white/25 hover:text-white"
-            >
-              <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
-              Introducing Seedance 2.5
-              <ArrowUpRight className="size-3.5" aria-hidden="true" />
-            </Link>
+            {FEATURED_MODELS.map((model) => (
+              <Link
+                key={model.label}
+                href={appHref(model.path)}
+                prefetch={false}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1.5 pl-3 pr-2.5 text-caption text-white/80 backdrop-blur transition-colors hover:border-white/25 hover:text-white"
+              >
+                <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
+                {model.label}
+                <ArrowUpRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            ))}
           </motion.div>
 
           <motion.h1
