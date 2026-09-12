@@ -71,8 +71,20 @@ export type DynamicField = {
 
 export type CloudflareModelConfig = {
   /** Exact Cloudflare model id, e.g. "recraft/recraftv4-1". First-party
-   *  models need the "@cf/" prefix; partner models must NOT have it. */
+   *  models need the "@cf/" prefix; partner models must NOT have it.
+   *  On a runtime: "kie" entry this is OUR canonical id instead — what the
+   *  row stores and what credit-estimate keys its rates on — while
+   *  `kieModel` carries the provider's own spelling. */
   id: string;
+  /** Which API actually runs this model. Absent means Cloudflare, which is
+   *  every entry probed live against /ai/run. A "kie" entry is served by
+   *  kie.ai's createTask/recordInfo pair (lib/kie-ai.ts) instead, and its
+   *  field list comes from kie.ai's published docs — the probe rule at the
+   *  top of this file cannot be applied to it. */
+  runtime?: "cloudflare" | "kie";
+  /** The model string kie.ai expects in createTask, e.g.
+   *  "kling-2.6/text-to-video". Required when runtime is "kie". */
+  kieModel?: string;
   label: string;
   provider: string;
   description: string;
@@ -702,6 +714,154 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "seed", cfParam: "seed", label: "Seed", type: "number" },
     ],
     outputPath: ["video"],
+    outputKind: "url",
+  },
+
+  // ---------- Kling, on kie.ai ----------
+  // Not Cloudflare models: these run through kie.ai's createTask/recordInfo
+  // pair (runtime: "kie", see lib/kie-ai.ts), so the probe rule at the top of
+  // this file does not apply to them. Every field, enum and default below
+  // comes from kie.ai's published model docs (docs.kie.ai/market/kling/*,
+  // read 2026-09-12), and the rates in credit-estimate.ts come from kie.ai's
+  // own pricing table on the same day.
+  //
+  // What is deliberately NOT exposed: multi_prompt / elements /
+  // kling_elements (arrays of objects with mutually exclusive rules the
+  // dynamic form cannot describe) and Kling 3.0's paired first/last frame,
+  // which the API takes as two entries of one image_urls array rather than
+  // the separate parameter lastFrameCfParam models.
+  {
+    id: "kling/3.0",
+    runtime: "kie",
+    kieModel: "kling-3.0/video",
+    label: "Kling 3.0",
+    provider: "Kling",
+    description: "Runs on kie.ai — up to 4K with native audio, optional reference image",
+    category: "text-to-video",
+    promptRequired: true,
+    image: "optional",
+    imageCfParam: "image_urls",
+    imageParamShape: "urlArray",
+    fields: [
+      // The API spells its quality tiers std/pro/4K. We keep resolutions
+      // canonical so credit-estimate's rate table stays keyed like every
+      // other model's, and translate on the wire.
+      { key: "resolution", cfParam: "mode", label: "Resolution", type: "select", options: ["720p", "1080p", "4k"], defaultValue: "1080p", cfValueMap: { "720p": "std", "1080p": "pro", "4k": "4K" } },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1"], defaultValue: "16:9" },
+      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["3", "5", "10", "15"], defaultValue: "5", helperText: "seconds" },
+      { key: "audio", cfParam: "sound", label: "Native audio", type: "switch", defaultValue: false },
+    ],
+    // Unused on this runtime: kie.ai always answers with
+    // resultJson.resultUrls, which checkKieAiTask reads. Kept because the
+    // type demands it and an entry without it would read as an oversight.
+    outputPath: [],
+    outputKind: "url",
+  },
+  {
+    id: "kling/3.0-omni",
+    runtime: "kie",
+    kieModel: "kling-3.0-omni/text-to-video",
+    label: "Kling 3.0 Omni",
+    provider: "Kling",
+    description: "Runs on kie.ai — 3 to 15s, up to 4K with native audio",
+    category: "text-to-video",
+    promptRequired: true,
+    image: "none",
+    // customize_multi_shots defaults to TRUE on this model, and then demands
+    // a multi_prompt array we never send. Pinned false so a single-prompt
+    // request is a valid one.
+    staticParams: { customize_multi_shots: false },
+    fields: [
+      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p", "4k"], defaultValue: "720p" },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1"], defaultValue: "16:9" },
+      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 3, max: 15, helperText: "seconds" },
+      { key: "audio", cfParam: "audio", label: "Native audio", type: "switch", defaultValue: false },
+    ],
+    outputPath: [],
+    outputKind: "url",
+  },
+  {
+    id: "kling/3.0-turbo",
+    runtime: "kie",
+    kieModel: "kling/v3-turbo-text-to-video",
+    label: "Kling 3.0 Turbo",
+    provider: "Kling",
+    description: "Runs on kie.ai — faster Kling 3.0 at 720p or 1080p",
+    category: "text-to-video",
+    promptRequired: true,
+    image: "none",
+    fields: [
+      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p"], defaultValue: "720p" },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1"], defaultValue: "16:9" },
+      // This one spells its duration with the unit attached ("5s"), unlike
+      // every sibling. Stored canonically as seconds, translated on the wire.
+      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["3", "5", "10", "15"], defaultValue: "5", helperText: "seconds", cfValueMap: { "3": "3s", "5": "5s", "10": "10s", "15": "15s" } },
+    ],
+    outputPath: [],
+    outputKind: "url",
+  },
+  {
+    id: "kling/2.6",
+    runtime: "kie",
+    kieModel: "kling-2.6/text-to-video",
+    label: "Kling 2.6",
+    provider: "Kling",
+    description: "Runs on kie.ai — 5s or 10s, optional native audio",
+    category: "text-to-video",
+    promptRequired: true,
+    image: "none",
+    // sound is a required field on 2.6, so it has to be on the wire even
+    // when the switch was never touched. The field below overrides it.
+    staticParams: { sound: false },
+    fields: [
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["1:1", "16:9", "9:16"], defaultValue: "1:1" },
+      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["5", "10"], defaultValue: "5", helperText: "seconds" },
+      { key: "audio", cfParam: "sound", label: "Native audio", type: "switch", defaultValue: false },
+    ],
+    outputPath: [],
+    outputKind: "url",
+  },
+  {
+    id: "kling/2.6-image",
+    runtime: "kie",
+    kieModel: "kling-2.6/image-to-video",
+    label: "Kling 2.6 Image",
+    provider: "Kling",
+    description: "Runs on kie.ai — animates one image, 5s or 10s with optional audio",
+    category: "image-to-video",
+    promptRequired: true,
+    image: "required",
+    imageCfParam: "image_urls",
+    imageParamShape: "urlArray",
+    staticParams: { sound: false },
+    fields: [
+      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["5", "10"], defaultValue: "5", helperText: "seconds" },
+      { key: "audio", cfParam: "sound", label: "Native audio", type: "switch", defaultValue: false },
+    ],
+    outputPath: [],
+    outputKind: "url",
+  },
+  {
+    id: "kling/2.1-pro",
+    runtime: "kie",
+    kieModel: "kling/v2-1-pro",
+    label: "Kling 2.1 Pro",
+    provider: "Kling",
+    description: "Runs on kie.ai — image to video with end-frame control",
+    category: "image-to-video",
+    promptRequired: true,
+    image: "required",
+    imageCfParam: "image_url",
+    // The one Kling here with a separate closing-frame parameter, so the
+    // end frame the composer already collects is forwarded rather than
+    // dropped — see buildProviderInput.
+    lastFrameCfParam: "tail_image_url",
+    fields: [
+      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["5", "10"], defaultValue: "5", helperText: "seconds" },
+      { key: "negativePrompt", cfParam: "negative_prompt", label: "Negative prompt", type: "text", helperText: "What to avoid" },
+      { key: "cfgScale", cfParam: "cfg_scale", label: "Prompt adherence", type: "number", defaultValue: 0.5, min: 0, max: 1, helperText: "0 loose, 1 strict" },
+    ],
+    outputPath: [],
     outputKind: "url",
   },
 ];

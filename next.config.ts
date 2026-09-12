@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
-      { protocol: "https", hostname: "pdbhvyklkrasersozbqe.supabase.co" }, // R2-backed uploads, served via the Edge Function
+      { protocol: "https", hostname: "jqzbrzwowitiapkoohlb.supabase.co" }, // R2-backed uploads, served via the Edge Function
     ],
   },
   async rewrites() {

@@ -79,6 +79,11 @@ const VIDEO_COST_USD: Record<
   {
     perSecond: Record<string, number>;
     withReferenceVideo?: Record<string, number>;
+    /** Rates when the model is asked for a soundtrack. Kling sells audio as
+     *  a separate line — 2.6 doubles, 3.0 adds 40-50% — so quoting the silent
+     *  rate for a run with sound would sell it below cost. Absent means audio
+     *  changes nothing, which is true of every Cloudflare entry here. */
+    withAudio?: Record<string, number>;
     minSeconds: number;
     /** Floor for the withReferenceVideo table, when it differs. */
     minSecondsWithReferenceVideo?: number;
@@ -125,6 +130,43 @@ const VIDEO_COST_USD: Record<
     minSeconds: 3,
   },
   // 0.83x (720p) / 0.8x (1080p) of Seedance 2.0.
+  // ---------- Kling, on kie.ai ----------
+  // Read off kie.ai's own pricing table (kie.ai/fr/pricing, 2026-09-12),
+  // which quotes Kling per second and sells the soundtrack separately —
+  // hence withAudio. 2.6 exposes no resolution at all, so its table carries
+  // the single rate under "default": rates[resolution] falls through to the
+  // highest entry when the key is missing, which is that same number.
+  "kling/3.0": {
+    perSecond: { "720p": 0.07, "1080p": 0.09, "4k": 0.335 },
+    withAudio: { "720p": 0.1, "1080p": 0.135, "4k": 0.335 },
+    minSeconds: 3,
+  },
+  "kling/3.0-omni": {
+    perSecond: { "720p": 0.07, "1080p": 0.09, "4k": 0.335 },
+    withAudio: { "720p": 0.1, "1080p": 0.135, "4k": 0.335 },
+    minSeconds: 3,
+  },
+  "kling/3.0-turbo": {
+    perSecond: { "720p": 0.09, "1080p": 0.1125 },
+    minSeconds: 3,
+  },
+  // $0.275 for a silent 5s clip, $0.55 with sound — exactly double.
+  "kling/2.6": {
+    perSecond: { default: 0.055 },
+    withAudio: { default: 0.11 },
+    minSeconds: 5,
+  },
+  "kling/2.6-image": {
+    perSecond: { default: 0.055 },
+    withAudio: { default: 0.11 },
+    minSeconds: 5,
+  },
+  // Pro tier: $0.25 for 5s, $0.50 for 10s. The Standard and Master tiers
+  // kie.ai also lists are different models, not options on this one.
+  "kling/2.1-pro": {
+    perSecond: { default: 0.05 },
+    minSeconds: 5,
+  },
   "alibaba/hh1.1-i2v": {
     perSecond: { "720p": 0.1245, "1080p": 0.296 },
     minSeconds: 3,
@@ -346,7 +388,7 @@ export function estimateVideoCredits(
   model: string,
   durationSeconds: number,
   resolution: VideoResolution | string,
-  options: { hasReferenceVideo?: boolean; hasReferenceAudio?: boolean } = {},
+  options: { hasReferenceVideo?: boolean; hasReferenceAudio?: boolean; hasAudio?: boolean } = {},
 ) {
   // Reference audio raises the assumed length of an auto-duration clip the
   // same way a reference video does (both carry their own timeline the output
@@ -371,7 +413,11 @@ export function estimateVideoCredits(
   // offline again.
   const entry = VIDEO_COST_USD[model] ?? VIDEO_COST_USD[SEEDANCE2_MODEL_ID];
   const useVideoRates = options.hasReferenceVideo && entry.withReferenceVideo;
-  const rates = useVideoRates ? entry.withReferenceVideo! : entry.perSecond;
+  const rates = useVideoRates
+    ? entry.withReferenceVideo!
+    : options.hasAudio && entry.withAudio
+      ? entry.withAudio
+      : entry.perSecond;
   const minSeconds = useVideoRates
     ? (entry.minSecondsWithReferenceVideo ?? entry.minSeconds)
     : entry.minSeconds;
@@ -419,6 +465,18 @@ export function imageSettingsFromParameters(
   };
 }
 
+/**
+ * Whether a saved parameter blob asked for a soundtrack.
+ *
+ * Three spellings, because the registry mirrors each provider's own: Kling
+ * 3.0 Omni calls it `audio`, Kling 3.0 and 2.6 call it `sound`, Seedance
+ * calls it `generateAudio`. Read here rather than at each call site, so a
+ * fourth spelling only has to be added in one place.
+ */
+export function hasAudioFromParameters(parameters: Record<string, unknown>): boolean {
+  return parameters.audio === true || parameters.sound === true || parameters.generateAudio === true;
+}
+
 export function estimateCreditsForRequest(input: {
   type: GenerationType;
   model: string;
@@ -426,6 +484,9 @@ export function estimateCreditsForRequest(input: {
   resolution?: string;
   hasReferenceVideo?: boolean;
   hasReferenceAudio?: boolean;
+  /** Whether a soundtrack was asked for — a separate charge on Kling. Read
+   *  off the saved parameters with hasAudioFromParameters. */
+  hasAudio?: boolean;
   /** Image only — the picked size and quality. See estimateImageCredits. */
   imageSize?: string;
   imageQuality?: string;
@@ -440,6 +501,7 @@ export function estimateCreditsForRequest(input: {
     {
       hasReferenceVideo: input.hasReferenceVideo,
       hasReferenceAudio: input.hasReferenceAudio,
+      hasAudio: input.hasAudio,
     },
   );
 }
