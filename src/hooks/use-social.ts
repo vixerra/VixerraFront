@@ -90,7 +90,15 @@ export function useSocialAccounts() {
 export function useConnectSocial() {
   return useMutation({
     mutationFn: async (platform: SocialPlatform) => {
-      const res = await apiFetch(`/api/social/connect/${platform}`);
+      // Tell the server which host to send the creator back to. It can't
+      // infer it: this request goes through the same-origin /edge-api
+      // rewrite, so the browser sends no Origin header. Without it the
+      // callback returns to whatever APP_PUBLIC_URL names, and if that
+      // isn't the host you're on, the session cookie (host-scoped) isn't
+      // there and you land on the login page instead of Settings.
+      const res = await apiFetch(
+        `/api/social/connect/${platform}?return_origin=${encodeURIComponent(window.location.origin)}`,
+      );
       if (!res.ok) throw await readError(res, "Couldn't start the connection");
       const { url } = (await res.json()) as { url: string };
       window.location.href = url;
