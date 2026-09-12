@@ -44,7 +44,7 @@ export default function LandingPage() {
       <SeedancePromoBanner />
       <StatsStrip />
       <FeaturesShowcase />
-      <CapabilityConcepts />
+      {/*<CapabilityConcepts />*/}
       <HowItWorks />
 
       <LightBeam className="container-page" />
