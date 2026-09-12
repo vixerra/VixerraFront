@@ -313,7 +313,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             bar. px-5 puts the mark in the same column as the nav icon chips
             (nav px-3 + item pl-2). */}
         <div className={cn("flex h-16 shrink-0 items-center", collapsed ? "justify-center px-2" : "px-5")}>
-          <Logo iconOnly={collapsed} compact />
+          <Logo iconOnly={collapsed} compact href="/dashboard" />
         </div>
         {/* Renders nothing unless this account is in a team. */}
         <div className={cn("shrink-0", collapsed ? "flex justify-center px-2" : "px-3")}>
@@ -367,7 +367,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Menu className="size-5" />
             </Button>
-            <Logo />
+            <Logo href="/dashboard" />
           </div>
           <div className="hidden lg:block" />
 
@@ -430,7 +430,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Dialog.Title className="sr-only">Navigation</Dialog.Title>
             <div className="flex h-16 shrink-0 items-center justify-between px-4">
-              <Logo compact />
+              <Logo compact href="/dashboard" />
               <Dialog.Close asChild>
                 <Button variant="ghost" size="icon" aria-label="Close menu">
                   <X className="size-5" />

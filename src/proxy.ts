@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Route protection used to happen here via a session-cookie presence check,
-// but that only works when the frontend and API are same-site. Now that the
-// frontend calls the Supabase Edge Function directly (a different
-// registrable domain), the session cookie is scoped to *.supabase.co and is
-// never sent on requests to this app's own origin — this proxy structurally
-// cannot see it. Route protection now lives client-side instead (see
-// AppShell's useMe()-based guard and RedirectIfAuthenticated), since only
-// the browser (holding the cross-site cookie) and the Edge API can tell
-// whether a session is valid.
+// Route protection does not happen here, and the reason has changed since
+// that was decided. It used to be a session-cookie presence check, which
+// broke when the frontend started calling the Edge Function on its own
+// *.supabase.co domain: the cookie was cross-site and never reached this
+// app's origin. It reaches it again today — the browser talks to the Edge
+// Function through the same-origin /edge-api rewrite (next.config.ts), which
+// is what makes the cookie first-party at all, WebKit having blocked the
+// third-party one. So this proxy could now see the cookie, but presence is
+// not validity: only the Edge API can say whether a session is live. The
+// guard therefore stays client-side (AppShell's useMe() and
+// RedirectIfAuthenticated).
 //
 // What it does do is split one deployment across two hosts: the public site
 // stays on the apex, everything that needs a session moves to
@@ -19,11 +21,15 @@ import type { NextRequest } from "next/server";
 // than rendering the same page under two hostnames — duplicate content to a
 // crawler, and two places to be logged in to a user.
 //
-// The session needs nothing here either: that same cross-site cookie follows
-// the API, not this app's hostname. What DOES need updating alongside this
-// is the API's ALLOWED_ORIGINS secret (with the app host first, since
-// ALLOWED_ORIGINS[0] is what password-reset and invite emails link to) and
-// APP_PUBLIC_URL, the OAuth redirect_uri base.
+// The session does need care, for the same reason as above: being
+// first-party, the cookie is host-only, so one obtained on the app host is
+// not sent to the apex — where the shared header still asks /auth/me who you
+// are, and would show an app user as logged out. The API carries a
+// SESSION_COOKIE_DOMAIN secret for exactly that; set it to ".vixlens.com"
+// and both hosts share one session. Two more secrets need the new origin:
+// ALLOWED_ORIGINS (app host FIRST, since ALLOWED_ORIGINS[0] is what
+// password-reset and invite emails link to) and APP_PUBLIC_URL, the OAuth
+// redirect_uri base.
 const APP_HOST = "app.vixlens.com";
 const SITE_HOST = "vixlens.com";
 
@@ -68,6 +74,17 @@ export function proxy(req: NextRequest) {
   if (host !== APP_HOST && host !== SITE_HOST && host !== `www.${SITE_HOST}`) {
     return NextResponse.next();
   }
+
+  // Next fetches the same URL with an `RSC: 1` header to prefetch a link and
+  // to navigate client-side. Those are same-origin fetches from whichever
+  // host the page is on, so a 308 to the other host turns them into a
+  // cross-origin request the browser refuses outright — "Redirect is not
+  // allowed for a preflight request", once per crossing link. Serving them
+  // costs nothing: the real navigation is a document request with no RSC
+  // header and still gets redirected. Crossing links are absolute anyway
+  // (src/lib/hosts.ts), which stops the prefetch from happening at all —
+  // this is the net under that.
+  if (req.headers.get("rsc") === "1") return NextResponse.next();
 
   const { pathname, search } = req.nextUrl;
   const belongsToApp = isAppPath(pathname);

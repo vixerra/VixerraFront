@@ -9,13 +9,19 @@ export function Logo({
   className,
   iconOnly = false,
   compact = false,
+  href = "/",
 }: {
   className?: string;
   iconOnly?: boolean;
   compact?: boolean;
+  /** Where the lockup leads. Both callers on the app host override it: the
+   *  shell sends it to the dashboard, the auth pages to the public site's
+   *  absolute URL. A relative "/" from there is a cross-host link, which the
+   *  browser refuses to follow as a prefetch — see src/lib/hosts.ts. */
+  href?: string;
 }) {
   return (
-    <Link href="/" className={cn("inline-flex items-center gap-2 text-ink", className)}>
+    <Link href={href} className={cn("inline-flex items-center gap-2 text-ink", className)}>
       {/* The mark stays silver while the wordmark's accent goes lime: the
           identity belongs to the monochrome base, and the signal colors
           are for things you can act on (see globals.css). currentColor

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useMe } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { appHref } from "@/lib/hosts";
 import { Logo } from "./logo";
 import { MobileNav } from "./mobile-nav";
 
@@ -53,18 +54,19 @@ export function Header() {
 
         <div className="hidden items-center gap-4 lg:flex">
           {isAuthed ? (
-            <Link href="/dashboard" className={buttonVariants({ size: "sm" })}>
+            <Link href={appHref("/dashboard")} prefetch={false} className={buttonVariants({ size: "sm" })}>
               Dashboard
             </Link>
           ) : (
             <>
               <Link
-                href="/login"
+                href={appHref("/login")}
+                prefetch={false}
                 className="text-body-sm font-medium text-muted transition-colors hover:text-ink"
               >
                 Log in
               </Link>
-              <Link href="/signup" className={buttonVariants({ size: "sm" })}>
+              <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ size: "sm" })}>
                 Start for Free
               </Link>
             </>
