@@ -179,6 +179,22 @@ const REAL_LOGOS: Record<string, { viewBox: string; content: ReactNode; padded?:
       </>
     ),
   },
+  // Traced by hand from the mark supplied for this integration, not exported
+  // from an official asset: a filled disc with two crossing lens outlines.
+  // Swap in the real file if one turns up — public/media/svg/kling.svg holds
+  // the same geometry standalone.
+  Kling: {
+    viewBox: "0 0 48 48",
+    content: (
+      <>
+        <circle cx="24" cy="24" r="24" fill="#000" />
+        <g fill="none" stroke="#fff" strokeWidth="2.6">
+          <ellipse cx="24" cy="24" rx="17" ry="9.6" transform="rotate(-40 24 24)" />
+          <ellipse cx="24" cy="24" rx="17" ry="9.6" transform="rotate(40 24 24)" />
+        </g>
+      </>
+    ),
+  },
 };
 
 const MONOGRAM_STYLES: Record<string, { initials: string; className: string }> = {};
