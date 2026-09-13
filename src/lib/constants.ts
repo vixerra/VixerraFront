@@ -36,14 +36,15 @@ const ESTIMATES_NOTE =
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
 
-// The Free plan can't reach Seedance 2.0 at all (its shortest clip costs 76
-// credits, past the 20-credit budget), so that card advertises the Mini variant
-// and its note says why.
+// The Free plan can't reach any Seedance model: 2.0's shortest clip costs 76
+// credits and even the Mini's is 32, both past the 30-credit budget. So that
+// card advertises Grok Imagine Video (24 credits for 3s at 480p) and its note
+// says why.
 const ESTIMATES_NOTE_FREE =
   "Estimates. Every figure above is what these credits buy at each model's " +
   "cheapest settings — 480p, which is also this plan's ceiling, and the fast " +
-  "image models. Seedance 2.0 itself needs 76 credits for its shortest clip, " +
-  "past the budget here, so its Mini variant is what these credits reach.";
+  "image models. Seedance clips start at 32 credits, past the budget here, " +
+  "so Grok Imagine Video is what these credits reach.";
 
 export const TIER_INFO: Record<
   Tier,
@@ -56,7 +57,7 @@ export const TIER_INFO: Record<
     /**
      * Whether monthlyCredits is granted again every calendar month.
      *
-     * Free is a one-time welcome grant, not an allowance: 20 credits when
+     * Free is a one-time welcome grant, not an allowance: 30 credits when
      * the account is created, never refilled. rolloverMonths is not
      * consulted at all when this is false — credits that never come back
      * must not be taken away either, so the grant simply never expires.
@@ -110,17 +111,17 @@ export const TIER_INFO: Record<
   free: {
     label: "Free",
     priceMonthly: 0,
-    // 20 since 2026-09-13 (was 50). Existing accounts keep the grant they
-    // were issued: it is a one-time row, written when the account first
-    // reads its balance, and nothing re-issues it.
-    monthlyCredits: 20,
+    // 30 since 2026-09-13 (was 50, then briefly 20 the same day). Existing
+    // accounts keep the grant they were issued: it is a one-time row, written
+    // when the account first reads its balance, and nothing re-issues it.
+    monthlyCredits: 30,
     renewsMonthly: false,
-    // Capped at 480p (not 720p): the cheapest 720p clip, a 4s Seedance 2.0
-    // Mini, is 33 credits, past the whole free budget. At 480p the budget
-    // reaches one 5s Mini clip (19 credits), while Seedance 2.0's 4s floor is
-    // 76 credits and Seedance 2.5's is 112, both out of reach. Raising this
-    // to ~140 would put one 5s Seedance 2.5 480p clip (140 credits) in range,
-    // if the free tier should demo the flagship model.
+    // Capped at 480p. At 480p the budget reaches one 3s Grok Imagine Video
+    // clip (24 credits; 4s is 32), while every Seedance clip is out of reach:
+    // the Mini's 4s floor is 32 credits, 2.0's is 76 and 2.5's is 112.
+    // Raising this to 40 would put a 5s Grok or Mini 480p clip in range, and
+    // ~140 one 5s Seedance 2.5 480p clip, if the free tier should demo that
+    // family.
     maxResolution: "480p",
     maxDurationSeconds: 5,
     concurrentGenerations: 1,
@@ -134,9 +135,9 @@ export const TIER_INFO: Record<
     creatorSuite: false,
     apiAccess: false,
     features: [
-      "20 one-time credits, no monthly refill",
-      "~6 images",
-      "~5s Seedance 2.0 Mini video",
+      "30 one-time credits, no monthly refill",
+      "~10 images",
+      "~3s Grok Imagine video",
       "Credits never expire",
       "Video watermark",
       "Standard queue",

@@ -88,6 +88,10 @@ function imageCreditsFor(costUsd: number): number {
 // Flux 3 Video, Vidu Q3 and P-Video are not on kie.ai: their rates are the
 // per-second prices on Cloudflare's own model pages (2026-09-13).
 //
+// Seedance 2.0 Mini, both Grok video models, Wan 2.7 and both Veo 3.1 models
+// are priced off the real provider bill instead (2026-09-13), which came in
+// well above kie.ai's table for every one of them. Their entries say so.
+//
 // `minSeconds` is the shortest clip the model accepts — the floor cost is
 // that many seconds at the model's cheapest resolution, so a request can
 // never be quoted below what the provider will actually bill us for.
@@ -128,11 +132,17 @@ const VIDEO_COST_USD: Record<
     minSeconds: 4,
     minSecondsWithReferenceVideo: 4,
   },
-  // kie.ai lists 480p/720p only, which is all the model accepts (see
-  // cloudflare-models.ts). The old 1080p rate was for a tier it never had.
+  // 480p/720p only, which is all the model accepts (see cloudflare-models.ts).
+  // Rates are the real provider bill (2026-09-13), about double the kie.ai
+  // table's $0.019/$0.041 they replaced. The video-input rates are billed
+  // prices too, not derived — though the registry entry takes no reference
+  // video today, so they only apply once it does. The floor is 4s, the
+  // registry's own minimum duration (it was 3s here, a length the model
+  // refuses).
   "bytedance/seedance-2.0-mini": {
-    perSecond: { "480p": 0.019, "720p": 0.041 },
-    minSeconds: 3,
+    perSecond: { "480p": 0.04, "720p": 0.09 },
+    withReferenceVideo: { "480p": 0.084, "720p": 0.182 },
+    minSeconds: 4,
   },
   // Cloudflare lists Flux 3 as "hd" / "fhd" (our 720p / 1080p) and a draft
   // price at hd only, so a draft 1080p run bills at the full fhd rate. Its
@@ -143,13 +153,18 @@ const VIDEO_COST_USD: Record<
     withDraft: { "720p": 0.06 },
     minSeconds: 5,
   },
-  // kie.ai prices both Grok video models identically, text or image input.
+  // Both Grok video models, off the provider bill (2026-09-13): three to seven
+  // times the $0.012/$0.0225 kie.ai lists for either. They no longer price
+  // alike — 1.5 Preview is dearer and has no separate video-input rate. The
+  // base model's video-input rates only apply once the registry takes a
+  // reference video, which it doesn't today (`_operation: "generate"` only).
   "xai/grok-imagine-video": {
-    perSecond: { "480p": 0.012, "720p": 0.0225 },
+    perSecond: { "480p": 0.04, "720p": 0.09 },
+    withReferenceVideo: { "480p": 0.084, "720p": 0.182 },
     minSeconds: 3,
   },
   "xai/grok-imagine-video-1.5-preview": {
-    perSecond: { "480p": 0.012, "720p": 0.0225 },
+    perSecond: { "480p": 0.08, "720p": 0.14 },
     minSeconds: 3,
   },
   // ---------- Kling, on kie.ai ----------
@@ -195,13 +210,29 @@ const VIDEO_COST_USD: Record<
     perSecond: { "720p": 0.1125, "1080p": 0.145 },
     minSeconds: 3,
   },
-  // kie.ai's wan 2.7 video image-to-video line.
+  // Wan 2.7 image-to-video, off the provider bill (2026-09-13). kie.ai's
+  // line for it was $0.08/$0.12.
   "alibaba/wan-2.7-i2v": {
-    perSecond: { "720p": 0.08, "1080p": 0.12 },
+    perSecond: { "720p": 0.1, "1080p": 0.15 },
     minSeconds: 3,
   },
-  // Google Veo 3.1 is priced per clip, not per second — see
-  // VIDEO_CLIP_COST_USD below.
+  // Google Veo 3.1, per second off the provider bill (2026-09-13). It used to
+  // be a flat per-clip price off kie.ai's table ($1.25 Quality, $0.30 Fast,
+  // whatever the length), which sold an 8s Veo 3.1 clip with sound at under
+  // half its real cost. The soundtrack is its own rate and generate_audio
+  // defaults to true in the registry, so an untouched composer bills the
+  // audio rate. The 4k rates are listed for completeness only: the registry
+  // offers 720p and 1080p. Durations are 4/6/8s, so the floor is 4s.
+  "google/veo-3.1": {
+    perSecond: { "720p": 0.2, "1080p": 0.2, "4k": 0.4 },
+    withAudio: { "720p": 0.4, "1080p": 0.4, "4k": 0.6 },
+    minSeconds: 4,
+  },
+  "google/veo-3.1-fast": {
+    perSecond: { "720p": 0.08, "1080p": 0.1, "4k": 0.25 },
+    withAudio: { "720p": 0.1, "1080p": 0.12, "4k": 0.3 },
+    minSeconds: 4,
+  },
   //
   // Vidu Q3. Cloudflare publishes one Q3 table, applied to both variants:
   // Turbo is probably cheaper, so it is overcharged until its own rate is
@@ -233,16 +264,6 @@ const VIDEO_COST_USD: Record<
     perSecond: { "768p": 0.045, "1080p": 0.4 / 6 },
     minSeconds: 6,
   },
-};
-
-// Models billed a flat price per clip, whatever its length — kie.ai sells
-// Veo per video, and Veo only offers 4/6/8s, so a per-second table would
-// either overcharge the 8s clip or undercharge the 4s one. Keyed by
-// resolution like VIDEO_COST_USD. None of these accept a reference video.
-// veo-3.1 is kie.ai's "Quality" line, veo-3.1-fast its "Fast" line.
-const VIDEO_CLIP_COST_USD: Record<string, Record<string, number>> = {
-  "google/veo-3.1": { "720p": 1.25, "1080p": 1.275 },
-  "google/veo-3.1-fast": { "720p": 0.3, "1080p": 0.325 },
 };
 
 // duration=-1 ("automatic") doesn't tell us the real output length ahead of
@@ -425,12 +446,6 @@ export function estimateVideoCredits(
       creditsFor(SEEDANCE_DURATION_MIN, SEEDANCE25_KIE_AI_1080P_COST_USD),
       creditsFor(effectiveDuration, SEEDANCE25_KIE_AI_1080P_COST_USD),
     );
-  }
-
-  const clipRates = VIDEO_CLIP_COST_USD[model];
-  if (clipRates) {
-    const clipUsd = clipRates[resolution] ?? Math.max(...Object.values(clipRates));
-    return creditsForUsd(clipUsd, COST_USD_PER_CREDIT);
   }
 
   // A model in the catalog but missing from VIDEO_COST_USD used to throw
