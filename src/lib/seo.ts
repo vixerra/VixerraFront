@@ -16,7 +16,7 @@ export const SITE_URL = RAW_SITE_URL.replace(/\/+$/, "");
 export const SITE_NAME = "Vixlens";
 
 export const SITE_DESCRIPTION =
-  "Generate cinematic video and imagery from text, images, or audio in seconds. Vixlens is an AI creative studio for teams that ship fast.";
+  "Vixlens is an AI video generator and AI image generator in one: turn text or photos into video and images with Seedance, Veo 3.1, GPT Image 2 and more.";
 
 /** Default social card. There is no bespoke OG image yet, so this reuses a
  *  real generated still from public/media rather than a placeholder. */

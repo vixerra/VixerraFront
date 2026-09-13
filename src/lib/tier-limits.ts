@@ -3,7 +3,7 @@
 // checks) — used to proactively lock options in the generate forms instead
 // of letting the user pick something the backend will reject. The backend
 // remains the source of truth; this is UX only.
-import { TIER_INFO, TIERS, videoModelSupportsWatermark, type Tier } from "@/lib/constants";
+import { TIER_INFO, TIERS, type Tier } from "@/lib/constants";
 
 // Keep every rung in step with VIDEO_RESOLUTION_RANK in aiVideo-backend's
 // generations.ts — a resolution missing from either map compares as
@@ -18,28 +18,7 @@ export const RESOLUTION_RANK: Record<string, number> = {
   "4k": 6,
 };
 
-type TierLimits = { maxResolution: string; maxDurationSeconds: number; videoWatermark: boolean };
-
-/**
- * Why a video model can't be used on this plan, or undefined when it can.
- *
- * The only such rule today is the forced watermark: a plan that watermarks
- * every video can't run a model whose provider won't add one, and the server
- * refuses that pair outright rather than quietly returning clean video (see
- * the API's lib/generations.ts). Surfaced here so the picker can say so
- * before Generate is pressed, the same way locked resolutions do.
- */
-export function modelLockReason(
-  modelId: string,
-  tierInfo: { videoWatermark?: boolean } | undefined,
-): string | undefined {
-  if (!tierInfo?.videoWatermark) return undefined;
-  if (videoModelSupportsWatermark(modelId)) return undefined;
-  const clean = minTierWithoutForcedWatermark();
-  return clean
-    ? `Needs ${TIER_INFO[clean].label} — this model can't add your plan's watermark.`
-    : "Not available on your plan.";
-}
+type TierLimits = { maxResolution: string; maxDurationSeconds: number };
 
 export function isResolutionLocked(resolution: string, tierInfo: TierLimits | undefined): boolean {
   if (!tierInfo) return false;
@@ -102,11 +81,6 @@ export function minTierForResolution(resolution: string): Tier | undefined {
 /** The cheapest tier whose maxDurationSeconds covers `durationSeconds`. */
 export function minTierForDuration(durationSeconds: number): Tier | undefined {
   return TIERS.find((t) => TIER_INFO[t].maxDurationSeconds >= durationSeconds);
-}
-
-/** The cheapest tier that doesn't force a watermark onto every video. */
-export function minTierWithoutForcedWatermark(): Tier | undefined {
-  return TIERS.find((t) => !TIER_INFO[t].videoWatermark);
 }
 
 export function upgradeHint(minTier: Tier | undefined, what: string): string {

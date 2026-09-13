@@ -14,7 +14,6 @@ import { estimateVideoCredits } from "@/lib/credit-estimate";
 import { seedance2VideoSchema, type Seedance2VideoInput } from "@/lib/validation";
 import { apiFetch } from "@/lib/api-client";
 import {
-  modelLockReason,
   isResolutionLocked,
   isDurationLocked,
   bestAllowedResolution,
@@ -318,7 +317,6 @@ export function Seedance2VideoForm({
             value={model}
             onChange={onModelChange}
             fullWidth
-            lockReason={(id) => modelLockReason(id, tierInfo)}
           />
         </PanelSection>
 

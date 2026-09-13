@@ -18,7 +18,6 @@ import { measureMediaDuration, formatMediaDuration } from "@/lib/media-duration"
 import { seedanceVideoSchema, type SeedanceVideoInput } from "@/lib/validation";
 import { apiFetch } from "@/lib/api-client";
 import {
-  modelLockReason,
   isResolutionLocked,
   isDurationLocked,
   bestAllowedResolution,
@@ -420,7 +419,6 @@ export function SeedanceVideoForm({
             value={model}
             onChange={onModelChange}
             fullWidth
-            lockReason={(id) => modelLockReason(id, tierInfo)}
           />
         </PanelSection>
 

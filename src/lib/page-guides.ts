@@ -320,9 +320,9 @@ export const PAGE_GUIDES: PageGuide[] = [
     steps: [
       { icon: "mail", title: "Email and password", detail: "That is the whole form." },
       { icon: "zap", title: "30 credits land", detail: "Waiting on your dashboard." },
-      { icon: "image", title: "Spend them well", detail: "They cover about 10 images. Video starts at 76 credits." },
+      { icon: "image", title: "Spend them well", detail: "About 10 images, or 2 short Grok videos." },
     ],
-    note: "Free output is watermarked and capped at 480p / 5s. The watermark goes away on Starter.",
+    note: "Every model is open, with no watermark. Free video is capped at 480p / 5s; Starter goes to 1080p.",
     noteTone: "warn",
   },
   {

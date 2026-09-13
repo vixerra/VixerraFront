@@ -13,9 +13,8 @@ import type { DynamicField } from "@/lib/cloudflare-models";
 /**
  * Never rendered. The plan decides these, not the user.
  *
- * `watermark` is forced to true for the free tier server-side (see
- * aiVideo-backend's generations.ts) and false on every paid plan, so a toggle
- * here is a control that either lies or does nothing. Hiding it does not drop
+ * `watermark` stays off on every plan — no plan watermarks video — so a
+ * toggle here would only add a provider mark nobody asked for. Hiding it does not drop
  * the value: registry fields carrying a defaultValue are defaulted by the zod
  * schema on both sides, so omitting the key sends exactly what the visible
  * toggle would have sent.

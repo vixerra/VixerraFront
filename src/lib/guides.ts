@@ -254,7 +254,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `New accounts start with ${FREE_CREDITS} credits and no credit card. Watermark-free video and a commercial licence begin at the ${STARTER.label} plan ($${STARTER.priceMonthly}/month) — see [pricing](/pricing).`,
+        text: `New accounts start with ${FREE_CREDITS} credits and no credit card, and no plan watermarks video. A commercial licence begins at the ${STARTER.label} plan ($${STARTER.priceMonthly}/month) — see [pricing](/pricing).`,
       },
     ],
   },
@@ -298,7 +298,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `On Vixlens, watermark-free video and a commercial licence both start at the ${STARTER.label} plan ($${STARTER.priceMonthly}/month). The ${TIER_INFO.free.label} plan watermarks video and does not include a commercial licence — it is there to try the models, not to ship with.`,
+        text: `On Vixlens, no plan watermarks video — ${TIER_INFO.free.label} included. What the ${TIER_INFO.free.label} plan leaves out is the commercial licence, which starts at ${STARTER.label} ($${STARTER.priceMonthly}/month): it is there to try the models, not to ship with.`,
       },
       { type: "h2", text: "What else to check alongside the watermark" },
       { type: "h3", text: "Resolution ceiling" },

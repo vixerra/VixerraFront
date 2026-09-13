@@ -40,7 +40,6 @@ import {
   bestAllowedDuration,
   minTierForResolution,
   minTierForDuration,
-  modelLockReason,
   upgradeHint,
 } from "@/lib/tier-limits";
 import {
@@ -374,7 +373,6 @@ export function DynamicModelForm<T extends string>({
             value={model}
             onChange={onModelChange}
             fullWidth
-            lockReason={(id) => modelLockReason(id, tierInfo)}
           />
         </PanelSection>
 

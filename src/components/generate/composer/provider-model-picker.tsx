@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, ChevronRight, Lock } from "lucide-react";
+import { Check, ChevronDown, ChevronRight } from "lucide-react";
 import { DropdownRoot, DropdownTrigger, DropdownContent } from "@/components/ui/dropdown";
 import { ProviderLogo } from "./provider-logo";
 import { pillClass } from "./pill";
@@ -27,7 +27,6 @@ export function ProviderModelPicker<T extends string>({
   value,
   onChange,
   fullWidth,
-  lockReason,
 }: {
   models: readonly PickerModel<T>[];
   value: T;
@@ -35,11 +34,6 @@ export function ProviderModelPicker<T extends string>({
   /** Panel variant: the trigger spans its container as a select-style row
    * (logo + name left, chevron right) instead of a compact toolbar pill. */
   fullWidth?: boolean;
-  /** Returns why a model is unavailable on the caller's plan, or undefined
-   * when it is available. Locked models stay listed and unpickable, with the
-   * reason in place of their description — hiding them would make the plan
-   * limit look like a missing model. */
-  lockReason?: (id: T) => string | undefined;
 }) {
   const selected = models?.find((m) => m.id === value) ?? models[0];
 
@@ -105,40 +99,28 @@ export function ProviderModelPicker<T extends string>({
                 <div className="mt-1 ml-4 space-y-0.5 border-l border-line pl-3">
                   {providerModels.map((model) => {
                     const specBadges = getModelBadges(model.id);
-                    const locked = lockReason?.(model.id);
                     return (
                       <button
                         key={model.id}
                         type="button"
-                        disabled={locked !== undefined}
-                        title={locked}
                         onClick={() => {
                           onChange(model.id);
                           setOpen(false);
                         }}
-                        className={cn(
-                          "flex w-full items-start gap-2 rounded-lg px-2.5 py-2 text-left transition-colors",
-                          locked ? "cursor-not-allowed opacity-55" : "hover:bg-dropdown-hover",
-                        )}
+                        className="flex w-full items-start gap-2 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-dropdown-hover"
                       >
-                        {locked ? (
-                          <Lock className="mt-0.5 size-3.5 shrink-0 text-muted" aria-hidden="true" />
-                        ) : (
-                          <Check
-                            className={cn(
-                              "mt-0.5 size-3.5 shrink-0",
-                              model.id === value ? "text-brand" : "text-transparent",
-                            )}
-                            aria-hidden="true"
-                          />
-                        )}
+                        <Check
+                          className={cn(
+                            "mt-0.5 size-3.5 shrink-0",
+                            model.id === value ? "text-brand" : "text-transparent",
+                          )}
+                          aria-hidden="true"
+                        />
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2">
                             <span className="truncate text-label text-ink-soft">{model.label}</span>
                           </span>
-                          {locked ? (
-                            <span className="mt-0.5 block text-caption text-muted">{locked}</span>
-                          ) : specBadges.length > 0 ? (
+                          {specBadges.length > 0 ? (
                             <span className="mt-1 flex flex-wrap gap-1">
                               {specBadges.map((b) => (
                                 <span

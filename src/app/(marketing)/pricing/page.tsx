@@ -16,12 +16,12 @@ import { appHref } from "@/lib/hosts";
 export const metadata: Metadata = {
   title: "AI video generator pricing",
   description:
-    "Credit-based pricing for AI video and image generation. Start free with no credit card — watermark-free export and a commercial licence from Starter up.",
+    "Credit-based pricing for AI video and image generation. Start free with no credit card and no watermark on any plan — a commercial licence from Starter up.",
   alternates: { canonical: "/pricing" },
   openGraph: openGraph({
     title: "AI video generator pricing",
     description:
-      "Credit-based pricing for AI video and image generation. Start free with no credit card — watermark-free export and a commercial licence from Starter up.",
+      "Credit-based pricing for AI video and image generation. Start free with no credit card and no watermark on any plan — a commercial licence from Starter up.",
     path: "/pricing",
   }),
 };

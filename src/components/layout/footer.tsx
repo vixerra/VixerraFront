@@ -7,6 +7,8 @@ import { Logo } from "./logo";
 // no other nav path anywhere on the site), just inline instead of in
 // columns, so nothing gets orphaned.
 const FOOTER_LINKS = [
+  { href: "/ai-video-generator", label: "AI Video Generator" },
+  { href: "/ai-image-generator", label: "AI Image Generator" },
   { href: "/features", label: "Features" },
   { href: "/pricing", label: "Pricing" },
   { href: "/models", label: "Models" },

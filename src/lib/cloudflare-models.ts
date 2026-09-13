@@ -419,11 +419,8 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
   // On kie.ai since 2026-09-13 (bytedance/seedance-2-mini, fields from
   // docs.kie.ai/market/bytedance/seedance-2-mini): Cloudflare billed it at
   // about twice kie's rate. The move cost three things Cloudflare's schema
-  // had and kie's doesn't — camera_fixed, seed and, the one that matters,
-  // watermark. Without a watermark field videoModelSupportsWatermark says no,
-  // so a watermarked plan (Free) can no longer run it; that was accepted, and
-  // the Free card stopped advertising video. In exchange: 4-15s (was 4-12)
-  // and an "adaptive" aspect ratio, but no 9:21.
+  // had and kie's doesn't — camera_fixed, seed and watermark. In exchange:
+  // 4-15s (was 4-12) and an "adaptive" aspect ratio, but no 9:21.
   {
     id: "bytedance/seedance-2.0-mini",
     runtime: "kie",

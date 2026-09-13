@@ -47,9 +47,7 @@ const SECTIONS = [
     title: "4. Commercial use",
     body: `${list(COMMERCIAL_PLANS)} include the right to use what you generate commercially — in advertising, in a product, or for a client — within the licence terms of the underlying model. ${list(
       PERSONAL_PLANS,
-    )} ${PERSONAL_PLANS.length === 1 ? "is" : "are"} for personal and evaluation use only, and video generated ${
-      PERSONAL_PLANS.length === 1 ? "on it" : "on those plans"
-    } carries a watermark. Work you generated while on a commercial plan stays licensed for commercial use if you later downgrade.`,
+    )} ${PERSONAL_PLANS.length === 1 ? "is" : "are"} for personal and evaluation use only. Work you generated while on a commercial plan stays licensed for commercial use if you later downgrade.`,
   },
   {
     title: "5. Team accounts",

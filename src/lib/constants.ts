@@ -36,17 +36,12 @@ const ESTIMATES_NOTE =
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
 
-// The Free plan's grant buys no video. Free watermarks every clip, and at its
-// 480p cap only Seedance 2.0 and 2.5 can add one (videoModelSupportsWatermark;
-// Wan 2.7 can too, but starts at 720p) — their
-// cheapest 480p clips are 76 and 112 credits, past the 30-credit budget. The
-// cheap models it could otherwise afford (Seedance 2.0 Mini, Grok Imagine
-// Video) run on kie.ai, which has no watermark switch for them. So that card
-// advertises images only, and its note says why.
+// No plan watermarks video and no model is locked to a plan: what the Free
+// grant can make is decided by its credits, inside Free's 480p / 5s caps.
 const ESTIMATES_NOTE_FREE =
-  "Estimates. Every figure above is what these credits buy with the fast " +
-  "image models. Video on this plan is watermarked and capped at 480p, and " +
-  "its cheapest clip, 4s of Seedance 2.0, needs 76 credits.";
+  "Estimates. Images are counted with the fast image models, videos with " +
+  "the cheapest video model at this plan's 5s / 480p cap. Every model is " +
+  "open; the credits are the only limit.";
 
 export const TIER_INFO: Record<
   Tier,
@@ -72,7 +67,6 @@ export const TIER_INFO: Record<
     // Extra months a monthly grant stays spendable after the month it was
     // granted in — 0 = expires at month end, 1 = "1-month rollover".
     rolloverMonths: number;
-    videoWatermark: boolean;
     commercialLicense: boolean;
     seats: number;
     priorityQueue: boolean;
@@ -108,7 +102,7 @@ export const TIER_INFO: Record<
   // credit-estimate.ts. That is the video-only worst case: images bill at a
   // 55% gross margin (~44-46% net), so an image-heavy user is the
   // comfortable one. maxResolution/maxDurationSeconds/
-  // concurrentGenerations/videoWatermark/priorityQueue/apiAccess are enforced
+  // concurrentGenerations/priorityQueue/apiAccess are enforced
   // server-side (see aiVideo-backend's generations.ts).
   free: {
     label: "Free",
@@ -118,18 +112,12 @@ export const TIER_INFO: Record<
     // when the account first reads its balance, and nothing re-issues it.
     monthlyCredits: 30,
     renewsMonthly: false,
-    // Capped at 480p. The grant reaches no video at all (see
-    // ESTIMATES_NOTE_FREE): the models that can carry Free's watermark start
-    // at 76 credits (Seedance 2.0) and 112 (2.5) at 480p. Raising the grant
-    // to 76 would put one 4s Seedance 2.0 clip in range, if the free tier
-    // should demo video again.
     maxResolution: "480p",
     maxDurationSeconds: 5,
     concurrentGenerations: 1,
     // Unused on this plan: renewsMonthly is false, so the grant is issued
     // with no expiry at all and there is nothing to roll over.
     rolloverMonths: 0,
-    videoWatermark: true,
     commercialLicense: false,
     seats: 1,
     priorityQueue: false,
@@ -138,8 +126,9 @@ export const TIER_INFO: Record<
     features: [
       "30 one-time credits, no monthly refill",
       "~10 images",
+      "or ~2 Grok videos (5s, 480p)",
       "Credits never expire",
-      "Video watermark",
+      "No watermark",
       "Standard queue",
     ],
     featuresNote: ESTIMATES_NOTE_FREE,
@@ -153,7 +142,6 @@ export const TIER_INFO: Record<
     maxDurationSeconds: 20,
     concurrentGenerations: 2,
     rolloverMonths: 0,
-    videoWatermark: false,
     commercialLicense: true,
     seats: 1,
     priorityQueue: false,
@@ -181,7 +169,6 @@ export const TIER_INFO: Record<
     maxDurationSeconds: 30,
     concurrentGenerations: 3,
     rolloverMonths: 1,
-    videoWatermark: false,
     commercialLicense: true,
     seats: 1,
     priorityQueue: true,
@@ -213,7 +200,6 @@ export const TIER_INFO: Record<
     maxDurationSeconds: 30,
     concurrentGenerations: 5,
     rolloverMonths: 1,
-    videoWatermark: false,
     commercialLicense: true,
     // Total seats INCLUDING the owner: "you plus 3 teammates". The backend's
     // seat checks count the owner as one, so this must stay in step with
@@ -441,28 +427,6 @@ export const SEEDANCE_REFERENCE_MEDIA_MAX_SECONDS = 30;
 // documents it as unsupported), and no output_format choice.
 export const SEEDANCE2_MODEL_ID = "bytedance/seedance-2.0";
 
-/**
- * Whether a video model will actually carry the forced watermark a
- * videoWatermark tier owes.
- *
- * Only some provider schemas accept the flag at all, so the old rule -
- * set watermark=true if the payload happens to carry the key - silently
- * produced clean video on every model that does not, making a plan limit
- * depend on which model was picked rather than on the plan. Generation now
- * refuses the combination outright (see lib/generations.ts), which needs a
- * straight answer to whether a model can be watermarked at all.
- *
- * The two Seedance flagships are hand-wired routes rather than registry
- * entries (their watermark field lives in the request schemas in
- * validation.ts), so they are named here; every other model is read off the
- * registry, so a new one answers correctly the day it lands.
- */
-export function videoModelSupportsWatermark(modelId: string): boolean {
-  if (modelId === SEEDANCE_MODEL_ID || modelId === SEEDANCE2_MODEL_ID) return true;
-  const config = CLOUDFLARE_MODELS.find((m) => m.id === modelId);
-  if (!config || config.category === "text-to-image") return false;
-  return config.fields.some((f) => f.key === "watermark");
-}
 export const SEEDANCE2_DURATION_MIN = 4;
 export const SEEDANCE2_DURATION_MAX = 12;
 export const SEEDANCE2_RESOLUTIONS = ["480p", "720p", "1080p", "4k"] as const;
