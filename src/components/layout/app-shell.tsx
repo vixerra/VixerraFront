@@ -293,61 +293,67 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-surface-app lg:gap-3">
-      <aside
-        className={cn(
-          "relative hidden shrink-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface-sidebar shadow-floating transition-[width] duration-300 lg:sticky lg:top-3 lg:my-3 lg:ml-3 lg:flex lg:h-[calc(100vh-1.5rem)]",
-          collapsed ? "lg:w-16" : "lg:w-60",
-        )}
-      >
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="absolute top-1/2 -right-3 z-10 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface-3 text-muted shadow-card transition-colors hover:border-border-strong hover:text-ink-soft"
+      {/* The toggle hangs off this wrapper rather than the aside: the aside
+          needs overflow-hidden for its rounded corners and width animation,
+          which clipped the half of the button straddling the edge. z-20 keeps
+          it above the sticky header (z-10) and page content. */}
+      <div className="relative z-20 hidden shrink-0 lg:sticky lg:top-3 lg:my-3 lg:ml-3 lg:block lg:h-[calc(100vh-1.5rem)]">
+        <aside
+          className={cn(
+            "flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface-sidebar shadow-floating transition-[width] duration-300",
+            collapsed ? "w-16" : "w-60",
+          )}
         >
-          <ChevronLeft className={cn("size-3.5 transition-transform duration-300", collapsed && "rotate-180")} aria-hidden="true" />
-        </button>
-
-        {/* No border under the lockup: the sidebar is a floating card, and a
-            full-width rule right below the logo made the top read as a title
-            bar. px-5 puts the mark in the same column as the nav icon chips
-            (nav px-3 + item pl-2). */}
-        <div className={cn("flex h-16 shrink-0 items-center", collapsed ? "justify-center px-2" : "px-5")}>
-          <Logo iconOnly={collapsed} compact href="/dashboard" />
-        </div>
-        {/* Renders nothing unless this account is in a team. */}
-        <div className={cn("shrink-0", collapsed ? "flex justify-center px-2" : "px-3")}>
-          <WorkspaceSwitcher collapsed={collapsed} />
-        </div>
-        <NavLinks collapsed={collapsed} />
-        <div className="shrink-0 border-t border-line px-3 py-3">
-          {collapsed ? (
-            <Tooltip content="Log out" side="right">
+          {/* No border under the lockup: the sidebar is a floating card, and a
+              full-width rule right below the logo made the top read as a title
+              bar. px-5 puts the mark in the same column as the nav icon chips
+              (nav px-3 + item pl-2). */}
+          <div className={cn("flex h-16 shrink-0 items-center", collapsed ? "justify-center px-2" : "px-5")}>
+            <Logo iconOnly={collapsed} compact href="/dashboard" />
+          </div>
+          {/* Renders nothing unless this account is in a team. */}
+          <div className={cn("shrink-0", collapsed ? "flex justify-center px-2" : "px-3")}>
+            <WorkspaceSwitcher collapsed={collapsed} />
+          </div>
+          <NavLinks collapsed={collapsed} />
+          <div className="shrink-0 border-t border-line px-3 py-3">
+            {collapsed ? (
+              <Tooltip content="Log out" side="right">
+                <button
+                  type="button"
+                  onClick={() => logout.mutate()}
+                  aria-label="Log out"
+                  className="mx-auto flex w-8 items-center justify-center rounded-xl py-2 text-label text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+                >
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                    <LogOut className="size-4 text-muted" aria-hidden="true" />
+                  </span>
+                </button>
+              </Tooltip>
+            ) : (
               <button
                 type="button"
                 onClick={() => logout.mutate()}
-                aria-label="Log out"
-                className="mx-auto flex w-8 items-center justify-center rounded-xl py-2 text-label text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+                className="font-display flex w-full items-center gap-3 rounded-xl py-2 pr-3 pl-2 text-label font-medium text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
               >
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
                   <LogOut className="size-4 text-muted" aria-hidden="true" />
                 </span>
+                Log out
               </button>
-            </Tooltip>
-          ) : (
-            <button
-              type="button"
-              onClick={() => logout.mutate()}
-              className="font-display flex w-full items-center gap-3 rounded-xl py-2 pr-3 pl-2 text-label font-medium text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
-            >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
-                <LogOut className="size-4 text-muted" aria-hidden="true" />
-              </span>
-              Log out
-            </button>
-          )}
-        </div>
-      </aside>
+            )}
+          </div>
+        </aside>
+
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute top-1/2 -right-3 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface-3 text-muted shadow-card transition-colors hover:border-brand/40 hover:bg-brand/15 hover:text-brand"
+        >
+          <ChevronLeft className={cn("size-3.5 transition-transform duration-300", collapsed && "rotate-180")} aria-hidden="true" />
+        </button>
+      </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header
