@@ -117,6 +117,6 @@ export const config = {
   // and a cross-host redirect there is one more thing that can drop it.
   // _next and _vercel are framework-internal and never user-visible routes.
   matcher: [
-    "/((?!api|edge-api|_next|_vercel|media|favicon.ico|icon.svg|apple-icon.png|robots.txt|sitemap.xml).*)",
+    "/((?!api|edge-api|_next|_vercel|media|favicon.ico|icon.svg|icon1.png|apple-icon.png|robots.txt|sitemap.xml).*)",
   ],
 };
