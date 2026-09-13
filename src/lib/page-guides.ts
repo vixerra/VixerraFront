@@ -320,7 +320,7 @@ export const PAGE_GUIDES: PageGuide[] = [
     steps: [
       { icon: "mail", title: "Email and password", detail: "That is the whole form." },
       { icon: "zap", title: "30 credits land", detail: "Waiting on your dashboard." },
-      { icon: "video", title: "Spend them well", detail: "Grok Imagine Video at 3s / 480p is what fits." },
+      { icon: "image", title: "Spend them well", detail: "They cover about 10 images. Video starts at 76 credits." },
     ],
     note: "Free output is watermarked and capped at 480p / 5s. The watermark goes away on Starter.",
     noteTone: "warn",

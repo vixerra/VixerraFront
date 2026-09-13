@@ -169,7 +169,7 @@ export const GUIDE_POSTS: GuidePost[] = [
     title: "Seedance 2.5 vs Veo 3.1: which AI video model should you use?",
     metaTitle: "Seedance 2.5 vs Veo 3.1 — AI video model comparison",
     description:
-      "Seedance 2.5 and Veo 3.1 compared: clip length, resolution, audio, reference control, data retention — and which jobs each one actually wins.",
+      "Seedance 2.5 and Veo 3.1 compared: clip length, resolution, audio, reference control — and which jobs each one actually wins.",
     published: "2026-09-08",
     readingMinutes: 8,
     excerpt:
@@ -212,10 +212,10 @@ export const GUIDE_POSTS: GuidePost[] = [
         type: "p",
         text: "If you need more than one recurring subject, [Seedance 2.0](/generate/seedance-2-0) takes up to four subject references at once and adds a genuine fixed-camera mode — the pick for packshots and turntables where any camera drift ruins the shot.",
       },
-      { type: "h2", text: "Data retention: Veo's advantage" },
+      { type: "h2", text: "Resolution: Veo's advantage" },
       {
         type: "p",
-        text: "Veo 3.1 runs under zero data retention. Nothing you send is kept. For agency and brand work that is often not a preference but a contractual requirement, and it settles the question on its own regardless of what the footage looks like.",
+        text: "Veo 3.1 renders at up to 4K on the Studio plan, where Seedance 2.5 stops at 1080p. For a hero spot that will be shown large, that settles the question on its own regardless of what else the footage needs.",
       },
       { type: "h2", text: "Speed and cost" },
       {
@@ -224,7 +224,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "p",
-        text: "[Veo 3.1 Fast](/generate/veo-3-1-fast) is worth knowing about here: same prompts, same durations, same audio, noticeably lower latency. Iterate on Fast, deliver on standard Veo. For Seedance, the equivalent draft tier is [Seedance 2.0 Mini](/generate/seedance-2-0-mini), the cheapest video model in the catalog.",
+        text: "[Veo 3.1 Fast](/generate/veo-3-1-fast) is worth knowing about here: same prompts, same durations, same audio, noticeably lower latency. Iterate on Fast, deliver on standard Veo. For Seedance, the equivalent draft tier is [Seedance 2.0 Mini](/generate/seedance-2-0-mini), one of the cheapest video models in the catalog.",
       },
       { type: "h2", text: "Which to pick" },
       { type: "h3", text: "Choose Seedance 2.5 when" },
@@ -241,7 +241,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       {
         type: "ul",
         items: [
-          "The footage must not be retained or used for training.",
+          "The spot has to be delivered in 4K.",
           "The scene depends on physical plausibility — liquids, fabric, crowds, vehicles.",
           "You want predictable clip lengths for a timeline you are cutting to.",
           "Ambient sound design matters as much as the picture.",
@@ -529,9 +529,9 @@ export const GUIDE_POSTS: GuidePost[] = [
         type: "ul",
         items: [
           "**Long single takes, consistent subject** — [Seedance 2.5](/generate/seedance-2-5).",
-          "**Physical plausibility, zero data retention** — [Veo 3.1](/generate/veo-3-1), with [Veo 3.1 Fast](/generate/veo-3-1-fast) for iteration.",
+          "**Physical plausibility, up to 4K** — [Veo 3.1](/generate/veo-3-1), with [Veo 3.1 Fast](/generate/veo-3-1-fast) for iteration.",
           "**Locked-off product shots at high resolution** — [Seedance 2.0](/generate/seedance-2-0).",
-          "**Very short cuts for fast-cut edits** — [Grok Imagine Video](/generate/grok-imagine-video).",
+          "**Very short cuts for fast-cut edits** — [Grok Imagine Video 1.5](/generate/grok-imagine-video-1-5).",
           "**Wide cinematic framing with a cheap draft mode** — [Flux 3 Video](/generate/flux-3-video).",
           "**Terse prompts you would rather not write out** — [Hailuo 2.3](/generate/hailuo-2-3), which expands them for you.",
           "**Frame-rate control and reproducible seeds** — [P-Video](/generate/p-video).",

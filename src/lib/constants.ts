@@ -36,15 +36,17 @@ const ESTIMATES_NOTE =
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
 
-// The Free plan can't reach any Seedance model: 2.0's shortest clip costs 76
-// credits and even the Mini's is 32, both past the 30-credit budget. So that
-// card advertises Grok Imagine Video (24 credits for 3s at 480p) and its note
-// says why.
+// The Free plan's grant buys no video. Free watermarks every clip, and at its
+// 480p cap only Seedance 2.0 and 2.5 can add one (videoModelSupportsWatermark;
+// Wan 2.7 can too, but starts at 720p) — their
+// cheapest 480p clips are 76 and 112 credits, past the 30-credit budget. The
+// cheap models it could otherwise afford (Seedance 2.0 Mini, Grok Imagine
+// Video) run on kie.ai, which has no watermark switch for them. So that card
+// advertises images only, and its note says why.
 const ESTIMATES_NOTE_FREE =
-  "Estimates. Every figure above is what these credits buy at each model's " +
-  "cheapest settings — 480p, which is also this plan's ceiling, and the fast " +
-  "image models. Seedance clips start at 32 credits, past the budget here, " +
-  "so Grok Imagine Video is what these credits reach.";
+  "Estimates. Every figure above is what these credits buy with the fast " +
+  "image models. Video on this plan is watermarked and capped at 480p, and " +
+  "its cheapest clip, 4s of Seedance 2.0, needs 76 credits.";
 
 export const TIER_INFO: Record<
   Tier,
@@ -116,12 +118,11 @@ export const TIER_INFO: Record<
     // when the account first reads its balance, and nothing re-issues it.
     monthlyCredits: 30,
     renewsMonthly: false,
-    // Capped at 480p. At 480p the budget reaches one 3s Grok Imagine Video
-    // clip (24 credits; 4s is 32), while every Seedance clip is out of reach:
-    // the Mini's 4s floor is 32 credits, 2.0's is 76 and 2.5's is 112.
-    // Raising this to 40 would put a 5s Grok or Mini 480p clip in range, and
-    // ~140 one 5s Seedance 2.5 480p clip, if the free tier should demo that
-    // family.
+    // Capped at 480p. The grant reaches no video at all (see
+    // ESTIMATES_NOTE_FREE): the models that can carry Free's watermark start
+    // at 76 credits (Seedance 2.0) and 112 (2.5) at 480p. Raising the grant
+    // to 76 would put one 4s Seedance 2.0 clip in range, if the free tier
+    // should demo video again.
     maxResolution: "480p",
     maxDurationSeconds: 5,
     concurrentGenerations: 1,
@@ -137,7 +138,6 @@ export const TIER_INFO: Record<
     features: [
       "30 one-time credits, no monthly refill",
       "~10 images",
-      "~3s Grok Imagine video",
       "Credits never expire",
       "Video watermark",
       "Standard queue",

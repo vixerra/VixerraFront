@@ -130,17 +130,17 @@ export const MODEL_PAGES: ModelPageContent[] = [
   {
     slug: "veo-3-1",
     id: "google/veo-3.1",
-    tagline: "Google's flagship video model, with synchronized audio and zero data retention",
+    tagline: "Google's flagship video model, with synchronized audio at up to 4K",
     intro:
-      "Veo 3.1 is Google's flagship text-to-video model and the strongest option here for scenes with real physical logic — weight, contact, and light behaving the way they should. It generates a synchronized soundtrack with the picture, and runs under zero data retention, so nothing you send is kept to train on.",
+      "Veo 3.1 is Google's flagship text-to-video model and the strongest option here for scenes with real physical logic — weight, contact, and light behaving the way they should. It generates a synchronized soundtrack with the picture, and renders at up to 4K.",
     strengths: [
       "Native audio generated in sync with the picture, including ambience and effects",
-      "Zero data retention on every request",
-      "Consistent 1080p delivery at fixed, predictable clip lengths",
+      "Up to 4K output on the Studio plan",
+      "Fixed, predictable clip lengths of 4, 6 or 8 seconds",
       "Takes an optional reference image as the opening frame",
     ],
     useCases: [
-      "Brand work where the footage cannot be used as training data",
+      "Hero brand spots delivered in 4K",
       "Physically grounded action — liquids, fabric, crowds, vehicles",
       "Finished 1080p social spots that need sound out of the box",
     ],
@@ -201,20 +201,20 @@ export const MODEL_PAGES: ModelPageContent[] = [
     id: "xai/grok-imagine-video",
     tagline: "xAI's video model with native synchronized audio",
     intro:
-      "Grok Imagine Video is xAI's video model, built to generate the soundtrack alongside the picture rather than as a separate step. Its duration range is unusually wide at the short end, which makes it a good fit for the one- and two-second cuts that social edits are actually built from.",
+      "Grok Imagine Video is xAI's video model, built to generate the soundtrack alongside the picture rather than as a separate step. Its duration range runs long, from 6 to 30 seconds in one generation, which gives a social edit a continuous take to cut several moments from.",
     strengths: [
       "Native synchronized audio",
-      "Clips as short as a single second, for cut-driven edits",
+      "Takes from 6 up to 30 seconds, at up to 1080p",
       "Portrait, square and landscape framing from the same prompt",
       "Accepts an optional reference image",
     ],
     useCases: [
-      "Fast-cut social edits assembled from many short generations",
+      "One long take cut down into several social edits",
       "Reaction shots and stingers",
       "Vertical-first content for TikTok, Reels and Shorts",
     ],
     prompts: [
-      "A skateboard landing hard on concrete, one second, close on the wheels, grit spraying",
+      "A skateboard landing hard on concrete, close on the wheels, grit spraying",
       "A vinyl record dropping onto a turntable and the needle settling into the groove",
       "Neon sign flickering on above a rain-slick doorway, vertical framing",
     ],
@@ -227,7 +227,7 @@ export const MODEL_PAGES: ModelPageContent[] = [
       "Grok Imagine Video 1.5 is xAI's next-generation video model, available here in preview. It takes the same inputs as the current release with improvements to motion and detail — worth running side by side with the stable model on the same prompt to see which one your shot prefers.",
     strengths: [
       "Quality improvements over the current Grok Imagine Video release",
-      "Same short-clip range and framing options, so prompts port straight across",
+      "Clips as short as a single second, a length the stable release does not go down to",
       "Native synchronized audio",
       "Optional reference image",
     ],

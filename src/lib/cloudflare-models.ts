@@ -85,6 +85,14 @@ export type CloudflareModelConfig = {
   /** The model string kie.ai expects in createTask, e.g.
    *  "kling-2.6/text-to-video". Required when runtime is "kie". */
   kieModel?: string;
+  /** The kie.ai model to run instead when the request carries an image, for
+   *  a model kie.ai splits into separate text- and image-to-video tasks
+   *  (Grok Imagine Video). Absent means kieModel takes both. */
+  kieImageModel?: string;
+  /** Which kie.ai API carries the model. Absent means the market
+   *  createTask/recordInfo pair; "veo" is Veo 3.1's own /api/v1/veo
+   *  generate/record-info pair (see lib/kie-ai.ts). */
+  kieApi?: "veo";
   label: string;
   provider: string;
   description: string;
@@ -92,10 +100,10 @@ export type CloudflareModelConfig = {
   promptRequired: boolean;
   image: "none" | "optional" | "required";
   imageCfParam?: string;
-  /** grok wants `{ url }` (its schema calls the field `image.url`), veo-3.1
-   *  wants a raw base64-encoded image (fetched and re-encoded server-side,
-   *  see generation-runner.ts), nano-banana-pro demands an array in
-   *  `image_input`, and most others want a bare URL string. */
+  /** Some models want `{ url }`, some a raw base64-encoded image (fetched and
+   *  re-encoded server-side, see generation-runner.ts), nano-banana-pro
+   *  demands an array in `image_input`, and most others want a bare URL
+   *  string. */
   imageParamShape?: "string" | "urlObject" | "base64" | "urlArray";
   /** Cloudflare param for a closing-frame reference image, for the models
    *  that accept one. runCloudflareJob already resolves the stored
@@ -408,28 +416,33 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
   },
 
   // ---------- text-to-video (no required image) ----------
-  // Verified enum: resolution is "480p"|"720p" only — the 1080p option this
-  // entry used to offer is not accepted by the model.
+  // On kie.ai since 2026-09-13 (bytedance/seedance-2-mini, fields from
+  // docs.kie.ai/market/bytedance/seedance-2-mini): Cloudflare billed it at
+  // about twice kie's rate. The move cost three things Cloudflare's schema
+  // had and kie's doesn't — camera_fixed, seed and, the one that matters,
+  // watermark. Without a watermark field videoModelSupportsWatermark says no,
+  // so a watermarked plan (Free) can no longer run it; that was accepted, and
+  // the Free card stopped advertising video. In exchange: 4-15s (was 4-12)
+  // and an "adaptive" aspect ratio, but no 9:21.
   {
     id: "bytedance/seedance-2.0-mini",
+    runtime: "kie",
+    kieModel: "bytedance/seedance-2-mini",
     label: "Seedance 2.0 Mini",
     provider: "ByteDance",
-    description: "Compact & cost-efficient",
+    description: "Runs on kie.ai — compact & cost-efficient, 4 to 15s",
     category: "text-to-video",
     promptRequired: true,
     image: "optional",
-    imageCfParam: "image",
+    imageCfParam: "first_frame_url",
+    lastFrameCfParam: "last_frame_url",
     fields: [
-      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 4, max: 12, helperText: "seconds" },
+      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 4, max: 15, helperText: "seconds" },
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["480p", "720p"], defaultValue: "720p" },
-      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "9:21"], defaultValue: "16:9" },
-      { key: "cameraFixed", cfParam: "camera_fixed", label: "Fix camera position", type: "switch", defaultValue: false },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "adaptive"], defaultValue: "16:9" },
       { key: "generateAudio", cfParam: "generate_audio", label: "Generate audio", type: "switch", defaultValue: true },
-      { key: "watermark", cfParam: "watermark", label: "Watermark", type: "switch", defaultValue: false },
-      { key: "useVirtualAvatar", cfParam: "use_virtual_avatar", label: "Virtual avatar mode", type: "switch", defaultValue: true },
-      { key: "seed", cfParam: "seed", label: "Seed", type: "number" },
     ],
-    outputPath: ["video"],
+    outputPath: [],
     outputKind: "url",
   },
   // Discriminated union on `mode`: "t2v" (prompt) vs "i2v" (keyframes).
@@ -464,86 +477,127 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     outputPath: ["video"],
     outputKind: "url",
   },
-  // The operation discriminator is `_operation` (leading underscore), not
-  // `operation` — the old spelling was rejected as an unsupported field.
+  // On kie.ai since 2026-09-13 (fields from docs.kie.ai/market/grok-imagine/
+  // text-to-video and image-to-video): Cloudflare billed it at 3-4x kie's
+  // rate. kie splits it into two tasks, picked per request by kieImageModel.
+  // Durations are 6-30s there (Cloudflare took 1-15), 1080p is new, and 4:3 /
+  // 3:4 are gone. `mode` is pinned to "normal": "spicy" is kie's explicit
+  // setting and is refused for uploaded images anyway. Duration goes out as
+  // a number, as kie's image-to-video README (kie.ai model page, 2026-09-13)
+  // types it and sends it. nsfw_checker is pinned off, by choice: kie's
+  // content filter is not wanted here (2026-09-13), and this model's README
+  // lists true as the default, so leaving it unset could switch it on.
   {
     id: "xai/grok-imagine-video",
+    runtime: "kie",
+    kieModel: "grok-imagine/text-to-video",
+    kieImageModel: "grok-imagine/image-to-video",
     label: "Grok Imagine Video",
     provider: "xAI",
-    description: "Native synchronized audio",
+    description: "Runs on kie.ai — native synchronized audio, 6 to 30s up to 1080p",
     category: "text-to-video",
     promptRequired: true,
     image: "optional",
-    imageCfParam: "image",
-    imageParamShape: "urlObject",
+    imageCfParam: "image_urls",
+    imageParamShape: "urlArray",
+    staticParams: { mode: "normal", nsfw_checker: false },
     fields: [
-      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 1, max: 15, helperText: "seconds" },
-      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3"], defaultValue: "16:9" },
-      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["480p", "720p"], defaultValue: "720p" },
+      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 6, min: 6, max: 30, helperText: "seconds" },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1", "3:2", "2:3"], defaultValue: "16:9" },
+      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["480p", "720p", "1080p"], defaultValue: "720p" },
     ],
-    staticParams: { _operation: "generate" },
-    outputUploadTarget: { cfParam: "output", urlKey: "upload_url", contentType: "video/mp4" },
-    outputPath: ["video"],
+    outputPath: [],
     outputKind: "url",
   },
+  // On kie.ai since 2026-09-13 (grok-imagine-video-1-5-preview, fields from
+  // docs.kie.ai/market/grok-imagine/1-5-preview): Cloudflare billed it at
+  // ~6.5x kie's rate. One task takes text or an image. kie also accepts
+  // 1080p, but lists no price for it on this model, so it isn't offered;
+  // "auto" is new and 4:3 / 3:4 are gone. nsfw_checker is pinned off for the
+  // same reason as the stable model above.
   {
     id: "xai/grok-imagine-video-1.5-preview",
+    runtime: "kie",
+    kieModel: "grok-imagine-video-1-5-preview",
     label: "Grok Imagine Video 1.5 Preview",
     provider: "xAI",
-    description: "Next-gen quality improvements",
+    description: "Runs on kie.ai — next-gen quality improvements",
     category: "text-to-video",
     promptRequired: true,
     image: "optional",
-    imageCfParam: "image",
-    imageParamShape: "urlObject",
+    imageCfParam: "image_urls",
+    imageParamShape: "urlArray",
+    staticParams: { nsfw_checker: false },
     fields: [
       { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 1, max: 15, helperText: "seconds" },
-      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3"], defaultValue: "16:9" },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1", "3:2", "2:3", "auto"], defaultValue: "16:9" },
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["480p", "720p"], defaultValue: "720p" },
     ],
-    staticParams: { _operation: "generate" },
-    outputUploadTarget: { cfParam: "output", urlKey: "upload_url", contentType: "video/mp4" },
-    outputPath: ["video"],
+    outputPath: [],
     outputKind: "url",
   },
-  // Verified as already correct: prompt, image_input, duration ("4s"/"6s"/
-  // "8s"), aspect_ratio, resolution, generate_audio.
+  // Both Veo 3.1 models on kie.ai since 2026-09-13: Cloudflare billed them
+  // at ~2.5-3x kie's per-clip price. They run on kie's own /api/v1/veo pair
+  // (kieApi: "veo"), whose fields come from docs.kie.ai/old-model/veo3-api/
+  // generate-veo-3-video — see lib/kie-ai.ts for why that page and not the
+  // market one. What changed from Cloudflare:
+  //   - no audio switch: kie ships every Veo clip with its soundtrack;
+  //   - 4K is new, 1:1 is gone ("auto" crops to 16:9 or 9:16 from the image);
+  //   - duration keeps its "4s"/"6s"/"8s" spelling in our params (old rows and
+  //     durationSecondsOf read it) and goes out as the integer kie wants;
+  //   - the image goes as a URL in imageUrls instead of base64. kie reads a
+  //     second entry there as the last frame, which isn't wired up;
+  //   - the ratio goes as `aspectRatio`. The doc says aspect_ratio, but kie's
+  //     own playground (kie.ai/veo-3-1, read 2026-09-13) sends aspectRatio,
+  //     camelCase like every other field on this endpoint.
   {
     id: "google/veo-3.1",
+    runtime: "kie",
+    kieApi: "veo",
+    kieModel: "veo3",
     label: "Veo 3.1",
     provider: "Google",
-    description: "Google's flagship video model, native audio & zero data retention",
+    description: "Runs on kie.ai — Google's flagship video model with native audio, up to 4K",
     category: "text-to-video",
     promptRequired: true,
     image: "optional",
-    imageCfParam: "image_input",
-    imageParamShape: "base64",
+    imageCfParam: "imageUrls",
+    imageParamShape: "urlArray",
+    // Optional per the docs (kie infers it from imageUrls), but the playground
+    // always sends it, so this does too.
+    noImageStaticParams: { generationType: "TEXT_2_VIDEO" },
+    imageStaticParams: { generationType: "FIRST_AND_LAST_FRAMES_2_VIDEO" },
     fields: [
-      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["4s", "6s", "8s"], defaultValue: "6s" },
-      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p"], defaultValue: "720p" },
-      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1"], defaultValue: "16:9" },
-      { key: "generateAudio", cfParam: "generate_audio", label: "Generate audio", type: "switch", defaultValue: true },
+      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["4s", "6s", "8s"], defaultValue: "6s", cfValueMap: { "4s": 4, "6s": 6, "8s": 8 } },
+      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p", "4k"], defaultValue: "720p" },
+      { key: "aspectRatio", cfParam: "aspectRatio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "auto"], defaultValue: "16:9", cfValueMap: { auto: "Auto" } },
     ],
-    outputPath: ["video"],
+    outputPath: [],
     outputKind: "url",
   },
   {
     id: "google/veo-3.1-fast",
+    runtime: "kie",
+    kieApi: "veo",
+    kieModel: "veo3_fast",
     label: "Veo 3.1 Fast",
     provider: "Google",
-    description: "Lower-latency Veo variant, same quality & native audio",
+    description: "Runs on kie.ai — lower-latency Veo variant with native audio, up to 4K",
     category: "text-to-video",
     promptRequired: true,
     image: "optional",
-    imageCfParam: "image_input",
-    imageParamShape: "base64",
+    imageCfParam: "imageUrls",
+    imageParamShape: "urlArray",
+    // Optional per the docs (kie infers it from imageUrls), but the playground
+    // always sends it, so this does too.
+    noImageStaticParams: { generationType: "TEXT_2_VIDEO" },
+    imageStaticParams: { generationType: "FIRST_AND_LAST_FRAMES_2_VIDEO" },
     fields: [
-      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["4s", "6s", "8s"], defaultValue: "6s" },
-      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p"], defaultValue: "720p" },
-      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1"], defaultValue: "16:9" },
-      { key: "generateAudio", cfParam: "generate_audio", label: "Generate audio", type: "switch", defaultValue: true },
+      { key: "duration", cfParam: "duration", label: "Duration", type: "select", options: ["4s", "6s", "8s"], defaultValue: "6s", cfValueMap: { "4s": 4, "6s": 6, "8s": 8 } },
+      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p", "4k"], defaultValue: "720p" },
+      { key: "aspectRatio", cfParam: "aspectRatio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "auto"], defaultValue: "16:9", cfValueMap: { auto: "Auto" } },
     ],
-    outputPath: ["video"],
+    outputPath: [],
     outputKind: "url",
   },
 
