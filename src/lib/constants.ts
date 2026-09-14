@@ -291,7 +291,57 @@ const DYNAMIC_IMAGE_ENTRIES = CLOUDFLARE_MODELS.filter((m) => m.category === "te
   }),
 );
 
-export const VIDEO_MODELS = [
+// Picker order, most used first. The top of each list is what users actually
+// ran (Generation counts per model, 2026-09-14); the rest follows by how
+// in-demand the model is. A model not listed here keeps its registry order
+// after every listed one. The picker groups by provider in first-appearance
+// order, so this also decides which provider opens the list.
+export const MODEL_POPULARITY: readonly string[] = [
+  // video
+  "bytedance/seedance-2.5",
+  "bytedance/seedance-2.0-mini",
+  "kling/2.6",
+  "google/veo-3.1",
+  "kling/3.0",
+  "bytedance/seedance-2.0",
+  "google/veo-3.1-fast",
+  "xai/grok-imagine-video",
+  "kling/3.0-turbo",
+  "kling/2.6-image",
+  "minimax/hailuo-2.3",
+  "alibaba/wan-2.7-i2v",
+  "kling/3.0-omni",
+  "kling/2.1-pro",
+  "xai/grok-imagine-video-1.5-preview",
+  "vidu/q3-pro",
+  "vidu/q3-turbo",
+  "black-forest-labs/flux-3-video",
+  "alibaba/hh1.1-i2v",
+  "pruna/p-video",
+  // image
+  "google/nano-banana-2-lite",
+  "google/nano-banana-pro",
+  "bytedance/seedream-4.5",
+  "@cf/leonardo/lucid-origin",
+  "recraft/recraftv4-1",
+  "bytedance/seedream-5-pro",
+  "openai/gpt-image-2",
+  "xai/grok-imagine-image",
+  "bytedance/seedream-5-lite",
+  "xai/grok-imagine-image-quality",
+  "recraft/recraftv4-1-pro",
+  "recraft/recraftv4-1-vector",
+];
+
+export function byPopularity<T extends { id: string }>(models: readonly T[]): T[] {
+  const rank = (id: string) => {
+    const i = MODEL_POPULARITY.indexOf(id);
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+  };
+  return [...models].sort((a, b) => rank(a.id) - rank(b.id));
+}
+
+export const VIDEO_MODELS = byPopularity([
   {
     id: "bytedance/seedance-2.5",
     label: "Seedance 2.5",
@@ -305,10 +355,10 @@ export const VIDEO_MODELS = [
     description: "Up to 4K, fixed camera & native audio",
   },
   ...DYNAMIC_VIDEO_ENTRIES,
-] as const;
+] as const);
 export type VideoModelId = (typeof VIDEO_MODELS)[number]["id"];
 
-export const IMAGE_MODELS = [...DYNAMIC_IMAGE_ENTRIES] as const;
+export const IMAGE_MODELS = byPopularity(DYNAMIC_IMAGE_ENTRIES);
 export type ImageModelId = (typeof IMAGE_MODELS)[number]["id"];
 
 export const VIDEO_DURATIONS = [3, 5, 10, 15, 20] as const;

@@ -23,7 +23,7 @@ import {
   type MarketingKind,
   type MarketingStyle,
 } from "@/lib/marketing-styles";
-import type { TierInfo } from "@/lib/constants";
+import { byPopularity, type TierInfo } from "@/lib/constants";
 import {
   bestAllowedDuration,
   bestAllowedResolution,
@@ -34,16 +34,16 @@ import {
   upgradeHint,
 } from "@/lib/tier-limits";
 
-export const STUDIO_IMAGE_MODELS = CLOUDFLARE_MODELS.filter(
-  (m) => m.category === "text-to-image" && m.image !== "none",
+export const STUDIO_IMAGE_MODELS = byPopularity(
+  CLOUDFLARE_MODELS.filter((m) => m.category === "text-to-image" && m.image !== "none"),
 );
 
 // text-to-video only. The two image-to-video entries (Alibaba's pair) demand
 // an image, which would make the studio unusable before anything is uploaded,
 // and the bespoke Seedance 2.5/2.0 forms post to their own endpoints with
 // their own schemas — this composer speaks the generic registry payload only.
-export const STUDIO_VIDEO_MODELS = CLOUDFLARE_MODELS.filter(
-  (m) => m.category === "text-to-video" && m.image !== "none",
+export const STUDIO_VIDEO_MODELS = byPopularity(
+  CLOUDFLARE_MODELS.filter((m) => m.category === "text-to-video" && m.image !== "none"),
 );
 
 export function studioModels(kind: MarketingKind): CloudflareModelConfig[] {

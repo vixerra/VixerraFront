@@ -283,7 +283,6 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     promptRequired: true,
     image: "none",
     fields: [
-      { key: "n", cfParam: "n", label: "Number of images", type: "number", defaultValue: 1, min: 1, max: 4 },
       { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["1:1", "3:4", "4:3", "9:16", "16:9", "2:3", "3:2", "9:19.5", "19.5:9", "9:20", "20:9", "1:2", "2:1", "auto"], defaultValue: "16:9" },
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["1k", "2k"], defaultValue: "1k" },
     ],
@@ -308,10 +307,10 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
   // fast variant would change what that model costs us while it stays in the
   // cheap image bucket in credit-estimate.ts.
   //
-  // The probe also reports `n` accepts up to 10, not 4 — but see the note on
-  // seedream-4.5 below: this pipeline persists exactly one result URL, so any
-  // n > 1 bills for images that are then dropped. Left at its existing bounds
-  // rather than widened.
+  // The probe also reports an `n` (1-10 images per call). Neither xAI model
+  // exposes it, so the provider's default of one image is what runs: this
+  // pipeline persists exactly one result URL (see the note on seedream-4.5
+  // below), so any n > 1 would bill for images that are then dropped.
   //
   // Its schema names the image field `image.url`, i.e. a nested { url }
   // object — a bare string 400s.
@@ -326,7 +325,6 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     imageCfParam: "image",
     imageParamShape: "urlObject",
     fields: [
-      { key: "n", cfParam: "n", label: "Number of images", type: "number", defaultValue: 1, min: 1, max: 4 },
       { key: "quality", cfParam: "quality", label: "Quality", type: "select", options: ["low", "medium", "high"], defaultValue: "high" },
       { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["1:1", "3:4", "4:3", "9:16", "16:9", "2:3", "3:2", "9:19.5", "19.5:9", "9:20", "20:9", "1:2", "2:1", "auto"], defaultValue: "16:9" },
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["1k", "2k"], defaultValue: "2k" },
