@@ -8,8 +8,8 @@ import { CLOUDFLARE_MODELS } from "@/lib/cloudflare-models";
 // generation costs ~$2.31").
 //
 // It is ALSO the base credit-estimate.ts prices generations from: a credit
-// may buy CREDIT_VALUE_USD × (1 - TARGET_GROSS_MARGIN) = $0.005 of provider
-// compute on video, or $0.0045 on images (they carry a steeper 55% margin).
+// may buy CREDIT_VALUE_USD × (1 - TARGET_GROSS_MARGIN) = $0.004 of provider
+// compute on video, or $0.0035 on images (they carry a steeper 65% margin).
 // The margin therefore rides on every generation. Until 2026-08-30 it
 // worked the other way round — generations were priced at cost (1 credit =
 // $0.01 of compute) and the margin came from tiers granting fewer credits
@@ -54,7 +54,7 @@ export const TIER_INFO: Record<
     /**
      * Whether monthlyCredits is granted again every calendar month.
      *
-     * Free is a one-time welcome grant, not an allowance: 30 credits when
+     * Free is a one-time welcome grant, not an allowance: 20 credits when
      * the account is created, never refilled. rolloverMonths is not
      * consulted at all when this is false — credits that never come back
      * must not be taken away either, so the grant simply never expires.
@@ -92,25 +92,23 @@ export const TIER_INFO: Record<
   // Credits recalibrated 2026-08-30: every plan sells credits at a flat
   // CREDIT_VALUE_USD ($0.01) — $9.99 → 1,000, $24 → 2,500, $49 → 5,000 — and
   // the margin now comes from generation pricing instead (credit-estimate.ts
-  // bills video at a 50% gross margin over real provider cost, images at
-  // 55%).
-  // Spending a plan's credits in full on video therefore costs us half its
-  // price: ~50% gross, ~39-40% net of the ~2.9%+$0.30 Stripe fee and the ~5%
-  // storage/support/hosting overhead — still clearing the 40% net floor the
-  // v2 pricing was built around, but with no headroom left, so a further
-  // credit increase has to be paid for by raising prices or the margin in
-  // credit-estimate.ts. That is the video-only worst case: images bill at a
-  // 55% gross margin (~44-46% net), so an image-heavy user is the
-  // comfortable one. maxResolution/maxDurationSeconds/
+  // bills video at a 60% gross margin over real provider cost, images at
+  // 65% — 50% and 55% until 2026-09-14).
+  // Spending a plan's credits in full on video therefore costs us 40% of its
+  // price: ~60% gross, ~49-51% net of the ~2.9%+$0.30 Stripe fee and the ~5%
+  // storage/support/hosting overhead — about ten points above the 40% net
+  // floor the v2 pricing was built around. That is the video-only worst
+  // case: images bill at a 65% gross margin (~54-56% net), so an image-heavy
+  // user is the comfortable one. maxResolution/maxDurationSeconds/
   // concurrentGenerations/priorityQueue/apiAccess are enforced
   // server-side (see aiVideo-backend's generations.ts).
   free: {
     label: "Free",
     priceMonthly: 0,
-    // 30 since 2026-09-13 (was 50, then briefly 20 the same day). Existing
+    // 20 since 2026-09-14 (was 50, then 20 and 30 on 2026-09-13). Existing
     // accounts keep the grant they were issued: it is a one-time row, written
     // when the account first reads its balance, and nothing re-issues it.
-    monthlyCredits: 30,
+    monthlyCredits: 20,
     renewsMonthly: false,
     maxResolution: "480p",
     maxDurationSeconds: 5,
@@ -124,9 +122,9 @@ export const TIER_INFO: Record<
     creatorSuite: false,
     apiAccess: false,
     features: [
-      "30 one-time credits, no monthly refill",
-      "~10 images",
-      "or ~2 Grok videos (5s, 480p)",
+      "20 one-time credits, no monthly refill",
+      "~3 images",
+      "or 1 Grok video (5s, 480p)",
       "Credits never expire",
       "No watermark",
       "Standard queue",
@@ -150,8 +148,8 @@ export const TIER_INFO: Record<
     features: [
       "1,000 credits / month",
       "~333 images",
-      "~52s Seedance 2.0 video",
-      "~35s Seedance 2.5 video",
+      "~42s Seedance 2.0 video",
+      "~28s Seedance 2.5 video",
       "Add credits as needed",
       "Up to 1080p",
       "No watermark",
@@ -177,8 +175,8 @@ export const TIER_INFO: Record<
     features: [
       "2,500 credits / month",
       "~833 images",
-      "~131s Seedance 2.0 video",
-      "~89s Seedance 2.5 video",
+      "~105s Seedance 2.0 video",
+      "~71s Seedance 2.5 video",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
       "Publish to TikTok, Instagram, YouTube & Facebook",
@@ -211,9 +209,9 @@ export const TIER_INFO: Record<
     features: [
       "5,000 credits / month",
       "~1,666 images",
-      "~263s Seedance 2.0 video",
-      "~178s Seedance 2.5 video",
-      "~24s Seedance 2.0 video (4K, exclusive)",
+      "~210s Seedance 2.0 video",
+      "~142s Seedance 2.5 video",
+      "~19s Seedance 2.0 video (4K, exclusive)",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
       "Publish to TikTok, Instagram, YouTube & Facebook",
@@ -233,8 +231,8 @@ export type TierInfo = (typeof TIER_INFO)[Tier];
 // pay 11 months for 12) — payments are simulated in this build, so this
 // isn't wired to any real billing cycle. Kept intentionally more modest than
 // a typical 17-20% annual discount: an annual discount cuts the price but
-// not the credits, so it comes straight out of margin — at ~50% gross, a
-// 20% discount would leave well under 30% net.
+// not the credits, so it comes straight out of margin — at ~60% gross, a
+// 20% discount would bring it down to the 40% net floor.
 export const ANNUAL_PRICE_MONTHLY: Partial<Record<Tier, number>> = {
   starter: 9.16,
   creator: 22,

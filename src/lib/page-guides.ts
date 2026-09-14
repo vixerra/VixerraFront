@@ -82,7 +82,7 @@ export const PAGE_GUIDES: PageGuide[] = [
       { icon: "activity", title: "Read the 30-day chart", detail: "It shows where your credits actually went." },
       { icon: "play", title: "Reopen recent work", detail: "Every generation keeps its prompt and settings." },
     ],
-    note: "Per 1,000 credits: about 333 images, 52s of Seedance 2.0, or 35s of Seedance 2.5.",
+    note: "Per 1,000 credits: about 333 images, 42s of Seedance 2.0, or 28s of Seedance 2.5.",
   },
   {
     path: "/generate",
@@ -215,7 +215,7 @@ export const PAGE_GUIDES: PageGuide[] = [
     art: "share",
     steps: [
       { icon: "play", title: "Watch and browse", detail: "Read-only, and no sign-in needed." },
-      { icon: "sparkles", title: "Make your own", detail: "A free account opens with 30 credits." },
+      { icon: "sparkles", title: "Make your own", detail: "A free account opens with 20 credits." },
     ],
   },
   {
@@ -314,13 +314,13 @@ export const PAGE_GUIDES: PageGuide[] = [
   {
     path: "/signup",
     title: "Create an account",
-    what: "Free, with 30 credits",
+    what: "Free, with 20 credits",
     plan: "any",
     art: "auth",
     steps: [
       { icon: "mail", title: "Email and password", detail: "That is the whole form." },
-      { icon: "zap", title: "30 credits land", detail: "Waiting on your dashboard." },
-      { icon: "image", title: "Spend them well", detail: "About 10 images, or 2 short Grok videos." },
+      { icon: "zap", title: "20 credits land", detail: "Waiting on your dashboard." },
+      { icon: "image", title: "Spend them well", detail: "About 3 images, or 1 short Grok video." },
     ],
     note: "Every model is open, with no watermark. Free video is capped at 480p / 5s; Starter goes to 1080p.",
     noteTone: "warn",
@@ -372,7 +372,7 @@ export const PAGE_GUIDES: PageGuide[] = [
     steps: [
       { icon: "sparkles", title: "Try the hero demo", detail: "See the flow before signing up for anything." },
       { icon: "video", title: "Follow a try-it link", detail: "It opens the composer with that model selected." },
-      { icon: "zap", title: "Start free", detail: "30 credits, no card." },
+      { icon: "zap", title: "Start free", detail: "20 credits, no card." },
     ],
   },
   {

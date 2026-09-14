@@ -94,7 +94,7 @@ const content: GeneratorLandingContent = {
     {
       question: "Is the AI video generator free?",
       answer: freeVideo
-        ? `Yes. A free account comes with ${free.monthlyCredits} credits and no credit card — enough for ${freeVideo.clips} clips with ${freeVideo.label} (${freeVideo.credits} credits each, ${freeVideo.seconds}s at ${freeVideo.resolution}, no watermark). Every model is open on every plan; the credits are the only limit. For longer, sharper video and a commercial licence, ${starter.label} is $${starter.priceMonthly}/month with ${starter.monthlyCredits.toLocaleString("en-US")} credits.`
+        ? `Yes. A free account comes with ${free.monthlyCredits} credits and no credit card — enough for ${freeVideo.clips === 1 ? "a clip" : `${freeVideo.clips} clips`} with ${freeVideo.label} (${freeVideo.credits} credits${freeVideo.clips === 1 ? "" : " each"}, ${freeVideo.seconds}s at ${freeVideo.resolution}, no watermark). Every model is open on every plan; the credits are the only limit. For longer, sharper video and a commercial licence, ${starter.label} is $${starter.priceMonthly}/month with ${starter.monthlyCredits.toLocaleString("en-US")} credits.`
         : `Signing up is free and comes with ${free.monthlyCredits} credits and no credit card, but those credits are sized for trying the image models and don't cover a video clip. Video starts on the ${starter.label} plan at $${starter.priceMonthly}/month, with ${starter.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence.`,
     },
     ...(audioModels.length > 0

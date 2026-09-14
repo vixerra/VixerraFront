@@ -21,13 +21,13 @@ import {
 // A credit SELLS for CREDIT_VALUE_USD ($0.01 — see constants.ts, where
 // every plan and pack is priced at that rate). TARGET_GROSS_MARGIN is the
 // cut of that we keep, so a credit may only buy COST_USD_PER_CREDIT =
-// $0.005 of provider compute on video. Images use their own, steeper
-// IMAGE_GROSS_MARGIN (55%, so IMAGE_COST_USD_PER_CREDIT = $0.0045):
+// $0.004 of provider compute on video. Images use their own, steeper
+// IMAGE_GROSS_MARGIN (65%, so IMAGE_COST_USD_PER_CREDIT = $0.0035):
 //
 //   credits = ceil(seconds × usdPerSecond / COST_USD_PER_CREDIT)
 //
 // Both margins are measured against the provider's price, before Stripe's
-// fee: after it, ~44-47% survives on video and ~49-52% on images, depending
+// fee: after it, ~54-57% survives on video and ~59-62% on images, depending
 // on which plan or pack the credits were bought through.
 //
 // Before 2026-08-30 credits were sold and spent at par ($0.01 of compute
@@ -36,7 +36,8 @@ import {
 // were repriced to a flat 1000/2500/5000 credits — at par those grant more
 // compute than they cost — so the markup now lives on the generation side,
 // where it scales with actual usage instead of with the grant.
-const TARGET_GROSS_MARGIN = 0.5;
+// 50% until 2026-09-14.
+const TARGET_GROSS_MARGIN = 0.6;
 const COST_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - TARGET_GROSS_MARGIN);
 
 // Images carry a steeper margin than video. A single image is cheap enough in
@@ -44,8 +45,9 @@ const COST_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - TARGET_GROSS_MARGIN);
 // multi-dollar clip, so they are taken here instead of on video where the
 // same percentage would cost a user real money per generation. 65% until
 // 2026-09-12, when image costs moved from two estimated buckets to kie.ai's
-// real per-model table and the margin was set to 55%.
-const IMAGE_GROSS_MARGIN = 0.55;
+// real per-model table and the margin was set to 55%; back to 65% on
+// 2026-09-14, when video went from 50% to 60%.
+const IMAGE_GROSS_MARGIN = 0.65;
 const IMAGE_COST_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - IMAGE_GROSS_MARGIN);
 
 // Always rounds UP. A credit is too coarse to land on a margin exactly, and

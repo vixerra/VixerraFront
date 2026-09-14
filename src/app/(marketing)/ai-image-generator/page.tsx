@@ -20,7 +20,7 @@ const models = generatorModels("image");
 const freeVideo = freeVideoOffer();
 const featured = featuredModelLabels(models, 3);
 const vectorModel = models.find((m) => m.page.slug === "recraft-v4-1-vector");
-// "~10 images" on the Free card — reused rather than restated, so the two
+// "~3 images" on the Free card — reused rather than restated, so the two
 // can't disagree when the grant changes.
 const freeImages = free.features.find((f) => f.endsWith(" images"))?.replace("~", "about ");
 
@@ -98,7 +98,7 @@ const content: GeneratorLandingContent = {
       question: "Can I turn my images into video?",
       answer: `Yes — upload one to the ${SITE_NAME} AI video generator and describe how it should move.${
         freeVideo
-          ? ` Your free credits cover ${freeVideo.clips} short clips with ${freeVideo.label}.`
+          ? ` Your free credits cover ${freeVideo.clips === 1 ? "a short clip" : `${freeVideo.clips} short clips`} with ${freeVideo.label}.`
           : ` Video starts on the ${starter.label} plan.`
       }`,
     },
