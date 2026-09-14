@@ -72,6 +72,11 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-video-preview": -1 },
   },
+  // Facebook Business domain verification (Meta Business Suite → Brand Safety
+  // → Domains). Renders <meta name="facebook-domain-verification" …> in <head>.
+  verification: {
+    other: { "facebook-domain-verification": "mj9jz0e8nix5l4t89hxzuz8sxk00g2" },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
