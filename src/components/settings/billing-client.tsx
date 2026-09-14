@@ -383,8 +383,13 @@ export function BillingClient() {
               Manage billing
               <ExternalLink className="size-3.5 opacity-60" aria-hidden="true" />
             </Button>
+            {/* The portal is configured for card and invoices only (see
+                `npm run stripe:setup` in the backend) — changing or
+                cancelling the plan happens on the cards below, where the
+                backend can record who did it. */}
             <p className="mt-2 text-caption text-muted">
-              Update your card, download invoices, or cancel — handled by Stripe.
+              Update your card or download invoices — handled by Stripe. To change or cancel your
+              plan, use the plans below.
             </p>
           </div>
         )}
