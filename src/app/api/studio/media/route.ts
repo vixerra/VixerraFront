@@ -42,9 +42,21 @@ function isAllowed(target: URL): boolean {
   return false;
 }
 
+/** The filename lands inside a quoted header value, so anything that could
+ *  close the quote or split the header is dropped rather than escaped. */
+function safeFilename(name: string): string {
+  return name.replace(/[^A-Za-z0-9._-]/g, "-").slice(0, 100) || "download";
+}
+
 export async function GET(request: NextRequest) {
   const raw = request.nextUrl.searchParams.get("url");
   if (!raw) return new Response("Missing url", { status: 400 });
+  // `?filename=` flips the response from playable to saveable: the bytes
+  // come back as an attachment under that name. Used by
+  // downloadGenerationResult as the fallback when it has only the
+  // inline-signed playback URL — a same-origin attachment is the one thing
+  // every browser reliably saves rather than opens.
+  const filename = request.nextUrl.searchParams.get("filename");
 
   let target: URL;
   try {
@@ -84,6 +96,9 @@ export async function GET(request: NextRequest) {
   // signature would serve a 403 body from cache long after the real object
   // is still perfectly readable.
   headers.set("Cache-Control", "private, no-store");
+  if (filename) {
+    headers.set("Content-Disposition", `attachment; filename="${safeFilename(filename)}"`);
+  }
 
   return new Response(upstream.body, { status: upstream.status, headers });
 }
