@@ -1,21 +1,59 @@
 "use client";
 
 import { useId } from "react";
+import Image from "next/image";
 import type { MarketingStyle, StyleMotif } from "@/lib/marketing-styles";
 import { cn } from "@/lib/utils";
 
 /**
- * The artwork on a style card.
+ * The artwork on a style card: a rendered sample when the style has one,
+ * otherwise a tile drawn from its palette and motif.
  *
- * Drawn, not photographed: the reference libraries this picker is modelled on
- * show a real sample render per style, and we have none — every sample we
- * could ship would either be someone else's work or a claim ("this is what
- * this style produces") the catalog can't back. An abstract tile built from
- * the style's own palette + motif says "these are different looks" honestly,
- * costs no bytes, and means adding a style stays a one-object edit in
- * marketing-styles.ts.
+ * The drawn tile came first, because the catalog shipped no art and every
+ * sample we could have borrowed would either be someone else's work or a
+ * claim ("this is what this style produces") the catalog couldn't back. The
+ * thumbnails in /public/marketing are neither — each is a generation from
+ * this studio off the prompt recorded in docs/marketing-style-thumbnails.md.
+ * The drawn tile stays for the styles without art (today, all 13 video ones)
+ * and as the fallback behind every image that hasn't loaded yet, so it is a
+ * supported state rather than a stopgap.
  */
 export function StylePreview({
+  style,
+  className,
+}: {
+  style: MarketingStyle;
+  className?: string;
+}) {
+  if (style.thumbnail) {
+    return (
+      // The gradient sits under the image rather than beside it: the card has
+      // no background of its own, so without it a slow tile is a transparent
+      // hole in the grid. Positioning lives here, not on the callers — two of
+      // the three (the header chip, the idle canvas) size their box without
+      // making it a containing block, which `fill` would otherwise escape.
+      <div
+        className={cn("relative h-full w-full overflow-hidden", className)}
+        style={{ background: `linear-gradient(135deg, ${style.palette[0]}, ${style.palette[1]})` }}
+      >
+        <Image
+          src={style.thumbnail}
+          alt={`${style.name} style preview`}
+          fill
+          // Largest on-screen box is the idle canvas at 160px; the grid cards
+          // land near 200. 320 covers both at 2x without asking the optimizer
+          // for a size no tile displays.
+          sizes="320px"
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+
+  return <StyleMotifTile style={style} className={className} />;
+}
+
+function StyleMotifTile({
   style,
   className,
 }: {

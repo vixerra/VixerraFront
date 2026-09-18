@@ -13,10 +13,11 @@
 //      anti-gibberish sentence marketing-prompt.ts appends.
 //   3. `model` + `aspect` — the sensible default pairing for that look, both
 //      still overridable in the composer.
-//   4. `motif` + `palette` — how its card draws itself in the picker. The
-//      catalog ships no image assets: every tile is CSS/SVG generated from
-//      these two fields, so adding a style stays a one-object edit and the
-//      repo gains no binaries.
+//   4. `thumbnail`, or `motif` + `palette` — what its card shows in the
+//      picker. A style with rendered art points at it; one without draws a
+//      CSS/SVG tile from its motif and palette instead, so a new style is
+//      still a one-object edit and ships looking finished before anyone
+//      generates a sample for it.
 
 export type MarketingKind = "image" | "video";
 
@@ -105,8 +106,23 @@ export type MarketingStyle = {
   motif: StyleMotif;
   /** [from, to] of the tile's gradient. Raw hex — these are illustration
    *  colors for the preview art, not app chrome, so they deliberately sit
-   *  outside the theme tokens in globals.css. */
+   *  outside the theme tokens in globals.css.
+   *
+   *  Still required with a `thumbnail` set: it is what the card falls back to
+   *  while the image loads, and what a future style gets before its art
+   *  exists. */
   palette: readonly [string, string];
+  /** A rendered sample under /public, shown instead of the drawn motif.
+   *
+   *  The motif tiles were built because the catalog shipped no art and every
+   *  sample we could have shipped would either be someone else's work or a
+   *  claim the catalog couldn't back. These are neither: each one is a
+   *  generation from this studio, off the prompt recorded for it in
+   *  docs/marketing-style-thumbnails.md, on an unbranded stand-in product.
+   *  The 13 video styles have none yet and keep drawing their motif — the two
+   *  render side by side in the grid, so the drawn tiles stay a supported
+   *  state rather than a stopgap. */
+  thumbnail?: string;
   /** Folded into the prompt on submit. Treatment and composition only.
    *
    *  Written as a photographer's or director's brief rather than as a mood:
@@ -152,6 +168,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["clean", "packshot", "catalog", "white", "hero"],
     motif: "object",
     palette: ["#e9e4dc", "#b8b0a4"],
+    thumbnail: "/marketing/studio-seamless.webp",
     direction:
       "studio packshot on a seamless sweep, a large soft key at 45 degrees with a fill card lifting the shadow side and a top rim separating the product from the background, smooth gradient falloff behind it, a soft contact shadow anchoring it to the surface, 85mm look with the whole product sharp, hero centered with generous even margins and nothing in frame competing with it",
     copy: "none",
@@ -166,6 +183,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["marble", "plinth", "editorial", "luxury", "minimal"],
     motif: "pedestal",
     palette: ["#d8cfc2", "#8d8478"],
+    thumbnail: "/marketing/stone-pedestal.webp",
     direction:
       "editorial still life, the product raised on a stone plinth in a minimal architectural set, hard directional sunlight raking across it, long soft-edged shadows with a warm bounce filling the shade, travertine and plaster texture, warm neutral palette, low three-quarter camera looking slightly up so the product reads monumental, generous air above it",
     copy: "none",
@@ -180,6 +198,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["water", "drink", "splash", "macro", "fresh"],
     motif: "splash",
     palette: ["#7fd4e8", "#1c6f92"],
+    thumbnail: "/marketing/splash-freeze.webp",
     direction:
       "high-speed flash photography, a liquid splash frozen mid-air around the product, crystalline droplets suspended with clean rims, a wet reflective surface below, hard backlight making the liquid glow, ultra-crisp macro detail and deep saturated color, the product itself perfectly still and razor-sharp at the center of the motion",
     copy: "none",
@@ -194,6 +213,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["organic", "clean beauty", "earthy", "botanical", "skincare"],
     motif: "object",
     palette: ["#cfd7c2", "#6f7a5c"],
+    thumbnail: "/marketing/natural-set.webp",
     direction:
       "the product staged on natural materials — raw stone, crumpled linen, fresh foliage — dappled daylight through leaves drawing organic shadow shapes, soft directional window light, a calm earthy palette of sand, clay and sage, shallow depth of field with the label crisp and the props falling off, quiet unstyled realism",
     copy: "none",
@@ -208,6 +228,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["premium", "black", "perfume", "moody", "dramatic"],
     motif: "object",
     palette: ["#3a3a42", "#0c0c10"],
+    thumbnail: "/marketing/dark-luxe.webp",
     direction:
       "low-key studio lighting on a black glossy surface, one hard rim light tracing the silhouette and a soft edge kick on the opposite side, deep falloff into near-black, controlled specular highlights on glass and metal, a mirrored reflection under the product, restrained composition with the hero held small inside a large dark frame",
     copy: "none",
@@ -222,6 +243,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["colorful", "bold", "playful", "duotone", "social"],
     motif: "object",
     palette: ["#ff8f5e", "#c026d3"],
+    thumbnail: "/marketing/gradient-pop.webp",
     direction:
       "bold duotone gradient backdrop, hard colored studio lights throwing crisp overlapping shadow shapes, the product floating weightless in a playful composition, punchy saturated color, glossy highlights, high-key contrast, graphic and confident with plenty of flat color left around the hero",
     copy: "none",
@@ -236,6 +258,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["food", "supplement", "explosion", "energy", "fresh"],
     motif: "splash",
     palette: ["#ffd166", "#e2662b"],
+    thumbnail: "/marketing/ingredient-burst.webp",
     direction:
       "the product at the center of its own ingredients bursting outward in mid-air, motion frozen at high shutter speed with every element crisp and individually readable, a bright even key with a soft top light, clean single-color backdrop, weightless radial arrangement with the hero upright, dominant and unobscured",
     copy: "none",
@@ -250,6 +273,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["overhead", "top down", "styled", "lifestyle", "grid"],
     motif: "grid",
     palette: ["#e7dfd4", "#a99e8c"],
+    thumbnail: "/marketing/flat-lay.webp",
     direction:
       "top-down flat lay on a textured surface, props styled on an invisible grid with even spacing, soft diffuse daylight with consistent shadows all falling the same way, a muted cohesive palette, camera perfectly square-on with no perspective skew, generous negative space left open for copy",
     copy: "none",
@@ -264,6 +288,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["model", "on body", "holding", "scale", "human", "lifestyle"],
     motif: "portrait",
     palette: ["#e8c9b4", "#8c6a55"],
+    thumbnail: "/marketing/in-hand.webp",
     direction:
       "the product held or worn by a person, cropped close on the hands or the point of contact, soft directional daylight with a gentle falloff, the product crisp and the person softly out of focus behind it, natural skin tone and unretouched texture, an unposed candid gesture that shows real scale, the label turned to camera and readable",
     copy: "none",
@@ -278,6 +303,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["range", "variants", "flavors", "collection", "family", "set"],
     motif: "grid",
     palette: ["#dcd8d2", "#7e7a72"],
+    thumbnail: "/marketing/range-lineup.webp",
     direction:
       "the full product range lined up in a single row, evenly spaced and identically lit, matched height and one shared eye level across every unit, a soft studio key with a single consistent shadow direction, plain gradient backdrop, each front label square to camera and equally legible, no unit overlapping another",
     copy: "none",
@@ -297,6 +323,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["poster", "typography", "campaign", "key visual", "instagram"],
     motif: "type",
     palette: ["#bbdc12", "#1d2408"],
+    thumbnail: "/marketing/headline-hero.webp",
     direction:
       "advertising key visual, a large bold headline locked to a clear typographic grid with the product hero beside it, a strong color-blocked background, dramatic single-source light on the product, a deliberate hierarchy of headline then product then one small supporting line, generous negative space around all three, poster-clean",
     copy: "supplied",
@@ -311,6 +338,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["sale", "promo", "discount", "retail", "black friday"],
     motif: "burst",
     palette: ["#ff0052", "#ffd400"],
+    thumbnail: "/marketing/offer-burst.webp",
     direction:
       "promotional retail layout, a bold discount badge over a radial burst behind the product, high-contrast sale colors, the product cut out crisply and floating in front of the burst with a soft drop shadow, loud but tidy, the offer and the product both readable in a one-second glance on a phone",
     copy: "supplied",
@@ -325,6 +353,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["benefits", "annotated", "spec", "tech", "explainer"],
     motif: "split",
     palette: ["#9fb8d8", "#243247"],
+    thumbnail: "/marketing/feature-callouts.webp",
     direction:
       "clean advertising layout with hairline leader lines running from precise points on the product to short feature labels set in one small consistent sans, the product centered on a flat background under even studio light, labels balanced left and right, technical but elegant, plenty of empty space and no line crossing another",
     copy: "supplied",
@@ -339,6 +368,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["comparison", "results", "transformation", "proof"],
     motif: "split",
     palette: ["#8ad2b0", "#22553f"],
+    thumbnail: "/marketing/before-after.webp",
     direction:
       "split-frame comparison divided by a crisp vertical line, identical framing, lens, lighting and background on both halves so the result is the only thing that differs, the change plainly visible, small labels in matching corners, honest documentary treatment with no exaggeration and no grading between the halves",
     copy: "supplied",
@@ -353,6 +383,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["review", "social proof", "quote", "stars", "ugc ad"],
     motif: "portrait",
     palette: ["#f2c3b1", "#8a4b3a"],
+    thumbnail: "/marketing/testimonial-card.webp",
     direction:
       "social-proof ad: a portrait on one side, a short quote card and a row of five filled stars on the other, soft brand-tinted background, flattering natural light on the face with true skin tone, the product visible in frame at a smaller scale, clean card edges and comfortable margins",
     copy: "supplied",
@@ -367,6 +398,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["story", "reels", "tiktok", "vertical", "paid social", "9:16"],
     motif: "type",
     palette: ["#ff7a45", "#2b1054"],
+    thumbnail: "/marketing/story-frame.webp",
     direction:
       "full-bleed vertical ad frame, the product hero filling the upper two thirds, a short punchy headline above it and a clear call-to-action band low in the frame, high-contrast color, the top and bottom eighths kept clear of anything important so platform UI cannot cover it, thumb-stopping at a glance",
     copy: "supplied",
@@ -381,6 +413,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["ooh", "outdoor", "wide", "city", "cinematic"],
     motif: "type",
     palette: ["#5b6cff", "#101430"],
+    thumbnail: "/marketing/billboard.webp",
     direction:
       "out-of-home billboard visual: giant type, a single product hero, extreme simplicity, dusk city light with a cool ambient and one warm practical glow, cinematic wide crop, at most four words of copy, the whole message legible from a hundred metres away",
     copy: "supplied",
@@ -401,6 +434,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["amazon", "shopify", "etsy", "catalog", "main image"],
     motif: "object",
     palette: ["#ffffff", "#c9c9cf"],
+    thumbnail: "/marketing/pure-white.webp",
     direction:
       "e-commerce main listing photo on a pure white RGB 255,255,255 background, even shadowless lighting from both sides, the product fully in frame and filling about 85 percent of it, square-on hero angle, true color and crisp edges with no halo or cut-out fringe, at most a faint contact shadow, no props and no border",
     copy: "none",
@@ -415,6 +449,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["amazon", "a+", "infographic", "benefits", "icons"],
     motif: "grid",
     palette: ["#9ad1ff", "#1b3a5c"],
+    thumbnail: "/marketing/spec-infographic.webp",
     direction:
       "listing infographic: the product centered with three short benefit labels in a clean icon-led grid, flat background, one accent color only, thick type and simple line icons sized to stay readable at thumbnail scale, even spacing and strict alignment",
     copy: "supplied",
@@ -429,6 +464,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["dimensions", "measurements", "diagram", "technical"],
     motif: "split",
     palette: ["#d5d9de", "#5a636e"],
+    thumbnail: "/marketing/scale-diagram.webp",
     direction:
       "dimension diagram: the product straight-on with thin measurement lines, end ticks and short size labels on a neutral background, one consistent line weight, technical-drawing precision, uncluttered, a familiar everyday object beside it for scale",
     copy: "supplied",
@@ -443,6 +479,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["lifestyle", "context", "home", "candid"],
     motif: "portrait",
     palette: ["#e3d3bd", "#7d6549"],
+    thumbnail: "/marketing/in-use.webp",
     direction:
       "lifestyle listing photo showing the product being used in a real home, soft window light with a warm bounce, authentic candid framing, shallow depth of field with the product sharp and the room falling away, a tidy but lived-in set, natural skin tone, no other brand visible anywhere in frame",
     copy: "none",
@@ -457,6 +494,7 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["whats included", "kit", "set", "overhead"],
     motif: "grid",
     palette: ["#dfe3e8", "#8b93a1"],
+    thumbnail: "/marketing/bundle-contents.webp",
     direction:
       "everything-in-the-box layout: every included item laid out top-down on a soft neutral surface, equal spacing and consistent orientation, even shadowless light, the main unit largest and centered with the accessories arranged around it, nothing cropped and nothing overlapping",
     copy: "none",
