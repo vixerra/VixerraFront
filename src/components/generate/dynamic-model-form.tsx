@@ -7,6 +7,7 @@ import { useInvalidateCredits, useUsage } from "@/hooks/use-credits";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  ArrowLeftRight,
   Clock,
   Gauge,
   Maximize,
@@ -31,7 +32,7 @@ import {
   isDraftFromParameters,
 } from "@/lib/credit-estimate";
 import { buildDynamicSchema } from "@/lib/validation";
-import type { CloudflareModelConfig } from "@/lib/cloudflare-models";
+import { referenceImageSlots, type CloudflareModelConfig } from "@/lib/cloudflare-models";
 import { apiFetch } from "@/lib/api-client";
 import {
   isResolutionLocked,
@@ -59,6 +60,7 @@ import {
   PanelDropzone,
   ProviderModelPicker,
   PillSelect,
+  SegmentedTabs,
   FieldRow,
   CreditsSubmitPill,
   type PickerModel,
@@ -95,6 +97,13 @@ function fieldIcon(fieldKey: string, isImageModel: boolean): LucideIcon {
  * separate clear affordance. */
 const STYLE_OPTIONS = ["None", ...IMAGE_STYLE_PRESETS] as const;
 type StyleOption = (typeof STYLE_OPTIONS)[number];
+
+/** The two things the image section collects on a model that refuses to mix
+ * them (referenceImages.exclusiveWithFrames). */
+const IMAGE_MODES = ["frames", "references"] as const;
+type ImageMode = (typeof IMAGE_MODES)[number];
+
+type UploadedReference = { url: string; preview: string };
 
 /** Duration is a *select* on some models rather than the numeric range the
  * slider handles — veo-3.1 spells its options "4s"/"6s"/"8s" and
@@ -162,11 +171,23 @@ export function DynamicModelForm<T extends string>({
   // parameter, because the backend builds parameters strictly from the model
   // registry and no image model here takes a generic style argument.
   const [style, setStyle] = useState<StyleOption>("None");
+  const [endFramePreview, setEndFramePreview] = useState<string | null>(null);
+  const [uploadingEndFrame, setUploadingEndFrame] = useState(false);
+  const [references, setReferences] = useState<UploadedReference[]>([]);
+  const [uploadingReference, setUploadingReference] = useState(false);
+  const [imageMode, setImageMode] = useState<ImageMode>("frames");
 
   const isVideoModel = config.category !== "text-to-image";
   const isImageModel = !isVideoModel;
   const imageRequired = config.image === "required";
   const hasImage = config.image !== "none";
+  // What the image section collects beyond the one upload: a closing frame
+  // (lastFrameCfParam) and a list of references (referenceImages) — beside
+  // the upload, or instead of the frames on a model that refuses to mix them.
+  const takesEndFrame = hasImage && Boolean(config.lastFrameCfParam);
+  const referenceSlots = hasImage ? referenceImageSlots(config) : 0;
+  const referencesExclusive = referenceSlots > 0 && Boolean(config.referenceImages?.exclusiveWithFrames);
+  const showingReferences = referencesExclusive && imageMode === "references";
 
   const defaultValues: Record<string, unknown> = { prompt: initialPrompt };
   for (const field of config.fields) {
@@ -194,6 +215,11 @@ export function DynamicModelForm<T extends string>({
   const duration = values.duration;
   const resolution = values.resolution;
   const image = values.image as string | undefined;
+  const lastFrameImage = values.lastFrameImage as string | undefined;
+  // Grok takes a single image at 1080p, so the reference grid closes there.
+  const blockedAt = config.referenceImages?.unavailableWhen;
+  const referencesBlocked =
+    blockedAt !== undefined && Object.entries(blockedAt).every(([key, value]) => values[key] === value);
 
   // Images used to bill a flat per-model figure, so the Size/Resolution/
   // Quality pill sat directly beside the cost and the number never moved even
@@ -298,23 +324,152 @@ export function DynamicModelForm<T extends string>({
     return undefined;
   }
 
+  /** Shared by every upload slot here. Throws so each caller can undo its
+   *  own optimistic preview. */
+  async function uploadFile(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await apiFetch("/api/upload", { method: "POST", body: formData });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Upload failed.");
+    return json.url as string;
+  }
+
+  function reportUploadFailure(err: unknown) {
+    toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
+  }
+
   async function handleFile(file: File) {
     setUploading(true);
     setPreview(URL.createObjectURL(file));
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await apiFetch("/api/upload", { method: "POST", body: formData });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Upload failed.");
-      setValue("image", json.url, { shouldValidate: true });
+      setValue("image", await uploadFile(file), { shouldValidate: true });
     } catch (err) {
-      toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
+      reportUploadFailure(err);
       setPreview(null);
     } finally {
       setUploading(false);
     }
   }
+
+  async function handleEndFrameFile(file: File) {
+    setUploadingEndFrame(true);
+    setEndFramePreview(URL.createObjectURL(file));
+    try {
+      setValue("lastFrameImage", await uploadFile(file), { shouldValidate: true });
+    } catch (err) {
+      reportUploadFailure(err);
+      setEndFramePreview(null);
+    } finally {
+      setUploadingEndFrame(false);
+    }
+  }
+
+  function setReferenceList(next: UploadedReference[]) {
+    setReferences(next);
+    // Undefined rather than [] once the last one goes, as the Seedance forms
+    // do: absent is what the schema and the provider read as "none".
+    setValue("referenceImages", next.length ? next.map((r) => r.url) : undefined, { shouldValidate: true });
+  }
+
+  async function handleReferenceFile(file: File) {
+    if (references.length >= referenceSlots) return;
+    setUploadingReference(true);
+    try {
+      const url = await uploadFile(file);
+      setReferenceList([...references, { url, preview: URL.createObjectURL(file) }]);
+    } catch (err) {
+      reportUploadFailure(err);
+    } finally {
+      setUploadingReference(false);
+    }
+  }
+
+  function clearEndFrame() {
+    setEndFramePreview(null);
+    setValue("lastFrameImage", undefined, { shouldValidate: true });
+  }
+
+  function clearImage() {
+    // A shared reference list extends the main image, so its first entry
+    // takes that place instead of the whole list being left without one.
+    if (!referencesExclusive && references.length > 0) {
+      const [first, ...rest] = references;
+      setPreview(first.preview);
+      setValue("image", first.url, { shouldValidate: true });
+      setReferenceList(rest);
+      return;
+    }
+    setPreview(null);
+    setValue("image", undefined, { shouldValidate: true });
+    // An end frame without a start frame isn't a valid pairing.
+    clearEndFrame();
+  }
+
+  function handleSwapFrames() {
+    const nextImage = getValues("lastFrameImage");
+    setValue("lastFrameImage", getValues("image"), { shouldValidate: true });
+    setValue("image", nextImage, { shouldValidate: true });
+    const nextPreview = endFramePreview;
+    setEndFramePreview(preview);
+    setPreview(nextPreview);
+  }
+
+  /** Frames and references are exclusive on these models, so leaving a mode
+   *  drops what only that mode could set, as the Seedance 2.0 form does. */
+  function handleImageModeChange(next: ImageMode) {
+    setImageMode(next);
+    if (next === "references") {
+      setPreview(null);
+      setValue("image", undefined, { shouldValidate: true });
+      clearEndFrame();
+    } else {
+      setReferenceList([]);
+    }
+  }
+
+  /** The reference tiles. A filled tile is never clickable (see
+   *  PanelDropzone), so a reference is replaced by removing it and adding
+   *  another, like the Seedance 2.0 character grid. On a shared list the
+   *  upload is image 1, so the tiles count on from 2. */
+  function renderReferenceGrid(disabledHint?: string) {
+    const firstNumber = referencesExclusive ? 1 : 2;
+    return (
+      <>
+        <div className="grid grid-cols-4 gap-1.5">
+          {references.map((reference, index) => (
+            <PanelDropzone
+              key={reference.url}
+              compact
+              className="h-20"
+              label={`Image ${index + firstNumber}`}
+              previewUrl={reference.preview}
+              onFile={() => {}}
+              onRemove={() => setReferenceList(references.filter((_, i) => i !== index))}
+            />
+          ))}
+          {references.length < referenceSlots && (
+            <PanelDropzone
+              compact
+              className="h-20"
+              label="Add"
+              uploading={uploadingReference}
+              onFile={handleReferenceFile}
+              onRemove={() => {}}
+              disabled={Boolean(disabledHint)}
+              disabledHint={disabledHint}
+            />
+          )}
+        </div>
+        <FieldError>{errors.referenceImages?.message as string | undefined}</FieldError>
+      </>
+    );
+  }
+
+  const referenceHint = [
+    `Optional — up to ${referenceSlots} ${referencesExclusive ? "images" : "more images"} of the people, objects or places to keep.`,
+    config.referenceImages?.hint ?? "Refer to them in the prompt.",
+  ].join(" ");
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
@@ -378,25 +533,94 @@ export function DynamicModelForm<T extends string>({
 
         {hasImage && (
           <PanelSection
-            label={isVideoModel ? "Upload an image" : "Reference image"}
+            label={
+              referencesExclusive
+                ? "Images"
+                : takesEndFrame
+                  ? "Frames"
+                  : isVideoModel
+                    ? "Upload an image"
+                    : "Reference image"
+            }
+            action={
+              referencesExclusive ? (
+                <SegmentedTabs
+                  value={imageMode}
+                  options={IMAGE_MODES}
+                  onChange={handleImageModeChange}
+                  renderLabel={(m) => (m === "frames" ? "Frames" : "References")}
+                />
+              ) : undefined
+            }
             hint={
-              imageRequired
-                ? "Required — JPG, PNG or WEBP. This image becomes the first frame."
-                : "Optional — JPG, PNG or WEBP."
+              showingReferences
+                ? referenceHint
+                : takesEndFrame
+                  ? `${imageRequired ? "Required" : "Optional"} — JPG, PNG or WEBP. The clip starts on the first frame; add a last frame to set where it ends.`
+                  : imageRequired
+                    ? "Required — JPG, PNG or WEBP. This image becomes the first frame."
+                    : "Optional — JPG, PNG or WEBP."
             }
           >
-            <PanelDropzone
-              label="Click or drag to upload"
-              sublabel="JPG, PNG or WEBP"
-              previewUrl={preview}
-              uploading={uploading}
-              onFile={handleFile}
-              onRemove={() => {
-                setPreview(null);
-                setValue("image", undefined, { shouldValidate: true });
-              }}
-            />
+            {showingReferences ? (
+              renderReferenceGrid()
+            ) : takesEndFrame ? (
+              <div className="flex items-center gap-1.5">
+                <PanelDropzone
+                  compact
+                  className="flex-1"
+                  label="First frame"
+                  previewUrl={preview}
+                  uploading={uploading}
+                  onFile={handleFile}
+                  onRemove={clearImage}
+                />
+                <button
+                  type="button"
+                  onClick={handleSwapFrames}
+                  disabled={!image || !lastFrameImage}
+                  aria-label="Swap first and last frame"
+                  title="Swap first and last frame"
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full border border-line bg-surface-3 text-muted shadow-raised transition-all duration-200 hover:rotate-180 hover:border-border-strong hover:text-ink-soft disabled:pointer-events-none disabled:opacity-40"
+                >
+                  <ArrowLeftRight className="size-3" aria-hidden="true" />
+                </button>
+                <PanelDropzone
+                  compact
+                  className="flex-1"
+                  label="Last frame"
+                  previewUrl={endFramePreview}
+                  uploading={uploadingEndFrame}
+                  onFile={handleEndFrameFile}
+                  onRemove={clearEndFrame}
+                  disabled={!image}
+                  disabledHint="Add a first frame first."
+                />
+              </div>
+            ) : (
+              <PanelDropzone
+                label="Click or drag to upload"
+                sublabel="JPG, PNG or WEBP"
+                previewUrl={preview}
+                uploading={uploading}
+                onFile={handleFile}
+                onRemove={clearImage}
+              />
+            )}
             <FieldError>{!image ? (errors.image?.message as string | undefined) : undefined}</FieldError>
+            <FieldError>{errors.lastFrameImage?.message as string | undefined}</FieldError>
+          </PanelSection>
+        )}
+
+        {referenceSlots > 0 && !referencesExclusive && (
+          <PanelSection label="More references" hint={referenceHint}>
+            {renderReferenceGrid(
+              !image
+                ? "Add the main image first."
+                : referencesBlocked
+                  ? `Only one image at ${Object.values(blockedAt ?? {}).join(", ")}.`
+                  : undefined,
+            )}
           </PanelSection>
         )}
 
@@ -537,7 +761,7 @@ export function DynamicModelForm<T extends string>({
         <CreditsSubmitPill
           fullWidth
           credits={estimatedCredits}
-          loading={mutation.isPending || busy || uploading}
+          loading={mutation.isPending || busy || uploading || uploadingEndFrame || uploadingReference}
           disabled={imageRequired && !image}
           balance={creditBalance}
           blockedReason={blockedReason}

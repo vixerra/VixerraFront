@@ -28,7 +28,7 @@ import {
   SEEDANCE2_ASPECT_RATIOS,
   SEEDANCE2_REFERENCE_IMAGES_MAX,
 } from "@/lib/constants";
-import type { CloudflareModelConfig } from "@/lib/cloudflare-models";
+import { referenceImageSlots, type CloudflareModelConfig } from "@/lib/cloudflare-models";
 
 const videoModelIds = VIDEO_MODELS.map((m) => m.id) as [string, ...string[]];
 const imageModelIds = IMAGE_MODELS.map((m) => m.id) as [string, ...string[]];
@@ -298,6 +298,17 @@ export function buildDynamicSchema(config: CloudflareModelConfig) {
       config.image === "required"
         ? z.string().min(1, { error: "A reference image is required." })
         : z.string().min(1).optional();
+    // A closing frame and extra references, for the entries that say where
+    // they go on the wire (lastFrameCfParam, referenceImages).
+    if (config.lastFrameCfParam) shape.lastFrameImage = z.string().min(1).optional();
+    const slots = referenceImageSlots(config);
+    if (slots > 0) {
+      const shared = config.referenceImages?.cfParam === config.imageCfParam;
+      shape.referenceImages = z
+        .array(z.string().min(1))
+        .max(slots, { error: shared ? `Up to ${slots} more images.` : `Up to ${slots} reference images.` })
+        .optional();
+    }
   }
 
   for (const field of config.fields) {
@@ -323,6 +334,38 @@ export function buildDynamicSchema(config: CloudflareModelConfig) {
       field.defaultValue !== undefined ? base.default(field.defaultValue as never) : base.optional();
   }
 
-  return z.object(shape);
+  // The pairing rules, refused here so they fail for free at submit rather
+  // than at execution, after billing — as the Seedance schemas do.
+  const refs = config.referenceImages;
+  const blockedAt = refs?.unavailableWhen;
+  const hasReferences = (data: Record<string, unknown>) =>
+    Array.isArray(data.referenceImages) && data.referenceImages.length > 0;
+  return z
+    .object(shape)
+    .refine((data) => !data.lastFrameImage || Boolean(data.image), {
+      error: "Add a start frame before setting an end frame.",
+      path: ["lastFrameImage"],
+    })
+    .refine(
+      (data) =>
+        !hasReferences(data) ||
+        (refs?.exclusiveWithFrames ? !data.image && !data.lastFrameImage : Boolean(data.image)),
+      {
+        error: refs?.exclusiveWithFrames
+          ? "Use reference images or a first/last frame, not both."
+          : "Add the main image before adding more.",
+        path: ["referenceImages"],
+      },
+    )
+    .refine(
+      (data) =>
+        !hasReferences(data) ||
+        !blockedAt ||
+        !Object.entries(blockedAt).every(([key, value]) => data[key] === value),
+      {
+        error: `Only one image is allowed at ${Object.values(blockedAt ?? {}).join(", ")}.`,
+        path: ["referenceImages"],
+      },
+    );
 }
 export type DynamicModelInput = Record<string, unknown>;

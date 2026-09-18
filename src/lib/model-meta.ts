@@ -24,6 +24,9 @@ const RESOLUTION_RANK: Record<string, number> = {
   "480p": 1,
   "540p": 1,
   "720p": 2,
+  // MiniMax's HD tier (Hailuo 2.3, H3 Max). Unranked, it sorted below 480p,
+  // so H3 Max's badge read "480p max".
+  "768p": 2,
   "1024x1024": 2,
   "1080p": 3,
   "2k": 3,

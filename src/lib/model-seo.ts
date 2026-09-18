@@ -266,6 +266,29 @@ export const MODEL_PAGES: ModelPageContent[] = [
     ],
   },
   {
+    slug: "h3-max",
+    id: "minimax/h3-max",
+    tagline: "MiniMax's fast video model, with sound on every clip",
+    intro:
+      "H3 Max is MiniMax's H3 video model, post-trained by fal for fast generation. It renders 5 to 15 seconds at 480p or 768p, generates a soundtrack with every clip, and expands your prompt before rendering — a balanced pass by default, a more careful one in quality mode, or none at all when you want your wording followed exactly.",
+    strengths: [
+      "Built by MiniMax and fal for fast generation, so trying several takes stays quick",
+      "A soundtrack generated with every clip",
+      "Prompt expansion you choose: off, balanced or quality",
+      "Any length from 5 to 15 seconds, one second at a time",
+    ],
+    useCases: [
+      "Quick drafts and variations before committing to a final render",
+      "Social clips in vertical, square or widescreen framing",
+      "Animating a still as the opening frame",
+    ],
+    prompts: [
+      "A street-food cook tossing noodles over a roaring wok, sparks and steam, handheld close-up",
+      "Waves breaking over black volcanic rocks at dawn, slow push-in toward the spray",
+      "A paper lantern drifting up over a crowded night market, the camera tilting up to follow it",
+    ],
+  },
+  {
     slug: "p-video",
     id: "pruna/p-video",
     tagline: "The most tunable video model here — frame rate, length and draft mode",
@@ -774,7 +797,9 @@ export function modelSpecs(id: string): ModelSpec[] {
   if (fps) specs.push({ label: "Frame rate", value: `${fps} fps` });
 
   if (config.category !== "text-to-image") {
-    const audio = config.fields.some((f) => ["generateAudio", "audio", "saveAudio"].includes(f.key));
+    const audio =
+      config.alwaysHasAudio ||
+      config.fields.some((f) => ["generateAudio", "audio", "saveAudio"].includes(f.key));
     specs.push({ label: "Audio", value: audio ? "Generated with the clip" : "Not supported" });
   }
 
@@ -790,6 +815,13 @@ export function modelSpecs(id: string): ModelSpec[] {
   }
 
   specs.push({ label: "Reference image", value: IMAGE_SUPPORT_LABEL[config.image] });
+
+  if (config.referenceImages) {
+    specs.push({ label: "Reference images", value: `Up to ${config.referenceImages.max}` });
+  }
+  if (config.lastFrameCfParam && config.image !== "none") {
+    specs.push({ label: "Last frame", value: "Supported" });
+  }
 
   if (config.fields.some((f) => f.key === "seed")) {
     specs.push({ label: "Seed control", value: "Supported" });

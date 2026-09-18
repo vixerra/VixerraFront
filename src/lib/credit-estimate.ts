@@ -247,6 +247,15 @@ const VIDEO_COST_USD: Record<
     perSecond: { "768p": 0.045, "1080p": 0.4 / 6 },
     minSeconds: 6,
   },
+  // MiniMax H3 Max, at the per-second rates Cloudflare's dashboard lists for
+  // it (2026-09-18): $0.05 at 480p, $0.08 at 768p. The registry entry sends
+  // text and at most a first frame, never the reference media MiniMax meters
+  // as input seconds, so no other line of its price applies. Its shortest
+  // clip is 5s.
+  "minimax/h3-max": {
+    perSecond: { "480p": 0.05, "768p": 0.08 },
+    minSeconds: 5,
+  },
 };
 
 // Models billed a flat price per clip, whatever its length — kie.ai sells
@@ -379,11 +388,13 @@ const IMAGE_DEFAULT_QUALITY: Record<string, string> = {
 //   - gpt-image-2: 1000 prompt tokens at $5 per 1M = $0.005. It takes no
 //     input image, so its $8 per 1M image-input rate never applies.
 //     Negligible on a high image, but it doubles the cost of a low one;
-//   - nano-banana-pro: 1000 prompt tokens plus one input image, 560 tokens
-//     (the runner never sends more than one), at $2 per 1M = $0.00312.
+//   - nano-banana-pro: 1000 prompt tokens plus three input images of 560
+//     tokens each (the most its image_input takes: the upload and two
+//     references), at $2 per 1M = $0.00536. It was one image, $0.00312,
+//     until references were exposed (2026-09-18).
 const IMAGE_PROMPT_COST_USD: Record<string, number> = {
   "openai/gpt-image-2": 0.005,
-  "google/nano-banana-pro": 0.00312,
+  "google/nano-banana-pro": 0.00536,
 };
 
 // For a model missing from the table above. Priced high on purpose: the old

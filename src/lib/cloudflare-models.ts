@@ -37,6 +37,10 @@ export type DynamicField = {
   key: string;
   /** Exact Cloudflare input param name this maps to. */
   cfParam: string;
+  /** Nests cfParam one level down, inside this object, for the providers
+   *  that group options: MiniMax H3 Max takes
+   *  `extra: { prompt_expansion_mode }` and refuses the bare field. */
+  cfGroup?: string;
   label: string;
   type: DynamicFieldType;
   /** For "select" fields. */
@@ -99,6 +103,14 @@ export type CloudflareModelConfig = {
   category: "text-to-image" | "text-to-video" | "image-to-video";
   promptRequired: boolean;
   image: "none" | "optional" | "required";
+  /** How the prompt and images travel. Absent means as named params (the
+   *  prompt under `prompt`, the image under imageCfParam), which is every
+   *  entry but one. "content" is the typed list MiniMax H3 Max takes
+   *  instead, refusing a top-level `prompt` outright:
+   *    content: [{ type: "text", text }, { type: "image_url", image_url: { url }, role }]
+   *  On such an entry imageCfParam and lastFrameCfParam name each image's
+   *  `role` in that list rather than a param, and imageParamShape is unused. */
+  inputShape?: "content";
   imageCfParam?: string;
   /** Some models want `{ url }`, some a raw base64-encoded image (fetched and
    *  re-encoded server-side, see generation-runner.ts), nano-banana-pro
@@ -106,18 +118,43 @@ export type CloudflareModelConfig = {
    *  string. */
   imageParamShape?: "string" | "urlObject" | "base64" | "urlArray";
   /** Cloudflare param for a closing-frame reference image, for the models
-   *  that accept one. runCloudflareJob already resolves the stored
-   *  lastFrameImage to a signed URL for the Seedance path, so wiring it
-   *  here just forwards that same value. */
+   *  that accept one. The composer collects it as `lastFrameImage`, the name
+   *  the Seedance forms use, and the runner resolves it to a signed URL and
+   *  forwards it here, only ever beside an opening frame. */
   lastFrameCfParam?: string;
+  /** Extra reference images, for the models that take a list of them. The
+   *  composer collects them as `referenceImages`; buildProviderInput puts
+   *  them on the wire. */
+  referenceImages?: {
+    /** The provider's own cap on that list, as its docs state it. */
+    max: number;
+    /** The param the list goes in, or on an inputShape "content" entry the
+     *  role each item carries. When it is imageCfParam itself (Nano Banana
+     *  Pro's image_input, Grok's image_urls), the references extend the main
+     *  image's array and that image takes one of the `max` slots. */
+    cfParam: string;
+    /** The provider takes references or a first/last frame, never both
+     *  (MiniMax H3 Max, Seedance 2.0 Mini): the composer offers one mode or
+     *  the other and the schema refuses the mix. Without it, references are
+     *  extra images that need the main one. */
+    exclusiveWithFrames?: boolean;
+    /** Field values at which the provider takes no references (Grok Imagine
+     *  Video accepts a single image at 1080p). */
+    unavailableWhen?: Record<string, string>;
+    /** Shown with the uploads, for a provider with its own way of pointing
+     *  at an image from the prompt. */
+    hint?: string;
+  };
   /** Extra tunable params exposed in the dynamic form. */
   fields: DynamicField[];
   /** Params always sent as-is, not user-editable (e.g. a fixed operation). */
   staticParams?: Record<string, string | number | boolean>;
   /** Merged over staticParams when the request HAS an input image, and
-   *  when it doesn't, respectively. FLUX 3 Video is a discriminated union
-   *  on `mode`: "t2v" takes a prompt, "i2v" takes `keyframes` instead of
-   *  `image`, and sending the wrong one is a 400. */
+   *  when it doesn't, respectively, and over the fields as well: what they
+   *  set is decided by the image, not by the form. FLUX 3 Video is a
+   *  discriminated union on `mode`: "t2v" takes a prompt, "i2v" takes
+   *  `keyframes` instead of `image`, and sending the wrong one is a 400.
+   *  MiniMax H3 Max refuses any ratio but "adaptive" beside a first frame. */
   imageStaticParams?: Record<string, string | number | boolean>;
   noImageStaticParams?: Record<string, string | number | boolean>;
   /** Some providers refuse to host the generated file and instead demand a
@@ -137,6 +174,11 @@ export type CloudflareModelConfig = {
   /** MIME type for the `data:` URI built from a base64 result. Lucid Origin
    *  returns JPEG bytes, not PNG. */
   outputMimeType?: string;
+  /** Every clip comes back with a soundtrack and there is no switch for it,
+   *  which a field list alone can't say. The model landing pages
+   *  (model-seo.ts, frontend) read audio support off this or off an audio
+   *  switch field. */
+  alwaysHasAudio?: boolean;
 };
 
 export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
@@ -252,6 +294,10 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "imageSize", cfParam: "image_size", label: "Resolution", type: "select", options: ["1K", "2K", "4K"], defaultValue: "2K" },
       { key: "outputFormat", cfParam: "output_format", label: "Output format", type: "select", options: ["jpg", "png", "webp"], defaultValue: "png" },
     ],
+    // image_input takes up to 3 images (Cloudflare's published schema, read
+    // 2026-09-18): the upload and two references. IMAGE_PROMPT_COST_USD
+    // prices all three.
+    referenceImages: { max: 3, cfParam: "image_input" },
     // Unlike the Seedream trio, which answer with `images: [...]`, this one
     // returns a single scalar `image` URL — hence outputPath stays ["image"].
     outputPath: ["image"],
@@ -437,6 +483,11 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "adaptive"], defaultValue: "16:9" },
       { key: "generateAudio", cfParam: "generate_audio", label: "Generate audio", type: "switch", defaultValue: true },
     ],
+    // Reference images or first/last frames, never both: kie documents them
+    // as mutually exclusive scenarios, with up to 9 reference_image_urls
+    // (docs.kie.ai/market/bytedance/seedance-2-mini, read 2026-09-18). Its
+    // reference videos and audio aren't exposed.
+    referenceImages: { max: 9, cfParam: "reference_image_urls", exclusiveWithFrames: true },
     outputPath: [],
     outputKind: "url",
   },
@@ -501,6 +552,17 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1", "3:2", "2:3"], defaultValue: "16:9" },
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["480p", "720p", "1080p"], defaultValue: "720p" },
     ],
+    // Up to 7 images in image_urls, the upload first, each named in the
+    // prompt by position; a single one at 1080p (docs.kie.ai/market/
+    // grok-imagine/image-to-video, read 2026-09-18).
+    referenceImages: {
+      max: 7,
+      cfParam: "image_urls",
+      unavailableWhen: { resolution: "1080p" },
+      hint: "Refer to each image in the prompt as @image1, @image2 and so on, in upload order.",
+    },
+    // xAI generates the soundtrack with the picture; kie has no switch for it.
+    alwaysHasAudio: true,
     outputPath: [],
     outputKind: "url",
   },
@@ -528,6 +590,11 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1", "3:2", "2:3", "auto"], defaultValue: "16:9" },
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["480p", "720p"], defaultValue: "720p" },
     ],
+    // Up to 7 images in image_urls (docs.kie.ai/market/grok-imagine/
+    // 1-5-preview, read 2026-09-18). Its single-image limit applies at
+    // 1080p, which this entry doesn't offer.
+    referenceImages: { max: 7, cfParam: "image_urls" },
+    alwaysHasAudio: true,
     outputPath: [],
     outputKind: "url",
   },
@@ -567,6 +634,8 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p", "4k"], defaultValue: "720p" },
       { key: "aspectRatio", cfParam: "aspectRatio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "auto"], defaultValue: "16:9", cfValueMap: { auto: "Auto" } },
     ],
+    // kie ships every Veo clip with its soundtrack (see above).
+    alwaysHasAudio: true,
     outputPath: [],
     outputKind: "url",
   },
@@ -592,6 +661,8 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p", "4k"], defaultValue: "720p" },
       { key: "aspectRatio", cfParam: "aspectRatio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "auto"], defaultValue: "16:9", cfValueMap: { auto: "Auto" } },
     ],
+    // kie ships every Veo clip with its soundtrack (see above).
+    alwaysHasAudio: true,
     outputPath: [],
     outputKind: "url",
   },
@@ -622,6 +693,59 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       { key: "fastPretreatment", cfParam: "fast_pretreatment", label: "Fast pretreatment", type: "switch", defaultValue: false },
     ],
     outputPath: ["video"],
+    outputKind: "url",
+  },
+
+  // MiniMax H3 Max, fal's speed-tuned post-train of H3. Probed live
+  // 2026-09-18, and shaped nothing like Hailuo above:
+  //   - the prompt and the image travel as typed items of one `content`
+  //     list (inputShape), and a top-level `prompt` is refused;
+  //   - the prompt-expansion setting sits in a nested `extra` (cfGroup);
+  //   - the result comes back as `task: { status, content: { url } }`.
+  // /ai/run still answers only once the render is done: every sample on
+  // Cloudflare's model page comes back "succeeded", 6 to 71s after it was
+  // created. A task that fails upstream answers 200 with status "failed"
+  // and MiniMax's own { code, message }, which runCloudflareModel surfaces.
+  //
+  // The ratio depends on the input. Beside a first frame Cloudflare refuses
+  // anything but "adaptive" ("image-to-video requires adaptive ratio",
+  // probed 2026-09-18), so imageStaticParams pins it and the pick only
+  // applies to text-only runs. Those get concrete ratios only: Cloudflare's
+  // validation lets a text-only "adaptive" through, but MiniMax's API
+  // reference (video-generation-v2-create) says it is refused upstream, a
+  // failure that would only surface at execution.
+  //
+  // Reference images (role reference_image, up to 9) and first/last frames
+  // are two modes MiniMax refuses to mix, hence exclusiveWithFrames. The
+  // references don't appear to move the price: Cloudflare's two-reference
+  // sample reports total_seconds equal to the output length. Reference
+  // videos and audio (3 each) are not exposed, since their input seconds
+  // (usage.input_seconds, input_audio_seconds) may be billed at a rate we
+  // don't have. callback_url is moot while the call blocks.
+  //
+  // Every clip carries a soundtrack, with no switch for it: both of
+  // Cloudflare's sample outputs hold a ~195 kbps AAC track.
+  {
+    id: "minimax/h3-max",
+    label: "H3 Max",
+    provider: "MiniMax",
+    description: "MiniMax's fast video model, 5 to 15s at 480p or 768p with native audio",
+    category: "text-to-video",
+    promptRequired: true,
+    image: "optional",
+    inputShape: "content",
+    imageCfParam: "first_frame",
+    lastFrameCfParam: "last_frame",
+    imageStaticParams: { ratio: "adaptive" },
+    fields: [
+      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 5, max: 15, helperText: "seconds" },
+      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["480p", "768p"], defaultValue: "768p", cfValueMap: { "480p": "480P", "768p": "768P" } },
+      { key: "aspectRatio", cfParam: "ratio", label: "Aspect ratio", type: "select", options: ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16"], defaultValue: "16:9", helperText: "Ignored when a reference image is supplied" },
+      { key: "promptExpansion", cfParam: "prompt_expansion_mode", cfGroup: "extra", label: "Prompt expansion", type: "select", options: ["disabled", "balanced", "quality"], defaultValue: "balanced" },
+    ],
+    alwaysHasAudio: true,
+    referenceImages: { max: 9, cfParam: "reference_image", exclusiveWithFrames: true },
+    outputPath: ["task", "content", "url"],
     outputKind: "url",
   },
 
@@ -917,4 +1041,13 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
 
 export function getCloudflareModel(id: string): CloudflareModelConfig | undefined {
   return CLOUDFLARE_MODELS.find((m) => m.id === id);
+}
+
+/** How many images the composer's reference list may hold. A list that
+ *  shares the main image's param gives one of the provider's slots to that
+ *  image. */
+export function referenceImageSlots(config: CloudflareModelConfig): number {
+  const refs = config.referenceImages;
+  if (!refs) return 0;
+  return refs.cfParam === config.imageCfParam ? refs.max - 1 : refs.max;
 }

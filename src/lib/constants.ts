@@ -308,6 +308,9 @@ export const MODEL_POPULARITY: readonly string[] = [
   "xai/grok-imagine-video",
   "kling/3.0-turbo",
   "kling/2.6-image",
+  // New on 2026-09-18, so no usage yet: placed at the head of MiniMax's
+  // group rather than ranked by counts it doesn't have.
+  "minimax/h3-max",
   "minimax/hailuo-2.3",
   "alibaba/wan-2.7-i2v",
   "kling/3.0-omni",

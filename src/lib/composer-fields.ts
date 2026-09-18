@@ -167,6 +167,11 @@ const VALUE_HINTS: Record<string, string> = {
   medium: "Balanced",
   high: "Best quality",
   auto: "Model decides",
+  // Prompt expansion (MiniMax H3 Max), in MiniMax's own terms: off, the
+  // default balanced pass, or one that prioritises the expansion's quality.
+  disabled: "Your prompt as written",
+  balanced: "Expanded",
+  quality: "Most careful expansion",
   // Output formats.
   mp4: "Video",
   mov: "Video, ProRes-friendly",
