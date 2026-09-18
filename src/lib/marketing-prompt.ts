@@ -11,7 +11,7 @@
 // (`inputImageUrl`), which is why the sheet note below has to exist at all.
 
 import { PROMPT_MAX_LENGTH } from "@/lib/constants";
-import type { MarketingKind, MarketingStyle } from "@/lib/marketing-styles";
+import type { CopyPolicy, MarketingKind, MarketingStyle } from "@/lib/marketing-styles";
 
 /**
  * Which uploaded asset travels as the model's one reference image.
@@ -28,6 +28,45 @@ export type ReferenceUse = "none" | "product" | "talent" | "sheet";
  *  (see buildDynamicSchema) so a long description gets trimmed here, with an
  *  ellipsis, rather than turning into a validation error at submit time. */
 const MAX_PROMPT_LENGTH = PROMPT_MAX_LENGTH - 100;
+
+/** Below this, trimming the subject does more damage than trimming the whole
+ *  string, so the flat cut comes back. Unreachable with the current catalog
+ *  (the longest tail leaves ~600 characters of room); it exists so a future
+ *  style can't quietly reduce the brief to a stub. */
+const MIN_SUBJECT_LENGTH = 200;
+
+/**
+ * What every frame of this kind owes a paying client, appended to every
+ * generation.
+ *
+ * These are the defects that make an otherwise good result unusable rather
+ * than merely imperfect — a warped bottle, a label that drifts between
+ * frames, subtitles nobody asked for. Naming them costs a couple of hundred
+ * characters and is the cheapest quality the studio can buy; leaving them
+ * unsaid is what produces a beautiful image the marketer cannot run.
+ */
+const CRAFT: Record<MarketingKind, string> = {
+  image:
+    "Commercial advertising photography: physically accurate light and shadow, true-to-life materials, correct product geometry and undistorted proportions, clean unbroken edges, sharp focus on the hero, no duplicated or melted parts, no watermark.",
+  video:
+    "Commercial advertising film: the product and any person stay identical from the first frame to the last — no morphing, no drifting label, no extra fingers — with stable exposure and white balance, motion that respects real weight, and no subtitles, captions or watermark at any point.",
+};
+
+/**
+ * The anti-gibberish clause, chosen by the style's `copy` policy.
+ *
+ * Both halves matter. "none" has to say more than "no text", because the one
+ * thing that must keep its lettering is the product's own packaging. And
+ * "supplied" has to give the model somewhere to go when the brief named no
+ * copy at all — left to itself it fills the headline slot with confident
+ * nonsense, which is the single most common reason an ad render gets thrown
+ * away.
+ */
+const COPY_RULES: Record<CopyPolicy, string> = {
+  none: "No text, lettering, logo, badge or watermark anywhere in the frame beyond the product's own packaging, which keeps its real wording exactly as it is.",
+  supplied:
+    "Set only the words that appear in the brief above, spelled exactly as written, in one or two clean type sizes; if the brief names no copy, leave the type areas empty rather than inventing a headline or filling them with letter-shaped marks.",
+};
 
 function referenceNote(kind: MarketingKind, reference: ReferenceUse): string | undefined {
   if (reference === "none") return undefined;
@@ -83,9 +122,12 @@ function sentence(text: string): string {
  * The exact text submitted as `prompt`.
  *
  * Order matters: your own words first, then how the reference must be treated,
- * then the style's treatment. Models weight the front of a prompt most
- * heavily, and the one thing a marketing shot cannot get wrong is what it's
- * of — so the subject leads and the look follows it.
+ * then the style's treatment, then the two rules that apply to every frame —
+ * what may be written in it, and what counts as a usable result. Models weight
+ * the front of a prompt most heavily, and the one thing a marketing shot
+ * cannot get wrong is what it's of, so the subject leads and the look follows
+ * it. The constraints go last on purpose: they are also the part a model is
+ * most likely to drop, and the tail is the second-strongest position.
  */
 export function buildMarketingPrompt(
   style: MarketingStyle,
@@ -95,19 +137,30 @@ export function buildMarketingPrompt(
   const { kind, reference } = options;
   const own = description.trim();
 
-  const parts: string[] = [
-    own ? sentence(own).replace(/\s*\.?\s*$/, ".") : fallbackSubject(kind, reference),
-  ];
+  const subject = own
+    ? sentence(own).replace(/\s*\.?\s*$/, ".")
+    : fallbackSubject(kind, reference);
 
+  const tail: string[] = [];
   const note = referenceNote(kind, reference);
-  if (note) parts.push(note);
+  if (note) tail.push(note);
+  tail.push(`${sentence(style.direction)}.`);
+  tail.push(COPY_RULES[style.copy]);
+  tail.push(CRAFT[kind]);
+  const suffix = tail.join(" ");
 
-  parts.push(`${sentence(style.direction)}.`);
-
-  const prompt = parts.join(" ");
-  return prompt.length > MAX_PROMPT_LENGTH
-    ? `${prompt.slice(0, MAX_PROMPT_LENGTH - 1).trimEnd()}…`
-    : prompt;
+  // Trim the subject rather than the string. The description field takes
+  // 1200 characters, enough that a thorough brief plus the tail overruns the
+  // cap — and cutting from the end would drop the craft rules, then the copy
+  // rule, then the style, then the sentence explaining what the attached
+  // reference even is. Those are the parts with no second chance; a long
+  // brief still says most of what it came to say in its first paragraph.
+  const room = MAX_PROMPT_LENGTH - suffix.length - 1;
+  if (subject.length <= room) return `${subject} ${suffix}`;
+  if (room < MIN_SUBJECT_LENGTH) {
+    return `${`${subject} ${suffix}`.slice(0, MAX_PROMPT_LENGTH - 1).trimEnd()}…`;
+  }
+  return `${subject.slice(0, room - 1).trimEnd()}… ${suffix}`;
 }
 
 /** Whether there is enough here to be worth spending credits on. A style
