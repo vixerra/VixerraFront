@@ -155,10 +155,13 @@ export function probeVideo(objectUrl: string): Promise<ProbeResult> {
 /**
  * A `<video>` the renderer can draw from.
  *
- * Never attached to the document: it exists purely as a decode target. Muted
- * because the mixdown handles audio separately and an autoplaying element
- * with sound would be blocked outright; `playsInline` because iOS otherwise
- * takes any played video fullscreen.
+ * Never attached to the document: it exists purely as a decode target.
+ *
+ * It starts MUTED and stays that way until `PreviewAudio` routes it into the
+ * mixer, which only happens off a user gesture — an element that tried to
+ * play with sound before one would simply be refused, and the picture would
+ * stop with it. `playsInline` because iOS otherwise takes any played video
+ * fullscreen.
  */
 export function createDecodeVideo(objectUrl: string): HTMLVideoElement {
   const video = document.createElement("video");
@@ -171,9 +174,36 @@ export function createDecodeVideo(objectUrl: string): HTMLVideoElement {
 }
 
 /** How far a playing preview may drift from the playhead before it is
- *  yanked back. Generous — correcting a 60ms drift costs a re-seek, which
- *  looks far worse than the drift did. */
+ *  yanked back by a seek. Generous — a seek stalls the decoder and, now that
+ *  the preview has sound, clicks — so it is the last resort, reached only
+ *  after PREVIEW_DRIFT_SOFT has failed to close the gap. */
 export const PREVIEW_DRIFT_TOLERANCE = 0.22;
+
+/**
+ * Drift past which the preview starts nudging a clip back into place with
+ * its playback rate instead of seeking it.
+ *
+ * A 2% rate change is inaudible and invisible; it closes a 40ms gap over a
+ * couple of seconds without a single dropped frame. This is how every video
+ * player keeps a picture locked to a clock it does not own.
+ */
+export const PREVIEW_DRIFT_SOFT = 0.035;
+export const PREVIEW_DRIFT_NUDGE = 0.02;
+
+/**
+ * How early an upcoming clip is parked on its first frame.
+ *
+ * Without this, a cut is the first moment anything asks the next clip's
+ * decoder for a frame: it is still sitting whereever it was left — at its
+ * own last frame, after one play-through — and that stale frame is what the
+ * canvas draws until the seek lands. That flash at every junction is the
+ * single most "unfinished" thing about a preview.
+ *
+ * Three quarters of a second is enough for a blob-backed seek to complete
+ * several times over, and short enough that scrubbing does not preroll half
+ * the timeline.
+ */
+export const PREVIEW_PREROLL_SECONDS = 0.75;
 
 /**
  * Parks a video on an exact frame.

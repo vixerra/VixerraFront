@@ -194,6 +194,18 @@ export type Clip = {
   filters: ClipFilters;
   /** 0..1, applied to this clip's own audio in the mixdown. */
   volume: number;
+  /**
+   * Silences the clip without losing the level it was set to.
+   *
+   * All three of these are optional so projects saved before preview audio
+   * existed still load — absent reads as "not muted, no fade", which is what
+   * every stored clip was.
+   */
+  muted?: boolean;
+  /** Seconds of ramp on this clip's own audio, on top of whatever the
+   *  transition it sits under already imposes. */
+  audioFadeIn?: number;
+  audioFadeOut?: number;
 
   transition: { type: TransitionId; duration: number };
 };
@@ -415,6 +427,9 @@ export function defaultClip(input: {
     // Stills carry no audio track, so a volume of 1 would put a live-looking
     // slider on a clip that can never make a sound.
     volume: kind === "image" ? 0 : 1,
+    muted: false,
+    audioFadeIn: 0,
+    audioFadeOut: 0,
     // A cut, not a dissolve: the first thing anyone does after adding two
     // clips is watch them, and an unrequested crossfade reads as a bug.
     transition: { type: "none", duration: 0.5 },

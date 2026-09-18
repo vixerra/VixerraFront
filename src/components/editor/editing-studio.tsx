@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   Download,
   FolderOpen,
+  Keyboard,
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
@@ -34,6 +35,7 @@ import {
   removeOverlay,
   reorderClips,
   splitClipAt,
+  trimToPlayhead,
   updateClip,
   updateOverlay,
   withClips,
@@ -61,7 +63,7 @@ import { Inspector, type InspectorTab } from "./inspector";
 import { MediaLibrary, LibraryHeader, type LibraryItem } from "./media-library";
 import { PreviewStage } from "./preview-stage";
 import { Timeline, type Selection } from "./timeline";
-import { useStudioEngine } from "./use-studio-engine";
+import { PREVIEW_RATES, useStudioEngine } from "./use-studio-engine";
 
 /** How long after the last keystroke or drag the project is written to
  *  localStorage. Long enough that dragging a slider doesn't serialise the
@@ -120,6 +122,7 @@ export function EditingStudio() {
   const [libraryOpen, setLibraryOpen] = useState(true);
   const [exportOpen, setExportOpen] = useState(false);
   const [projectsOpen, setProjectsOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
@@ -373,6 +376,27 @@ export function EditingStudio() {
 
   /* ----------------------------------------------------------- shortcuts */
 
+  /**
+   * One press of J or L.
+   *
+   * From a stop, L means "play" and J means "play slowly" — jumping straight
+   * to 1.5x on the first press of L would be a speed control, not a
+   * transport. Once running, each press steps one notch along PREVIEW_RATES.
+   */
+  const shuttle = useCallback(
+    (direction: -1 | 1) => {
+      if (!engine.playing) {
+        engine.setRate(direction > 0 ? 1 : 0.5);
+        engine.play();
+        return;
+      }
+      const index = PREVIEW_RATES.indexOf(engine.rate);
+      const next = Math.max(0, Math.min(PREVIEW_RATES.length - 1, index + direction));
+      engine.setRate(PREVIEW_RATES[next]);
+    },
+    [engine],
+  );
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
@@ -402,6 +426,51 @@ export function EditingStudio() {
         case "s":
         case "S":
           commit(splitClipAt(project, time));
+          break;
+        case "m":
+        case "M":
+          engine.toggleMuted();
+          break;
+        // Shuttle. A real J/K/L runs the picture backwards on J, which a
+        // <video> element cannot do at all — so J steps the speed DOWN and L
+        // steps it UP, which is the half of the gesture that survives, and
+        // K still means stop.
+        case "j":
+          shuttle(-1);
+          break;
+        case "k":
+        case "K":
+          engine.pause();
+          break;
+        case "l":
+          shuttle(1);
+          break;
+        // Uppercase L only reaches here with Shift held (or caps lock, which
+        // nobody is editing video under).
+        case "L":
+          engine.setLoop(!engine.loop);
+          break;
+        case "i":
+        case "I":
+          if (selection?.kind === "clip") {
+            commit(trimToPlayhead(project, selection.id, "in", time));
+          }
+          break;
+        case "o":
+        case "O":
+          if (selection?.kind === "clip") {
+            commit(trimToPlayhead(project, selection.id, "out", time));
+          }
+          break;
+        // The other frame-step, for hands that learned it in a cutting room.
+        case ",":
+          seek(time - 1 / project.fps);
+          break;
+        case ".":
+          seek(time + 1 / project.fps);
+          break;
+        case "?":
+          setShortcutsOpen(true);
           break;
         case "t":
         case "T": {
@@ -443,7 +512,7 @@ export function EditingStudio() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [commit, duration, engine, project, redo, seek, selection, time, undo]);
+  }, [commit, duration, engine, project, redo, seek, selection, shuttle, time, undo]);
 
   /* ------------------------------------------------------------ handlers */
 
@@ -619,6 +688,19 @@ export function EditingStudio() {
             </button>
           </Tooltip>
 
+          {/* Sound, shuttle and trim-to-playhead are all keyboard-first, and
+              a shortcut nobody can find is a feature nobody has. */}
+          <Tooltip content="Keyboard shortcuts (?)">
+            <button
+              type="button"
+              onClick={() => setShortcutsOpen(true)}
+              aria-label="Keyboard shortcuts"
+              className="hidden rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink sm:block"
+            >
+              <Keyboard className="size-4" />
+            </button>
+          </Tooltip>
+
           <div className="mx-1 h-5 w-px bg-line" />
 
           <Button variant="secondary" size="sm" onClick={() => setProjectsOpen(true)}>
@@ -655,6 +737,15 @@ export function EditingStudio() {
             playing={engine.playing}
             onToggle={engine.toggle}
             onSeek={seek}
+            volume={engine.volume}
+            onVolumeChange={engine.setVolume}
+            muted={engine.muted}
+            onToggleMuted={engine.toggleMuted}
+            audioLevel={engine.audioLevel}
+            rate={engine.rate}
+            onRateChange={engine.setRate}
+            loop={engine.loop}
+            onLoopChange={engine.setLoop}
             emptyHint={
               libraryOpen
                 ? "Pick a video from your library to start your edit."
@@ -728,6 +819,8 @@ export function EditingStudio() {
         onBeforeRender={pause}
       />
 
+      <ShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+
       <ProjectsModal
         open={projectsOpen}
         onOpenChange={setProjectsOpen}
@@ -747,6 +840,86 @@ export function EditingStudio() {
         }}
       />
     </div>
+  );
+}
+
+/* ---------------------------------------------------------- shortcuts UI */
+
+/** Grouped the way the hands work, not alphabetically: everything to do with
+ *  moving the playhead together, everything that changes the cut together. */
+const SHORTCUT_GROUPS: { title: string; items: [string, string][] }[] = [
+  {
+    title: "Playback",
+    items: [
+      ["Space", "Play / pause"],
+      ["J · K · L", "Slower · stop · faster"],
+      ["M", "Mute the preview"],
+      ["Shift + L", "Loop the edit"],
+      ["Home · End", "Jump to start · end"],
+    ],
+  },
+  {
+    title: "The playhead",
+    items: [
+      ["← ·  →", "Half a second"],
+      ["Shift + ← · →", "One frame"],
+      [", · .", "One frame"],
+    ],
+  },
+  {
+    title: "Cutting",
+    items: [
+      ["S", "Split at the playhead"],
+      ["I · O", "Trim the selected clip to the playhead"],
+      ["[ · ]", "Move the clip earlier · later"],
+      ["T", "Add text at the playhead"],
+      ["Delete", "Remove what's selected"],
+    ],
+  },
+  {
+    title: "Everything else",
+    items: [
+      ["Ctrl / ⌘ + Z", "Undo"],
+      ["Ctrl / ⌘ + Shift + Z", "Redo"],
+      ["?", "This list"],
+    ],
+  },
+];
+
+function ShortcutsModal({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Keyboard shortcuts"
+      description="They work whenever you're not typing in a field."
+    >
+      <div className="grid gap-5 sm:grid-cols-2">
+        {SHORTCUT_GROUPS.map((group) => (
+          <section key={group.title}>
+            <h3 className="mb-2 text-caption font-medium tracking-wide text-text-tertiary uppercase">
+              {group.title}
+            </h3>
+            <dl className="space-y-1.5">
+              {group.items.map(([keys, description]) => (
+                <div key={keys} className="flex items-baseline justify-between gap-3">
+                  <dd className="text-body-sm text-ink-soft">{description}</dd>
+                  <dt className="shrink-0 rounded-md border border-line bg-surface-dark px-1.5 py-0.5 font-mono text-caption text-muted">
+                    {keys}
+                  </dt>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ))}
+      </div>
+    </Modal>
   );
 }
 

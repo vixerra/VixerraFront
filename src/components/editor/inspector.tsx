@@ -463,16 +463,50 @@ function ClipPanel({
           can never do anything is worse than no slider. */}
       {clip.kind !== "image" && (
         <PanelSection title="Sound">
+          <label className="flex items-center justify-between text-body-sm text-ink-soft">
+            Mute this clip
+            <Switch
+              checked={Boolean(clip.muted)}
+              onCheckedChange={(muted) => onPatch({ muted })}
+            />
+          </label>
           <SliderRow
             label="Clip volume"
             value={clip.volume}
             min={0}
             max={1.5}
             step={0.01}
-            onChange={(volume) => onPatch({ volume })}
+            onChange={(volume) => onPatch({ volume, muted: false })}
             format={(v) => `${Math.round(v * 100)}%`}
             defaultValue={1}
           />
+          {/* On top of whatever the transition above already imposes — a
+              1s dissolve keeps its 1s audio ramp however these are set. */}
+          <SliderRow
+            label="Fade in"
+            value={clip.audioFadeIn ?? 0}
+            min={0}
+            max={Math.max(0.5, clipDuration(clip) / 3)}
+            step={0.05}
+            onChange={(audioFadeIn) => onPatch({ audioFadeIn })}
+            format={(v) => `${v.toFixed(2)}s`}
+            defaultValue={0}
+          />
+          <SliderRow
+            label="Fade out"
+            value={clip.audioFadeOut ?? 0}
+            min={0}
+            max={Math.max(0.5, clipDuration(clip) / 3)}
+            step={0.05}
+            onChange={(audioFadeOut) => onPatch({ audioFadeOut })}
+            format={(v) => `${v.toFixed(2)}s`}
+            defaultValue={0}
+          />
+          <p className="text-caption text-muted">
+            {clip.muted
+              ? "Silent in the preview and in the export. Its volume is kept for when you turn it back on."
+              : "Press play to hear it. Turn the whole track off under Audio."}
+          </p>
         </PanelSection>
       )}
     </>
@@ -1027,8 +1061,8 @@ function AudioPanel({
         ) : (
           <>
             <p className="text-caption text-muted">
-              Add a track from your machine. It is mixed in at export time and never leaves your
-              browser until then — only the finished video is uploaded.
+              Add a track from your machine. You&apos;ll hear it against the edit straight away, and
+              it never leaves your browser — only the finished video is uploaded.
             </p>
             <Button
               variant="secondary"

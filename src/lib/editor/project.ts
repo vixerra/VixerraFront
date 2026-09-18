@@ -183,6 +183,38 @@ export function splitClipAt(project: Project, time: number): Project {
   return withClips(project, clips);
 }
 
+/**
+ * Pulls one of a clip's trim handles to the playhead (the I and O keys).
+ *
+ * The fastest edit in any cutting room: park the playhead where the shot
+ * should start, press I. Doing it with the mouse means finding a 6px handle
+ * and dragging it to a position that was only ever visible as a vertical
+ * line.
+ *
+ * Refuses when the playhead is outside the clip — there is no sensible
+ * reading of "start here" for a moment the clip does not cover — and when
+ * the cut would leave less than MIN_CLIP_SECONDS behind.
+ */
+export function trimToPlayhead(
+  project: Project,
+  clipId: string,
+  edge: "in" | "out",
+  time: number,
+): Project {
+  const placed = timelineLayout(project).placed.find((p) => p.clip.id === clipId);
+  if (!placed || time <= placed.start || time >= placed.end) return project;
+
+  const cut = sourceTimeFor(placed, time);
+  const minimum = MIN_CLIP_SECONDS * placed.clip.speed;
+
+  if (edge === "in") {
+    if (placed.clip.out - cut < minimum) return project;
+    return updateClip(project, clipId, { in: cut });
+  }
+  if (cut - placed.clip.in < minimum) return project;
+  return updateClip(project, clipId, { out: cut });
+}
+
 export function updateOverlay(
   project: Project,
   overlayId: string,

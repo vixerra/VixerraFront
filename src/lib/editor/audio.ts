@@ -15,9 +15,9 @@
  * a minute to render.
  */
 
-import { timelineLayout, type TimelineLayout } from "./project";
+import { timelineLayout, type PlacedClip, type TimelineLayout } from "./project";
 import { getAsset } from "./storage";
-import type { Project } from "./types";
+import type { Clip, Project } from "./types";
 
 /** 48kHz stereo: what AAC encoders and every social platform expect, and
  *  high enough that resampling a 44.1kHz source is inaudible. */
@@ -27,7 +27,89 @@ export const MIX_CHANNELS = 2;
 /** A hard cut in the middle of a waveform is an audible click. Every clip
  *  gets this much ramp at each end unless a longer transition already
  *  covers it. */
-const ANTI_CLICK_SECONDS = 0.03;
+export const ANTI_CLICK_SECONDS = 0.03;
+
+/**
+ * How loud a clip is in the mix, before its envelope.
+ *
+ * `muted` is kept separate from a volume of 0 on purpose: muting a clip and
+ * coming back to it has to restore the level it had, which a slider dragged
+ * to zero cannot do.
+ */
+export function clipMixVolume(clip: Clip): number {
+  return clip.muted ? 0 : clip.volume;
+}
+
+/**
+ * A clip's ramp lengths — whichever is longest of the anti-click floor, the
+ * transition it sits under, and the fade the user asked for.
+ *
+ * Shared by the offline mixdown (which schedules these as ramps) and by the
+ * live preview (which evaluates them per frame), so the two cannot drift.
+ * That is the whole promise of preview audio: it predicts the export.
+ */
+export function clipRamps(
+  layout: TimelineLayout,
+  placed: PlacedClip,
+): { rampIn: number; rampOut: number } {
+  return {
+    rampIn: Math.max(ANTI_CLICK_SECONDS, placed.transitionDuration, placed.clip.audioFadeIn ?? 0),
+    rampOut: Math.max(
+      ANTI_CLICK_SECONDS,
+      nextTransitionDuration(layout, placed.clip.id),
+      placed.clip.audioFadeOut ?? 0,
+    ),
+  };
+}
+
+/** Ramps clamped to something the clip can afford — see shapeClipGain. */
+function clampRamps(length: number, rampIn: number, rampOut: number) {
+  return { inRamp: Math.min(rampIn, length / 3), outRamp: Math.min(rampOut, length / 3) };
+}
+
+/**
+ * The value of a clip's envelope at one moment.
+ *
+ * The analytic twin of `shapeClipGain` — the same breakpoints, read rather
+ * than scheduled. The preview needs this shape too, but its playhead jumps
+ * around: an envelope scheduled against a timeline the user is scrubbing is
+ * wrong the instant they touch it.
+ */
+export function envelopeAt(
+  start: number,
+  end: number,
+  volume: number,
+  rampIn: number,
+  rampOut: number,
+  time: number,
+): number {
+  if (time <= start || time >= end) return 0;
+  const length = Math.max(0.001, end - start);
+  const { inRamp, outRamp } = clampRamps(length, rampIn, rampOut);
+
+  const holdStart = start + inRamp;
+  const holdEnd = Math.max(holdStart, end - outRamp);
+
+  if (time < holdStart) return volume * ((time - start) / Math.max(1e-6, inRamp));
+  if (time <= holdEnd) return volume;
+  return volume * ((end - time) / Math.max(1e-6, end - holdEnd));
+}
+
+/** The master bus's opening and closing fade at one moment — the analytic
+ *  twin of applyGlobalFades. */
+export function globalFadeAt(project: Project, duration: number, time: number): number {
+  const fadeIn = Math.min(project.fadeIn, duration / 2);
+  const fadeOut = Math.min(project.fadeOut, duration / 2);
+
+  let gain = 1;
+  if (fadeIn > 0 && time < fadeIn) gain = Math.max(0, time / fadeIn);
+
+  const outStart = Math.max(fadeIn, duration - fadeOut);
+  if (fadeOut > 0 && time > outStart) {
+    gain = Math.min(gain, Math.max(0, (duration - time) / Math.max(1e-6, duration - outStart)));
+  }
+  return gain;
+}
 
 type ClipAudio = { clipId: string; buffer: AudioBuffer };
 
@@ -46,7 +128,7 @@ async function decodeClipAudio(
 ): Promise<ClipAudio[]> {
   const results = await Promise.all(
     project.clips.map(async (clip) => {
-      if (clip.volume <= 0) return null;
+      if (clipMixVolume(clip) <= 0) return null;
       const url = objectUrlFor(clip.id);
       if (!url) return null;
       try {
@@ -123,11 +205,10 @@ export async function mixProjectAudio(
 
       const gain = context.createGain();
       // An overlapping transition should sound like what it looks like, so
-      // the audio ramp is the transition's own length when there is one.
-      const rampIn = Math.max(ANTI_CLICK_SECONDS, placed.transitionDuration);
-      const nextOverlap = nextTransitionDuration(layout, placed.clip.id);
-      const rampOut = Math.max(ANTI_CLICK_SECONDS, nextOverlap);
-      shapeClipGain(gain, placed.start, placed.end, placed.clip.volume, rampIn, rampOut);
+      // the audio ramp is the transition's own length when there is one —
+      // unless the clip asks for a longer fade of its own.
+      const { rampIn, rampOut } = clipRamps(layout, placed);
+      shapeClipGain(gain, placed.start, placed.end, clipMixVolume(placed.clip), rampIn, rampOut);
 
       node.connect(gain).connect(master);
       // offset/duration are in the BUFFER's own timeline, so the trim points
@@ -190,8 +271,7 @@ function shapeClipGain(
   rampOut: number,
 ) {
   const length = Math.max(0.001, end - start);
-  const inRamp = Math.min(rampIn, length / 3);
-  const outRamp = Math.min(rampOut, length / 3);
+  const { inRamp, outRamp } = clampRamps(length, rampIn, rampOut);
 
   gain.gain.setValueAtTime(0, start);
   gain.gain.linearRampToValueAtTime(volume, start + inRamp);
