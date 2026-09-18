@@ -32,7 +32,8 @@ import {
   isDraftFromParameters,
 } from "@/lib/credit-estimate";
 import { buildDynamicSchema } from "@/lib/validation";
-import { referenceImageSlots, type CloudflareModelConfig } from "@/lib/cloudflare-models";
+import { referenceImageSlots, type CloudflareModelConfig, type ImageLimits } from "@/lib/cloudflare-models";
+import { imageLimitProblem, readImageSize } from "@/lib/image-limits";
 import { apiFetch } from "@/lib/api-client";
 import {
   isResolutionLocked,
@@ -339,7 +340,19 @@ export function DynamicModelForm<T extends string>({
     toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
   }
 
+  /** Refuses a pick its provider would refuse anyway (see image-limits.ts),
+   *  before anything is uploaded. */
+  async function rejectedForLimits(file: File, limits: ImageLimits | undefined): Promise<boolean> {
+    if (!limits) return false;
+    const size = await readImageSize(file);
+    const problem = size && imageLimitProblem(size, limits);
+    if (!problem) return false;
+    toast({ title: `${config.label} can't use this image`, description: problem, variant: "error" });
+    return true;
+  }
+
   async function handleFile(file: File) {
+    if (await rejectedForLimits(file, config.imageLimits)) return;
     setUploading(true);
     setPreview(URL.createObjectURL(file));
     try {
@@ -353,6 +366,7 @@ export function DynamicModelForm<T extends string>({
   }
 
   async function handleEndFrameFile(file: File) {
+    if (await rejectedForLimits(file, config.imageLimits)) return;
     setUploadingEndFrame(true);
     setEndFramePreview(URL.createObjectURL(file));
     try {
@@ -374,6 +388,7 @@ export function DynamicModelForm<T extends string>({
 
   async function handleReferenceFile(file: File) {
     if (references.length >= referenceSlots) return;
+    if (await rejectedForLimits(file, config.referenceImages?.limits ?? config.imageLimits)) return;
     setUploadingReference(true);
     try {
       const url = await uploadFile(file);

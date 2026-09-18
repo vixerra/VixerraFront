@@ -73,6 +73,18 @@ export type DynamicField = {
   cfValueMap?: Record<string, string | number | boolean>;
 };
 
+/** Pixel bounds a provider documents for its input images, inclusive. The
+ *  composer checks each pick against them before uploading: a request that
+ *  breaks them is only refused once it reaches the provider, after the job
+ *  was queued and charged (then refunded). */
+export type ImageLimits = {
+  minSide: number;
+  maxSide: number;
+  /** Width over height. */
+  minAspect: number;
+  maxAspect: number;
+};
+
 export type CloudflareModelConfig = {
   /** Exact Cloudflare model id, e.g. "recraft/recraftv4-1". First-party
    *  models need the "@cf/" prefix; partner models must NOT have it.
@@ -144,7 +156,13 @@ export type CloudflareModelConfig = {
     /** Shown with the uploads, for a provider with its own way of pointing
      *  at an image from the prompt. */
     hint?: string;
+    /** Bounds on the references alone, for a provider that documents them
+     *  for that list only. Absent means imageLimits applies. */
+    limits?: ImageLimits;
   };
+  /** Bounds on every image the model receives, where its provider documents
+   *  them. */
+  imageLimits?: ImageLimits;
   /** Extra tunable params exposed in the dynamic form. */
   fields: DynamicField[];
   /** Params always sent as-is, not user-editable (e.g. a fixed operation). */
@@ -486,8 +504,15 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     // Reference images or first/last frames, never both: kie documents them
     // as mutually exclusive scenarios, with up to 9 reference_image_urls
     // (docs.kie.ai/market/bytedance/seedance-2-mini, read 2026-09-18). Its
-    // reference videos and audio aren't exposed.
-    referenceImages: { max: 9, cfParam: "reference_image_urls", exclusiveWithFrames: true },
+    // reference videos and audio aren't exposed. `limits` are the pixel
+    // bounds the same page gives the reference images; it states none for
+    // the frames.
+    referenceImages: {
+      max: 9,
+      cfParam: "reference_image_urls",
+      exclusiveWithFrames: true,
+      limits: { minSide: 300, maxSide: 6000, minAspect: 0.4, maxAspect: 2.5 },
+    },
     outputPath: [],
     outputKind: "url",
   },
@@ -745,6 +770,10 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     ],
     alwaysHasAudio: true,
     referenceImages: { max: 9, cfParam: "reference_image", exclusiveWithFrames: true },
+    // MiniMax's bounds on every image_url (API reference, video-generation-
+    // v2-create), and Cloudflare enforces them: a 342x105 upload came back
+    // "expected each side in [256, 5760]" (2026-09-18).
+    imageLimits: { minSide: 256, maxSide: 5760, minAspect: 0.4, maxAspect: 2.5 },
     outputPath: ["task", "content", "url"],
     outputKind: "url",
   },
