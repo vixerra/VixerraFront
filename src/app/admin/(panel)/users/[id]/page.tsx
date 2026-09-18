@@ -1,15 +1,16 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, Coins, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Coins, Mail, ShieldCheck } from "lucide-react";
 import {
   useAdminUser,
   useAdjustCredits,
   useChangeTier,
 } from "@/hooks/use-admin-data";
 import { TIERS } from "@/lib/constants";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { GenerationDrawer } from "@/components/admin/generation-drawer";
 import {
   PageHeader,
   Panel,
@@ -22,8 +23,41 @@ import {
   LoadingBlock,
   ErrorBlock,
   ActionDialog,
+  ClickableRow,
+  CopyButton,
+  When,
   formatDate,
 } from "@/components/admin/ui";
+
+/** A section heading with a "see everything" link to the full, filtered
+ *  list — the detail page only ever shows the most recent slice. */
+function SectionHeading({ title, href, linkLabel }: { title: string; href?: string; linkLabel?: string }) {
+  return (
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <h2 className="text-label font-medium text-ink-soft">{title}</h2>
+      {href && (
+        <Link
+          href={href}
+          className="inline-flex items-center gap-1 text-caption text-brand hover:underline"
+        >
+          {linkLabel}
+          <ArrowRight className="size-3" aria-hidden="true" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function StatTile({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-line bg-surface-2 p-4">
+      <p className="text-caption tracking-wide text-muted uppercase">{label}</p>
+      <div className="font-display mt-1.5 text-feature-title font-bold text-ink capitalize">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -33,11 +67,13 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
 
   const [tier, setTier] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
+  const [openGeneration, setOpenGeneration] = useState<string | null>(null);
 
   if (isLoading) return <LoadingBlock />;
   if (isError || !data) return <ErrorBlock message={(error as Error)?.message} />;
 
   const { user, grants, generations, usage, audit } = data;
+  const verified = user.emailVerifiedAt;
 
   return (
     <div>
@@ -54,6 +90,13 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
         subtitle={user.email}
         actions={
           <div className="flex flex-wrap gap-2">
+            <a
+              href={`mailto:${user.email}`}
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              <Mail className="size-4" aria-hidden="true" />
+              Email
+            </a>
             <ActionDialog
               trigger={
                 <Button size="sm" variant="secondary">
@@ -143,24 +186,49 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: "Tier", value: user.tier },
-          { label: "Credit balance", value: user.creditBalance.toLocaleString() },
-          { label: "Generations", value: user.generationCount },
-          { label: "Joined", value: formatDate(user.createdAt) },
-        ].map((s) => (
-          <div key={s.label} className="rounded-2xl border border-line bg-surface-2 p-4">
-            <p className="text-caption tracking-wide text-muted uppercase">{s.label}</p>
-            <p className="mt-1.5 font-display text-feature-title font-bold text-ink capitalize">
-              {s.value}
-            </p>
-          </div>
-        ))}
+      <div className="-mt-3 mb-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-caption text-muted">
+        <span className="flex items-center gap-1">
+          <Mono>{user.id}</Mono>
+          <CopyButton value={user.id} label="Copy account id" />
+        </span>
+        <span className="flex items-center gap-1">
+          <Mono>{user.email}</Mono>
+          <CopyButton value={user.email} label="Copy email" />
+        </span>
+        {user.nickname && <span>Pen name “{user.nickname}”</span>}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <StatTile label="Tier">{user.tier}</StatTile>
+        <StatTile label="Credit balance">
+          <span className="text-accent-amber">{user.creditBalance.toLocaleString()}</span>
+        </StatTile>
+        <StatTile label="Generations">
+          {user.generationCount !== undefined ? user.generationCount.toLocaleString() : "—"}
+        </StatTile>
+        <StatTile label="Joined">
+          <span className="normal-case">{formatDate(user.createdAt)}</span>
+        </StatTile>
+        <StatTile label="Last sign-in">
+          <span className="normal-case">{formatDate(user.lastLoginAt)}</span>
+        </StatTile>
+        <StatTile label="Email">
+          {verified === undefined ? (
+            "—"
+          ) : verified ? (
+            <span className="text-success">Verified</span>
+          ) : (
+            <span className="text-warning">Unverified</span>
+          )}
+        </StatTile>
       </div>
 
       <section className="mt-8">
-        <h2 className="mb-3 text-label font-medium text-ink-soft">Credit grants</h2>
+        <SectionHeading
+          title="Credit grants"
+          href={`/admin/credits?userId=${encodeURIComponent(user.id)}`}
+          linkLabel="Open in the ledger"
+        />
         <Panel>
           <Table
             head={
@@ -201,7 +269,11 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
       </section>
 
       <section className="mt-8">
-        <h2 className="mb-3 text-label font-medium text-ink-soft">Recent generations</h2>
+        <SectionHeading
+          title="Recent generations"
+          href={`/admin/generations?status=all&userId=${encodeURIComponent(user.id)}`}
+          linkLabel="All of this account's generations"
+        />
         <Panel>
           <Table
             head={
@@ -218,26 +290,29 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
               <EmptyRow colSpan={5}>No generations yet.</EmptyRow>
             ) : (
               generations.map((g) => (
-                <tr key={g.id}>
+                <ClickableRow key={g.id} onActivate={() => setOpenGeneration(g.id)}>
                   <Td>
                     <Mono className="text-ink-soft">{g.model}</Mono>
+                    <Mono className="block opacity-60">{g.type}</Mono>
                   </Td>
                   <Td>
                     <StatusPill status={g.status} />
                   </Td>
-                  <Td className="text-right">{g.costCredits}</Td>
+                  <Td className="text-right tabular-nums">{g.costCredits}</Td>
                   <Td>
                     <Mono className="text-accent">{g.errorCode ?? "—"}</Mono>
                   </Td>
                   <Td>
-                    <Mono>{formatDate(g.createdAt)}</Mono>
+                    <When value={g.createdAt} />
                   </Td>
-                </tr>
+                </ClickableRow>
               ))
             )}
           </Table>
         </Panel>
       </section>
+
+      <GenerationDrawer id={openGeneration} onClose={() => setOpenGeneration(null)} />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <section>
@@ -270,7 +345,11 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
         </section>
 
         <section>
-          <h2 className="mb-3 text-label font-medium text-ink-soft">Admin actions on this account</h2>
+          <SectionHeading
+            title="Admin actions on this account"
+            href={`/admin/audit?targetType=User&targetId=${encodeURIComponent(user.id)}`}
+            linkLabel="Full history"
+          />
           <Panel className="p-4">
             {audit.length === 0 ? (
               <p className="py-6 text-center text-body-sm text-muted">

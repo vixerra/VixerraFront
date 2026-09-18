@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api-client";
 
@@ -55,8 +55,11 @@ export function useAdminLogout() {
       // Only the admin-scoped cache is dropped. Clearing everything (the way
       // the app's logout does) would also blow away the operator's own user
       // session data, which this action has no business touching.
-      queryClient.removeQueries({ queryKey: ["admin-me"] });
-      queryClient.removeQueries({ queryKey: ["admin-stats"] });
+      // Every "admin*" key — the lists hold customer data that shouldn't
+      // outlive the staff session that fetched it.
+      queryClient.removeQueries({
+        predicate: (q) => typeof q.queryKey[0] === "string" && q.queryKey[0].startsWith("admin"),
+      });
       router.push("/admin/login");
       router.refresh();
     },
@@ -82,11 +85,16 @@ export type AdminStats = {
   byStatus: { status: string; count: number }[];
 };
 
-export function useAdminStats() {
+/** `days` sets how far back the chart series reach (7, 30 or 90); the
+ *  headline counters keep their own labelled windows whatever it is. */
+export function useAdminStats(days = 30) {
   return useQuery({
-    queryKey: ["admin-stats"],
+    queryKey: ["admin-stats", days],
+    // Keeps the page on screen while a different range loads, instead of
+    // dropping back to the full-page spinner.
+    placeholderData: keepPreviousData,
     queryFn: async (): Promise<AdminStats> => {
-      const res = await apiFetch("/api/admin/stats");
+      const res = await apiFetch(`/api/admin/stats?days=${days}`);
       if (!res.ok) throw new Error("Failed to load stats");
       const stats = (await res.json()) as AdminStats;
       // The series arrays are newer than the counters, so a backend that

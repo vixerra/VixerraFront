@@ -4,24 +4,14 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  Gauge,
-  Users,
-  Coins,
-  Wand2,
-  Images,
-  LifeBuoy,
-  Activity,
-  ScrollText,
-  LogOut,
-  ShieldCheck,
-  Menu,
-  X,
-} from "lucide-react";
+import { LogOut, ShieldCheck, Menu, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useAdminMe, useAdminLogout } from "@/hooks/use-admin";
+import { useAdminBadges } from "@/hooks/use-admin-data";
+import { NAV_SECTIONS } from "@/components/admin/nav";
+import { CommandPalette } from "@/components/admin/command-palette";
 
 /**
  * Chrome for every page under /admin except the login screen.
@@ -39,42 +29,11 @@ import { useAdminMe, useAdminLogout } from "@/hooks/use-admin";
  * red staff marker in the header exists to keep that impossible to forget.
  */
 
-const NAV_SECTIONS: {
-  label: string;
-  items: { href: string; label: string; icon: typeof Gauge; exact?: boolean }[];
-}[] = [
-  {
-    label: "Monitor",
-    items: [
-      { href: "/admin", label: "Overview", icon: Gauge, exact: true },
-      { href: "/admin/generations", label: "Generations", icon: Activity },
-    ],
-  },
-  {
-    label: "Accounts",
-    items: [
-      { href: "/admin/users", label: "Users", icon: Users },
-      { href: "/admin/credits", label: "Credits", icon: Coins },
-    ],
-  },
-  {
-    label: "Catalog",
-    items: [
-      { href: "/admin/presets", label: "Presets", icon: Wand2 },
-      { href: "/admin/content", label: "Content", icon: Images },
-    ],
-  },
-  {
-    label: "Operations",
-    items: [
-      { href: "/admin/support", label: "Support", icon: LifeBuoy },
-      { href: "/admin/audit", label: "Audit log", icon: ScrollText },
-    ],
-  },
-];
-
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  // Live counts for the two queues that need a human: failed jobs and
+  // unread messages. A backend without the endpoint just shows none.
+  const { data: badges } = useAdminBadges();
   return (
     <nav className="flex-1 space-y-6 overflow-y-auto p-4">
       {NAV_SECTIONS.map((section) => (
@@ -113,6 +72,21 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                     />
                   </span>
                   {item.label}
+                  {item.badge && badges && badges[item.badge] > 0 && (
+                    <span
+                      className={cn(
+                        "ml-auto rounded-full px-1.5 py-px text-[11px] leading-4 font-semibold tabular-nums",
+                        item.badge === "failed24h"
+                          ? "bg-accent/15 text-accent"
+                          : "bg-brand/15 text-brand",
+                      )}
+                      title={
+                        item.badge === "failed24h" ? "Failed in the last 24 hours" : "Unread messages"
+                      }
+                    >
+                      {badges[item.badge] > 99 ? "99+" : badges[item.badge]}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -126,8 +100,22 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const { data: admin, isLoading, isError } = useAdminMe();
   const logout = useAdminLogout();
+
+  // Ctrl/⌘ K toggles the command palette from anywhere, including from
+  // inside a text field — the one shortcut worth taking over from them.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Client-side gate, matching how AppShell protects the app: the session
   // lives in a cookie only the browser can present to the Edge Function, so
@@ -219,14 +207,30 @@ export function AdminShell({ children }: { children: ReactNode }) {
             {brandMark}
           </div>
 
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            aria-label="Search the admin panel"
+            aria-keyshortcuts="Control+K Meta+K"
+            className="flex h-9 items-center gap-2 rounded-xl border border-line bg-surface-dark px-3 text-body-sm text-muted transition-colors hover:border-border-strong hover:text-ink-soft lg:w-80"
+          >
+            <Search className="size-4 shrink-0" aria-hidden="true" />
+            <span className="hidden flex-1 text-left sm:inline">Search users, jobs, pages…</span>
+            <kbd className="hidden rounded border border-line px-1.5 font-mono text-[11px] leading-5 sm:inline">
+              Ctrl K
+            </kbd>
+          </button>
+
           {/* Standing reminder that everything here acts on real customer
               accounts. In the header rather than as a full-width bar so it
               travels with the chrome instead of pushing every page down. */}
-          <span className="ml-auto hidden items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 text-caption text-accent sm:inline-flex">
+          <span className="ml-auto hidden items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 text-caption text-accent md:inline-flex">
             <ShieldCheck className="size-3.5" aria-hidden="true" />
             Staff console — actions affect real accounts
           </span>
         </header>
+
+        <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
 
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>

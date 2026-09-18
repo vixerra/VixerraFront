@@ -486,7 +486,8 @@ export const PAGE_GUIDES: PageGuide[] = [
     art: "admin",
     steps: [
       { icon: "gauge", title: "Scan the metrics", detail: "Start here before anything else." },
-      { icon: "activity", title: "Follow the anomaly", detail: "Open Generations to see the jobs behind it." },
+      { icon: "activity", title: "Follow the anomaly", detail: "Each tile opens the jobs or accounts behind it." },
+      { icon: "search", title: "Press Ctrl K", detail: "Jump to any page, account or job id." },
     ],
   },
   {
@@ -496,9 +497,9 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "search", title: "Filter to the case", detail: "By account or by model." },
-      { icon: "eye", title: "Open the job", detail: "Its parameters and its failure reason." },
-      { icon: "coins", title: "Refund if it was us", detail: "Credit it back from the Credits screen." },
+      { icon: "search", title: "Filter to the case", detail: "By status, model, account, date or prompt." },
+      { icon: "eye", title: "Open the job", detail: "Click a row for its parameters and failure reason." },
+      { icon: "list", title: "Act in bulk", detail: "Tick several rows to retry or refund them together." },
     ],
   },
   {
@@ -508,7 +509,8 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "search", title: "Search by email", detail: "The fastest way in." },
+      { icon: "search", title: "Search by email", detail: "Or name, pen name or account id. Press / to start." },
+      { icon: "sliders", title: "Narrow and sort", detail: "By plan, sign-up or last sign-in; click a column to sort." },
       { icon: "eye", title: "Open the account", detail: "Plan, balance and generation history." },
     ],
   },
@@ -567,8 +569,8 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "clock", title: "Work oldest first", detail: "The queue is ordered for a reason." },
-      { icon: "eye", title: "Read the account first", detail: "Their plan and recent generations, before replying." },
+      { icon: "clock", title: "Work oldest first", detail: "Filter to Unread and order by oldest." },
+      { icon: "eye", title: "Read the account first", detail: "The Customer tag opens their plan and history." },
     ],
   },
   {

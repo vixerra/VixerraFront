@@ -138,7 +138,9 @@ export function TrendChart({
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            interval={isMobile ? 6 : 4}
+            // About five ticks on a phone and eight otherwise, whatever the
+            // range — 7 days labels every day, 90 days every twelfth.
+            interval={Math.max(0, Math.ceil(data.length / (isMobile ? 5 : 8)) - 1)}
             minTickGap={isMobile ? 16 : 8}
           />
           <YAxis
@@ -256,10 +258,14 @@ export function RankedBars({
   data,
   height = 240,
   color = RED,
+  onSelect,
 }: {
   data: { label: string; value: number; secondary?: number }[];
   height?: number;
   color?: string;
+  /** Makes the bars clickable — e.g. to filter a table to that category.
+   *  Receives the bar's index in `data`. */
+  onSelect?: (index: number) => void;
 }) {
   return (
     <div style={{ height }} className="w-full">
@@ -277,7 +283,14 @@ export function RankedBars({
             width={150}
           />
           <Tooltip {...tooltipProps} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-          <Bar dataKey="value" fill={color} radius={[0, 6, 6, 0]} maxBarSize={18} />
+          <Bar
+            dataKey="value"
+            fill={color}
+            radius={[0, 6, 6, 0]}
+            maxBarSize={18}
+            cursor={onSelect ? "pointer" : undefined}
+            onClick={onSelect ? (_, index) => onSelect(index) : undefined}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

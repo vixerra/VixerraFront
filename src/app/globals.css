@@ -244,6 +244,9 @@
      reasoning/timing as sheet-up above, just sliding in from the edge the
      panel is anchored to instead of the bottom. */
   --animate-sheet-left: sheet-left 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* The admin panel's detail drawers (see admin/generation-drawer.tsx),
+     which open from the right edge. Same timing as the two above. */
+  --animate-sheet-right: sheet-right 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
   /* Generation loader (see generate/generation-loader.tsx) — the generate
      page's "working on it" state is an animated line icon of the thing
      being made (a film frame for video, a photo for image), not a spinner
@@ -336,6 +339,15 @@
 @keyframes sheet-left {
   from {
     transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes sheet-right {
+  from {
+    transform: translateX(100%);
   }
   to {
     transform: translateX(0);

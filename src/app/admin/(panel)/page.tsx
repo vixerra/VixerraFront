@@ -1,24 +1,67 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   Activity,
   AlertTriangle,
+  ArrowRight,
   ArrowUpRight,
   Info,
+  Loader2,
   Mail,
   TrendingUp,
   Users,
   Zap,
 } from "lucide-react";
 import { useAdminStats } from "@/hooks/use-admin";
+import { useAdminGenerations, useAdminUsers } from "@/hooks/use-admin-data";
+import { useUrlFilters } from "@/hooks/use-url-filters";
 import { Card } from "@/components/ui/card";
 import { useSpotlight } from "@/hooks/use-spotlight";
 import { cn } from "@/lib/utils";
 import { CREDIT_VALUE_USD } from "@/lib/constants";
-import { LoadingBlock, ErrorBlock } from "@/components/admin/ui";
+import { ChipGroup } from "@/components/admin/filters";
+import { LoadingBlock, ErrorBlock, Mono, TierPill, When } from "@/components/admin/ui";
 import { ChartCard, TrendChart, BreakdownDonut, RankedBars } from "@/components/admin/charts";
+
+const DEFAULTS = { days: "30" };
+
+/** A short list with a "see all" link — the overview's way into a queue. */
+function ListCard({
+  title,
+  href,
+  loading,
+  empty,
+  children,
+}: {
+  title: string;
+  href: string;
+  loading: boolean;
+  empty: string;
+  children: ReactNode[];
+}) {
+  return (
+    <Card variant="standard" className="p-5 shadow-card hover:translate-y-0">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="font-display text-feature-title font-bold text-ink">{title}</h3>
+        <Link href={href} className="inline-flex items-center gap-1 text-caption text-brand hover:underline">
+          See all <ArrowRight className="size-3" aria-hidden="true" />
+        </Link>
+      </div>
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="size-5 animate-spin text-muted" aria-label="Loading" />
+        </div>
+      ) : children.length === 0 ? (
+        <p className="py-8 text-center text-body-sm text-muted">{empty}</p>
+      ) : (
+        <ul className="divide-y divide-line">{children}</ul>
+      )}
+    </Card>
+  );
+}
 
 /** Compact metric tile — the same rounded-card, uppercase-caption, big-display
  *  -number rhythm the customer dashboard uses for its secondary stats. */
@@ -72,8 +115,19 @@ function Stat({
 }
 
 export default function AdminOverviewPage() {
-  const { data, isLoading, isError, error } = useAdminStats();
+  const router = useRouter();
+  const { filters, update } = useUrlFilters(DEFAULTS, { limit: 0 });
+  const days = [7, 30, 90].includes(Number(filters.days)) ? Number(filters.days) : 30;
+  const { data, isLoading, isError, error, isFetching } = useAdminStats(days);
   const spotlight = useSpotlight<HTMLDivElement>();
+
+  // The two queues worth a glance on arrival, straight from the list
+  // endpoints the full pages use — "See all" opens the same view, unabridged.
+  const failures = useAdminGenerations(
+    { status: "failed", sort: "createdAt", dir: "desc", limit: 5, offset: 0 },
+    { live: false },
+  );
+  const newest = useAdminUsers({ sort: "createdAt", dir: "desc", limit: 5, offset: 0 });
 
   if (isLoading) return <LoadingBlock />;
   if (isError || !data) return <ErrorBlock message={(error as Error)?.message} />;
@@ -82,14 +136,30 @@ export default function AdminOverviewPage() {
   const failRate = data.generations24h
     ? Math.round((data.failed24h / data.generations24h) * 100)
     : 0;
+  const tiers = [...data.tierSplit].sort((a, b) => b.count - a.count);
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-heading font-bold tracking-tight text-ink">Overview</h1>
-        <p className="mt-2 text-body-sm text-muted">
-          Live counts straight from the database — no sampling, no cache.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-heading font-bold tracking-tight text-ink">Overview</h1>
+          <p className="mt-2 text-body-sm text-muted">
+            Live counts straight from the database — no sampling, no cache.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {isFetching && <Loader2 className="size-4 animate-spin text-muted" aria-label="Updating" />}
+          <ChipGroup
+            label="Chart range"
+            value={String(days)}
+            onChange={(next) => update({ days: next })}
+            options={[
+              { value: "7", label: "7 days" },
+              { value: "30", label: "30 days" },
+              { value: "90", label: "90 days" },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Hero row: the two numbers worth checking first — how much work is
@@ -112,7 +182,7 @@ export default function AdminOverviewPage() {
           />
           <div className="relative flex items-center gap-2 text-caption text-muted">
             <Activity className="size-3.5 text-brand" aria-hidden="true" />
-            Generations · last 30 days
+            Generations · last {days} days
           </div>
           <p className="font-display relative mt-2 text-heading font-bold tracking-tight text-ink sm:text-display">
             {data.generationSeries.reduce((n, d) => n + d.count, 0).toLocaleString()}
@@ -140,7 +210,7 @@ export default function AdminOverviewPage() {
             sub={data.generations24h ? `${failRate}% of today's jobs` : "No jobs today"}
             icon={<AlertTriangle className="size-3.5" aria-hidden="true" />}
             tone={data.failed24h > 0 ? "alert" : "default"}
-            href="/admin/generations"
+            href="/admin/generations?status=failed&range=24h"
           />
           <Stat
             label="In flight"
@@ -166,7 +236,7 @@ export default function AdminOverviewPage() {
           value={data.paidUsers}
           sub={`${paidPct}% of accounts`}
           icon={<TrendingUp className="size-3.5" aria-hidden="true" />}
-          href="/admin/users"
+          href="/admin/users?tier=paid"
         />
         <Stat
           label="Credits spent · 30d"
@@ -182,12 +252,64 @@ export default function AdminOverviewPage() {
           sub="From the contact form"
           icon={<Mail className="size-3.5" aria-hidden="true" />}
           tone={data.unreadMessages > 0 ? "warn" : "default"}
-          href="/admin/support"
+          href={data.unreadMessages > 0 ? "/admin/support?status=unread" : "/admin/support"}
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Signups" hint="New accounts per day, last 30 days">
+        <ListCard
+          title="Latest failures"
+          href="/admin/generations?status=failed"
+          loading={failures.isLoading}
+          empty="No failed jobs on record."
+        >
+          {(failures.data?.generations ?? []).map((g) => (
+            <li key={g.id}>
+              <Link
+                href={`/admin/generations?status=failed&open=${g.id}`}
+                className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-white/[0.03]"
+              >
+                <span className="min-w-0">
+                  <Mono className="block truncate text-ink-soft">{g.model}</Mono>
+                  <span className="block truncate text-caption text-accent">
+                    {g.errorCode ?? "failed"}
+                    {g.errorMessage ? ` — ${g.errorMessage}` : ""}
+                  </span>
+                </span>
+                <When value={g.createdAt} />
+              </Link>
+            </li>
+          ))}
+        </ListCard>
+
+        <ListCard
+          title="Newest accounts"
+          href="/admin/users"
+          loading={newest.isLoading}
+          empty="No accounts yet."
+        >
+          {(newest.data?.users ?? []).map((u) => (
+            <li key={u.id}>
+              <Link
+                href={`/admin/users/${u.id}`}
+                className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-white/[0.03]"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-body-sm text-ink">{u.name}</span>
+                  <Mono className="block truncate">{u.email}</Mono>
+                </span>
+                <span className="flex shrink-0 items-center gap-3">
+                  <TierPill tier={u.tier} />
+                  <When value={u.createdAt} />
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ListCard>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ChartCard title="Signups" hint={`New accounts per day, last ${days} days`}>
           <TrendChart data={data.signupSeries} color="#56a8e8" height={200} />
         </ChartCard>
 
@@ -205,13 +327,12 @@ export default function AdminOverviewPage() {
           />
         </ChartCard>
 
-        <ChartCard title="Accounts by plan" hint="Where the user base actually sits">
+        <ChartCard title="Accounts by plan" hint="Where the user base actually sits — click a plan to list it">
           <RankedBars
-            data={[...data.tierSplit]
-              .sort((a, b) => b.count - a.count)
-              .map((t) => ({ label: t.tier, value: t.count }))}
+            data={tiers.map((t) => ({ label: t.tier, value: t.count }))}
             color="#bbdc12"
             height={200}
+            onSelect={(i) => tiers[i] && router.push(`/admin/users?tier=${tiers[i].tier}`)}
           />
         </ChartCard>
       </div>
