@@ -28,9 +28,17 @@ already a dependency). The 22 tiles below came in at 17.5 MB as PNG/JPEG and 0.8
 
 ## Status
 
-22 of 35 styles have art — every image style. The 13 video styles (all of UGC and Motion) have none
-yet and keep drawing their motif tile; the two states render side by side in the grid, so there is no
-rush on them.
+All 35 styles have a still. The 13 video styles (all of UGC and Motion) also have a hover loop at
+`public/marketing/videos/<id>.mp4`, which plays over the still while the card is hovered or focused
+and is not fetched before that. All 13 clips are 704×1280, 2.04 s.
+
+**A video style's still is its clip's first frame, not a prompt from this file.** Hover restarts the
+loop at 0 and fades it in over the still, so the two have to match for the handoff to be invisible.
+When a clip is regenerated, re-extract frame 0 as `public/marketing/<id>.webp`. The single-frame
+prompts in the UGC and Motion sections below predate the clips and are no longer what those tiles use.
+
+`kinetic-typography` is worth regenerating: no words ever animate — it is a magenta wipe across a
+bottle, which reads as a transition rather than as type.
 
 Three tiles are worth regenerating when convenient:
 

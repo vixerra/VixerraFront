@@ -583,11 +583,16 @@ function AssetSlot({
 /** Idle canvas — the picked style's own artwork blown up, so the right side
  *  says something before there is a result to show. */
 function StyleCanvas({ style }: { style: MarketingStyle }) {
+  const [previewing, setPreviewing] = useState(false);
   return (
     <div className="flex h-full min-h-[24rem] flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-brand/15 bg-surface-2/20 p-10 text-center">
-      <div className="w-40 overflow-hidden rounded-2xl border border-line shadow-floating">
+      <div
+        className="w-40 overflow-hidden rounded-2xl border border-line shadow-floating"
+        onPointerEnter={() => setPreviewing(true)}
+        onPointerLeave={() => setPreviewing(false)}
+      >
         <div className="aspect-[3/4]">
-          <StylePreview style={style} />
+          <StylePreview style={style} playing={previewing} />
         </div>
       </div>
       <h2 className="mt-6 font-display text-subheading font-bold text-ink">{style.name}</h2>

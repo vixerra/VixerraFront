@@ -210,8 +210,21 @@ function StyleCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  // The whole card counts as the hover target, name and blurb included, and
+  // keyboard focus counts as hovering — tabbing through the grid previews
+  // each clip the same way pointing at it does.
+  const [previewing, setPreviewing] = useState(false);
+
   return (
-    <button type="button" onClick={onSelect} className="group text-left">
+    <button
+      type="button"
+      onClick={onSelect}
+      onPointerEnter={() => setPreviewing(true)}
+      onPointerLeave={() => setPreviewing(false)}
+      onFocus={() => setPreviewing(true)}
+      onBlur={() => setPreviewing(false)}
+      className="group text-left"
+    >
       <div
         className={cn(
           "relative aspect-[3/4] w-full overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300",
@@ -220,7 +233,7 @@ function StyleCard({
             : "border-line group-hover:-translate-y-1 group-hover:border-brand/40 group-hover:shadow-glow-sm",
         )}
       >
-        <StylePreview style={style} />
+        <StylePreview style={style} playing={previewing} />
         {selected && (
           <span className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-brand text-on-brand shadow-glow-sm">
             <Check className="size-3.5" aria-hidden="true" />

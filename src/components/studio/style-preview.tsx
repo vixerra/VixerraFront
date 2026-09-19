@@ -1,30 +1,108 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import type { MarketingStyle, StyleMotif } from "@/lib/marketing-styles";
 import { cn } from "@/lib/utils";
 
+/** How long a pointer has to rest on a tile before its loop is fetched. A
+ *  sweep across the grid passes over every card in a row; without this, each
+ *  one it grazes starts a download that is cancelled a frame later. */
+const HOVER_INTENT_MS = 120;
+
 /**
  * The artwork on a style card: a rendered sample when the style has one,
- * otherwise a tile drawn from its palette and motif.
+ * otherwise a tile drawn from its palette and motif — and, for a style with a
+ * `video`, its loop playing over that still while `playing` is true.
  *
  * The drawn tile came first, because the catalog shipped no art and every
  * sample we could have borrowed would either be someone else's work or a
  * claim ("this is what this style produces") the catalog couldn't back. The
- * thumbnails in /public/marketing are neither — each is a generation from
- * this studio off the prompt recorded in docs/marketing-style-thumbnails.md.
- * The drawn tile stays for the styles without art (today, all 13 video ones)
- * and as the fallback behind every image that hasn't loaded yet, so it is a
- * supported state rather than a stopgap.
+ * samples in /public/marketing are neither — each is a generation from this
+ * studio off the prompt recorded in docs/marketing-style-thumbnails.md. The
+ * drawn tile stays for styles without art and as the fallback behind every
+ * image that hasn't loaded yet, so it is a supported state, not a stopgap.
+ *
+ * `playing` is the caller's call rather than this component's own hover
+ * state: a picker card wants the whole card (name and blurb included) to
+ * count, and wants keyboard focus to count too, while the 56px header chip
+ * wants no playback at all.
  */
 export function StylePreview({
   style,
   className,
+  playing = false,
 }: {
   style: MarketingStyle;
   className?: string;
+  playing?: boolean;
 }) {
+  if (!style.video) return <StillTile style={style} className={className} />;
+
+  return (
+    <div className={cn("relative h-full w-full overflow-hidden", className)}>
+      <StillTile style={style} />
+      <PreviewLoop src={style.video} playing={playing} />
+    </div>
+  );
+}
+
+/**
+ * The loop over a video style's tile.
+ *
+ * `preload="none"` is the whole point: a category of seven video styles would
+ * otherwise start seven downloads the moment the picker opens. The clip is
+ * fetched on the first hover and cached from then on. It stays invisible
+ * until it is actually painting frames, so the still underneath covers the
+ * load instead of a black box.
+ */
+function PreviewLoop({ src, playing }: { src: string; playing: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [painting, setPainting] = useState(false);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    if (!playing) {
+      video.pause();
+      return;
+    }
+    // Hover-to-play is user-initiated, but a looping clip is still exactly
+    // the motion this setting asks us to hold back.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const timer = window.setTimeout(() => {
+      video.currentTime = 0;
+      // Rejects with AbortError when a pause lands before playback starts —
+      // the pointer simply moved on, which is not a failure.
+      video.play().catch(() => {});
+    }, HOVER_INTENT_MS);
+    return () => window.clearTimeout(timer);
+  }, [playing]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      muted
+      loop
+      playsInline
+      preload="none"
+      disablePictureInPicture
+      tabIndex={-1}
+      // Decorative: the still underneath already carries the tile's name.
+      aria-hidden="true"
+      onPlaying={() => setPainting(true)}
+      onPause={() => setPainting(false)}
+      className={cn(
+        "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+        painting ? "opacity-100" : "opacity-0",
+      )}
+    />
+  );
+}
+
+function StillTile({ style, className }: { style: MarketingStyle; className?: string }) {
   if (style.thumbnail) {
     return (
       // The gradient sits under the image rather than beside it: the card has

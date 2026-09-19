@@ -119,10 +119,17 @@ export type MarketingStyle = {
    *  claim the catalog couldn't back. These are neither: each one is a
    *  generation from this studio, off the prompt recorded for it in
    *  docs/marketing-style-thumbnails.md, on an unbranded stand-in product.
-   *  The 13 video styles have none yet and keep drawing their motif — the two
-   *  render side by side in the grid, so the drawn tiles stay a supported
-   *  state rather than a stopgap. */
+   *
+   *  On a video style this must be the clip's own first frame, not a
+   *  separate render: hover restarts the loop at 0 and fades it in over the
+   *  still, so a matching frame makes that seamless and anything else turns
+   *  it into a crossfade between two different pictures. */
   thumbnail?: string;
+  /** A short muted loop under /public that plays over the tile while it is
+   *  hovered or focused — video styles only, where a still can't show the
+   *  one thing that sets them apart. Never fetched until then: the picker
+   *  can have seven of these on screen at once. See StylePreview. */
+  video?: string;
   /** Folded into the prompt on submit. Treatment and composition only.
    *
    *  Written as a photographer's or director's brief rather than as a mood:
@@ -516,6 +523,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["tiktok", "reels", "unboxing", "handheld", "authentic"],
     motif: "phone",
     palette: ["#f4b8c8", "#7a3450"],
+    thumbnail: "/marketing/unboxing-selfie.webp",
+    video: "/marketing/videos/unboxing-selfie.mp4",
     direction:
       "handheld vertical selfie video with a phone-camera look, natural indoor light from a window, the person opens the box and reacts honestly to what is inside, then holds the product up to the lens so the label reads clearly, casual unpolished energy with slight handheld drift and a natural refocus, a normal speaking voice over quiet room tone and no music bed",
     copy: "none",
@@ -530,6 +539,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["review", "testimonial", "creator", "talking head"],
     motif: "portrait",
     palette: ["#c9d8f0", "#33445e"],
+    thumbnail: "/marketing/talking-review.webp",
+    video: "/marketing/videos/talking-review.mp4",
     direction:
       "creator talking straight to camera while holding the product at chest height, a home background slightly out of focus, soft natural light on the face, eye contact with the lens, phone framing from just above eye level, honest conversational delivery at a normal pace with accurate lip sync, a close clean voice over quiet room tone",
     copy: "none",
@@ -544,6 +555,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["hook", "pov", "before after", "pain point", "tiktok"],
     motif: "phone",
     palette: ["#a8d5ba", "#2f4f43"],
+    thumbnail: "/marketing/problem-fix.webp",
+    video: "/marketing/videos/problem-fix.mp4",
     direction:
       "vertical phone-shot clip that opens on the frustration the product solves, shown in the first two seconds, then turns to the same person using the product with the problem gone, the same room and the same light on both sides of the turn so the fix reads instantly, handheld and unpolished, a plain conversational voice with no music bed",
     copy: "none",
@@ -558,6 +571,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["grwm", "beauty", "routine", "vanity", "mirror"],
     motif: "phone",
     palette: ["#f3d9b1", "#8a6134"],
+    thumbnail: "/marketing/grwm.webp",
+    video: "/marketing/videos/grwm.mp4",
     direction:
       "vertical get-ready-with-me clip at a mirror or vanity, the person uses the product mid-routine while talking to camera, warm ambient light with a soft bulb glow, relaxed multitasking energy, the product turned face-on to the lens each time it is picked up, a natural unhurried voice over quiet room tone",
     copy: "none",
@@ -572,6 +587,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["demo", "how to", "tutorial", "close up", "asmr"],
     motif: "object",
     palette: ["#dcd3c6", "#6b6152"],
+    thumbnail: "/marketing/hands-on-demo.webp",
+    video: "/marketing/videos/hands-on-demo.mp4",
     direction:
       "close-up of hands demonstrating the product on a clean surface, alternating top-down and over-the-shoulder framing, no face in frame, crisp macro detail on every interaction, soft even light with no blown reflections, deliberate unhurried movement, close tactile contact sounds and no voice-over",
     copy: "none",
@@ -586,6 +603,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["interview", "street", "documentary", "man on the street"],
     motif: "portrait",
     palette: ["#b9c4c9", "#3c4a52"],
+    thumbnail: "/marketing/street-vox-pop.webp",
+    video: "/marketing/videos/street-vox-pop.mp4",
     direction:
       "documentary street interview, shallow depth of field with city bokeh behind, natural daylight, the person holds the product and answers a question from an off-camera interviewer, slight handheld movement, candid unrehearsed delivery with street ambience sitting under the voice",
     copy: "none",
@@ -602,6 +621,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["motion graphics", "flat", "animation", "graphic"],
     motif: "object",
     palette: ["#b18cf5", "#f0d9c4"],
+    thumbnail: "/marketing/2d-product-motion.webp",
+    video: "/marketing/videos/2d-product-motion.mp4",
     direction:
       "flat graphic motion design, the product composited over animated 2D shapes and paper-cut layers, smooth eased transitions with a confident overshoot, bold flat color, a locked-off camera with no shake, shapes entering and leaving on a steady beat while the product stays fully visible throughout",
     copy: "none",
@@ -616,6 +637,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["fast", "energetic", "whip pan", "speed ramp", "macro"],
     motif: "splash",
     palette: ["#63e6be", "#0d6b7a"],
+    thumbnail: "/marketing/hypermotion.webp",
+    video: "/marketing/videos/hypermotion.mp4",
     direction:
       "hyper-kinetic macro motion, whip pans and speed ramps between extreme close-ups, liquid and ingredients bursting in slow motion, punchy contrast and saturated color, a high-energy cutting rhythm in which every shot resolves on the product, impact hits and whooshes carrying the cuts",
     copy: "none",
@@ -630,6 +653,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["typography", "text", "words", "lyric", "bold"],
     motif: "type",
     palette: ["#ff5fa2", "#2b0a1b"],
+    thumbnail: "/marketing/kinetic-typography.webp",
+    video: "/marketing/videos/kinetic-typography.mp4",
     direction:
       "kinetic typography spot: large words animate on and off around the product in a tight rhythm, bold sans-serif, high-contrast color blocking, each word landing on a beat and holding long enough to be read, the product anchored at the center and never covered by the type",
     copy: "supplied",
@@ -644,6 +669,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["premium", "tech", "apple", "slow", "minimal"],
     motif: "object",
     palette: ["#4a4f57", "#0a0a0c"],
+    thumbnail: "/marketing/dark-minimalism.webp",
+    video: "/marketing/videos/dark-minimalism.mp4",
     direction:
       "minimal dark set, one slow deliberate camera move around the product, a single travelling light source tracing its edges, deep negative space and restraint, premium tech tone, no cuts, settling on a held hero frame, near-silence carried by one low sustained tone",
     copy: "none",
@@ -658,6 +685,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["pour", "drip", "slow motion", "macro", "texture"],
     motif: "splash",
     palette: ["#f0b67f", "#7c3f1d"],
+    thumbnail: "/marketing/liquid-pour.webp",
+    video: "/marketing/videos/liquid-pour.mp4",
     direction:
       "slow-motion pour or drip interacting with the product, macro lens, glossy surfaces, controlled studio light with crisp specular highlights, liquid moving with real viscosity and weight, a luxurious tactile feel, the label staying clean, dry and readable throughout",
     copy: "none",
@@ -672,6 +701,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["360", "turntable", "spin", "loop", "rotate"],
     motif: "orbit",
     palette: ["#a8b6c8", "#2c3746"],
+    thumbnail: "/marketing/orbit-turntable.webp",
+    video: "/marketing/videos/orbit-turntable.mp4",
     direction:
       "a smooth 360-degree orbit around the product on a turntable at constant speed, the last frame matching the first so it loops seamlessly, studio gradient background, consistent specular highlights through the whole rotation, no cuts, the product centered and stationary while only the camera moves",
     copy: "none",
@@ -686,6 +717,8 @@ export const MARKETING_STYLES: MarketingStyle[] = [
     keywords: ["reveal", "logo", "particles", "intro", "sting"],
     motif: "burst",
     palette: ["#7dd3fc", "#0c1f3d"],
+    thumbnail: "/marketing/particle-reveal.webp",
+    video: "/marketing/videos/particle-reveal.mp4",
     direction:
       "the product assembles from drifting particles and settles into a clean hero frame, dark studio, subtle volumetric light rays, the particles resolving completely rather than lingering around the edges, ending on a held still with clear space above the product, one rising whoosh into a soft impact",
     copy: "none",
