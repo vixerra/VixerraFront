@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { AudioLines, FileVideo, ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -81,31 +81,119 @@ export function SegmentedTabs<T extends string>({
   );
 }
 
+/** An uploaded reference the prompt can name — `tag` is what gets typed
+ * after the @ ("image1"), in the order the model receives the files. */
+export type PromptMention = {
+  tag: string;
+  label: string;
+  preview?: string | null;
+  mediaKind?: "image" | "video" | "audio";
+};
+
+/** "@ima" right before the caret, at the start of a word — the part being
+ * completed. An @ inside a word (an email address) doesn't open the list. */
+function mentionQueryAt(value: string, caret: number): { start: number; text: string } | null {
+  const match = /(^|\s)@(\w*)$/.exec(value.slice(0, caret));
+  if (!match) return null;
+  return { start: caret - match[2].length - 1, text: match[2].toLowerCase() };
+}
+
 /** The panel's prompt box — a bordered multi-line field with the character
  * count and the ⌘Enter affordance inside its own frame, rather than the
- * bar composer's borderless inline textarea. */
+ * bar composer's borderless inline textarea.
+ *
+ * With `mentions`, typing @ opens a list of the uploaded references to insert
+ * as @image1, @image2… — arrows move, Enter or Tab inserts, Escape closes. */
 export function PanelPromptField({
   value,
   onChange,
   onSubmit,
   placeholder,
   maxLength,
+  mentions = [],
 }: {
   value: string;
   onChange: (value: string) => void;
   onSubmit?: () => void;
   placeholder?: string;
   maxLength?: number;
+  mentions?: readonly PromptMention[];
 }) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const listId = useId();
+  const [query, setQuery] = useState<{ start: number; text: string } | null>(null);
+  const [active, setActive] = useState(0);
+  // Where the caret goes once the inserted tag has rendered — setting it
+  // before the controlled value lands would be undone by the re-render.
+  const pendingCaret = useRef<number | null>(null);
+
+  const matches = query ? mentions.filter((m) => m.tag.toLowerCase().startsWith(query.text)) : [];
+  const open = matches.length > 0;
+  const activeIndex = Math.min(active, Math.max(matches.length - 1, 0));
+
+  useLayoutEffect(() => {
+    if (pendingCaret.current === null || !textareaRef.current) return;
+    textareaRef.current.setSelectionRange(pendingCaret.current, pendingCaret.current);
+    pendingCaret.current = null;
+  }, [value]);
+
+  function syncQuery(el: HTMLTextAreaElement) {
+    const next = el.selectionStart === el.selectionEnd ? mentionQueryAt(el.value, el.selectionStart) : null;
+    setQuery(next);
+    if (next?.text !== query?.text) setActive(0);
+  }
+
+  function insert(mention: PromptMention) {
+    const el = textareaRef.current;
+    if (!query || !el) return;
+    const before = value.slice(0, query.start);
+    const after = value.slice(el.selectionStart);
+    const tag = `@${mention.tag}${after.startsWith(" ") ? "" : " "}`;
+    const next = before + tag + after;
+    if (maxLength !== undefined && next.length > maxLength) return;
+    pendingCaret.current = before.length + tag.length + (after.startsWith(" ") ? 1 : 0);
+    setQuery(null);
+    onChange(next);
+  }
+
   return (
-    <div className="rounded-xl border border-line bg-surface-dark transition-colors duration-200 focus-within:border-border-strong">
+    <div className="relative rounded-xl border border-line bg-surface-dark transition-colors duration-200 focus-within:border-border-strong">
       <textarea
+        ref={textareaRef}
         rows={4}
         value={value}
         maxLength={maxLength}
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        role={mentions.length > 0 ? "combobox" : undefined}
+        aria-autocomplete={mentions.length > 0 ? "list" : undefined}
+        aria-expanded={mentions.length > 0 ? open : undefined}
+        aria-controls={open ? listId : undefined}
+        aria-activedescendant={open ? `${listId}-${activeIndex}` : undefined}
+        onChange={(e) => {
+          onChange(e.target.value);
+          syncQuery(e.target);
+        }}
+        onSelect={(e) => syncQuery(e.currentTarget)}
+        onBlur={() => setQuery(null)}
         onKeyDown={(e) => {
+          if (open) {
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+              e.preventDefault();
+              const step = e.key === "ArrowDown" ? 1 : -1;
+              setActive((activeIndex + step + matches.length) % matches.length);
+              return;
+            }
+            if ((e.key === "Enter" && !e.metaKey && !e.ctrlKey) || e.key === "Tab") {
+              e.preventDefault();
+              insert(matches[activeIndex]);
+              return;
+            }
+            if (e.key === "Escape") {
+              e.preventDefault();
+              setQuery(null);
+              return;
+            }
+          }
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
             e.preventDefault();
             onSubmit?.();
@@ -113,10 +201,43 @@ export function PanelPromptField({
         }}
         className="w-full resize-none bg-transparent px-3.5 pt-3 text-body-sm text-ink-soft placeholder:text-muted focus:outline-none"
       />
+      {open && (
+        <ul
+          id={listId}
+          role="listbox"
+          aria-label="Uploaded references"
+          className="absolute inset-x-2 top-full z-30 mt-1 max-h-60 overflow-y-auto rounded-xl border border-line bg-surface-2 p-1 shadow-floating"
+        >
+          {matches.map((mention, index) => (
+            <li
+              key={mention.tag}
+              id={`${listId}-${index}`}
+              role="option"
+              aria-selected={index === activeIndex}
+              // mousedown, not click: a click would blur the textarea first
+              // and close the list before the pick registered.
+              onMouseDown={(e) => {
+                e.preventDefault();
+                insert(mention);
+              }}
+              onMouseEnter={() => setActive(index)}
+              className={cn(
+                "flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5",
+                index === activeIndex ? "bg-surface-3 text-ink" : "text-ink-soft",
+              )}
+            >
+              <MentionThumb mention={mention} />
+              <span className="text-body-sm font-medium">@{mention.tag}</span>
+              <span className="ml-auto truncate text-caption text-muted">{mention.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="flex items-center justify-between gap-2 px-3.5 pb-2.5">
         <kbd className="hidden items-center gap-1 rounded-md border border-line bg-surface-3 px-1.5 py-0.5 font-mono text-caption text-muted sm:flex">
           ⌘ Enter
         </kbd>
+        {mentions.length > 0 && <span className="text-caption text-muted">Type @ to reference an upload</span>}
         {maxLength !== undefined && (
           <span className="ml-auto text-caption text-muted">
             {value.length}/{maxLength}
@@ -125,6 +246,23 @@ export function PanelPromptField({
       </div>
     </div>
   );
+}
+
+function MentionThumb({ mention }: { mention: PromptMention }) {
+  const box = "size-8 shrink-0 overflow-hidden rounded-md border border-line bg-surface-3";
+  if (mention.mediaKind === "audio" || !mention.preview) {
+    const Icon = mention.mediaKind === "audio" ? AudioLines : mention.mediaKind === "video" ? FileVideo : ImagePlus;
+    return (
+      <span className={cn(box, "flex items-center justify-center text-brand")}>
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+    );
+  }
+  if (mention.mediaKind === "video") {
+    return <video src={mention.preview} className={cn(box, "object-cover")} muted playsInline preload="metadata" />;
+  }
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={mention.preview} alt="" className={cn(box, "object-cover")} />;
 }
 
 /** Wraps a stack of FieldRow rows in the panel's input-surface frame so the

@@ -65,6 +65,7 @@ import {
   FieldRow,
   CreditsSubmitPill,
   type PickerModel,
+  type PromptMention,
 } from "./composer";
 
 const ENDPOINTS = {
@@ -481,6 +482,20 @@ export function DynamicModelForm<T extends string>({
     );
   }
 
+  /** What @ offers in the prompt, numbered as the tiles are: the images the
+   *  model receives as a list, in the order it receives them. */
+  const referencePreviews = references.map((r) => r.preview);
+  const mentionPreviews = showingReferences
+    ? referencePreviews
+    : referenceSlots > 0 && !referencesExclusive && image
+      ? [preview, ...referencePreviews]
+      : [];
+  const promptMentions: PromptMention[] = mentionPreviews.map((p, i) => ({
+    tag: `image${i + 1}`,
+    label: `Image ${i + 1}`,
+    preview: p,
+  }));
+
   const referenceHint = [
     `Optional — up to ${referenceSlots} ${referencesExclusive ? "images" : "more images"} of the people, objects or places to keep.`,
     config.referenceImages?.hint ?? "Refer to them in the prompt.",
@@ -659,6 +674,7 @@ export function DynamicModelForm<T extends string>({
                       : "Describe the scene you imagine"
                 }
                 maxLength={PROMPT_MAX_LENGTH}
+                mentions={promptMentions}
               />
             )}
           />

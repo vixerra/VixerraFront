@@ -538,6 +538,25 @@ export function SeedanceVideoForm({
                 onSubmit={submit}
                 placeholder="Describe the scene you imagine"
                 maxLength={PROMPT_MAX_LENGTH}
+                mentions={[
+                  ...attachments.referenceImages.map((a, i) => ({
+                    tag: `image${i + 1}`,
+                    label: `Image ${i + 1}`,
+                    preview: a.preview,
+                    mediaKind: "image" as const,
+                  })),
+                  ...attachments.referenceVideos.map((a, i) => ({
+                    tag: `video${i + 1}`,
+                    label: `Clip ${i + 1}`,
+                    preview: a.preview,
+                    mediaKind: "video" as const,
+                  })),
+                  ...attachments.referenceAudios.map((a, i) => ({
+                    tag: `audio${i + 1}`,
+                    label: `Audio ${i + 1}`,
+                    mediaKind: "audio" as const,
+                  })),
+                ]}
               />
             )}
           />

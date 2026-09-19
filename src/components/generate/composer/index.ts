@@ -7,6 +7,7 @@ export {
   PanelFieldList,
   PanelDropzone,
   type ReferenceMode,
+  type PromptMention,
 } from "./panel";
 export { PillSelect, DisabledPillHint, FieldRow, pillClass } from "./pill";
 export { CreditsSubmitPill } from "./credits-pill";

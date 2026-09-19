@@ -458,6 +458,11 @@ export function Seedance2VideoForm({
                 onSubmit={submit}
                 placeholder="Describe the scene you imagine"
                 maxLength={PROMPT_MAX_LENGTH}
+                mentions={characters.map((c, i) => ({
+                  tag: `image${i + 1}`,
+                  label: `Character ${i + 1}`,
+                  preview: c.preview,
+                }))}
               />
             )}
           />
