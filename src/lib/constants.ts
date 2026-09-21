@@ -433,11 +433,13 @@ export const SEEDANCE_MODEL_ID = "bytedance/seedance-2.5";
 export const SEEDANCE_DURATION_MIN = 4;
 export const SEEDANCE_DURATION_MAX = 30;
 export const SEEDANCE_DURATION_AUTO = -1;
-// 1080p isn't offered by Cloudflare's Seedance 2.5 integration — those
-// requests route to kie.ai instead, on resolution alone (see usesKieAi in
-// aiVideo-backend's generation-runner.ts). That provider's task takes a first
-// frame and nothing else, which is why validation.ts refuses 1080p together
-// with any of the reference lists below.
+// All three resolutions run on kie.ai since 2026-09-21 — Cloudflare never
+// offered 1080p here, and couldn't hold a reference-image render inside one
+// Edge Function invocation either (see usesKieAi in aiVideo-backend's
+// generation-runner.ts). kie.ai takes the reference lists below at every
+// resolution, but not alongside a first/last frame: those are separate input
+// modes, which is what validation.ts now refuses instead of the old 1080p
+// rule.
 export const SEEDANCE_RESOLUTIONS = ["480p", "720p", "1080p"] as const;
 export const SEEDANCE_ASPECT_RATIOS = [
   "adaptive",

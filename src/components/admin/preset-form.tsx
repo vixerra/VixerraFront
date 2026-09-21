@@ -48,7 +48,9 @@ const SEEDANCE_FIELDS: Record<string, DynamicField[]> = {
     { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: [...SEEDANCE_ASPECT_RATIOS], defaultValue: "adaptive" },
     { key: "generateAudio", cfParam: "generate_audio", label: "Generate audio", type: "switch", defaultValue: true },
     { key: "watermark", cfParam: "watermark", label: "Watermark", type: "switch", defaultValue: false },
-    { key: "useVirtualAvatar", cfParam: "use_virtual_avatar", label: "Virtual avatar mode", type: "switch", defaultValue: true },
+    // No virtual-avatar switch on 2.5 since 2026-09-21: the model moved to
+    // kie.ai, whose schema has no use_virtual_avatar, so a preset setting it
+    // would store a field the runner cannot send. 2.0 below still has it.
     { key: "outputFormat", cfParam: "output_format", label: "Output format", type: "select", options: [...SEEDANCE_OUTPUT_FORMATS], defaultValue: "mp4" },
   ],
   [SEEDANCE2_MODEL_ID]: [

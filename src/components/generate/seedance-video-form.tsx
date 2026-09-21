@@ -7,7 +7,7 @@ import { useInvalidateCredits, useUsage } from "@/hooks/use-credits";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftRight, FileType, Monitor, RectangleHorizontal } from "lucide-react";
-import { FieldError, Input } from "@/components/ui/input";
+import { FieldError } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -123,7 +123,6 @@ export function SeedanceVideoForm({
   const [uploadingList, setUploadingList] = useState<ReferenceListKey | null>(null);
 
   const {
-    register,
     handleSubmit,
     control,
     setValue,
@@ -138,10 +137,14 @@ export function SeedanceVideoForm({
       aspectRatio: "adaptive",
       generateAudio: true,
       watermark: false,
-      // Pinned on and no longer offered as a switch: it routes character
-      // references through ByteDance's trusted avatar library instead of its
-      // face/deepfake detector, so it only ever unblocks a generation.
-      useVirtualAvatar: true,
+      // useVirtualAvatar is NOT set here any more. It used to be pinned on —
+      // it routed character references through ByteDance's trusted avatar
+      // library instead of its face/deepfake detector, so it only ever
+      // unblocked a generation — but 2.5 now runs on kie.ai, whose schema has
+      // no such field, and the shared schema refuses it rather than let a run
+      // be billed for input the provider ignored. A reference set that trips
+      // the detector has no way past it on this model now; Seedance 2.0 still
+      // has the switch.
       outputFormat: "mp4",
     },
   });
@@ -197,12 +200,13 @@ export function SeedanceVideoForm({
   // locked here means the clamp above had nothing to fall back to.
   const blockedReason = isResolutionLocked(resolution, tierInfo)
     ? upgradeHint(minTierForResolution(resolution), resolution)
-    : // 1080p leaves Cloudflare for kie.ai, whose Seedance 2.5 task takes a
-      // first frame and nothing else. The schema refuses the pairing, so say
-      // why on the button rather than letting Generate surface a field error
-      // on a control that may be scrolled out of view.
-      resolution === "1080p" && hasAnyReferenceList
-      ? "1080p can't carry reference images, videos or audio — switch to 720p."
+    : // Reference files and start/end frames are separate input modes on the
+      // provider, not extras that combine (see the schema). Resolution no
+      // longer has anything to do with it — 1080p carries the lists like the
+      // others since the model moved fully to kie.ai. Said on the button
+      // rather than left to a field error on a control scrolled out of view.
+      hasAnyReferenceList && Boolean(image)
+      ? "Reference files and a start frame can't be used together — remove one."
       : undefined;
 
   /** Shared by every upload slot this form owns — first frame, last frame and
@@ -665,19 +669,11 @@ export function SeedanceVideoForm({
               />
             </FieldRow>
 
-            <div className="py-3.5">
-              <label htmlFor="sd-seed" className="mb-1.5 block text-label text-ink-soft">
-                Seed (optional)
-              </label>
-              <Input
-                id="sd-seed"
-                type="number"
-                placeholder="Random"
-                {...register("seed", {
-                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                })}
-              />
-            </div>
+            {/* The seed input lived here until 2026-09-21. kie.ai, which now
+                runs every Seedance 2.5 request, has no seed field, so the
+                control would have promised a reproducibility the provider
+                can't give — the schema refuses one rather than drop it on the
+                wire. Seedance 2.0 keeps its seed. */}
           </PanelFieldList>
         </PanelSection>
       </div>

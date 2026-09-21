@@ -156,7 +156,10 @@ export const seedanceVideoSchema = z
     aspectRatio: z.enum(SEEDANCE_ASPECT_RATIOS).default("adaptive"),
     generateAudio: z.boolean().default(true),
     watermark: z.boolean().default(false),
-    useVirtualAvatar: z.boolean().default(true),
+    // False since 2026-09-21, and matching the API's own copy: 2.5's provider
+    // has no use_virtual_avatar field any more. The refine at the bottom
+    // explains what that costs.
+    useVirtualAvatar: z.boolean().default(false),
     outputFormat: z.enum(SEEDANCE_OUTPUT_FORMATS).default("mp4"),
     seed: z.number().int().min(-9007199254740991).max(9007199254740991).optional(),
   })
@@ -179,15 +182,23 @@ export const seedanceVideoSchema = z
     error: "Add a start frame before setting an end frame.",
     path: ["lastFrameImage"],
   })
-  // 1080p is the one resolution Cloudflare's integration can't serve, so it
-  // routes to kie.ai instead (see aiVideo-backend's generation-runner.ts), and
-  // kie.ai's Seedance 2.5 task takes a first frame and nothing else. Sending
-  // the reference lists anyway would drop them silently and bill for a
-  // generation that ignored most of its input — refused here so it stays a
-  // free validation error at submit time. Must keep matching usesKieAi() there.
+  // Everything below follows one fact: since 2026-09-21 every Seedance 2.5
+  // request runs on kie.ai, at every resolution (see usesKieAi in
+  // aiVideo-backend's generation-runner.ts — Cloudflare's single blocking
+  // call couldn't outlive an Edge Function invocation). These rules describe
+  // kie.ai's schema, so they must keep matching that routing.
+  //
+  // The reference lists are no longer refused at 1080p: kie.ai documents all
+  // three for this model (docs.kie.ai/market/bytedance/seedance-2-5, read
+  // 2026-09-21), and 1080p reference runs are the thing that rule used to
+  // cost us. What it documents instead is that the three input modes —
+  // first frame, first-and-last frame, multimodal reference — cannot be
+  // combined. Cloudflare's integration took a frame and a list together, so
+  // this exclusivity is new, and refusing it here keeps it a free error at
+  // submit time instead of a billed run that ignored half its input.
   .refine(
     (data) =>
-      data.resolution !== "1080p" ||
+      !(data.image || data.lastFrameImage) ||
       !(
         data.referenceImages?.length ||
         data.referenceVideos?.length ||
@@ -195,10 +206,34 @@ export const seedanceVideoSchema = z
       ),
     {
       error:
-        "1080p runs on a provider that only accepts a first frame. Switch to 720p to use reference images, videos or audio.",
-      path: ["resolution"],
+        "Seedance 2.5 takes either start/end frames or reference files, not both. Remove one of the two.",
+      path: ["referenceImages"],
     },
-  );
+  )
+  // Three switches Cloudflare's shape carried that kie.ai's has no field
+  // for. Refused rather than dropped on the way to the provider: a run
+  // billed for a watermark it didn't apply is the failure mode this file
+  // exists to prevent. The composer stopped sending all three for 2.5 the
+  // same day — see seedance-video-form.tsx.
+  .refine((data) => !data.watermark, {
+    error: "Seedance 2.5 can't watermark on its current provider. Turn the watermark off.",
+    path: ["watermark"],
+  })
+  // The escape hatch for AI-generated characters that ByteDance's face
+  // detector reads as real people — gone with the move, so a reference set
+  // that trips the detector now has no way past it on 2.5. It is why this
+  // field defaulted to true here (FORCED_ON_FIELD_KEYS in composer-fields.ts
+  // pins it on wherever it still exists); on 2.5 it defaults to false now
+  // because the provider has nowhere to put it.
+  .refine((data) => !data.useVirtualAvatar, {
+    error:
+      "Virtual avatar isn't available on Seedance 2.5's current provider. Turn it off, or use Seedance 2.0.",
+    path: ["useVirtualAvatar"],
+  })
+  .refine((data) => data.seed === undefined, {
+    error: "Seedance 2.5 doesn't take a seed on its current provider. Remove it, or use Seedance 2.0.",
+    path: ["seed"],
+  });
 export type SeedanceVideoInput = z.infer<typeof seedanceVideoSchema>;
 
 // Seedance 2.0's own parameter set — see SEEDANCE2_* in constants.ts for why

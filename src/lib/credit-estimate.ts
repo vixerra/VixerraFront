@@ -435,14 +435,24 @@ function imageCostUsd(model: string, size: string | undefined, quality: string |
   return imageUsd + (IMAGE_PROMPT_COST_USD[model] ?? 0);
 }
 
-// Seedance 2.5 at 1080p routes to kie.ai instead of Cloudflare — Cloudflare's
-// integration can't serve it. Real kie.ai per-second cost (dashboard,
-// 2026-08-18, and the same on its pricing table 2026-09-12): 1080p, no
-// reference video, $0.570/s. Every other Seedance 2.5
-// request stays on Cloudflare and uses the table above — this branch must
-// keep matching usesKieAi() in generation-runner.ts, which routes on
-// resolution alone, or we'd quote against a provider we don't actually use.
-const SEEDANCE25_KIE_AI_1080P_COST_USD = 0.57;
+// Seedance 2.5's 1080p rate, kept out of the table above only because that
+// table has no 1080p column for this model — every Seedance 2.5 request now
+// runs on kie.ai whatever its resolution (see usesKieAi in aiVideo-backend's
+// generation-runner.ts), so 480p and 720p are already quoted off kie's own
+// numbers up there and need nothing here.
+//
+// $0.790/s, kie.ai's pricing table read 2026-09-21. It was $0.570/s when
+// read on 2026-08-18 and again on 2026-09-12: kie moved the price, and until
+// this was caught a 1080p clip was quoted at about 72% of what it costs us —
+// a ~45% realised margin against the 60% target. The 480p and 720p rows of
+// the same page still match the table above exactly, which is what says the
+// rest of it is current.
+//
+// The branch below ignores hasReferenceVideo, and that stays deliberate:
+// kie prices 1080p-with-reference-video LOWER ($0.475/s), and this file
+// doesn't cut a rate on the strength of a price page alone — same reasoning
+// as withReferenceVideo above. So that mode over-quotes rather than under-.
+const SEEDANCE25_KIE_AI_1080P_COST_USD = 0.79;
 
 function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
