@@ -29,8 +29,10 @@ const FILTERS: Filter[] = ["All", ...PRESET_CATEGORIES];
  * The catalogue is public — it's what the marketing site puts on /prompts —
  * but running a recipe is not: the studio lives behind the app shell and
  * POST /api/generations/preset rejects an anonymous caller outright. So a
- * signed-out visitor is sent to log in with the studio as their return
- * trip, rather than into a page whose only move is to bounce them there.
+ * signed-out visitor is sent to sign up (a visitor browsing the public
+ * catalogue is usually new; signup links on to login with ?next= kept) with
+ * the studio as their return trip, rather than into a page whose only move
+ * is to bounce them there.
  */
 function presetHref(slug: string, isAuthed: boolean) {
   const studio = `/presets/${slug}`;
@@ -38,8 +40,8 @@ function presetHref(slug: string, isAuthed: boolean) {
   // both destinations live on the app host: a relative href here is
   // prefetched from the wrong origin and refused by the browser. See
   // src/lib/hosts.ts. The `next` param stays relative — it is consumed by
-  // the login page, which is already on the app host.
-  return appHref(isAuthed ? studio : `/login?next=${encodeURIComponent(studio)}`);
+  // the signup page, which is already on the app host.
+  return appHref(isAuthed ? studio : `/signup?next=${encodeURIComponent(studio)}`);
 }
 
 function PresetPreview({

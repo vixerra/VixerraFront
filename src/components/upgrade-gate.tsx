@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
 import { hasCreatorSuite, minTierWithCreatorSuite } from "@/lib/tier-limits";
 import { useMe } from "@/hooks/use-me";
+import { siteHref } from "@/lib/hosts";
 
 /**
  * The plan gate for the three tools TIER_INFO.creatorSuite covers — the
@@ -76,6 +77,13 @@ function unlockingPlanLabel(): string {
   return tier ? TIER_INFO[tier].label : "a paid plan";
 }
 
+/** Billing with that plan already singled out (?plan=, see BillingClient),
+ *  so "Upgrade to Creator" doesn't land on a page asking them to choose. */
+function unlockingPlanHref(): string {
+  const tier = minTierWithCreatorSuite();
+  return tier ? `/settings/billing?plan=${tier}` : "/settings/billing";
+}
+
 /** Every plan that includes the suite, listed from the data — so adding or
  *  removing a plan never leaves this sentence naming the old set. */
 function includedPlansLabel(): string {
@@ -112,10 +120,15 @@ export function CreatorSuiteUpsell({
         {blurb} Included on {includedPlansLabel()}.
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-        <Link href="/settings/billing" className={buttonVariants({})}>
+        <Link href={unlockingPlanHref()} className={buttonVariants({})}>
           Upgrade to {plan}
         </Link>
-        <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>
+        {/* /pricing lives on the public host — see src/lib/hosts.ts. */}
+        <Link
+          href={siteHref("/pricing")}
+          prefetch={false}
+          className={buttonVariants({ variant: "secondary" })}
+        >
           Compare plans
         </Link>
       </div>

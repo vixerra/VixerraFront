@@ -16,8 +16,25 @@ import { ResendVerificationButton } from "@/components/auth/resend-verification-
 import { registerSchema, type RegisterInput } from "@/lib/validation";
 import { apiFetch } from "@/lib/api-client";
 import { stashPostVerifyNext } from "@/lib/post-verify-next";
-import { TIER_INFO } from "@/lib/constants";
+import { TIER_INFO, type Tier } from "@/lib/constants";
+import { formatListPrice } from "@/lib/competitor-pricing";
 import { formatCredits } from "@/lib/utils";
+
+/** The paid plan a "Subscribe to X" click is carrying through signup
+ *  (?next=/settings/billing?plan=X, see PlansSection), so the page can say
+ *  where it leads instead of pitching the free credits they didn't ask for. */
+function planFromNext(next: string | null): Tier | null {
+  if (!next) return null;
+  try {
+    const url = new URL(next, "https://placeholder.invalid");
+    if (url.pathname !== "/settings/billing") return null;
+    const plan = url.searchParams.get("plan");
+    if (!plan || !Object.hasOwn(TIER_INFO, plan)) return null;
+    return TIER_INFO[plan as Tier].priceMonthly > 0 ? (plan as Tier) : null;
+  } catch {
+    return null;
+  }
+}
 
 function SignupForm() {
   const router = useRouter();
@@ -26,6 +43,7 @@ function SignupForm() {
   // account signs up and lands on that preset, not on a dashboard they then
   // have to navigate back out of.
   const next = searchParams.get("next");
+  const plan = planFromNext(next);
   const [serverError, setServerError] = useState<string | null>(null);
   // Set once the backend has created the account but is holding the session
   // until the emailed link is clicked — the form is replaced by the
@@ -93,9 +111,31 @@ function SignupForm() {
   return (
     <Card variant="standard">
       <h1 className="text-subheading font-semibold text-ink">Create your account</h1>
-      <p className="mt-2 text-body-sm text-muted">
-        Start with {formatCredits(TIER_INFO.free.monthlyCredits)} free credits — no card required.
-      </p>
+      {plan ? (
+        <p className="mt-2 text-body-sm text-muted">
+          Then straight to checkout for{" "}
+          <span className="font-medium text-ink">
+            {TIER_INFO[plan].label} · {formatListPrice(TIER_INFO[plan].priceMonthly)}/mo
+          </span>
+          . Cancel anytime.
+        </p>
+      ) : (
+        <p className="mt-2 text-body-sm text-muted">
+          Start with {formatCredits(TIER_INFO.free.monthlyCredits)} free credits — no card required.
+        </p>
+      )}
+
+      {/* One click beats three fields and a trip to the inbox, so Google
+          leads and the email form is the fallback. */}
+      <div className="mt-6">
+        <GoogleAuthButton next={next} />
+      </div>
+
+      <div className="mt-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-line" />
+        <span className="text-caption text-muted">or with email</span>
+        <div className="h-px flex-1 bg-line" />
+      </div>
 
       <form
         onSubmit={handleSubmit((data) => {
@@ -139,16 +179,6 @@ function SignupForm() {
           Create account
         </Button>
       </form>
-
-      <div className="mt-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-line" />
-        <span className="text-caption text-muted">or</span>
-        <div className="h-px flex-1 bg-line" />
-      </div>
-
-      <div className="mt-6">
-        <GoogleAuthButton next={next} />
-      </div>
 
       <p className="mt-6 text-center text-body-sm text-muted">
         Already have an account?{" "}

@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Sparkles, Zap } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +60,29 @@ export function CreditsSubmitPill({
 
   const blocked = Boolean(blockedReason) || unaffordable;
 
+  const shape = cn(
+    "inline-flex shrink-0 items-center gap-2 bg-brand text-label font-semibold text-on-brand shadow-glow-sm",
+    fullWidth ? "w-full justify-center rounded-xl px-4 py-3" : "rounded-full px-3.5 py-2",
+    "transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:scale-[1.02] hover:shadow-glow-md active:translate-y-0 active:scale-[0.98]",
+  );
+
+  // Hitting a limit mid-idea is the moment someone is readiest to pay, and a
+  // greyed-out button sold nothing: the way out lived in a hover tooltip,
+  // which a phone never shows. So a blocked control becomes the way out —
+  // billing — with the reason spelled out under it rather than on hover.
+  if (blocked && !loading) {
+    return (
+      <div className={cn("flex flex-col gap-2", fullWidth ? "w-full" : "items-center")}>
+        <Link href="/settings/billing" aria-label={hint} className={cn(shape, className)}>
+          <Zap className="size-4" aria-hidden="true" />
+          {blockedReason ? "Upgrade plan" : "Get more credits"}
+        </Link>
+        {/* hideTooltip callers already print blockedReason themselves. */}
+        {!hideTooltip && <p className="text-center text-caption text-muted">{hint}</p>}
+      </div>
+    );
+  }
+
   const control = (
     // A disabled button fires no pointer events, so the tooltip's hover
     // target has to be the wrapper — same pattern as DisabledPillHint. With
@@ -73,11 +97,7 @@ export function CreditsSubmitPill({
           disabled={disabled || loading || blocked}
           aria-label={hint}
           className={cn(
-            "inline-flex shrink-0 items-center gap-2 bg-brand text-label font-semibold text-on-brand shadow-glow-sm",
-            fullWidth
-              ? "w-full justify-center rounded-xl px-4 py-3"
-              : "rounded-full px-3.5 py-2",
-            "transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:scale-[1.02] hover:shadow-glow-md active:translate-y-0 active:scale-[0.98]",
+            shape,
             "disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100",
             className,
           )}

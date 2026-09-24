@@ -244,6 +244,19 @@ function NavLinks({ onNavigate, collapsed = false }: { onNavigate?: () => void; 
   );
 }
 
+/**
+ * Pages the public site links into ("try this model", a preset, the
+ * editor). A signed-out visitor there has almost always never had an
+ * account, so they get signup, which links back to login with ?next= kept.
+ * Everything else (dashboard, settings…) is reached signed-out mostly by an
+ * expired session, and keeps login.
+ */
+const TRY_IT_PREFIXES = ["/generate", "/presets", "/editor", "/studio"];
+
+function isTryItPath(pathname: string): boolean {
+  return TRY_IT_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -256,8 +269,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   // the Edge Function — see the comment in src/proxy.ts.
   useEffect(() => {
     if (isError) {
-      const next = window.location.pathname;
-      router.replace(`/login?next=${encodeURIComponent(next)}`);
+      const { pathname, search } = window.location;
+      // The query string is the errand: marketing links arrive as
+      // /generate?model=…&prompt=…, and dropping it lands a new account on a
+      // blank composer instead of the model they clicked.
+      const next = encodeURIComponent(pathname + search);
+      router.replace(isTryItPath(pathname) ? `/signup?next=${next}` : `/login?next=${next}`);
     }
   }, [isError, router]);
 

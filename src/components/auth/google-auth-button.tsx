@@ -30,8 +30,8 @@ function GoogleIcon() {
 }
 
 /** `next` is the page's ?next= errand. Supabase's redirectTo must match its
- *  allow-list exactly, so it can't carry it — it's parked in sessionStorage
- *  and picked up by /auth/callback, same as across the email round trip. */
+ *  allow-list exactly, so it can't carry it — it's parked in storage
+ *  (post-verify-next.ts) and picked up by /auth/callback, same as across the email round trip. */
 export function GoogleAuthButton({ next = null }: { next?: string | null }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
