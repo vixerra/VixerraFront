@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
 import { PlanPrice } from "@/components/pricing/plan-price";
 import { apiFetch } from "@/lib/api-client";
-import { formatCredits } from "@/lib/utils";
+import { cn, formatCredits } from "@/lib/utils";
 import { useInvalidateCredits } from "@/hooks/use-credits";
 import type { SubscriptionState } from "@/components/settings/billing-client";
 
@@ -208,8 +208,12 @@ export function PlanSwitcher({
   paymentsEnabled,
   subscription,
   unavailable = false,
+  highlightTier = null,
 }: {
   currentTier: string;
+  /** The plan picked on the landing page (?plan=), singled out and
+   *  scrolled to — the visitor came here to buy that one. */
+  highlightTier?: Tier | null;
   /** False on a deployment with no Stripe keys — the old instant, free
    *  switcher is still the whole billing flow there. */
   paymentsEnabled: boolean;
@@ -224,6 +228,11 @@ export function PlanSwitcher({
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [simulatedResult, setSimulatedResult] = useState<SwitchResult | null>(null);
   const [stripeResult, setStripeResult] = useState<CheckoutResult | null>(null);
+  const pickedRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    pickedRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [highlightTier]);
 
   const pendingCancel = subscription?.cancel_at_period_end === true;
   const periodEnd = formatDate(subscription?.current_period_end);
@@ -358,13 +367,20 @@ export function PlanSwitcher({
           const info = TIER_INFO[tier];
           const isCurrent = tier === currentTier;
           const action = actionFor(tier);
+          const isPicked = tier === highlightTier && !isCurrent;
           return (
-            <Card key={tier} variant="compact" className="flex flex-col">
+            <Card
+              key={tier}
+              ref={isPicked ? pickedRef : undefined}
+              variant="compact"
+              className={cn("flex flex-col", isPicked && "border-brand/50 shadow-glow-md")}
+            >
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-mono text-label font-semibold text-ink">{info.label}</h3>
                 {isCurrent && pendingCancel && (
                   <Badge variant="outline">{periodEnd ? `Ends ${periodEnd}` : "Ending"}</Badge>
                 )}
+                {isPicked && <Badge variant="brand">Your pick</Badge>}
               </div>
               <p className="mt-1 text-heading font-bold text-ink">
                 <PlanPrice priceMonthly={info.priceMonthly} showSuffix={false} />

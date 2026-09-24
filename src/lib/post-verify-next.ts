@@ -8,6 +8,10 @@
 // that survives from the signup tab to the click is this browser, so the
 // errand is parked in sessionStorage and picked up by /verify-email.
 //
+// The Google handoff has the same problem (Supabase's redirectTo must match
+// the allow-list too), so GoogleAuthButton parks the errand here as well and
+// /auth/callback takes it.
+//
 // sessionStorage, not localStorage: it dies with the tab, so a stale errand
 // can't ambush a different signup weeks later on the same machine. A click
 // from another device simply lands on the dashboard — an acceptable miss.

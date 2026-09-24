@@ -1,4 +1,4 @@
-import { type HTMLAttributes } from "react";
+import { type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 export type CardVariant = "standard" | "compact" | "feature" | "glass";
@@ -23,6 +23,6 @@ export function Card({
   variant = "standard",
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement> & { variant?: CardVariant }) {
+}: ComponentProps<"div"> & { variant?: CardVariant }) {
   return <div className={cn(variants[variant], className)} {...props} />;
 }

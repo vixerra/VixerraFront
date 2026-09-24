@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { supabaseBrowserClient } from "@/lib/supabase-browser-client";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser-client";
 import { apiFetch } from "@/lib/api-client";
 import { takePostVerifyNext } from "@/lib/post-verify-next";
 
@@ -37,7 +37,7 @@ export default function VerifyEmailPage() {
     let cancelled = false;
 
     async function run() {
-      const { data } = await supabaseBrowserClient.auth.getSession();
+      const { data } = await getSupabaseBrowserClient().auth.getSession();
       if (cancelled) return;
 
       const accessToken = data.session?.access_token;
@@ -54,7 +54,7 @@ export default function VerifyEmailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ access_token: accessToken }),
       });
-      await supabaseBrowserClient.auth.signOut();
+      await getSupabaseBrowserClient().auth.signOut();
       if (cancelled) return;
 
       if (!res.ok) {

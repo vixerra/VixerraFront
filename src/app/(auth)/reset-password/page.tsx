@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { supabaseBrowserClient } from "@/lib/supabase-browser-client";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser-client";
 import { apiFetch } from "@/lib/api-client";
 
 const schema = z
@@ -43,7 +43,7 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     let cancelled = false;
-    supabaseBrowserClient.auth.getSession().then(({ data }) => {
+    getSupabaseBrowserClient().auth.getSession().then(({ data }) => {
       if (!cancelled) setAccessToken(data.session?.access_token ?? null);
     });
     return () => {
@@ -68,7 +68,7 @@ function ResetPasswordForm() {
       if (!res.ok) throw new Error(json.error ?? "Something went wrong.");
     },
     onSuccess: async () => {
-      await supabaseBrowserClient.auth.signOut();
+      await getSupabaseBrowserClient().auth.signOut();
       queryClient.clear();
       setDone(true);
     },

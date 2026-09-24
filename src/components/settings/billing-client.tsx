@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { CreditCard, ExternalLink } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
-import { TIER_INFO, type Tier } from "@/lib/constants";
+import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -263,6 +263,9 @@ export function BillingClient() {
   const { toast } = useToast();
   const { data, isLoading, refetch } = useSubscription();
   const awaiting = useCheckoutReturn(refetch);
+  // Set by the landing page's "Subscribe to …" buttons (see plans-section.tsx).
+  const planParam = useSearchParams().get("plan");
+  const pickedTier = TIERS.find((t) => t === planParam) ?? null;
   const [portalLoading, setPortalLoading] = useState(false);
   const spotlight = useSpotlight<HTMLDivElement>();
 
@@ -415,6 +418,7 @@ export function BillingClient() {
         paymentsEnabled={paymentsEnabled}
         subscription={subscription}
         unavailable={misconfigured}
+        highlightTier={pickedTier}
       />
 
       <RechargePacks paymentsEnabled={paymentsEnabled} unavailable={misconfigured} />
