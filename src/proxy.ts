@@ -30,8 +30,16 @@ import type { NextRequest } from "next/server";
 // ALLOWED_ORIGINS (app host FIRST, since ALLOWED_ORIGINS[0] is what
 // password-reset and invite emails link to) and APP_PUBLIC_URL, the OAuth
 // redirect_uri base.
+//
+// The staff console has a third host, admins.vixlens.com, under the same
+// rules. It needs none of the secrets above: the admin cookie is host-only
+// by design (lib/admin-session.ts in the API), so a session there never
+// leaks to the customer-facing hosts, and it goes through /edge-api like
+// everything else, so the API never sees it as a cross-origin caller.
 const APP_HOST = "app.vixlens.com";
+const ADMIN_HOST = "admins.vixlens.com";
 const SITE_HOST = "vixlens.com";
+const KNOWN_HOSTS = new Set([SITE_HOST, `www.${SITE_HOST}`, APP_HOST, ADMIN_HOST]);
 
 /** Prefix match: the path itself, or anything under it. */
 const APP_PREFIXES = [
@@ -47,7 +55,6 @@ const APP_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/invite",
-  "/admin",
   "/auth/callback",
 ];
 
@@ -65,14 +72,34 @@ function isAppPath(pathname: string): boolean {
   return APP_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
+/** The host that owns a path. Paths stay /admin/* on the admin host — every
+ *  link and router.push in the panel already uses that prefix. */
+function ownerHost(pathname: string): string {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return ADMIN_HOST;
+  if (isAppPath(pathname)) return APP_HOST;
+  return SITE_HOST;
+}
+
 export function proxy(req: NextRequest) {
   const host = req.headers.get("host")?.split(":")[0]?.toLowerCase();
 
   // Only the production hostnames are split. localhost and *.vercel.app
   // preview deploys keep serving the whole site from one origin, so
   // `npm run dev` and a preview build still behave like they always did.
-  if (host !== APP_HOST && host !== SITE_HOST && host !== `www.${SITE_HOST}`) {
+  if (!host || !KNOWN_HOSTS.has(host)) {
     return NextResponse.next();
+  }
+
+  const { pathname, search } = req.nextUrl;
+  const owner = ownerHost(pathname);
+
+  // The panel only exists for someone who typed the admin host. Everywhere
+  // else /admin is a plain 404 — never a redirect, which would advertise
+  // where it lives. This runs before the RSC exemption below, which would
+  // otherwise render the panel on any host. The rewrite target is a
+  // private-folder path (leading "_"), which no route can ever match.
+  if (owner === ADMIN_HOST && host !== ADMIN_HOST) {
+    return NextResponse.rewrite(new URL("/_admin-not-found", req.url));
   }
 
   // Next fetches the same URL with an `RSC: 1` header to prefetch a link and
@@ -88,20 +115,23 @@ export function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const { pathname, search } = req.nextUrl;
-  const belongsToApp = isAppPath(pathname);
-
-  if (belongsToApp && host !== APP_HOST) {
-    return NextResponse.redirect(`https://${APP_HOST}${pathname}${search}`, 308);
+  // The admin host has nothing of its own at the root, so the bare domain
+  // opens the panel instead of bouncing to the marketing home page.
+  if (host === ADMIN_HOST && pathname === "/") {
+    return NextResponse.redirect(`https://${ADMIN_HOST}/admin${search}`, 308);
   }
-  if (!belongsToApp && host === APP_HOST) {
-    return NextResponse.redirect(`https://${SITE_HOST}${pathname}${search}`, 308);
+
+  // www keeps serving the public site as it always has. owner is never
+  // ADMIN_HOST here unless we are already on it (see the 404 above).
+  const onOwner = host === owner || (owner === SITE_HOST && host === `www.${SITE_HOST}`);
+  if (!onOwner) {
+    return NextResponse.redirect(`https://${owner}${pathname}${search}`, 308);
   }
 
   const res = NextResponse.next();
-  // The app host must never be indexed: it serves the same build as the
-  // canonical site, and nothing behind a login belongs in a search result.
-  if (host === APP_HOST) res.headers.set("X-Robots-Tag", "noindex, nofollow");
+  // The app and admin hosts must never be indexed: they serve the same build
+  // as the canonical site, and nothing behind a login belongs in a search result.
+  if (host === APP_HOST || host === ADMIN_HOST) res.headers.set("X-Robots-Tag", "noindex, nofollow");
   return res;
 }
 

@@ -17,7 +17,8 @@ import { SITE_URL } from "@/lib/seo";
 const DISALLOW = [
   "/api/",
   "/edge-api/",
-  "/admin",
+  // No /admin: it 404s on this host (src/proxy.ts), and listing it here
+  // would be the one public pointer to the staff console's path.
   "/settings",
   "/dashboard",
   "/my-gallery",
