@@ -2,23 +2,30 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronDown, ArrowUpRight } from "lucide-react";
-import { HeroDemoWidget } from "./hero-demo-widget";
-import { SEEDANCE_MODEL_ID } from "@/lib/constants";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { SEEDANCE_MODEL_ID, TIER_INFO } from "@/lib/constants";
 import { heroContainerVariants, heroWordVariants } from "@/lib/animations";
 import { appHref } from "@/lib/hosts";
+import {
+  COMPETITORS,
+  ENTRY_PRICE_MONTHLY,
+  PRICES_CHECKED_ON,
+  formatListPrice,
+  yearlySavings,
+} from "@/lib/competitor-pricing";
 
-// Bold grotesk statement + a short italic-serif line underneath — the same
-// two-beat structure ArtCraft uses for "Controllable AI / for artists.":
-// one all-caps declarative line the eye reads first, then a quieter,
-// lowercase editorial line that reads more like a considered subhead than
-// another shouted headline.
-const TITLE_WORDS = ["THE", "AI", "VIDEO", "& IMAGE"];
-const TITLE_ACCENT_WORD = "STUDIO";
-const TITLE_SCRIPT_LINE = "for ambitious creators.";
+// Price-led, subscribe-first: the headline IS the offer (every model, from
+// the entry plan's price), the main CTA scrolls to the plans, and the one
+// object under it is the entry-price board — the same comparison the
+// #compare section details, at a glance. Same two-beat title as before: an
+// all-caps grotesk statement, then a quieter italic-serif line.
+const TITLE_WORDS = ["EVERY", "TOP", "AI", "MODEL."];
+const TITLE_SCRIPT_LINE = "one plan, every model.";
+const ENTRY_PRICE = formatListPrice(ENTRY_PRICE_MONTHLY);
 
-// Featured models, each a direct link into its workspace — the first thing
-// above the headline, so the flagship lineup is what a visitor reads first.
+// Featured models, each a direct link into its workspace — the same
+// flagship lineup the competitors in the board below sell.
 const FEATURED_MODELS = [
   { label: "Seedance 2.5", path: `/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}` },
   { label: "Kling 3.0", path: `/generate?model=${encodeURIComponent("kling/3.0")}` },
@@ -26,16 +33,14 @@ const FEATURED_MODELS = [
   { label: "Nano Banana Pro", path: `/generate/image?model=${encodeURIComponent("google/nano-banana-pro")}` },
 ];
 
-// Scattered photo/video collage around the central prompt card — an
-// OpenArt-style hero (small floating tiles surrounding the generator, not
-// one full-bleed background clip). All 5 tiles are local media from
-// public/media, one clip + the app's 4 photography images; hidden below
-// lg since 5 overlapping tiles has no room to breathe on a narrow viewport.
+// Scattered photo/video collage around the centre column — local media from
+// public/media, hidden below lg where overlapping tiles have no room. The
+// bottom-centre tile the old hero had is gone: the price board sits there.
 const COLLAGE = [
   {
     kind: "image" as const,
     url: "/media/images/gpt-image-11.webp",
-    className: "left-[2%] top-[16%] w-44 -rotate-3 xl:w-52",
+    className: "left-[2%] top-[14%] w-44 -rotate-3 xl:w-52",
     aspect: "aspect-[3/4]",
   },
   {
@@ -47,22 +52,85 @@ const COLLAGE = [
   {
     kind: "image" as const,
     url: "/media/images/gpt-image-09.webp",
-    className: "left-[7%] top-[52%] w-36 rotate-2 xl:w-44",
+    className: "left-[6%] top-[56%] w-36 rotate-2 xl:w-44",
     aspect: "aspect-[3/4]",
   },
   {
     kind: "image" as const,
     url: "/media/images/gpt-image-06.webp",
-    className: "right-[6%] top-[46%] w-36 -rotate-2 xl:w-44",
+    className: "right-[5%] top-[50%] w-36 -rotate-2 xl:w-44",
     aspect: "aspect-[3/4]",
   },
-  {
-    kind: "image" as const,
-    url: "/media/images/gpt-image-16.webp",
-    className: "left-1/2 bottom-[6%] w-52 -translate-x-1/2 -rotate-1 xl:w-60",
-    aspect: "aspect-video",
-  },
 ];
+
+const BOARD_ROWS = [
+  { name: "Vixlens", price: ENTRY_PRICE_MONTHLY, savings: null, ours: true },
+  ...COMPETITORS.map((c) => ({
+    name: c.name,
+    price: c.entryPriceMonthly,
+    savings: yearlySavings(c),
+    ours: false,
+  })),
+];
+const BOARD_MAX = Math.max(...BOARD_ROWS.map((row) => row.price));
+
+/** Cheapest paid plan per month, as bars — ours in lime, theirs in silver,
+ *  with what theirs costs over a year beyond ours in amber (the money
+ *  colour, see globals.css). */
+function PriceBoard({ animate }: { animate: boolean }) {
+  return (
+    <div className="glass mx-auto w-full max-w-xl rounded-2xl p-5 text-left shadow-floating sm:p-6">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p className="font-display text-label font-semibold text-ink">
+          Cheapest paid plan, per month
+        </p>
+        <p className="text-caption text-text-tertiary">Public prices · {PRICES_CHECKED_ON}</p>
+      </div>
+      <ul className="mt-5 space-y-3.5">
+        {BOARD_ROWS.map((row, i) => (
+          <li key={row.name} className="grid grid-cols-[5.25rem_1fr_4.75rem] items-center gap-3">
+            <span
+              className={
+                row.ours
+                  ? "font-display text-body-sm font-bold text-brand"
+                  : "text-body-sm text-muted"
+              }
+            >
+              {row.name}
+            </span>
+            <div className="h-2.5 overflow-hidden rounded-full bg-white/5">
+              <motion.div
+                className={
+                  row.ours
+                    ? "h-full origin-left rounded-full bg-brand shadow-glow-sm"
+                    : "h-full origin-left rounded-full bg-silver/30"
+                }
+                style={{ width: `${(row.price / BOARD_MAX) * 100}%` }}
+                initial={animate ? { scaleX: 0 } : false}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.9, delay: 1.1 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </div>
+            <span className="flex flex-col items-end leading-tight">
+              <span
+                className={
+                  row.ours
+                    ? "font-display text-body font-bold text-brand"
+                    : "font-display text-body-sm font-semibold text-ink"
+                }
+              >
+                {formatListPrice(row.price)}
+              </span>
+              {row.savings !== null && (
+                <span className="text-[11px] text-accent-amber">+${row.savings}/yr</span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
@@ -86,7 +154,7 @@ export function Hero() {
             >
               {item.kind === "video" ? (
                 <video
-                  className="h-full w-full object-cover opacity-80"
+                  className="h-full w-full object-cover opacity-70"
                   autoPlay
                   muted
                   loop
@@ -97,14 +165,14 @@ export function Hero() {
                 </video>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media, decorative collage
-                <img src={item.url} alt="" className="h-full w-full object-cover opacity-80" />
+                <img src={item.url} alt="" className="h-full w-full object-cover opacity-70" />
               )}
             </motion.div>
           ))}
         </div>
       )}
 
-      <div className="container-page relative py-24">
+      <div className="container-page relative py-20 sm:py-24">
         <div className="mx-auto max-w-3xl text-center">
           <motion.div
             initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
@@ -143,10 +211,11 @@ export function Hero() {
             ))}
             <motion.span
               variants={shouldReduceMotion ? undefined : heroWordVariants}
-              className="inline-block text-brand"
+              className="block text-brand"
               style={{ WebkitTextFillColor: "initial" }}
             >
-              {TITLE_ACCENT_WORD}
+              From {ENTRY_PRICE}
+              <span className="ml-1 align-top text-[0.35em] leading-none text-white/60">/mo</span>
             </motion.span>
           </motion.h1>
 
@@ -154,7 +223,7 @@ export function Hero() {
             initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20, filter: "blur(6px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-            className="text-accent-script mt-2 text-3xl text-white/90 sm:text-4xl md:text-5xl"
+            className="text-accent-script mt-3 text-3xl text-white/90 sm:text-4xl md:text-5xl"
           >
             {TITLE_SCRIPT_LINE}
           </motion.p>
@@ -165,45 +234,65 @@ export function Hero() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
             className="mx-auto mt-6 max-w-xl text-body-lg text-muted"
           >
-            Describe a scene, animate a photo, or edit an existing shot. Vixlens
-            generates and refines broadcast-ready video and imagery in minutes —
-            no crew, no timeline, no waiting.
+            Seedance 2.5, Kling 3.0, Veo 3.1, GPT Image 2 and Nano Banana Pro in one studio.
+            No watermark on any plan, commercial license from {TIER_INFO.starter.label} up, cancel
+            anytime.
+          </motion.p>
+
+          <motion.div
+            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
+            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          >
+            <a
+              href="#plans"
+              className={buttonVariants({
+                variant: "accent",
+                className: "w-full px-8 py-4 text-body sm:w-auto sm:px-8 sm:py-4",
+              })}
+            >
+              Subscribe from {ENTRY_PRICE}/mo
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </a>
+            <a
+              href="#compare"
+              className={buttonVariants({
+                variant: "glass",
+                className: "w-full px-8 py-4 text-body sm:w-auto sm:px-8 sm:py-4",
+              })}
+            >
+              Compare prices
+            </a>
+          </motion.div>
+
+          <motion.p
+            initial={shouldReduceMotion ? undefined : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.9 }}
+            className="mt-4 text-caption text-white/50"
+          >
+            Just looking?{" "}
+            <Link
+              href={appHref("/signup")}
+              prefetch={false}
+              className="text-white/70 underline decoration-white/20 underline-offset-4 transition-colors hover:text-white"
+            >
+              Try it with {TIER_INFO.free.monthlyCredits} free credits
+            </Link>{" "}
+            — no card required.
           </motion.p>
         </div>
 
         <motion.div
-          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 30, scale: 0.95 }}
+          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 30, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
-          className="relative z-10"
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.95 }}
+          className="relative z-10 mt-12"
         >
-          <HeroDemoWidget />
+          <PriceBoard animate={!shouldReduceMotion} />
         </motion.div>
-
-        <motion.p
-          initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 1 }}
-          className="relative z-10 mt-4 text-center text-caption text-white/50"
-        >
-          20 free credits to start — no credit card required
-        </motion.p>
       </div>
-
-      {!shouldReduceMotion && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 1.4 }}
-          className="pointer-events-none absolute inset-x-0 bottom-6 flex flex-col items-center gap-1 text-white/40"
-          aria-hidden="true"
-        >
-          <span className="text-caption tracking-wide uppercase">Scroll to explore</span>
-          <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
-            <ChevronDown className="size-4" />
-          </motion.div>
-        </motion.div>
-      )}
     </section>
   );
 }

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { supabaseBrowserClient } from "@/lib/supabase-browser-client";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser-client";
+import { stashPostVerifyNext } from "@/lib/post-verify-next";
 
 // lucide-react has no brand logos, so the Google "G" mark is inlined here.
 function GoogleIcon() {
@@ -28,19 +29,27 @@ function GoogleIcon() {
   );
 }
 
-export function GoogleAuthButton() {
+/** `next` is the page's ?next= errand. Supabase's redirectTo must match its
+ *  allow-list exactly, so it can't carry it — it's parked in sessionStorage
+ *  and picked up by /auth/callback, same as across the email round trip. */
+export function GoogleAuthButton({ next = null }: { next?: string | null }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleClick() {
     setError(null);
     setLoading(true);
-    const { error: oauthError } = await supabaseBrowserClient.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-    if (oauthError) {
-      setError(oauthError.message);
+    stashPostVerifyNext(next);
+    try {
+      const { error: oauthError } = await getSupabaseBrowserClient().auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (oauthError) throw oauthError;
+    } catch (err) {
+      // Also reached when the Supabase env vars were missing at build time,
+      // where createClient itself throws.
+      setError(err instanceof Error ? err.message : "Google sign-in is unavailable.");
       setLoading(false);
     }
     // On success the browser navigates away to Google, so no further

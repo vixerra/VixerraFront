@@ -11,7 +11,7 @@ import { gridContainerVariants, gridItemVariants } from "@/lib/animations";
 // attributed to real people (the migration brief's persona cards imply
 // customer voices; this app has no real customer quotes to draw on, so
 // these stay descriptive, matching the honesty rule used everywhere else
-// on this page, e.g. HeroDemoWidget's "Interactive preview" disclaimer).
+// on this page, e.g. the sourced, dated figures in PriceComparison).
 const PERSONAS = [
   {
     title: "Content creators",

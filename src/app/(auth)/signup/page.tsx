@@ -147,7 +147,7 @@ function SignupForm() {
       </div>
 
       <div className="mt-6">
-        <GoogleAuthButton />
+        <GoogleAuthButton next={next} />
       </div>
 
       <p className="mt-6 text-center text-body-sm text-muted">

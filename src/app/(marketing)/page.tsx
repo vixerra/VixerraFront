@@ -7,8 +7,9 @@ import {
   webSiteJsonLd,
 } from "@/lib/structured-data";
 import { Hero } from "@/components/landing/hero";
+import { PlansSection } from "@/components/landing/plans-section";
+import { PriceComparison } from "@/components/landing/price-comparison";
 import { SeedancePromoBanner } from "@/components/landing/seedance-promo-banner";
-import { StatsStrip } from "@/components/landing/stats-strip";
 import { FeaturesShowcase } from "@/components/landing/features-showcase";
 import { CapabilityConcepts } from "@/components/landing/capability-concepts";
 import { HowItWorks } from "@/components/landing/how-it-works";
@@ -18,7 +19,6 @@ import { ModelCarousel } from "@/components/landing/model-carousel";
 import { ShowcaseTabs } from "@/components/landing/showcase-tabs";
 import { Personas } from "@/components/landing/personas";
 import { CreatorUseCases } from "@/components/landing/creator-use-cases";
-import { PricingPreview } from "@/components/landing/pricing-preview";
 import { FaqAccordion } from "@/components/landing/faq-accordion";
 import { CtaSection } from "@/components/landing/cta-section";
 
@@ -40,9 +40,12 @@ export default function LandingPage() {
           faqPageJsonLd(HOME_FAQS),
         ]}
       />
+      {/* Subscribe-first: the offer (hero), the plans, then the price check
+          that backs the offer up — product sections follow. */}
       <Hero />
+      <PlansSection />
+      <PriceComparison />
       <SeedancePromoBanner />
-      <StatsStrip />
       <FeaturesShowcase />
       {/*<CapabilityConcepts />*/}
       <HowItWorks />
@@ -70,7 +73,6 @@ export default function LandingPage() {
 
       <Personas />
       <CreatorUseCases />
-      <PricingPreview />
       <FaqAccordion />
       <CtaSection />
     </>
