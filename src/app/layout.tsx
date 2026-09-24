@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter, Space_Grotesk, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastProvider } from "@/components/ui/toast";
@@ -102,6 +103,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-M7N7WGMQ');`}
         </Script>
+        {/* Google tag (gtag.js) — GA4. Shares GTM's `dataLayer`. */}
+        <Script
+          id="google-tag-loader"
+          src="https://www.googletagmanager.com/gtag/js?id=G-FEEGSJGPZM"
+          strategy="afterInteractive"
+        />
+        <Script id="google-tag" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-FEEGSJGPZM');`}
+        </Script>
         {/* Meta Pixel — fires PageView on every route via strategy="afterInteractive".
             Two pixel ids share one loader/one PageView call: fbq('init', ...) can be
             called more than once, and 'track' (unlike 'trackSingle') fires for every
@@ -145,6 +158,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ReleaseAnnouncementModal />
           </TooltipProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   );
