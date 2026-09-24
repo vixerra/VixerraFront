@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter, Space_Grotesk, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastProvider } from "@/components/ui/toast";
@@ -127,6 +128,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ReleaseAnnouncementModal />
           </TooltipProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   );
