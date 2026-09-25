@@ -6,23 +6,28 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { SEEDANCE_MODEL_ID, TIER_INFO } from "@/lib/constants";
 import { heroContainerVariants, heroWordVariants } from "@/lib/animations";
-import { appHref } from "@/lib/hosts";
+import { useMe } from "@/hooks/use-me";
+import { appHref, subscribeHref } from "@/lib/hosts";
+import { formatCredits } from "@/lib/utils";
 import {
   COMPETITORS,
   ENTRY_PRICE_MONTHLY,
+  ENTRY_TIER,
   PRICES_CHECKED_ON,
   formatListPrice,
   yearlySavings,
 } from "@/lib/competitor-pricing";
 
 // Price-led, subscribe-first: the headline IS the offer (every model, from
-// the entry plan's price), the main CTA scrolls to the plans, and the one
-// object under it is the entry-price board — the same comparison the
+// the entry plan's price), the main CTA subscribes to that entry plan
+// directly (the plans section is one scroll away for anyone comparing), and
+// the one object under it is the entry-price board — the same comparison the
 // #compare section details, at a glance. Same two-beat title as before: an
 // all-caps grotesk statement, then a quieter italic-serif line.
 const TITLE_WORDS = ["EVERY", "TOP", "AI", "MODEL."];
 const TITLE_SCRIPT_LINE = "one plan, every model.";
 const ENTRY_PRICE = formatListPrice(ENTRY_PRICE_MONTHLY);
+const ENTRY = TIER_INFO[ENTRY_TIER];
 
 // Featured models, each a direct link into its workspace — the same
 // flagship lineup the competitors in the board below sell.
@@ -134,6 +139,7 @@ function PriceBoard({ animate }: { animate: boolean }) {
 
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
+  const { data: user } = useMe();
 
   return (
     <section className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden bg-black">
@@ -245,16 +251,17 @@ export function Hero() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
             className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <a
-              href="#plans"
+            <Link
+              href={subscribeHref(ENTRY_TIER, Boolean(user))}
+              prefetch={false}
               className={buttonVariants({
                 variant: "accent",
                 className: "w-full px-8 py-4 text-body sm:w-auto sm:px-8 sm:py-4",
               })}
             >
-              Subscribe from {ENTRY_PRICE}/mo
+              Get {ENTRY.label} for {ENTRY_PRICE}/mo
               <ArrowRight className="size-4" aria-hidden="true" />
-            </a>
+            </Link>
             <a
               href="#compare"
               className={buttonVariants({
@@ -272,7 +279,7 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.9 }}
             className="mt-4 text-caption text-white/50"
           >
-            Just looking?{" "}
+            {formatCredits(ENTRY.monthlyCredits)} credits every month. Just looking?{" "}
             <Link
               href={appHref("/signup")}
               prefetch={false}

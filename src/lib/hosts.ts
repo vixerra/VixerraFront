@@ -1,3 +1,5 @@
+import type { Tier } from "@/lib/constants";
+
 /**
  * Links that cross the two hostnames.
  *
@@ -28,4 +30,17 @@ export function appHref(path: string): string {
 /** A path on the public site — home, pricing, guides. */
 export function siteHref(path: string): string {
   return `${SITE_ORIGIN}${path}`;
+}
+
+/**
+ * Where a "Subscribe to <plan>" click goes. A signed-in visitor goes straight
+ * to billing; the signup page would bounce them to the dashboard
+ * (RedirectIfAuthenticated) and drop the plan. Everyone else goes through
+ * signup, whose ?next= survives both the email round trip and the Google
+ * handoff (see post-verify-next.ts), and ?plan= makes billing single the card
+ * out.
+ */
+export function subscribeHref(tier: Tier, signedIn: boolean): string {
+  const billing = `/settings/billing?plan=${tier}`;
+  return appHref(signedIn ? billing : `/signup?next=${encodeURIComponent(billing)}`);
 }

@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/marketing/reveal";
 import { useInView } from "@/hooks/use-in-view";
+import { useMe } from "@/hooks/use-me";
 import { useCountUp } from "@/hooks/use-count-up";
 import { CREDIT_VALUE_USD, TIER_INFO } from "@/lib/constants";
 import { formatMoney } from "@/lib/currency";
@@ -17,6 +19,7 @@ import {
   yearlySavings,
   type Competitor,
 } from "@/lib/competitor-pricing";
+import { subscribeHref } from "@/lib/hosts";
 import { cn } from "@/lib/utils";
 
 const ENTRY_LABEL = TIER_INFO[ENTRY_TIER].label;
@@ -130,6 +133,8 @@ function CellView({ cell, ours }: { cell: Cell; ours?: boolean }) {
 }
 
 export function PriceComparison() {
+  const { data: user } = useMe();
+
   return (
     <section id="compare" className="relative isolate scroll-mt-16 overflow-hidden py-20 sm:py-28">
       {/* Dot texture fading out from the centre, same technique as the
@@ -254,10 +259,14 @@ export function PriceComparison() {
               </li>
             ))}
           </ul>
-          <a href="#plans" className={buttonVariants({ variant: "accent", className: "px-8" })}>
-            Subscribe from {formatListPrice(ENTRY_PRICE_MONTHLY)}/mo
+          <Link
+            href={subscribeHref(ENTRY_TIER, Boolean(user))}
+            prefetch={false}
+            className={buttonVariants({ variant: "accent", className: "px-8" })}
+          >
+            Get {ENTRY_LABEL} for {formatListPrice(ENTRY_PRICE_MONTHLY)}/mo
             <ArrowRight className="size-4" aria-hidden="true" />
-          </a>
+          </Link>
         </Reveal>
       </div>
     </section>

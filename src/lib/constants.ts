@@ -3,7 +3,7 @@
 import { CLOUDFLARE_MODELS } from "@/lib/cloudflare-models";
 
 // The selling price of one credit. Every plan and pack below charges exactly
-// this ($9.99 → 1,000, $24 → 2,500, $49 → 5,000, packs likewise), so it is
+// this ($5.99 → 600, $24 → 2,500, $49 → 5,000, packs likewise), so it is
 // also the honest figure to show users next to a credit amount (e.g. "this
 // generation costs ~$2.31").
 //
@@ -90,7 +90,7 @@ export const TIER_INFO: Record<
   }
 > = {
   // Credits recalibrated 2026-08-30: every plan sells credits at a flat
-  // CREDIT_VALUE_USD ($0.01) — $9.99 → 1,000, $24 → 2,500, $49 → 5,000 — and
+  // CREDIT_VALUE_USD ($0.01) — $5.99 → 600, $24 → 2,500, $49 → 5,000 — and
   // the margin now comes from generation pricing instead (credit-estimate.ts
   // bills video at a 60% gross margin over real provider cost, images at
   // 65% — 50% and 55% until 2026-09-14).
@@ -133,8 +133,12 @@ export const TIER_INFO: Record<
   },
   starter: {
     label: "Starter",
-    priceMonthly: 9.99,
-    monthlyCredits: 1000,
+    // $5.99 / 600 since 2026-09-26 (was $9.99 / 1,000): a lower entry price
+    // for conversion, still exactly CREDIT_VALUE_USD per credit. Nobody was
+    // subscribed to Starter when it changed, so no one is left paying the old
+    // price for the new grant — grants follow the tier, not the Stripe price.
+    priceMonthly: 5.99,
+    monthlyCredits: 600,
     renewsMonthly: true,
     maxResolution: "1080p",
     maxDurationSeconds: 20,
@@ -146,10 +150,10 @@ export const TIER_INFO: Record<
     creatorSuite: false,
     apiAccess: false,
     features: [
-      "1,000 credits / month",
-      "~333 images",
-      "~42s Seedance 2.0 video",
-      "~28s Seedance 2.5 video",
+      "600 credits / month",
+      "~200 images",
+      "~25s Seedance 2.0 video",
+      "~17s Seedance 2.5 video",
       "Add credits as needed",
       "Up to 1080p",
       "No watermark",
@@ -234,7 +238,7 @@ export type TierInfo = (typeof TIER_INFO)[Tier];
 // not the credits, so it comes straight out of margin — at ~60% gross, a
 // 20% discount would bring it down to the 40% net floor.
 export const ANNUAL_PRICE_MONTHLY: Partial<Record<Tier, number>> = {
-  starter: 9.16,
+  starter: 5.49,
   creator: 22,
   studio: 44.92,
 };

@@ -9,11 +9,15 @@ import { PlanPrice } from "@/components/pricing/plan-price";
 import { useMe } from "@/hooks/use-me";
 import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
 import { COMPETITORS, ENTRY_TIER, formatListPrice } from "@/lib/competitor-pricing";
-import { appHref } from "@/lib/hosts";
+import { appHref, subscribeHref } from "@/lib/hosts";
 import { cn, formatCredits } from "@/lib/utils";
 
 const PAID_TIERS = TIERS.filter((tier) => TIER_INFO[tier].priceMonthly > 0);
 const POPULAR_TIER: Tier = "creator";
+// The entry plan is the one the hero and the price check sell, so its card
+// gets its own flag too. Outlined rather than filled, so it doesn't compete
+// with the popular badge for the same glance.
+const ENTRY_BADGE = "Best way to start";
 // The card shows its monthly grant as its own amber line, so the matching
 // bullet is dropped from the list; the rest is capped so three cards of
 // different lengths still line up, with the remainder on /pricing.
@@ -30,18 +34,6 @@ const TAGLINES: Record<Tier, string> = {
 const RIVAL_ENTRY_PRICES = COMPETITORS.map(
   (c) => `${c.name} ${formatListPrice(c.entryPriceMonthly)}`,
 ).join(" · ");
-
-/**
- * Where "Subscribe" goes. A signed-in visitor goes straight to billing; the
- * signup page would bounce them to the dashboard (RedirectIfAuthenticated)
- * and drop the plan. Everyone else goes through signup, whose ?next=
- * survives both the email round trip and the Google handoff (see
- * post-verify-next.ts), and ?plan= makes billing single the card out.
- */
-function subscribeHref(tier: Tier, signedIn: boolean) {
-  const billing = `/settings/billing?plan=${tier}`;
-  return appHref(signedIn ? billing : `/signup?next=${encodeURIComponent(billing)}`);
-}
 
 export function PlansSection() {
   const { data: user } = useMe();
@@ -70,6 +62,7 @@ export function PlansSection() {
           {PAID_TIERS.map((tier, index) => {
             const info = TIER_INFO[tier];
             const isPopular = tier === POPULAR_TIER;
+            const isEntry = tier === ENTRY_TIER;
             const bullets = info.features.filter((f) => !isGrantBullet(f));
             const shown = bullets.slice(0, FEATURES_SHOWN);
             const hidden = bullets.length - shown.length;
@@ -80,12 +73,19 @@ export function PlansSection() {
                     "relative flex h-full flex-col rounded-2xl border bg-surface-2 p-8 transition-[border-color,box-shadow,transform] duration-500 ease-out",
                     isPopular
                       ? "border-brand/50 shadow-glow-md lg:-translate-y-4"
-                      : "border-line shadow-card hover:border-border-strong",
+                      : isEntry
+                        ? "border-brand/30 shadow-card hover:border-brand/50"
+                        : "border-line shadow-card hover:border-border-strong",
                   )}
                 >
                   {isPopular && (
                     <span className="font-display absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-on-brand uppercase shadow-glow-sm">
                       Most popular
+                    </span>
+                  )}
+                  {isEntry && !isPopular && (
+                    <span className="font-display absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full border border-brand/50 bg-surface-2 px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-brand uppercase">
+                      {ENTRY_BADGE}
                     </span>
                   )}
 
@@ -99,7 +99,7 @@ export function PlansSection() {
                       suffixClassName="text-body-sm text-muted"
                     />
                   </p>
-                  {tier === ENTRY_TIER && (
+                  {isEntry && (
                     <p className="mt-2 text-caption text-text-tertiary">
                       Entry plans elsewhere: {RIVAL_ENTRY_PRICES}
                     </p>
@@ -117,7 +117,7 @@ export function PlansSection() {
                     href={subscribeHref(tier, signedIn)}
                     prefetch={false}
                     className={buttonVariants({
-                      variant: isPopular ? "accent" : "primary",
+                      variant: isPopular || isEntry ? "accent" : "primary",
                       className: "mt-6 w-full",
                     })}
                   >
