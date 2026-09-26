@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
+import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
 import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
@@ -60,6 +61,11 @@ type CheckoutResult = {
   credits_pending?: boolean;
   current_period_end?: string | null;
 };
+
+/** Stripe statuses under which a subscription still bills — the API's
+ *  LIVE_SUBSCRIPTION_STATUSES. Anything else (canceled, incomplete_expired)
+ *  means the next plan is a fresh Checkout, not a switch. */
+const LIVE_STATUSES = ["active", "trialing", "past_due", "unpaid", "paused"];
 
 function tierLabel(tier: string) {
   return TIER_INFO[tier as Tier]?.label ?? tier;
@@ -229,10 +235,26 @@ export function PlanSwitcher({
   const [simulatedResult, setSimulatedResult] = useState<SwitchResult | null>(null);
   const [stripeResult, setStripeResult] = useState<CheckoutResult | null>(null);
   const pickedRef = useRef<HTMLDivElement>(null);
+  const [autoTier, setAutoTier] = useState<Tier | null>(null);
+  const autoStarted = useRef(false);
 
   useEffect(() => {
     pickedRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [highlightTier]);
+
+  const hasLivePlan = subscription !== null && LIVE_STATUSES.includes(subscription.status);
+  // Arrived from a "Subscribe to …" button (?plan=) with no plan to switch
+  // from: the only next step is Stripe's payment page, which is its own
+  // confirmation, so go straight there instead of making them find the card
+  // and confirm first. A live plan keeps the confirm — switching it bills the
+  // card on the spot, with no Stripe page in between.
+  const autoCheckout =
+    paymentsEnabled &&
+    !unavailable &&
+    !hasLivePlan &&
+    highlightTier !== null &&
+    highlightTier !== "free" &&
+    highlightTier !== currentTier;
 
   const pendingCancel = subscription?.cancel_at_period_end === true;
   const periodEnd = formatDate(subscription?.current_period_end);
@@ -294,46 +316,80 @@ export function PlanSwitcher({
     });
   }
 
+  /** Runs a switch the user has already agreed to. Resolves true when the
+   *  page is leaving for Stripe. */
+  const runSwitch = useCallback(
+    async (tier: Tier): Promise<boolean> => {
+      setLoadingTier(tier);
+      try {
+        const endpoint = paymentsEnabled
+          ? "/api/subscription/checkout"
+          : "/api/subscription/upgrade";
+        const res = await apiFetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tier }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Failed to switch plan");
+
+        if (!paymentsEnabled) {
+          invalidateCredits();
+          setSimulatedResult(json as SwitchResult);
+          return false;
+        }
+
+        const result = json as CheckoutResult;
+        if (result.outcome === "checkout" && result.url) {
+          // Leaves the app entirely — no state to clean up, and deliberately
+          // no `finally` reset of the spinner, so the button stays busy for
+          // the moment the redirect takes.
+          window.location.assign(result.url);
+          return true;
+        }
+        invalidateCredits();
+        setStripeResult(result);
+      } catch (err) {
+        toast({
+          title: "Couldn't switch plan",
+          description: (err as Error).message,
+          variant: "error",
+        });
+      } finally {
+        setLoadingTier(null);
+      }
+      return false;
+    },
+    [paymentsEnabled, invalidateCredits, toast],
+  );
+
   async function switchTo(tier: Tier) {
     if (!(await confirmFor(tier))) return;
-
-    setLoadingTier(tier);
-    try {
-      const endpoint = paymentsEnabled ? "/api/subscription/checkout" : "/api/subscription/upgrade";
-      const res = await apiFetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Failed to switch plan");
-
-      if (!paymentsEnabled) {
-        invalidateCredits();
-        setSimulatedResult(json as SwitchResult);
-        return;
-      }
-
-      const result = json as CheckoutResult;
-      if (result.outcome === "checkout" && result.url) {
-        // Leaves the app entirely — no state to clean up, and deliberately
-        // no `finally` reset of the spinner, so the button stays busy for
-        // the moment the redirect takes.
-        window.location.assign(result.url);
-        return;
-      }
-      invalidateCredits();
-      setStripeResult(result);
-    } catch (err) {
-      toast({
-        title: "Couldn't switch plan",
-        description: (err as Error).message,
-        variant: "error",
-      });
-    } finally {
-      setLoadingTier(null);
-    }
+    await runSwitch(tier);
   }
+
+  useEffect(() => {
+    if (!autoCheckout || !highlightTier || autoStarted.current) return;
+    autoStarted.current = true;
+    const tier = highlightTier;
+    // Drop ?plan= before leaving, so Back from Stripe lands on a plain
+    // billing page rather than this one bouncing straight back to Checkout.
+    window.history.replaceState(null, "", window.location.pathname);
+    setAutoTier(tier);
+    void runSwitch(tier).then((leaving) => {
+      if (!leaving) setAutoTier(null);
+    });
+  }, [autoCheckout, highlightTier, runSwitch]);
+
+  // Back from Stripe can restore this page from the back/forward cache with
+  // the "taking you to checkout" notice still up. It isn't, any more.
+  useEffect(() => {
+    const onShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setAutoTier(null);
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
 
   /** What the button on each card says, which is the only place the four
    *  possible relationships to a plan are visible at a glance. */
@@ -357,6 +413,12 @@ export function PlanSwitcher({
 
   return (
     <>
+      {autoTier && (
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/10 px-4 py-3 text-caption text-ink">
+          <Spinner size={16} />
+          Taking you to secure checkout for {tierLabel(autoTier)}…
+        </div>
+      )}
       {unavailable && (
         <p className="mb-4 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-caption text-warning">
           Plans can&apos;t be purchased right now — billing isn&apos;t fully set up on this server.

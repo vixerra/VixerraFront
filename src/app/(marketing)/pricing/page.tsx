@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TIERS, TIER_INFO, CREDIT_VALUE_USD, LAUNCH_OFFER } from "@/lib/constants";
 import {
@@ -10,13 +8,13 @@ import {
   LaunchOfferPlanFlag,
   LaunchOfferStrip,
 } from "@/components/landing/launch-offer";
+import { PlanCta } from "@/components/pricing/plan-cta";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
 import { PlanPrice } from "@/components/pricing/plan-price";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqPageJsonLd } from "@/lib/faqs";
 import { pricingProductJsonLd } from "@/lib/structured-data";
 import { openGraph } from "@/lib/seo";
-import { appHref } from "@/lib/hosts";
 
 export const metadata: Metadata = {
   title: "AI video generator pricing",
@@ -122,15 +120,13 @@ export default function PricingPage() {
               {isOffer ? (
                 <LaunchOfferPlanCta className="mt-8 w-full" />
               ) : (
-                <Link
-                  href={appHref("/signup")} prefetch={false}
-                  className={buttonVariants({
-                    variant: isPopular ? "primary" : "secondary",
-                    className: "mt-8 w-full",
-                  })}
+                <PlanCta
+                  tier={tier}
+                  variant={isPopular ? "primary" : "secondary"}
+                  className="mt-8 w-full"
                 >
                   Get started
-                </Link>
+                </PlanCta>
               )}
             </Card>
           );
