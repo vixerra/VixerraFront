@@ -4,7 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { TIERS, TIER_INFO, CREDIT_VALUE_USD } from "@/lib/constants";
+import { TIERS, TIER_INFO, CREDIT_VALUE_USD, LAUNCH_OFFER } from "@/lib/constants";
+import {
+  LaunchOfferPlanCta,
+  LaunchOfferPlanFlag,
+  LaunchOfferStrip,
+} from "@/components/landing/launch-offer";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
 import { PlanPrice } from "@/components/pricing/plan-price";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -73,10 +78,15 @@ export default function PricingPage() {
         </p>
       </div>
 
+      {/* Starter's launch offer (see launch-offer.tsx). Both it and the
+          card flag below remove themselves once the offer sells out. */}
+      <LaunchOfferStrip className="mx-auto mt-12 max-w-5xl" />
+
       <div className="mt-16 grid gap-6 lg:grid-cols-4">
         {TIERS.map((tier) => {
           const info = TIER_INFO[tier];
           const isPopular = tier === "creator";
+          const isOffer = tier === LAUNCH_OFFER.tier;
           return (
             <Card
               key={tier}
@@ -84,8 +94,10 @@ export default function PricingPage() {
               className={cn(
                 "flex flex-col",
                 isPopular && "relative border-brand/40 shadow-glow-sm",
+                isOffer && "relative",
               )}
             >
+              {isOffer && <LaunchOfferPlanFlag />}
               {isPopular && (
                 <Badge
                   variant="brand"
@@ -107,15 +119,19 @@ export default function PricingPage() {
                 note={info.featuresNote}
                 className="mt-6 flex-1"
               />
-              <Link
-                href={appHref("/signup")} prefetch={false}
-                className={buttonVariants({
-                  variant: isPopular ? "primary" : "secondary",
-                  className: "mt-8 w-full",
-                })}
-              >
-                Get started
-              </Link>
+              {isOffer ? (
+                <LaunchOfferPlanCta className="mt-8 w-full" />
+              ) : (
+                <Link
+                  href={appHref("/signup")} prefetch={false}
+                  className={buttonVariants({
+                    variant: isPopular ? "primary" : "secondary",
+                    className: "mt-8 w-full",
+                  })}
+                >
+                  Get started
+                </Link>
+              )}
             </Card>
           );
         })}

@@ -288,6 +288,125 @@ export function LaunchOfferMeter({ className }: { className?: string }) {
   );
 }
 
+/**
+ * The pricing page's version of the banner: the offer's terms and its CTA, as
+ * a strip above the plan grid rather than a second big panel — that page is a
+ * comparison, and the cards stay the point. States the offer's size only,
+ * never how much of it is left.
+ */
+export function LaunchOfferStrip({ className }: { className?: string }) {
+  const { places, soldOut } = useLaunchOffer();
+  const { data: user } = useMe();
+  if (soldOut) return null;
+
+  return (
+    <Reveal className={className}>
+      <div className="relative overflow-hidden rounded-2xl border border-accent-hot/30 bg-surface-2 p-6 shadow-glow-hot-md sm:p-8">
+        {/* Same halftone and hot glow as the landing banner, from the left
+            this time, behind the copy. Decorative only. */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{
+            backgroundImage: "radial-gradient(rgb(255 0 82 / 0.5) 1px, transparent 1px)",
+            backgroundSize: "14px 14px",
+            maskImage: "radial-gradient(ellipse 50% 100% at 0% 50%, black, transparent)",
+          }}
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 45% 90% at 5% 50%, rgb(255 0 82 / 0.18), transparent 70%)",
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-accent-hot px-2.5 py-1 text-caption font-black tracking-wide text-white uppercase">
+                <Flame className="size-3.5" aria-hidden="true" />
+                Limited offer
+              </span>
+              <span className="rounded-md border border-accent-hot/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot uppercase">
+                {places} spots only
+              </span>
+            </div>
+            <p className="font-display mt-3 text-subheading leading-tight font-black tracking-tight text-ink uppercase sm:text-heading">
+              Lock in {OFFER_PRICE}/mo{" "}
+              <span className="text-accent-hot">· first {places} only</span>
+            </p>
+            <p className="mt-2 max-w-xl text-body-sm text-muted">
+              The first {places} {OFFER.label} subscribers keep {OFFER_PRICE} a month for as long
+              as they stay subscribed, whatever {OFFER.label} costs later. Once those spots are
+              gone, so is the locked-in price.
+            </p>
+          </div>
+
+          <Link
+            href={subscribeHref(LAUNCH_OFFER.tier, Boolean(user))}
+            prefetch={false}
+            className={buttonVariants({
+              variant: "accent",
+              className: "relative w-full shrink-0 overflow-hidden px-8 lg:w-auto",
+            })}
+          >
+            <LaunchOfferShine />
+            Claim my spot
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/** The offer's plan card on the pricing page: a hot ring and a badge, no
+ *  count. The card must be `relative`; both go when the offer sells out. */
+export function LaunchOfferPlanFlag() {
+  const { places, soldOut } = useLaunchOffer();
+  if (soldOut) return null;
+
+  return (
+    <>
+      <span
+        className="pointer-events-none absolute -inset-px rounded-2xl shadow-glow-hot-md ring-1 ring-accent-hot/70 motion-safe:animate-pulse"
+        aria-hidden="true"
+      />
+      <span className="font-display absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent-hot px-3 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-white uppercase shadow-glow-hot-sm">
+        <span
+          className="size-1.5 rounded-full bg-white motion-safe:animate-status-pulse"
+          aria-hidden="true"
+        />
+        Launch offer · {places} spots
+      </span>
+    </>
+  );
+}
+
+/** That card's button: straight into the plan's checkout path (see
+ *  subscribeHref), with the glint while the offer runs and a plain "Get
+ *  started" once it's over. */
+export function LaunchOfferPlanCta({ className }: { className?: string }) {
+  const { soldOut } = useLaunchOffer();
+  const { data: user } = useMe();
+
+  return (
+    <Link
+      href={subscribeHref(LAUNCH_OFFER.tier, Boolean(user))}
+      prefetch={false}
+      className={buttonVariants({
+        variant: soldOut ? "secondary" : "accent",
+        className: cn("relative overflow-hidden", className),
+      })}
+    >
+      {!soldOut && <LaunchOfferShine />}
+      {soldOut ? "Get started" : "Claim my spot"}
+    </Link>
+  );
+}
+
 const DISMISS_KEY = "vixlens:launch-offer-bar-dismissed";
 
 /**
