@@ -8,6 +8,7 @@ import {
 } from "@/lib/structured-data";
 import { Hero } from "@/components/landing/hero";
 import { PlansSection } from "@/components/landing/plans-section";
+import { LaunchOfferBanner, LaunchOfferStickyBar } from "@/components/landing/launch-offer";
 import { PriceComparison } from "@/components/landing/price-comparison";
 import { SeedancePromoBanner } from "@/components/landing/seedance-promo-banner";
 import { FeaturesShowcase } from "@/components/landing/features-showcase";
@@ -40,9 +41,12 @@ export default function LandingPage() {
           faqPageJsonLd(HOME_FAQS),
         ]}
       />
-      {/* Subscribe-first: the offer (hero), the plans, then the price check
-          that backs the offer up — product sections follow. */}
+      {/* Subscribe-first: the offer (hero), Starter's limited launch offer,
+          the plans, then the price check that backs the offer up — product
+          sections follow. The launch-offer pieces remove themselves once its
+          spots are gone. */}
       <Hero />
+      <LaunchOfferBanner />
       <PlansSection />
       <PriceComparison />
       <SeedancePromoBanner />
@@ -75,6 +79,7 @@ export default function LandingPage() {
       <CreatorUseCases />
       <FaqAccordion />
       <CtaSection />
+      <LaunchOfferStickyBar />
     </>
   );
 }

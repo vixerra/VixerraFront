@@ -243,6 +243,31 @@ export const ANNUAL_PRICE_MONTHLY: Partial<Record<Tier, number>> = {
   studio: 44.92,
 };
 
+/**
+ * Starter's launch offer (since 2026-09-26): the first `places` accounts to
+ * pay for Starter from `startsAt` on keep today's Starter price for as long
+ * as they stay subscribed, whatever Starter costs later. That promise is what
+ * makes the places scarce — the public price itself doesn't change when the
+ * last one goes.
+ *
+ * A place is taken by a paid Starter invoice (a `Payment` row), never by a
+ * click, and is not handed back on cancellation. GET /api/subscription/offer
+ * serves the live count to the marketing site, which drops every trace of
+ * the offer once it reads zero.
+ *
+ * Honouring it later: Stripe already leaves an existing subscription on its
+ * old Price when `stripe:setup` reprices a plan, but credits follow the tier
+ * (grantInvoiceCredits), not the Price. So before Starter's price or credits
+ * change, these accounts — the first `places` distinct users by their first
+ * such Payment — need their own grant, or they'd get the new allowance at
+ * the old price.
+ */
+export const LAUNCH_OFFER = {
+  tier: "starter",
+  places: 20,
+  startsAt: "2026-09-26T00:00:00Z",
+} as const satisfies { tier: Tier; places: number; startsAt: string };
+
 // Pay-per-use top-ups — priced at exactly CREDIT_VALUE_USD, same as the
 // plans (2026-08-30): a credit costs a cent wherever you buy it. They used
 // to carry a ~70% premium ($0.017/credit), which stopped making sense once

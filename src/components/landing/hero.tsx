@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { LaunchOfferPill } from "@/components/landing/launch-offer";
 import { SEEDANCE_MODEL_ID, TIER_INFO } from "@/lib/constants";
 import { heroContainerVariants, heroWordVariants } from "@/lib/animations";
 import { useMe } from "@/hooks/use-me";
@@ -180,6 +181,14 @@ export function Hero() {
 
       <div className="container-page relative py-20 sm:py-24">
         <div className="mx-auto max-w-3xl text-center">
+          <motion.div
+            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-4 flex justify-center"
+          >
+            <LaunchOfferPill />
+          </motion.div>
           <motion.div
             initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

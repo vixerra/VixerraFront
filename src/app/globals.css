@@ -280,6 +280,13 @@
   --animate-preset-select: preset-select 3.2s ease-in-out infinite;
   --animate-drop-into-frame: drop-into-frame 3.2s ease-in-out infinite;
   --animate-arrow-dip: arrow-dip 2.4s ease-in-out infinite;
+
+  /* Launch-offer CTAs (see landing/launch-offer.tsx): a flat translucent-white
+     band that sweeps across the button, then rests for most of the cycle so
+     it reads as a glint rather than a loading bar. A solid band, not a
+     gradient, per the rule above. The call site gives the band its width and
+     the button relative + overflow-hidden. */
+  --animate-shine: shine 3.6s ease-in-out infinite;
 }
 
 @keyframes blob-float {
@@ -462,6 +469,18 @@
   100% {
     opacity: 0;
     transform: translateY(4px);
+  }
+}
+
+/* Percentages are of the band's own width (a quarter of the button), so
+   -150% starts it fully off the left edge and 450% carries it off the right. */
+@keyframes shine {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  40%,
+  100% {
+    transform: translateX(450%) skewX(-20deg);
   }
 }
 

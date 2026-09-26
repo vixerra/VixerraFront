@@ -6,8 +6,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/marketing/reveal";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
 import { PlanPrice } from "@/components/pricing/plan-price";
+import { LaunchOfferMeter, LaunchOfferShine } from "@/components/landing/launch-offer";
+import { useLaunchOffer } from "@/hooks/use-launch-offer";
 import { useMe } from "@/hooks/use-me";
-import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
+import { LAUNCH_OFFER, TIERS, TIER_INFO, type Tier } from "@/lib/constants";
 import { COMPETITORS, ENTRY_TIER, formatListPrice } from "@/lib/competitor-pricing";
 import { appHref, subscribeHref } from "@/lib/hosts";
 import { cn, formatCredits } from "@/lib/utils";
@@ -16,7 +18,8 @@ const PAID_TIERS = TIERS.filter((tier) => TIER_INFO[tier].priceMonthly > 0);
 const POPULAR_TIER: Tier = "creator";
 // The entry plan is the one the hero and the price check sell, so its card
 // gets its own flag too. Outlined rather than filled, so it doesn't compete
-// with the popular badge for the same glance.
+// with the popular badge for the same glance. While the launch offer runs
+// (see launch-offer.tsx) its plan wears the offer instead.
 const ENTRY_BADGE = "Best way to start";
 // The card shows its monthly grant as its own amber line, so the matching
 // bullet is dropped from the list; the rest is capped so three cards of
@@ -38,6 +41,7 @@ const RIVAL_ENTRY_PRICES = COMPETITORS.map(
 export function PlansSection() {
   const { data: user } = useMe();
   const signedIn = Boolean(user);
+  const offer = useLaunchOffer();
 
   return (
     <section id="plans" className="relative scroll-mt-16 border-t border-line py-20 sm:py-28">
@@ -63,6 +67,7 @@ export function PlansSection() {
             const info = TIER_INFO[tier];
             const isPopular = tier === POPULAR_TIER;
             const isEntry = tier === ENTRY_TIER;
+            const isOffer = tier === LAUNCH_OFFER.tier && !offer.soldOut;
             const bullets = info.features.filter((f) => !isGrantBullet(f));
             const shown = bullets.slice(0, FEATURES_SHOWN);
             const hidden = bullets.length - shown.length;
@@ -73,20 +78,37 @@ export function PlansSection() {
                     "relative flex h-full flex-col rounded-2xl border bg-surface-2 p-8 transition-[border-color,box-shadow,transform] duration-500 ease-out",
                     isPopular
                       ? "border-brand/50 shadow-glow-md lg:-translate-y-4"
-                      : isEntry
-                        ? "border-brand/30 shadow-card hover:border-brand/50"
-                        : "border-line shadow-card hover:border-border-strong",
+                      : isOffer
+                        ? "border-accent-hot/50 shadow-glow-hot-md"
+                        : isEntry
+                          ? "border-brand/30 shadow-card hover:border-brand/50"
+                          : "border-line shadow-card hover:border-border-strong",
                   )}
                 >
+                  {isOffer && (
+                    <span
+                      className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-accent-hot/70 motion-safe:animate-pulse"
+                      aria-hidden="true"
+                    />
+                  )}
                   {isPopular && (
                     <span className="font-display absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-on-brand uppercase shadow-glow-sm">
                       Most popular
                     </span>
                   )}
-                  {isEntry && !isPopular && (
-                    <span className="font-display absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full border border-brand/50 bg-surface-2 px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-brand uppercase">
-                      {ENTRY_BADGE}
+                  {isOffer && !isPopular ? (
+                    <span className="font-display absolute -top-3.5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent-hot px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-white uppercase shadow-glow-hot-sm">
+                      <span className="size-1.5 rounded-full bg-white motion-safe:animate-status-pulse" aria-hidden="true" />
+                      Launch offer
+                      {offer.remaining !== null && ` · ${offer.remaining} left`}
                     </span>
+                  ) : (
+                    isEntry &&
+                    !isPopular && (
+                      <span className="font-display absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full border border-brand/50 bg-surface-2 px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-brand uppercase">
+                        {ENTRY_BADGE}
+                      </span>
+                    )
                   )}
 
                   <h3 className="text-feature-title text-ink">{info.label}</h3>
@@ -104,6 +126,7 @@ export function PlansSection() {
                       Entry plans elsewhere: {RIVAL_ENTRY_PRICES}
                     </p>
                   )}
+                  {isOffer && <LaunchOfferMeter className="mt-4" />}
 
                   <div className="mt-5 flex items-center gap-2 rounded-xl border border-accent-amber/20 bg-accent-amber/5 px-3.5 py-2.5">
                     <Zap className="size-4 shrink-0 text-accent-amber" aria-hidden="true" />
@@ -118,9 +141,10 @@ export function PlansSection() {
                     prefetch={false}
                     className={buttonVariants({
                       variant: isPopular || isEntry ? "accent" : "primary",
-                      className: "mt-6 w-full",
+                      className: cn("mt-6 w-full", isOffer && "relative overflow-hidden"),
                     })}
                   >
+                    {isOffer && <LaunchOfferShine />}
                     Subscribe to {info.label}
                     <ArrowRight className="size-4" aria-hidden="true" />
                   </Link>
