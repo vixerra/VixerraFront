@@ -32,8 +32,8 @@ export function useLaunchOffer() {
 
   return {
     places: data?.places ?? LAUNCH_OFFER.places,
-    taken: data ? data.taken + 9 : null,
-    remaining: data ? data.remaining - 9 : null,
+    taken: data ? data.taken + 12 : null,
+    remaining: data ? data.remaining - 12 : null,
     soldOut: data ? data.remaining <= 0 : false,
   };
 }
