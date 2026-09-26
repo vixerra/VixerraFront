@@ -165,8 +165,10 @@ export type CloudflareModelConfig = {
   imageLimits?: ImageLimits;
   /** Extra tunable params exposed in the dynamic form. */
   fields: DynamicField[];
-  /** Params always sent as-is, not user-editable (e.g. a fixed operation). */
-  staticParams?: Record<string, string | number | boolean>;
+  /** Params always sent as-is, not user-editable (e.g. a fixed operation).
+   *  An array here is shared by every request this isolate serves, hence
+   *  readonly. */
+  staticParams?: Record<string, string | number | boolean | readonly unknown[]>;
   /** Merged over staticParams when the request HAS an input image, and
    *  when it doesn't, respectively, and over the fields as well: what they
    *  set is decided by the image, not by the form. FLUX 3 Video is a
@@ -944,6 +946,11 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     image: "optional",
     imageCfParam: "image_urls",
     imageParamShape: "urlArray",
+    // Both are in the input's `required` list even for a single-shot run,
+    // although the docs call multi_shots optional: without it createTask
+    // answers "multi_shots cannot be empty" (2026-09-26). multi_prompt sits
+    // after it in that list and only takes effect when multi_shots is true.
+    staticParams: { multi_shots: false, multi_prompt: [] },
     fields: [
       // The API spells its quality tiers std/pro/4K. We keep resolutions
       // canonical so credit-estimate's rate table stays keyed like every
