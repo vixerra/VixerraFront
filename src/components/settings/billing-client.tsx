@@ -128,6 +128,12 @@ const WEBHOOK_WAIT_MS = 12000;
  * quietly with the correct data on screen — better than a "confirmed" toast
  * this code can't actually vouch for.
  *
+ * It also doesn't leave the payment to the webhook alone. The success URL
+ * carries Stripe's `session_id`, which is posted back to
+ * /api/subscription/checkout/confirm: the API reads that session from
+ * Stripe and settles it exactly as the webhook would, so an account is
+ * credited even when the webhook is late or not arriving at all.
+ *
  * Same query-param-plus-router.replace shape as the social OAuth callback in
  * social-accounts.tsx, which is why the page wraps this in a Suspense
  * boundary.
@@ -140,6 +146,7 @@ function useCheckoutReturn(refetch: () => Promise<{ data?: SubscriptionResponse 
   const [settled, setSettled] = useState(false);
 
   const outcome = searchParams.get("checkout");
+  const sessionId = searchParams.get("session_id");
   const awaiting = outcome === "success" && !settled;
 
   useEffect(() => {
@@ -175,7 +182,22 @@ function useCheckoutReturn(refetch: () => Promise<{ data?: SubscriptionResponse 
       }
     };
 
-    void tick();
+    // Confirmed only after the baseline poll, so the change it makes is
+    // still observed as one. Best effort: if it fails, the webhook and the
+    // polling carry on exactly as before.
+    void tick().then(async () => {
+      if (!sessionId || stopped) return;
+      try {
+        await apiFetch("/api/subscription/checkout/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId }),
+        });
+      } catch {
+        return;
+      }
+      await tick();
+    });
     const poll = setInterval(() => void tick(), 2000);
     const timer = setTimeout(() => setSettled(true), WEBHOOK_WAIT_MS);
     return () => {
@@ -183,7 +205,7 @@ function useCheckoutReturn(refetch: () => Promise<{ data?: SubscriptionResponse 
       clearInterval(poll);
       clearTimeout(timer);
     };
-  }, [awaiting, refetch, invalidateCredits, toast]);
+  }, [awaiting, sessionId, refetch, invalidateCredits, toast]);
 
   // Strip the parameter once the wait is over, so a refresh doesn't replay
   // the whole thing. Deliberately not done on arrival: `?checkout=success`
