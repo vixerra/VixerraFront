@@ -72,6 +72,7 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
           </Dialog.Title>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             {g && <StatusPill status={g.status} />}
+            {g?.deletedAt && <Mono>deleted by owner</Mono>}
             <Mono className="truncate">{id}</Mono>
             <CopyButton value={id} label="Copy generation id" />
           </div>
@@ -198,6 +199,7 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
                 </Field>
                 <Field label="Created">{formatDate(g.createdAt)}</Field>
                 <Field label="Completed">{formatDate(g.completedAt)}</Field>
+                {g.deletedAt && <Field label="Deleted by owner">{formatDate(g.deletedAt)}</Field>}
                 <Field label="Retries">{g.retryCount}</Field>
                 <Field label="Progress">{g.progressPercent}%</Field>
                 <Field label="Provider task">

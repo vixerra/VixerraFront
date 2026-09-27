@@ -212,6 +212,8 @@ export type AdminGenerationRow = {
   isPublic: boolean;
   createdAt: string;
   completedAt: string | null;
+  /** When its owner deleted it. The row stays; the owner no longer sees it. */
+  deletedAt: string | null;
 };
 
 export type AdminGenerationsParams = {

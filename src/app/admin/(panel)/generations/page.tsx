@@ -424,6 +424,7 @@ export default function AdminGenerationsPage() {
                   <Td>
                     <StatusPill status={g.status} />
                     {g.retryCount > 0 && <Mono className="mt-1 block">retried ×{g.retryCount}</Mono>}
+                    {g.deletedAt && <Mono className="mt-1 block">deleted by owner</Mono>}
                   </Td>
                   <Td className="text-right tabular-nums">{g.costCredits}</Td>
                   <Td className="text-right tabular-nums">
