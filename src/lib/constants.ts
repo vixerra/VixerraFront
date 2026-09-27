@@ -211,7 +211,7 @@ export const TIER_INFO: Record<
   },
   studio: {
     label: "Studio",
-    priceMonthly: 0.5,
+    priceMonthly: 49,
     monthlyCredits: 5000,
     renewsMonthly: true,
     // Only tier allowed to spend credits on 4K (Seedance 2.0) generations.
