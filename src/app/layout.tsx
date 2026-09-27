@@ -150,7 +150,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             src="https://www.facebook.com/tr?id=3254360258285341&ev=PageView&noscript=1"
           />
         </noscript>
-        {/* TikTok Pixel — same afterInteractive loader pattern as the Meta Pixel. */}
+        {/* TikTok Pixel — same afterInteractive loader pattern as the Meta Pixel.
+            The trailing lines keep the ad's `ttclid` in a cookie shared by the apex
+            and app hosts: the Pixel doesn't persist it, and the API's Events API
+            calls (lib/tiktok-events.ts in the backend) read it off the signup request. */}
         <Script id="tiktok-pixel" strategy="afterInteractive">
           {`!function (w, d, t) {
           w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
@@ -158,7 +161,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
           ttq.load('DASJHOJC77U88MSO90F0');
           ttq.page();
-          }(window, document, 'ttq');`}
+          }(window, document, 'ttq');
+          var ttclid = new URLSearchParams(location.search).get('ttclid');
+          if (ttclid) document.cookie = 'ttclid=' + encodeURIComponent(ttclid) + ';path=/;max-age=2592000;SameSite=Lax' +
+            (/(^|\\.)vixlens\\.com$/.test(location.hostname) ? ';domain=.vixlens.com' : '');`}
         </Script>
         <QueryProvider>
           <TooltipProvider>
