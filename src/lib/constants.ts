@@ -40,8 +40,8 @@ const ESTIMATES_NOTE =
 // grant can make is decided by its credits, inside Free's 480p / 5s caps.
 const ESTIMATES_NOTE_FREE =
   "Estimates. Images are counted with the fast image models, videos with " +
-  "the cheapest video model at this plan's 5s / 480p cap. Every model is " +
-  "open; the credits are the only limit.";
+  "the cheapest video model at this plan's 480p cap. Every model is open; " +
+  "the credits are the only limit.";
 
 export const TIER_INFO: Record<
   Tier,
@@ -54,7 +54,7 @@ export const TIER_INFO: Record<
     /**
      * Whether monthlyCredits is granted again every calendar month.
      *
-     * Free is a one-time welcome grant, not an allowance: 20 credits when
+     * Free is a one-time welcome grant, not an allowance: 10 credits when
      * the account is created, never refilled. rolloverMonths is not
      * consulted at all when this is false — credits that never come back
      * must not be taken away either, so the grant simply never expires.
@@ -105,10 +105,13 @@ export const TIER_INFO: Record<
   free: {
     label: "Free",
     priceMonthly: 0,
-    // 20 since 2026-09-14 (was 50, then 20 and 30 on 2026-09-13). Existing
-    // accounts keep the grant they were issued: it is a one-time row, written
-    // when the account first reads its balance, and nothing re-issues it.
-    monthlyCredits: 20,
+    // 10 since 2026-09-27 (was 50, then 20 and 30 on 2026-09-13, then 20
+    // from 2026-09-14). Existing accounts keep the grant they were issued: it
+    // is a one-time row, written when the account first reads its balance,
+    // and nothing re-issues it. 10 no longer buys a clip at Free's 5s cap on
+    // any model (the cheapest, Grok 1.5 at 480p, is 15 credits for 5s), so
+    // the video line below is a 3s clip (9 credits).
+    monthlyCredits: 10,
     renewsMonthly: false,
     maxResolution: "480p",
     maxDurationSeconds: 5,
@@ -122,9 +125,9 @@ export const TIER_INFO: Record<
     creatorSuite: false,
     apiAccess: false,
     features: [
-      "20 one-time credits, no monthly refill",
-      "~3 images",
-      "or 1 Grok video (5s, 480p)",
+      "10 one-time credits, no monthly refill",
+      "1 image",
+      "or 1 Grok video (3s, 480p)",
       "Credits never expire",
       "No watermark",
       "Standard queue",
