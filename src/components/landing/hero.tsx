@@ -250,7 +250,7 @@ export function Hero() {
             className="mx-auto mt-6 max-w-xl text-body-lg text-muted"
           >
             Seedance 2.5, Kling 3.0, Veo 3.1, GPT Image 2 and Nano Banana Pro in one studio.
-            No watermark on any plan, commercial license from {TIER_INFO.starter.label} up, cancel
+            No watermark and a commercial license from {TIER_INFO.starter.label} up, cancel
             anytime.
           </motion.p>
 

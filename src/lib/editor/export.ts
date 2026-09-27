@@ -84,7 +84,7 @@ export function isExportSupported(): boolean {
   return typeof window !== "undefined" && typeof window.VideoEncoder !== "undefined";
 }
 
-async function pickVideoCodec(config: Omit<VideoEncoderConfig, "codec">): Promise<string> {
+export async function pickVideoCodec(config: Omit<VideoEncoderConfig, "codec">): Promise<string> {
   for (const codec of AVC_CODECS) {
     try {
       const support = await VideoEncoder.isConfigSupported({ ...config, codec });
@@ -99,7 +99,7 @@ async function pickVideoCodec(config: Omit<VideoEncoderConfig, "codec">): Promis
   );
 }
 
-async function waitForQueue(encoder: { encodeQueueSize: number }) {
+export async function waitForQueue(encoder: { encodeQueueSize: number }) {
   while (encoder.encodeQueueSize > MAX_QUEUE) {
     await new Promise((resolve) => setTimeout(resolve, 8));
   }
@@ -314,7 +314,7 @@ export async function exportProject(options: {
  * they are computed from the running sample offset, never accumulated from
  * the slice length, so rounding cannot drift the audio out of sync.
  */
-async function encodeAudio(
+export async function encodeAudio(
   buffer: AudioBuffer,
   config: AudioEncoderConfig,
   muxer: Muxer<ArrayBufferTarget>,

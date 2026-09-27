@@ -13,8 +13,9 @@ import type { DynamicField } from "@/lib/cloudflare-models";
 /**
  * Never rendered. The plan decides these, not the user.
  *
- * `watermark` stays off on every plan — no plan watermarks video — so a
- * toggle here would only add a provider mark nobody asked for. Hiding it does not drop
+ * `watermark` is the provider's own flag and stays off on every plan: the
+ * Free plan's Vixlens mark is drawn by this app (lib/watermark.ts), not asked
+ * of the model, so a toggle here would only add a provider mark nobody asked for. Hiding it does not drop
  * the value: registry fields carrying a defaultValue are defaulted by the zod
  * schema on both sides, so omitting the key sends exactly what the visible
  * toggle would have sent.

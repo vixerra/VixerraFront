@@ -15,8 +15,29 @@ import { apiFetch } from "@/lib/api-client";
  * points a synthetic link at that. Fetching the bytes here instead (blob +
  * object URL) would need CORS on the bucket, which the signed URLs don't
  * carry.
+ *
+ * `watermark` (a Free plan's own result, see needsWatermark) takes a third
+ * path: the bytes come through the same-origin proxy after all, get the
+ * watermark burned in, and are saved from memory. It never falls back to the
+ * clean file — if the burn fails, the download fails.
  */
-export async function downloadGenerationResult(id: string, fallbackUrl?: string | null) {
+export async function downloadGenerationResult(
+  id: string,
+  fallbackUrl?: string | null,
+  options: { watermark?: { isVideo: boolean; onProgress?: (percent: number) => void } } = {},
+) {
+  if (options.watermark) {
+    if (!fallbackUrl) throw new Error("This result isn't available to download yet.");
+    const { isVideo, onProgress } = options.watermark;
+    const [{ burnWatermark, watermarkedExtension }, { downloadBlob }] = await Promise.all([
+      import("@/lib/watermark-burn"),
+      import("@/lib/editor/save"),
+    ]);
+    const blob = await burnWatermark(fallbackUrl, isVideo, onProgress);
+    downloadBlob(blob, `vixlens-${id}${watermarkedExtension(blob)}`);
+    return;
+  }
+
   let href: string | null = null;
 
   try {

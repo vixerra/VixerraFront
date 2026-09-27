@@ -405,7 +405,7 @@ function drawGlobalFade(
  * face measures at the fallback's metrics and the text wraps in the wrong
  * places.
  */
-function fontStack(role: string): { stack: string; weight: number; italic: boolean } {
+export function fontStack(role: string): { stack: string; weight: number; italic: boolean } {
   const spec = TEXT_FONTS.find((f) => f.id === role) ?? TEXT_FONTS[0];
   const stack =
     typeof window === "undefined"

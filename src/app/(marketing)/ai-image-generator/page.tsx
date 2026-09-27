@@ -20,9 +20,9 @@ const models = generatorModels("image");
 const freeVideo = freeVideoOffer();
 const featured = featuredModelLabels(models, 3);
 const vectorModel = models.find((m) => m.page.slug === "recraft-v4-1-vector");
-// "~3 images" on the Free card — reused rather than restated, so the two
-// can't disagree when the grant changes.
-const freeImages = free.features.find((f) => f.endsWith(" images"))?.replace("~", "about ");
+// The image line on the Free card ("~3 images", "1 image") — reused rather
+// than restated, so the two can't disagree when the grant changes.
+const freeImages = free.features.find((f) => / images?$/.test(f))?.replace("~", "about ");
 
 const TITLE = "Free AI Image Generator — Text to Image";
 const DESCRIPTION = metaDescription(
@@ -72,7 +72,7 @@ const content: GeneratorLandingContent = {
       question: "Is the AI image generator free?",
       answer: `Yes. A free account comes with ${free.monthlyCredits} credits and no credit card${
         freeImages ? ` — enough for ${freeImages} with the fast image models` : ""
-      }, and those credits never expire. When you need more, ${starter.label} is $${starter.priceMonthly}/month for ${starter.monthlyCredits.toLocaleString("en-US")} credits.`,
+      }, and those credits never expire. Free images carry a Vixlens watermark; when you need more, or need them clean, ${starter.label} is $${starter.priceMonthly}/month for ${starter.monthlyCredits.toLocaleString("en-US")} credits.`,
     },
     {
       question: "What is an AI image generator?",

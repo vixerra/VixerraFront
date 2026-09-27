@@ -172,7 +172,7 @@ export function PlansSection() {
           <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-dashed border-line px-6 py-5 text-center sm:flex-row sm:text-left">
             <p className="text-body-sm text-muted">
               <span className="font-medium text-ink">Not ready to subscribe?</span> Try it with{" "}
-              {TIER_INFO.free.monthlyCredits} free credits. No card, no watermark.
+              {TIER_INFO.free.monthlyCredits} free credits. No card required.
             </p>
             <Link
               href={appHref("/signup")}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToggleLike } from "@/hooks/use-generation-likes";
 import { GenerationCard, type GalleryItem } from "./generation-card";
 import { PreviewModal, type PreviewAuthor } from "./preview-modal";
+import { useResultWatermark } from "@/components/result-watermark";
 
 export function GalleryGrid({
   items,
@@ -43,6 +44,10 @@ export function GalleryGrid({
   // on screen changed. The server already answers this question, and its
   // 401 drives the sign-in prompt (see useToggleLike).
   const toggleLike = useToggleLike();
+  // The creator's own tiles only — the community feed shows other people's
+  // work, made on plans the viewer knows nothing about.
+  const planWatermark = useResultWatermark();
+  const watermarked = viewerIsOwner && planWatermark;
 
   return (
     <>
@@ -53,6 +58,7 @@ export function GalleryGrid({
             item={item}
             onOpen={() => setOpenIndex(i)}
             showAuthor={showAuthor}
+            watermarked={watermarked}
             onToggleLike={() => toggleLike.mutate({ item })}
           />
         ))}

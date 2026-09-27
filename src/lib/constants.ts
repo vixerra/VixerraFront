@@ -36,8 +36,9 @@ const ESTIMATES_NOTE =
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
 
-// No plan watermarks video and no model is locked to a plan: what the Free
-// grant can make is decided by its credits, inside Free's 480p / 5s caps.
+// No model is locked to a plan: what the Free grant can make is decided by
+// its credits, inside Free's 480p / 5s caps. What Free makes carries the
+// Vixlens watermark (TIER_INFO.watermark).
 const ESTIMATES_NOTE_FREE =
   "Estimates. Images are counted with the fast image models, videos with " +
   "the cheapest video model at this plan's 480p cap. Every model is open; " +
@@ -84,6 +85,16 @@ export const TIER_INFO: Record<
      * all four.
      */
     creatorSuite: boolean;
+    /**
+     * Whether this plan's results carry the Vixlens watermark, centered, on
+     * screen and in the downloaded file (Free only, since 2026-09-27).
+     *
+     * Frontend-only, and so is the watermark: the API stores and serves every
+     * result clean, and lib/watermark.ts draws the mark in the browser — see
+     * the header there for what that does and doesn't protect. That is why
+     * the API's copy of TIER_INFO has no such field.
+     */
+    watermark: boolean;
     features: string[];
     /** One disclosure for the whole card, see ESTIMATES_NOTE. */
     featuresNote: string;
@@ -123,13 +134,14 @@ export const TIER_INFO: Record<
     seats: 1,
     priorityQueue: false,
     creatorSuite: false,
+    watermark: true,
     apiAccess: false,
     features: [
       "10 one-time credits, no monthly refill",
       "1 image",
       "or 1 Grok video (3s, 480p)",
       "Credits never expire",
-      "No watermark",
+      "Vixlens watermark on results",
       "Standard queue",
     ],
     featuresNote: ESTIMATES_NOTE_FREE,
@@ -151,6 +163,7 @@ export const TIER_INFO: Record<
     seats: 1,
     priorityQueue: false,
     creatorSuite: false,
+    watermark: false,
     apiAccess: false,
     features: [
       "600 credits / month",
@@ -178,6 +191,7 @@ export const TIER_INFO: Record<
     seats: 1,
     priorityQueue: true,
     creatorSuite: true,
+    watermark: false,
     apiAccess: false,
     features: [
       "2,500 credits / month",
@@ -212,6 +226,7 @@ export const TIER_INFO: Record<
     seats: 4,
     priorityQueue: true,
     creatorSuite: true,
+    watermark: false,
     apiAccess: true,
     features: [
       "5,000 credits / month",

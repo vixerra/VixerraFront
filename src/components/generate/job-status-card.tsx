@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CheckCircle2, XCircle, Sparkles, RotateCcw, Download as DownloadIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { downloadGenerationResult } from "@/lib/download";
 import { PublishButton } from "@/components/social/publish-button";
+import { ResultWatermark, useResultWatermark } from "@/components/result-watermark";
 import { GenerationLoader } from "./generation-loader";
 import type { useGeneration } from "@/hooks/use-generation";
 
@@ -33,16 +34,26 @@ export function JobStatusCard({
 }) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  // Burning the watermark into a video takes a few seconds, so the button
+  // counts it up rather than sitting on "Preparing…".
+  const [burnPercent, setBurnPercent] = useState<number | null>(null);
+  // Always the viewer's own result here — this card only shows the job they
+  // just submitted.
+  const watermarked = useResultWatermark();
+  const mediaRef = useRef<HTMLVideoElement & HTMLImageElement>(null);
 
   async function handleDownload() {
     if (!jobId) return;
     setSaving(true);
     try {
-      await downloadGenerationResult(jobId, generation.result?.resultUrl);
+      await downloadGenerationResult(jobId, generation.result?.resultUrl, {
+        watermark: watermarked ? { isVideo, onProgress: setBurnPercent } : undefined,
+      });
     } catch (error) {
       toast({ title: (error as Error).message, variant: "error" });
     } finally {
       setSaving(false);
+      setBurnPercent(null);
     }
   }
 
@@ -104,15 +115,19 @@ export function JobStatusCard({
         {/* min-h-0 is load-bearing: without it this flex child refuses to
           * shrink below its content's natural size and the overflow comes
           * straight back. */}
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-dark shadow-glow-sm">
+        <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-dark shadow-glow-sm">
           {isVideo ? (
             <video
+              ref={mediaRef}
               src={generation.result.resultUrl}
               controls
               autoPlay
               loop
               muted
               playsInline
+              // The player's own download item would save the clean file.
+              controlsList={watermarked ? "nodownload" : undefined}
+              onContextMenu={watermarked ? (e) => e.preventDefault() : undefined}
               className="max-h-full max-w-full object-contain"
             />
           ) : (
@@ -124,17 +139,25 @@ export function JobStatusCard({
             // an aspect ratio we don't actually know here.
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              ref={mediaRef}
               src={generation.result.resultUrl}
               alt="Generation result"
+              draggable={watermarked ? false : undefined}
+              onContextMenu={watermarked ? (e) => e.preventDefault() : undefined}
               className="max-h-full max-w-full object-contain"
             />
           )}
+          {watermarked && <ResultWatermark mediaRef={mediaRef} />}
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button className="w-full sm:flex-1" disabled={saving} onClick={handleDownload}>
             <DownloadIcon className="size-4" aria-hidden="true" />
-            {saving ? "Preparing…" : "Download"}
+            {saving
+              ? burnPercent !== null
+                ? `Adding watermark… ${Math.round(burnPercent * 100)}%`
+                : "Preparing…"
+              : "Download"}
           </Button>
           {jobId && (
             <PublishButton

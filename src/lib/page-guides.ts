@@ -322,7 +322,7 @@ export const PAGE_GUIDES: PageGuide[] = [
       { icon: "zap", title: "10 credits land", detail: "Waiting on your dashboard." },
       { icon: "image", title: "Spend them well", detail: "1 image, or a 3s Grok video." },
     ],
-    note: "Every model is open, with no watermark. Free video is capped at 480p / 5s; Starter goes to 1080p.",
+    note: "Every model is open. Free results carry a watermark and video is capped at 480p / 5s; Starter drops the watermark and goes to 1080p.",
     noteTone: "warn",
   },
   {

@@ -14,9 +14,9 @@ import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 import { SEEDANCE25_SHOWCASE_VIDEOS } from "@/lib/showcase-media";
 
 // Targets "ai video generator", "ai video" and "free ai video generator". The
-// free claim rests on freeVideoOffer(): the Free grant covering a real clip on
-// a watermark-exempt model. If that ever stops being true, the title, tagline
-// and FAQ fall back to saying video starts on Starter instead.
+// free claim rests on freeVideoOffer(): the Free grant covering a real clip
+// (watermarked, like everything Free makes). If that ever stops being true,
+// the title, tagline and FAQ fall back to saying video starts on Starter.
 
 const { free, starter, creator, studio } = TIER_INFO;
 const models = generatorModels("video");
@@ -94,7 +94,7 @@ const content: GeneratorLandingContent = {
     {
       question: "Is the AI video generator free?",
       answer: freeVideo
-        ? `Yes. A free account comes with ${free.monthlyCredits} credits and no credit card — enough for ${freeVideo.clips === 1 ? "a clip" : `${freeVideo.clips} clips`} with ${freeVideo.label} (${freeVideo.credits} credits${freeVideo.clips === 1 ? "" : " each"}, ${freeVideo.seconds}s at ${freeVideo.resolution}, no watermark). Every model is open on every plan; the credits are the only limit. For longer, sharper video and a commercial licence, ${starter.label} is $${starter.priceMonthly}/month with ${starter.monthlyCredits.toLocaleString("en-US")} credits.`
+        ? `Yes. A free account comes with ${free.monthlyCredits} credits and no credit card — enough for ${freeVideo.clips === 1 ? "a clip" : `${freeVideo.clips} clips`} with ${freeVideo.label} (${freeVideo.credits} credits${freeVideo.clips === 1 ? "" : " each"}, ${freeVideo.seconds}s at ${freeVideo.resolution}, with a Vixlens watermark). Every model is open on every plan; the credits are the only limit. For longer, sharper, watermark-free video and a commercial licence, ${starter.label} is $${starter.priceMonthly}/month with ${starter.monthlyCredits.toLocaleString("en-US")} credits.`
         : `Signing up is free and comes with ${free.monthlyCredits} credits and no credit card, but those credits are sized for trying the image models and don't cover a video clip. Video starts on the ${starter.label} plan at $${starter.priceMonthly}/month, with ${starter.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence.`,
     },
     ...(audioModels.length > 0
@@ -113,7 +113,7 @@ const content: GeneratorLandingContent = {
     },
     {
       question: "Can I use the videos commercially?",
-      answer: `Yes, from the ${starter.label} plan up — paid plans include a commercial licence. The ${free.label} plan does not, although no plan watermarks its video.`,
+      answer: `Yes, from the ${starter.label} plan up — paid plans include a commercial licence. The ${free.label} plan does not, and its videos carry a Vixlens watermark.`,
     },
   ],
   sibling: {

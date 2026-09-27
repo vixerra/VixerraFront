@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Heart } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { ResultWatermark } from "@/components/result-watermark";
 
 // A tile sits still on its first frame and only plays while the pointer is
 // on the card — a grid of clips all looping at once is noise, and dozens of
@@ -137,10 +138,14 @@ export function GenerationCard({
   onOpen,
   onToggleLike,
   showAuthor = false,
+  watermarked = false,
 }: {
   item: GalleryItem;
   onOpen: () => void;
   onToggleLike?: () => void;
+  /** The Free plan's watermark over the tile — decided by the grid, which
+   *  knows whether these are the viewer's own (see useResultWatermark). */
+  watermarked?: boolean;
   /** Credits the creator on the tile — the public feed and shared
    *  collections, where the viewer generally isn't the person who made it. */
   showAuthor?: boolean;
@@ -200,6 +205,9 @@ export function GenerationCard({
             <span className="font-mono text-caption text-muted">{item.progressPercent}%</span>
           </div>
         )}
+        {/* The tile's media covers it edge to edge, so the mark fills the
+            tile rather than tracking an element. */}
+        {watermarked && item.status === "completed" && item.resultUrl && <ResultWatermark />}
       </button>
 
       {/* The only chrome on a tile: everything else (status, prompt, actions)

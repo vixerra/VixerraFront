@@ -71,7 +71,7 @@ function buildLlmsTxt() {
     `- Video models include ${VIDEO.slice(0, 6).map((m) => m.entry.label).join(", ")}.`,
     `- Image models include ${IMAGE.slice(0, 6).map((m) => m.entry.label).join(", ")}.`,
     `- Free to start: ${FREE.monthlyCredits} credits, no credit card required.`,
-    "- No plan watermarks video, including the free plan.",
+    `- ${FREE.label} results carry a Vixlens watermark; every paid plan exports without one.`,
     FIRST_COMMERCIAL
       ? `- Commercial use is licensed from the ${FIRST_COMMERCIAL.label} plan (${usd(FIRST_COMMERCIAL.priceMonthly)}/month).`
       : null,

@@ -62,7 +62,7 @@ const ROWS: Row[] = [
 const PERKS = [
   `1 credit = ${formatMoney(CREDIT_VALUE_USD)} on every plan`,
   "Exact cost shown before you generate",
-  "No watermark on any plan",
+  "No watermark on any paid plan",
 ];
 
 function SavingsCard({ competitor, index }: { competitor: Competitor; index: number }) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -30,6 +30,7 @@ import { useToast } from "@/components/ui/toast";
 import { cn, formatDate } from "@/lib/utils";
 import { downloadGenerationResult } from "@/lib/download";
 import { PublishButton } from "@/components/social/publish-button";
+import { ResultWatermark, useResultWatermark } from "@/components/result-watermark";
 import { IMAGE_MODELS, SEEDANCE_DURATION_AUTO, VIDEO_MODELS } from "@/lib/constants";
 import { EDIT_GENERATION_MODEL } from "@/lib/editor/types";
 import { itemLabel, type GalleryItem } from "./generation-card";
@@ -227,6 +228,12 @@ function PreviewBody({
   const [promptOpen, setPromptOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [burnPercent, setBurnPercent] = useState<number | null>(null);
+  // Only the creator's own work: someone else's piece on the community feed
+  // was made on their plan, not the viewer's.
+  const planWatermark = useResultWatermark();
+  const watermarked = Boolean(viewerIsOwner) && planWatermark;
+  const mediaRef = useRef<HTMLVideoElement & HTMLImageElement>(null);
   // A signed link expires (six hours, see toViewableInputUrl), and a panel
   // left open outlives that — so the source thumbnail takes itself out
   // rather than leaving a broken frame behind. Reset per item by the key on
@@ -330,10 +337,14 @@ function PreviewBody({
         {item.status === "completed" && item.resultUrl ? (
           isVideo ? (
             <video
+              ref={mediaRef}
               src={item.resultUrl}
               controls
               autoPlay
               loop
+              // The player's own download item would save the clean file.
+              controlsList={watermarked ? "nodownload" : undefined}
+              onContextMenu={watermarked ? (e) => e.preventDefault() : undefined}
               className="max-h-full max-w-full rounded-xl border border-line"
             />
           ) : (
@@ -342,8 +353,11 @@ function PreviewBody({
             // explicit-dimension model doesn't fit here.
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              ref={mediaRef}
               src={item.resultUrl}
               alt={itemLabel(item)}
+              draggable={watermarked ? false : undefined}
+              onContextMenu={watermarked ? (e) => e.preventDefault() : undefined}
               className="max-h-full max-w-full rounded-xl border border-line object-contain"
             />
           )
@@ -360,6 +374,9 @@ function PreviewBody({
             <Spinner size={28} />
             <p className="font-mono text-caption text-muted">{item.progressPercent}%</p>
           </div>
+        )}
+        {watermarked && item.status === "completed" && item.resultUrl && (
+          <ResultWatermark mediaRef={mediaRef} />
         )}
       </div>
 
@@ -604,16 +621,23 @@ function PreviewBody({
                 onClick={async () => {
                   setSaving(true);
                   try {
-                    await downloadGenerationResult(item.id, item.resultUrl);
+                    await downloadGenerationResult(item.id, item.resultUrl, {
+                      watermark: watermarked ? { isVideo, onProgress: setBurnPercent } : undefined,
+                    });
                   } catch (error) {
                     toast({ title: (error as Error).message, variant: "error" });
                   } finally {
                     setSaving(false);
+                    setBurnPercent(null);
                   }
                 }}
               >
                 <Download className="size-4" aria-hidden="true" />{" "}
-                {saving ? "Preparing…" : "Download"}
+                {saving
+                  ? burnPercent !== null
+                    ? `Watermarking… ${Math.round(burnPercent * 100)}%`
+                    : "Preparing…"
+                  : "Download"}
               </Button>
             )}
             {/* Publishing to the creator's own channels — distinct from
