@@ -28,6 +28,7 @@ export function TextToVideoForm({
   initialModel,
   initialPrompt: initialPromptProp,
   initialParams,
+  initialFieldValues,
   tierInfo,
 }: {
   onCreated: (jobId: string) => void;
@@ -37,12 +38,15 @@ export function TextToVideoForm({
   initialPrompt?: string;
   /** Only applied to Seedance 2.0 — the only model the prompt gallery targets. */
   initialParams?: Seedance2InitialParams;
+  /** Starting field values for a registry model, applied only to the model the form opens on. */
+  initialFieldValues?: Record<string, unknown>;
   /** Current plan's limits — undefined while still loading. */
   tierInfo?: TierInfo;
 }) {
   const [model, setModel] = useState<VideoModelId>(
     initialModel && VIDEO_MODELS.some((m) => m.id === initialModel) ? initialModel : VIDEO_MODELS[0].id,
   );
+  const [startModel] = useState(model);
   // Shared across model switches so re-picking a model doesn't lose what
   // you've already typed — each sub-form owns everything else itself.
   const [prompt, setPrompt] = useState(initialPromptProp ?? "");
@@ -95,6 +99,7 @@ export function TextToVideoForm({
         onCreated={onCreated}
         busy={busy}
         tierInfo={tierInfo}
+        initialValues={model === startModel ? initialFieldValues : undefined}
       />
     );
   }

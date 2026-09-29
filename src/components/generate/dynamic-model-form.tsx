@@ -144,6 +144,7 @@ export function DynamicModelForm<T extends string>({
   onCreated,
   busy,
   tierInfo,
+  initialValues,
 }: {
   config: CloudflareModelConfig;
   mode: keyof typeof ENDPOINTS;
@@ -158,6 +159,8 @@ export function DynamicModelForm<T extends string>({
    * for text-to-image models (only video resolution is tier-gated server
    * side, see aiVideo-backend's generations.ts). */
   tierInfo?: TierInfo;
+  /** Overrides registry defaults for the given field keys; unknown keys are ignored. */
+  initialValues?: Record<string, unknown>;
 }) {
   const { toast } = useToast();
   const invalidateCredits = useInvalidateCredits();
@@ -193,7 +196,8 @@ export function DynamicModelForm<T extends string>({
 
   const defaultValues: Record<string, unknown> = { prompt: initialPrompt };
   for (const field of config.fields) {
-    if (field.defaultValue !== undefined) defaultValues[field.key] = field.defaultValue;
+    if (initialValues?.[field.key] !== undefined) defaultValues[field.key] = initialValues[field.key];
+    else if (field.defaultValue !== undefined) defaultValues[field.key] = field.defaultValue;
   }
 
   const {

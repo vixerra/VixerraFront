@@ -24,6 +24,17 @@ import {
   type GenerationType,
 } from "@/lib/constants";
 
+// Where a Free account's composer opens when no ?model= was asked for: the
+// model whose default run spends the one-time grant in a single generation
+// (9 of 10 credits for the clip, 10 for the image) instead of opening on a
+// flagship the grant can't cover. Matches the Free card's "1 image, or 1 Grok
+// video (3s, 480p)". Re-check against credit-estimate.ts if prices move.
+const FREE_START_VIDEO = {
+  model: "xai/grok-imagine-video-1.5-preview" as VideoModelId,
+  fields: { duration: 3, resolution: "480p" },
+};
+const FREE_START_IMAGE = "bytedance/seedream-4.5" as ImageModelId;
+
 /**
  * Studio layout: a fixed-width composer panel on the left (modality tabs →
  * model → upload → prompt → settings → generate, top to bottom) and the
@@ -71,6 +82,7 @@ export function GenerateStudio({ type }: { type: GenerationType }) {
   const usageQuery = useUsage();
   const { data: me } = useMe();
   const canGenerate = useCanGenerate(me?.organization);
+  const freeStart = me?.effectiveTier === "free" && !requestedModel;
 
   const busy = generation.status === "queued" || generation.status === "processing";
   const hasJob = Boolean(activeJobId);
@@ -139,21 +151,24 @@ export function GenerateStudio({ type }: { type: GenerationType }) {
         {/* The form fills the rest of the panel and manages its own scroll
             area + pinned Generate footer — see the forms' root <form>. */}
         <div className={cn("min-h-0 flex-1", !canGenerate.allowed && "pointer-events-none opacity-50")}>
-          {type === "text-to-video" && (
+          {/* Waits for /me (normally already cached by AppShell) because the
+              forms read their starting model once, on mount. */}
+          {me && type === "text-to-video" && (
             <TextToVideoForm
               onCreated={handleCreated(true)}
               busy={busy}
-              initialModel={initialModel}
+              initialModel={freeStart ? FREE_START_VIDEO.model : initialModel}
               initialPrompt={initialPrompt}
               initialParams={initialParams}
+              initialFieldValues={freeStart ? FREE_START_VIDEO.fields : undefined}
               tierInfo={usageQuery.data?.tier_info}
             />
           )}
-          {type === "text-to-image" && (
+          {me && type === "text-to-image" && (
             <TextToImageForm
               onCreated={handleCreated(false)}
               busy={busy}
-              initialModel={initialImageModel}
+              initialModel={freeStart ? FREE_START_IMAGE : initialImageModel}
               initialPrompt={initialPrompt}
             />
           )}
