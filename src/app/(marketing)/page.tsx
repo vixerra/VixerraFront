@@ -21,6 +21,8 @@ import { ModelCarousel } from "@/components/landing/model-carousel";
 import { ShowcaseTabs } from "@/components/landing/showcase-tabs";
 import { Personas } from "@/components/landing/personas";
 import { CreatorUseCases } from "@/components/landing/creator-use-cases";
+import { TrustBar } from "@/components/landing/trust-bar";
+import { Reviews } from "@/components/landing/reviews";
 import { FaqAccordion } from "@/components/landing/faq-accordion";
 import { CtaSection } from "@/components/landing/cta-section";
 
@@ -55,6 +57,8 @@ export default function LandingPage() {
           sections follow. The launch-offer pieces remove themselves once its
           spots are gone. */}
       <Hero />
+      <TrustBar />
+      <Reviews />
       <LaunchOfferBanner />
       <PlansSection />
       <PriceComparison />
@@ -86,6 +90,7 @@ export default function LandingPage() {
 
       <Personas />
       <CreatorUseCases />
+      
       <FaqAccordion />
       <CtaSection />
       <LaunchOfferStickyBar />
