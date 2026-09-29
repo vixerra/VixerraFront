@@ -9,7 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { TIER_INFO } from "@/lib/constants";
 import { GUIDE_POSTS, guideBySlug, sortedGuides } from "@/lib/guides";
 import { modelCatalogEntry, modelPageBySlug } from "@/lib/model-seo";
-import { absoluteUrl, DEFAULT_OG_IMAGE, openGraph, SITE_NAME } from "@/lib/seo";
+import { absoluteUrl, DEFAULT_OG_IMAGE, keywords, openGraph, SITE_NAME } from "@/lib/seo";
 import { appHref } from "@/lib/hosts";
 
 export const dynamicParams = false;
@@ -35,6 +35,7 @@ export async function generateMetadata(props: PageProps<"/guides/[slug]">): Prom
       publishedTime: guide.published,
       modifiedTime: guide.updated ?? guide.published,
     }),
+    keywords: keywords(...guide.keywords),
   };
 }
 

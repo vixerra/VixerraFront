@@ -46,6 +46,7 @@ const COLLAGE = [
   {
     kind: "image" as const,
     url: "/media/images/gpt-image-11.webp",
+    alt: "AI-generated image from GPT Image 2",
     className: "left-[2%] top-[14%] w-44 -rotate-3 xl:w-52",
     aspect: "aspect-[3/4]",
   },
@@ -58,12 +59,14 @@ const COLLAGE = [
   {
     kind: "image" as const,
     url: "/media/images/gpt-image-09.webp",
+    alt: "AI-generated image with production-ready text rendering from GPT Image 2",
     className: "left-[6%] top-[56%] w-36 rotate-2 xl:w-44",
     aspect: "aspect-[3/4]",
   },
   {
     kind: "image" as const,
     url: "/media/images/gpt-image-06.webp",
+    alt: "Photorealistic AI-generated product image from GPT Image 2",
     className: "right-[5%] top-[50%] w-36 -rotate-2 xl:w-44",
     aspect: "aspect-[3/4]",
   },
@@ -172,7 +175,7 @@ export function Hero() {
                 </video>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media, decorative collage
-                <img src={item.url} alt="" className="h-full w-full object-cover opacity-70" />
+                <img src={item.url} alt={item.alt} className="h-full w-full object-cover opacity-70" />
               )}
             </motion.div>
           ))}

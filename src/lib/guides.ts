@@ -40,6 +40,8 @@ export type GuidePost = {
   body: GuideBlock[];
   /** Model landing pages this guide is about, cross-linked in a footer block. */
   relatedModelSlugs: string[];
+  /** Search terms this guide targets, beyond the site-wide defaults. */
+  keywords: string[];
 };
 
 const FREE_CREDITS = TIER_INFO.free.monthlyCredits;
@@ -60,6 +62,7 @@ export const GUIDE_POSTS: GuidePost[] = [
     excerpt:
       "Image-to-video is the most reliable way to get an AI video of something specific — your product, your face, your artwork — because the model starts from a picture instead of guessing what you meant. Here is how to do it well.",
     relatedModelSlugs: ["happyhorse-1-1", "wan-2-7", "seedance-2-5", "vidu-q3-pro"],
+    keywords: ["photo to video AI", "image to video AI", "turn a photo into a video"],
     body: [
       {
         type: "p",
@@ -175,6 +178,7 @@ export const GUIDE_POSTS: GuidePost[] = [
     excerpt:
       "Both generate video with sound from a written prompt. They are good at genuinely different things, and picking the wrong one is the most common reason a generation disappoints.",
     relatedModelSlugs: ["seedance-2-5", "veo-3-1", "veo-3-1-fast", "seedance-2-0"],
+    keywords: ["Seedance 2.5 vs Veo 3.1", "Seedance vs Veo", "AI video model comparison"],
     body: [
       {
         type: "p",
@@ -271,6 +275,7 @@ export const GUIDE_POSTS: GuidePost[] = [
     excerpt:
       "\"No watermark\" is the most searched-for feature in AI video and the least precisely defined. Here is what it actually means, and what to check before you commit a campaign to a tool.",
     relatedModelSlugs: ["seedance-2-5", "veo-3-1", "flux-3-video", "hailuo-2-3"],
+    keywords: ["AI video generator no watermark", "AI video without watermark", "watermark-free AI video"],
     body: [
       {
         type: "p",
@@ -357,6 +362,7 @@ export const GUIDE_POSTS: GuidePost[] = [
     excerpt:
       "The hard part of AI ad creative is not making something that looks good. It is making something that contains your actual product, with legible copy, in the right shape for the placement.",
     relatedModelSlugs: ["gpt-image-2", "seedance-2-0", "seedance-2-5", "nano-banana-pro"],
+    keywords: ["AI ad creative", "AI advertising images", "AI generated ads"],
     body: [
       {
         type: "p",
@@ -448,6 +454,7 @@ export const GUIDE_POSTS: GuidePost[] = [
     excerpt:
       "Everything that matters about generating video from a written prompt: how to structure one, which parameters change the result, what they cost, and how to pick a model.",
     relatedModelSlugs: ["seedance-2-5", "veo-3-1", "flux-3-video", "grok-imagine-video"],
+    keywords: ["text to video AI", "text to video prompts", "how text to video works"],
     body: [
       {
         type: "p",

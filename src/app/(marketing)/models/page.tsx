@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { buttonVariants } from "@/components/ui/button";
 import { TIER_INFO } from "@/lib/constants";
 import { CATEGORY_LABEL, MODEL_PAGES, modelCatalogEntry } from "@/lib/model-seo";
-import { openGraph, SITE_NAME } from "@/lib/seo";
+import { keywords, openGraph, SITE_NAME } from "@/lib/seo";
 import { appHref } from "@/lib/hosts";
 
 // The hub every /generate/[model] page links back to, and the reason those
@@ -23,6 +23,17 @@ export const metadata: Metadata = {
       "Every AI video and image model available on Vixlens, with specs and example prompts for each.",
     path: "/models",
   }),
+  keywords: keywords(
+    "AI video models",
+    "AI image models",
+    "Seedance",
+    "Veo 3.1",
+    "Flux",
+    "Grok Imagine",
+    "GPT Image 2",
+    "Nano Banana",
+    "Recraft",
+  ),
 };
 
 const GROUPS = [

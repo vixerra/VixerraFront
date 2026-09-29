@@ -20,7 +20,7 @@ import {
   modelWorkspaceHref,
   relatedModelPages,
 } from "@/lib/model-seo";
-import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
+import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 import { appHref } from "@/lib/hosts";
 
 // A public, statically generated landing page per model.
@@ -57,6 +57,12 @@ export async function generateMetadata(
     description,
     alternates: { canonical: `/generate/${page.slug}` },
     openGraph: openGraph({ title, description, path: `/generate/${page.slug}` }),
+    keywords: keywords(
+      entry.label,
+      `${entry.label} AI ${isVideo ? "video" : "image"} generator`,
+      isVideo ? "text to video" : "text to image",
+      CATEGORY_LABEL[entry.category],
+    ),
   };
 }
 

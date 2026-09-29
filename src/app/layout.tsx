@@ -8,7 +8,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { ConfirmProvider } from "@/components/ui/confirm";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReleaseAnnouncementModal } from "@/components/marketing/release-announcement-modal";
-import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, keywords, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 // Three type roles instead of one Inter-everywhere system — see the
 // --font-sans/--font-display/--font-accent tokens in globals.css for how
@@ -50,6 +50,15 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  keywords: keywords(
+    "AI video maker",
+    "AI image maker",
+    "image to video AI",
+    "Seedance",
+    "Veo 3.1",
+    "GPT Image 2",
+    "Nano Banana Pro",
+  ),
   // Deliberately no `alternates.canonical` here. Metadata is inherited, so a
   // canonical set on the root layout becomes the canonical of every page that
   // doesn't override it — pointing the whole site at "/" and de-indexing it.

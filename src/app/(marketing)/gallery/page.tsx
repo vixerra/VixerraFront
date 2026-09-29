@@ -4,7 +4,7 @@ import { PublicGalleryClient } from "@/components/gallery/public-gallery-client"
 import { JsonLd } from "@/components/seo/json-ld";
 import { modelCatalogEntry } from "@/lib/model-seo";
 import { fetchPublicGenerations, generationTitle, isVideoGeneration } from "@/lib/public-content";
-import { absoluteUrl, openGraph, SITE_NAME } from "@/lib/seo";
+import { absoluteUrl, keywords, openGraph, SITE_NAME } from "@/lib/seo";
 
 // The interactive grid stays a client component (lightbox, likes, lazy
 // playback). What's added here is the crawlable half: the feed is also read
@@ -28,6 +28,7 @@ export const metadata: Metadata = {
       "A public showcase of AI video and image generations from the Vixlens community — every one with the prompt and the model that made it.",
     path: "/gallery",
   }),
+  keywords: keywords("AI video gallery", "AI image gallery", "AI generated video examples", "AI art examples"),
 };
 
 export default async function PublicGalleryPage() {
@@ -74,34 +75,7 @@ export default async function PublicGalleryPage() {
         <PublicGalleryClient />
       </div>
 
-      {items.length > 0 && (
-        <section className="mt-20 border-t border-line pt-12">
-          <h2 className="text-feature-title font-semibold text-ink">
-            Every shared generation
-          </h2>
-          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-            {items.map((item) => {
-              const entry = modelCatalogEntry(item.model);
-              return (
-                <li key={item.id}>
-                  <Link
-                    href={`/gallery/${item.id}`}
-                    className="group block rounded-xl border border-line bg-surface-2 p-4 transition-colors hover:border-border-strong hover:bg-surface-3"
-                  >
-                    <span className="text-caption text-muted">
-                      {isVideoGeneration(item) ? "AI video" : "AI image"}
-                      {entry ? ` · ${entry.label}` : ""}
-                    </span>
-                    <p className="mt-1 text-body-sm text-ink-soft group-hover:text-brand">
-                      {generationTitle(item, { max: 110, modelLabel: entry?.label })}
-                    </p>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
+      
     </div>
   );
 }

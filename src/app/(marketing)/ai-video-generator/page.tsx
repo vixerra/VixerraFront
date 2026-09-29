@@ -10,7 +10,7 @@ import {
 import { TIER_INFO } from "@/lib/constants";
 import { appHref } from "@/lib/hosts";
 import { modelSpecs } from "@/lib/model-seo";
-import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
+import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 import { SEEDANCE25_SHOWCASE_VIDEOS } from "@/lib/showcase-media";
 
 // Targets "ai video generator", "ai video" and "free ai video generator". The
@@ -43,6 +43,12 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/ai-video-generator" },
   openGraph: openGraph({ title: TITLE, description: DESCRIPTION, path: "/ai-video-generator" }),
+  keywords: keywords(
+    "text to video",
+    "image to video",
+    ...(freeVideo ? ["free AI video generator"] : []),
+    ...featured,
+  ),
 };
 
 const content: GeneratorLandingContent = {

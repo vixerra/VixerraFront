@@ -86,7 +86,7 @@ function SectionMedia({
         )
       ) : (
         // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media
-        <img src={media.url} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={media.url} alt={prompt} aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
       )}
 
       <div

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { FeaturesGrid } from "@/components/landing/features-grid";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { ModelStrip } from "@/components/landing/model-strip";
-import { openGraph } from "@/lib/seo";
+import { keywords, openGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Features — AI video, image and ad creative",
@@ -15,6 +15,12 @@ export const metadata: Metadata = {
       "Text-to-video, image-to-video and text-to-image across every major model, plus a marketing studio, an editing studio and one-click publishing.",
     path: "/features",
   }),
+  keywords: keywords(
+    "AI ad creative",
+    "AI marketing studio",
+    "AI video editor",
+    "social media publishing",
+  ),
 };
 
 export default function FeaturesPage() {

@@ -59,7 +59,7 @@ function PersonaMedia({ media }: { media: (typeof PERSONAS)[number]["media"] }) 
         )
       ) : (
         // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media
-        <img src={media.url} alt="" aria-hidden="true" className="h-full w-full object-cover" />
+        <img src={media.url} alt={media.prompt} aria-hidden="true" className="h-full w-full object-cover" />
       )}
     </div>
   );

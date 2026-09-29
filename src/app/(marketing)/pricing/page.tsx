@@ -14,7 +14,7 @@ import { PlanPrice } from "@/components/pricing/plan-price";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqPageJsonLd } from "@/lib/faqs";
 import { pricingProductJsonLd } from "@/lib/structured-data";
-import { openGraph } from "@/lib/seo";
+import { keywords, openGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "AI video generator pricing",
@@ -27,6 +27,12 @@ export const metadata: Metadata = {
       "Credit-based pricing for AI video and image generation. Start free with no credit card — watermark-free export and a commercial licence from Starter up.",
     path: "/pricing",
   }),
+  keywords: keywords(
+    "AI video generator pricing",
+    "AI image generator pricing",
+    "AI video credits",
+    "AI video generator free trial",
+  ),
 };
 
 // Plan names come from TIER_INFO rather than being written out here: this

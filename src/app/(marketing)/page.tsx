@@ -6,6 +6,7 @@ import {
   softwareApplicationJsonLd,
   webSiteJsonLd,
 } from "@/lib/structured-data";
+import { keywords } from "@/lib/seo";
 import { Hero } from "@/components/landing/hero";
 import { PlansSection } from "@/components/landing/plans-section";
 import { LaunchOfferBanner, LaunchOfferStickyBar } from "@/components/landing/launch-offer";
@@ -25,6 +26,14 @@ import { CtaSection } from "@/components/landing/cta-section";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
+  keywords: keywords(
+    "free AI video generator",
+    "free AI image generator",
+    "AI video and image generator",
+    "Seedance",
+    "Veo 3.1",
+    "GPT Image 2",
+  ),
 };
 
 export default function LandingPage() {

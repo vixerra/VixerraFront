@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { TIER_INFO } from "@/lib/constants";
 import { sortedGuides } from "@/lib/guides";
-import { absoluteUrl, openGraph, SITE_NAME } from "@/lib/seo";
+import { absoluteUrl, keywords, openGraph, SITE_NAME } from "@/lib/seo";
 import { appHref } from "@/lib/hosts";
 
 export const metadata: Metadata = {
@@ -20,6 +20,7 @@ export const metadata: Metadata = {
       "Practical guides to AI video and image generation — choosing a model, writing prompts that work, and the parameters that decide the result.",
     path: "/guides",
   }),
+  keywords: keywords("AI video generator guide", "how to use AI video generator", "AI prompt writing"),
 };
 
 const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {

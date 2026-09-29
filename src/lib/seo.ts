@@ -72,3 +72,31 @@ export function metaDescription(text: string, max = 158) {
   const cut = clean.slice(0, max);
   return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
 }
+
+/** Terms every indexable page carries, however specific its own topic is —
+ *  the words someone actually types when they're looking for this product
+ *  rather than for one particular model or guide. */
+const BASE_KEYWORDS = [
+  "AI video generator",
+  "AI image generator",
+  "text to video AI",
+  "text to image AI",
+  SITE_NAME,
+];
+
+/**
+ * `keywords` metadata for one page: its own terms first, the site-wide base
+ * after, de-duplicated case-insensitively so a page that already mentions
+ * "AI video generator" doesn't repeat it.
+ */
+export function keywords(...terms: string[]): string[] {
+  const seen = new Set<string>();
+  const all: string[] = [];
+  for (const term of [...terms, ...BASE_KEYWORDS]) {
+    const key = term.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    all.push(term);
+  }
+  return all;
+}

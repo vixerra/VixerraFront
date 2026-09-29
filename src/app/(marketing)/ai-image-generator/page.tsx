@@ -10,7 +10,7 @@ import {
 import { TIER_INFO } from "@/lib/constants";
 import { GPT_IMAGE_2_IMAGES } from "@/lib/gpt-image-2-showcase";
 import { appHref } from "@/lib/hosts";
-import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
+import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 
 // Targets "ai image generator" / "ai image generator free". Unlike video, the
 // free claim holds here: the Free grant is sized for the fast image models.
@@ -34,6 +34,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/ai-image-generator" },
   openGraph: openGraph({ title: TITLE, description: DESCRIPTION, path: "/ai-image-generator" }),
+  keywords: keywords("text to image", "free AI image generator", ...featured),
 };
 
 const content: GeneratorLandingContent = {
