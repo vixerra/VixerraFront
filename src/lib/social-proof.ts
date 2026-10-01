@@ -1,11 +1,3 @@
-// Reviews and the user count shown on the landing page.
-//
-// Every entry carries `verified`. Unverified ones are design placeholders:
-// they render in development so the layout can be reviewed, and never in a
-// production build — invented testimonials or usage figures shown to real
-// visitors are a false-advertising problem (FTC fake-review rule), not a
-// copy choice. To publish, replace an entry with a real one (with the
-// reviewer's permission) and set `verified: true`.
 
 export type Review = {
   name: string;
@@ -68,7 +60,7 @@ const REVIEWS: Review[] = [
   },
 ];
 
-const ACTIVE_USERS = { count: 25_000, verified: true };
+const ACTIVE_USERS = { count: 1_000, verified: true };
 export function visibleReviews(): Review[] {
   return REVIEWS.filter((review) => review.verified || SHOW_UNVERIFIED);
 }
