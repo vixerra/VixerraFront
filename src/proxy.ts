@@ -80,7 +80,36 @@ function ownerHost(pathname: string): string {
   return SITE_HOST;
 }
 
+/** The /edge-api calls that can fire CompleteRegistration (routes/auth.ts in
+ *  the API). Listed again in config.matcher below. */
+const REGISTRATION_ENDPOINTS = ["/edge-api/auth/register", "/edge-api/auth/oauth/session", "/edge-api/auth/verify-email"];
+
+/** Vercel geo header → the name the API's geoFromRequest (lib/meta-capi.ts)
+ *  reads. The API can't geolocate the caller itself: through the /edge-api
+ *  rewrite, Supabase only sees Vercel's server, so its cf-* geo is Vercel's
+ *  datacenter. Re-sent under our own names, rather than relied on to survive
+ *  the external rewrite, and always overwritten so a client can't set them. */
+const GEO_HEADERS: Record<string, string> = {
+  "x-vercel-ip-city": "x-client-geo-city",
+  "x-vercel-ip-country-region": "x-client-geo-region",
+  "x-vercel-ip-postal-code": "x-client-geo-postal-code",
+  "x-vercel-ip-country": "x-client-geo-country",
+};
+
+function withClientGeo(req: NextRequest) {
+  const headers = new Headers(req.headers);
+  for (const [from, to] of Object.entries(GEO_HEADERS)) {
+    const value = req.headers.get(from);
+    if (value) headers.set(to, value);
+    else headers.delete(to);
+  }
+  return NextResponse.next({ request: { headers } });
+}
+
 export function proxy(req: NextRequest) {
+  // Same-origin API calls, served on every host — see the matcher note.
+  if (REGISTRATION_ENDPOINTS.includes(req.nextUrl.pathname)) return withClientGeo(req);
+
   const host = req.headers.get("host")?.split(":")[0]?.toLowerCase();
 
   // Only the production hostnames are split. localhost and *.vercel.app
@@ -146,7 +175,13 @@ export const config = {
   // /api/social/callback/[platform] carrying the provider's query string,
   // and a cross-host redirect there is one more thing that can drop it.
   // _next and _vercel are framework-internal and never user-visible routes.
+  //
+  // The registration endpoints are the one way back in, and only to have
+  // the user's geo attached (withClientGeo) — never host-redirected.
   matcher: [
     "/((?!api|edge-api|_next|_vercel|media|favicon.ico|icon.svg|icon1.png|apple-icon.png|robots.txt|sitemap.xml).*)",
+    "/edge-api/auth/register",
+    "/edge-api/auth/oauth/session",
+    "/edge-api/auth/verify-email",
   ],
 };
