@@ -97,7 +97,7 @@ export function PlansSection() {
                     </span>
                   )}
                   {isOffer && !isPopular ? (
-                    <span className="font-display absolute -top-3.5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent-hot px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-white uppercase shadow-glow-hot-sm">
+                    <span className="font-display absolute -top-3.5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent-hot-strong px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-white uppercase shadow-glow-hot-sm">
                       <span className="size-1.5 rounded-full bg-white motion-safe:animate-status-pulse" aria-hidden="true" />
                       Launch offer
                       {offer.remaining !== null && ` · ${offer.remaining} left`}

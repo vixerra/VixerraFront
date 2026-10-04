@@ -139,7 +139,7 @@ export function LaunchOfferPill() {
       <span className="hidden sm:inline">
         {OFFER_PRICE}/mo locked in for the first {places}
       </span>
-      <span className="rounded-full bg-accent-hot px-2 py-0.5 text-[11px] font-bold text-white tabular-nums">
+      <span className="rounded-full bg-accent-hot-strong px-2 py-0.5 text-[11px] font-bold text-white tabular-nums">
         {spotsLabel(places, remaining)}
       </span>
       <ArrowRight
@@ -183,7 +183,7 @@ export function LaunchOfferBanner() {
           <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-accent-hot px-2.5 py-1 text-caption font-black tracking-wide text-white uppercase">
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-accent-hot-strong px-2.5 py-1 text-caption font-black tracking-wide text-white uppercase">
                   <Flame className="size-3.5" aria-hidden="true" />
                   Limited offer
                 </span>
@@ -300,8 +300,11 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
   const { data: user } = useMe();
   if (soldOut) return null;
 
+  // No <Reveal> here, unlike the landing banner: this strip sits above the
+  // fold on /pricing and its copy is the page's LCP element. Reveal renders
+  // it at opacity 0 until hydration, which held LCP back ~2s on mobile.
   return (
-    <Reveal className={className}>
+    <div className={className}>
       <div className="relative overflow-hidden rounded-2xl border border-accent-hot/30 bg-surface-2 p-6 shadow-glow-hot-md sm:p-8">
         {/* Same halftone and hot glow as the landing banner, from the left
             this time, behind the copy. Decorative only. */}
@@ -326,7 +329,7 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-accent-hot px-2.5 py-1 text-caption font-black tracking-wide text-white uppercase">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-accent-hot-strong px-2.5 py-1 text-caption font-black tracking-wide text-white uppercase">
                 <Flame className="size-3.5" aria-hidden="true" />
                 Limited offer
               </span>
@@ -359,7 +362,7 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
           </Link>
         </div>
       </div>
-    </Reveal>
+    </div>
   );
 }
 
@@ -375,7 +378,7 @@ export function LaunchOfferPlanFlag() {
         className="pointer-events-none absolute -inset-px rounded-2xl shadow-glow-hot-md ring-1 ring-accent-hot/70 motion-safe:animate-pulse"
         aria-hidden="true"
       />
-      <span className="font-display absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent-hot px-3 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-white uppercase shadow-glow-hot-sm">
+      <span className="font-display absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent-hot-strong px-3 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-white uppercase shadow-glow-hot-sm">
         <span
           className="size-1.5 rounded-full bg-white motion-safe:animate-status-pulse"
           aria-hidden="true"

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SHOWCASE_VIDEOS } from "@/lib/showcase-media";
-import { apiFetch } from "@/lib/api-client";
+import { useMe } from "@/hooks/use-me";
 
 const DISMISSED_KEY = "aivio:seedance-2-5-announcement";
 // Skip the auth flow pages entirely — popping a promo over a login form is
@@ -36,7 +36,9 @@ export function ReleaseAnnouncementModal() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [connected, setConnected] = useState(false);
+  // The header's query, so this adds no /auth/me call of its own.
+  const { data: user } = useMe();
+  const connected = Boolean(user);
 
   const suppressed = SUPPRESSED_PREFIXES.some((p) => pathname?.startsWith(p));
 
@@ -44,23 +46,20 @@ export function ReleaseAnnouncementModal() {
     if (suppressed) return;
     if (sessionStorage.getItem(DISMISSED_KEY)) return;
 
-    let cancelled = false;
+    // Waits for the visitor's first scroll, tap or key, then a short delay.
+    // Opening on a timer alone started the hero clip's 4 MB fetch during
+    // every page load — on top of the page's own critical media, and as the
+    // single heaviest request in its PageSpeed run.
+    const events = ["scroll", "pointerdown", "keydown", "touchstart"] as const;
     let openTimer: ReturnType<typeof setTimeout> | undefined;
-    apiFetch("/api/auth/me")
-      .then((res) => {
-        if (!cancelled) setConnected(res.ok);
-      })
-      .catch(() => {})
-      .finally(() => {
-        // Opening this immediately would start the hero clip's fetch right
-        // on top of the landing page's own hero video and any above-the-fold
-        // showcase clips — exactly when bandwidth is most contended. A short
-        // delay lets the page's own critical media win that race first.
-        if (!cancelled) openTimer = setTimeout(() => setOpen(true), 1500);
-      });
+    const arm = () => {
+      events.forEach((e) => window.removeEventListener(e, arm));
+      openTimer = setTimeout(() => setOpen(true), 1500);
+    };
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
 
     return () => {
-      cancelled = true;
+      events.forEach((e) => window.removeEventListener(e, arm));
       if (openTimer) clearTimeout(openTimer);
     };
     // Intentionally runs once on mount — this is a one-shot launch prompt,
@@ -108,6 +107,8 @@ export function ReleaseAnnouncementModal() {
               preload="metadata"
             >
               <source src={HERO.url} type="video/mp4" />
+              {/* Muted showcase loop with no dialogue; the track says so. */}
+              <track kind="captions" src="/media/captions/no-dialogue.vtt" srcLang="en" label="English" />
             </video>
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-2 via-surface-2/10 to-transparent" />
 

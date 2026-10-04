@@ -42,9 +42,8 @@ export function PricingPromoBadge({ tier }: { tier: Tier }) {
   return <PromoBonusBadge credits={promoBonusFor(promo, tier)} />;
 }
 
-function FieldWithUrlCode({ className }: { className?: string }) {
+function Field({ className, fromUrl }: { className?: string; fromUrl: string | null }) {
   const context = useContext(PricingPromoContext);
-  const fromUrl = useSearchParams().get("promo");
   if (!context) return null;
   return (
     <PromoCodeField
@@ -57,11 +56,17 @@ function FieldWithUrlCode({ className }: { className?: string }) {
   );
 }
 
+function FieldWithUrlCode({ className }: { className?: string }) {
+  return <Field className={className} fromUrl={useSearchParams().get("promo")} />;
+}
+
 /** Suspense because ?promo= is read with useSearchParams, and the rest of the
- *  pricing page is static. */
+ *  pricing page is static. The fallback is the same field minus the URL code,
+ *  so the prerendered HTML already holds its space: a null fallback had it
+ *  pop in on hydration and shift the plan grid and footer down. */
 export function PricingPromoField({ className }: { className?: string }) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<Field className={className} fromUrl={null} />}>
       <FieldWithUrlCode className={className} />
     </Suspense>
   );

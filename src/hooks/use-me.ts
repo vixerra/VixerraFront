@@ -42,9 +42,17 @@ export function useMe() {
     queryKey: ["me"],
     queryFn: async (): Promise<Me> => {
       const res = await apiFetch("/api/auth/me");
-      if (!res.ok) throw new Error("Failed to load user");
+      if (!res.ok) throw Object.assign(new Error("Failed to load user"), { status: res.status });
       const data = await res.json();
+      // The proxy's answer when there's no session cookie (src/proxy.ts) —
+      // signed out, same as the API's 401, minus the console error.
+      if (!data.user) throw Object.assign(new Error("Failed to load user"), { status: 401 });
       return data.user;
     },
+    // A 401 just means signed out, and asking again won't change that — the
+    // default retry doubled the request (and its console error) for every
+    // signed-out visitor.
+    retry: (failureCount, error) =>
+      (error as Error & { status?: number }).status !== 401 && failureCount < 1,
   });
 }

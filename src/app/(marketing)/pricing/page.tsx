@@ -142,7 +142,10 @@ export default function PricingPage() {
                     variant={isPopular ? "primary" : "secondary"}
                     className="mt-8 w-full"
                   >
-                    Get started
+                    {/* One label per destination — three "Get started"
+                        links going to different plans fail the a11y
+                        identical-links-same-purpose check. */}
+                    {info.priceMonthly > 0 ? `Get ${info.label}` : "Start for free"}
                   </PlanCta>
                 )}
               </Card>

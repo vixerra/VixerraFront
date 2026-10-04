@@ -106,9 +106,26 @@ function withClientGeo(req: NextRequest) {
   return NextResponse.next({ request: { headers } });
 }
 
+/** The API's session cookie (lib/session.ts there). */
+const SESSION_COOKIE = "session";
+
 export function proxy(req: NextRequest) {
   // Same-origin API calls, served on every host — see the matcher note.
   if (REGISTRATION_ENDPOINTS.includes(req.nextUrl.pathname)) return withClientGeo(req);
+
+  // Every signed-out page view asks the header's "who am I". With no session
+  // cookie at all the API can only answer 401, which the browser logs as a
+  // console error on every marketing page (and PageSpeed counts against Best
+  // Practices). Answered here instead, as a plain "nobody" that useMe treats
+  // exactly like that 401. A cookie that is present still goes to the API,
+  // which alone can say whether it's valid.
+  // With a cookie it must pass straight through: falling into the host rules
+  // below would 308 it from the app host to the apex like a marketing page,
+  // which fails the fetch and bounced every signed-in user back to /login.
+  if (req.nextUrl.pathname === "/edge-api/auth/me") {
+    if (req.cookies.has(SESSION_COOKIE)) return NextResponse.next();
+    return NextResponse.json({ user: null }, { headers: { "Cache-Control": "no-store" } });
+  }
 
   const host = req.headers.get("host")?.split(":")[0]?.toLowerCase();
 
@@ -177,11 +194,13 @@ export const config = {
   // _next and _vercel are framework-internal and never user-visible routes.
   //
   // The registration endpoints are the one way back in, and only to have
-  // the user's geo attached (withClientGeo) — never host-redirected.
+  // the user's geo attached (withClientGeo) — never host-redirected. So is
+  // /edge-api/auth/me, answered here when there's no session cookie.
   matcher: [
     "/((?!api|edge-api|_next|_vercel|media|favicon.ico|icon.svg|icon1.png|apple-icon.png|robots.txt|sitemap.xml).*)",
     "/edge-api/auth/register",
     "/edge-api/auth/oauth/session",
     "/edge-api/auth/verify-email",
+    "/edge-api/auth/me",
   ],
 };

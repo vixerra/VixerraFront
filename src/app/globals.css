@@ -114,6 +114,9 @@
      Against an otherwise black-and-white page a single hot panel lands
      without needing any extra size or weight. */
   --color-accent-hot: #ff0052;
+  /* The hot as a fill under small white text: #ff0052 only reaches 3.9:1
+     against white, short of WCAG AA's 4.5:1 for caption-size labels. */
+  --color-accent-hot-strong: #e0004a;
 
   /* Status — separate from the signal set above, and deliberately so:
      these mean something fixed, and must never be mistaken for

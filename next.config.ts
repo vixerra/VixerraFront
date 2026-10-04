@@ -17,7 +17,29 @@ const EDGE_API_URL = process.env.NEXT_PUBLIC_EDGE_API_URL ?? "";
 // have failed optimization with "hostname is not configured".
 const edgeApiHost = EDGE_API_URL ? new URL(EDGE_API_URL).hostname : "";
 
+// Sent on every route. No script-src CSP: GTM, the Meta and TikTok pixels and
+// whatever GTM injects would all need allow-listing, and a miss silently
+// breaks ad attribution — frame-ancestors is the part that costs nothing.
+const SECURITY_HEADERS = [
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+  // allow-popups rather than same-origin: a third-party sign-in or checkout
+  // window opened from here keeps working.
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+];
+
 const nextConfig: NextConfig = {
+  experimental: {
+    // Tailwind's CSS is small; inlining it removes the render-blocking
+    // stylesheet round trip from first paint on mobile.
+    inlineCss: true,
+  },
+  async headers() {
+    return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },

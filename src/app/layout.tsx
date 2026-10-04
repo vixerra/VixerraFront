@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Script from "next/script";
+import { TrackingTags } from "@/components/analytics/tracking-tags";
 import { Inter, Space_Grotesk, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -103,44 +103,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        {/* Google Tag Manager — same afterInteractive strategy @next/third-parties'
-            <GoogleTagManager> uses; next/script hoists the loader itself. */}
-        <Script id="google-tag-manager" strategy="afterInteractive">
-          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-M7N7WGMQ');`}
-        </Script>
-        {/* Google tag (gtag.js) — GA4. Shares GTM's `dataLayer`. */}
-        <Script
-          id="google-tag-loader"
-          src="https://www.googletagmanager.com/gtag/js?id=G-FEEGSJGPZM"
-          strategy="afterInteractive"
-        />
-        <Script id="google-tag" strategy="afterInteractive">
-          {`window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-FEEGSJGPZM');`}
-        </Script>
-        {/* Meta Pixel — fires PageView on every route via strategy="afterInteractive".
-            Two pixel ids share one loader/one PageView call: fbq('init', ...) can be
-            called more than once, and 'track' (unlike 'trackSingle') fires for every
-            pixel that's been init'd. */}
-        <Script id="meta-pixel" strategy="afterInteractive">
-          {`!function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '2495678700916052');
-          fbq('init', '3254360258285341');
-          fbq('track', 'PageView');`}
-        </Script>
+        {/* GTM, Meta and TikTok load on first interaction — see tracking-tags.tsx. */}
+        <TrackingTags />
         <noscript>
           <img
             height="1"
@@ -159,22 +123,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             src="https://www.facebook.com/tr?id=3254360258285341&ev=PageView&noscript=1"
           />
         </noscript>
-        {/* TikTok Pixel — same afterInteractive loader pattern as the Meta Pixel.
-            The trailing lines keep the ad's `ttclid` in a cookie shared by the apex
-            and app hosts: the Pixel doesn't persist it, and the API's Events API
-            calls (lib/tiktok-events.ts in the backend) read it off the signup request. */}
-        <Script id="tiktok-pixel" strategy="afterInteractive">
-          {`!function (w, d, t) {
-          w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
-          var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
-          ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
-          ttq.load('DB0IG3RC77UA626ED02G');
-          ttq.page();
-          }(window, document, 'ttq');
-          var ttclid = new URLSearchParams(location.search).get('ttclid');
-          if (ttclid) document.cookie = 'ttclid=' + encodeURIComponent(ttclid) + ';path=/;max-age=2592000;SameSite=Lax' +
-            (/(^|\\.)vixlens\\.com$/.test(location.hostname) ? ';domain=.vixlens.com' : '');`}
-        </Script>
         <QueryProvider>
           <TooltipProvider>
             <ConfirmProvider>
