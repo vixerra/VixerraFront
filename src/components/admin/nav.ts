@@ -5,6 +5,7 @@ import {
   Images,
   LifeBuoy,
   ScrollText,
+  TicketPercent,
   Users,
   Wand2,
   type LucideIcon,
@@ -30,7 +31,13 @@ export const NAV_SECTIONS: { label: string; items: AdminNavItem[] }[] = [
   {
     label: "Monitor",
     items: [
-      { href: "/admin", label: "Overview", icon: Gauge, exact: true, keywords: "dashboard stats home" },
+      {
+        href: "/admin",
+        label: "Overview",
+        icon: Gauge,
+        exact: true,
+        keywords: "dashboard stats home",
+      },
       {
         href: "/admin/generations",
         label: "Generations",
@@ -43,15 +50,41 @@ export const NAV_SECTIONS: { label: string; items: AdminNavItem[] }[] = [
   {
     label: "Accounts",
     items: [
-      { href: "/admin/users", label: "Users", icon: Users, keywords: "accounts customers" },
-      { href: "/admin/credits", label: "Credits", icon: Coins, keywords: "ledger grants balance" },
+      {
+        href: "/admin/users",
+        label: "Users",
+        icon: Users,
+        keywords: "accounts customers",
+      },
+      {
+        href: "/admin/credits",
+        label: "Credits",
+        icon: Coins,
+        keywords: "ledger grants balance",
+      },
+      {
+        href: "/admin/promo-codes",
+        label: "Promo codes",
+        icon: TicketPercent,
+        keywords: "coupon voucher discount bonus",
+      },
     ],
   },
   {
     label: "Catalog",
     items: [
-      { href: "/admin/presets", label: "Presets", icon: Wand2, keywords: "recipes" },
-      { href: "/admin/content", label: "Content", icon: Images, keywords: "gallery public moderation" },
+      {
+        href: "/admin/presets",
+        label: "Presets",
+        icon: Wand2,
+        keywords: "recipes",
+      },
+      {
+        href: "/admin/content",
+        label: "Content",
+        icon: Images,
+        keywords: "gallery public moderation",
+      },
     ],
   },
   {
@@ -64,7 +97,12 @@ export const NAV_SECTIONS: { label: string; items: AdminNavItem[] }[] = [
         badge: "unreadMessages",
         keywords: "messages inbox contact",
       },
-      { href: "/admin/audit", label: "Audit log", icon: ScrollText, keywords: "history actions staff" },
+      {
+        href: "/admin/audit",
+        label: "Audit log",
+        icon: ScrollText,
+        keywords: "history actions staff",
+      },
     ],
   },
 ];

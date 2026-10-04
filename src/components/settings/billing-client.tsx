@@ -15,6 +15,7 @@ import { formatCredits } from "@/lib/utils";
 import { formatMoney } from "@/lib/currency";
 import { PlanSwitcher } from "@/components/settings/plan-switcher";
 import { RechargePacks } from "@/components/settings/recharge-packs";
+import { PromoCodeField, type AppliedPromo } from "@/components/settings/promo-code";
 import { PlanPrice } from "@/components/pricing/plan-price";
 import { useSpotlight } from "@/hooks/use-spotlight";
 import { useInvalidateCredits } from "@/hooks/use-credits";
@@ -286,9 +287,23 @@ export function BillingClient() {
   const { data, isLoading, refetch } = useSubscription();
   const awaiting = useCheckoutReturn(refetch);
   // Set by the landing page's "Subscribe to …" buttons (see plans-section.tsx).
-  const planParam = useSearchParams().get("plan");
+  const searchParams = useSearchParams();
+  const planParam = searchParams.get("plan");
+  // A promo code entered on the pricing page, carried here with the plan.
+  const promoParam = searchParams.get("promo");
   const pickedTier = TIERS.find((t) => t === planParam) ?? null;
   const [portalLoading, setPortalLoading] = useState(false);
+  // One code for the whole page: it can cover plans, packs or both, and the
+  // cards below show where it applies.
+  const [promo, setPromo] = useState<AppliedPromo | null>(null);
+  // A ?plan= arrival goes straight to Checkout (PlanSwitcher), which must
+  // wait for ?promo= to be checked or it leaves without the code. If the
+  // code is refused (already used, expired) it stays put instead, so the
+  // reason is read before anything is bought.
+  const [promoArrival, setPromoArrival] = useState<"checking" | "ok" | "failed">(
+    promoParam ? "checking" : "ok",
+  );
+  const onPromoArrival = useCallback((ok: boolean) => setPromoArrival(ok ? "ok" : "failed"), []);
   const spotlight = useSpotlight<HTMLDivElement>();
 
   const paymentsEnabled = data?.payments_enabled ?? false;
@@ -435,15 +450,31 @@ export function BillingClient() {
         </div>
       )}
 
+      <PromoCodeField
+        applied={promo}
+        onApply={setPromo}
+        disabled={misconfigured}
+        autoApply={promoParam}
+        onAutoApplyDone={onPromoArrival}
+      />
+
       <PlanSwitcher
         currentTier={tier}
         paymentsEnabled={paymentsEnabled}
         subscription={subscription}
         unavailable={misconfigured}
         highlightTier={pickedTier}
+        deferAutoCheckout={promoArrival !== "ok"}
+        promo={promo}
+        onPromoUsed={() => setPromo(null)}
       />
 
-      <RechargePacks paymentsEnabled={paymentsEnabled} unavailable={misconfigured} />
+      <RechargePacks
+        paymentsEnabled={paymentsEnabled}
+        unavailable={misconfigured}
+        promo={promo}
+        onPromoUsed={() => setPromo(null)}
+      />
 
       {paymentsEnabled && paymentsData && <PaymentHistory payments={paymentsData.payments} />}
     </div>

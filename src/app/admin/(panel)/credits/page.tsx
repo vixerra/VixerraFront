@@ -23,8 +23,19 @@ import {
   SearchField,
 } from "@/components/admin/filters";
 import {
-  PageHeader, Panel, Table, Th, SortTh, Td, Mono, Pagination,
-  EmptyRow, LoadingBlock, ErrorBlock, When, formatDate,
+  PageHeader,
+  Panel,
+  Table,
+  Th,
+  SortTh,
+  Td,
+  Mono,
+  Pagination,
+  EmptyRow,
+  LoadingBlock,
+  ErrorBlock,
+  When,
+  formatDate,
 } from "@/components/admin/ui";
 
 // Fixed per source so a colour means the same thing in every chart on the
@@ -35,6 +46,7 @@ const SOURCE_COLORS: Record<string, string> = {
   recharge: "#ffd400",
   refund: "#56a8e8",
   admin_grant: "#ff8f00",
+  promo: "#c86bfa",
 };
 
 const DEFAULTS = {
@@ -62,13 +74,16 @@ const EXPORT_COLUMNS: CsvColumn<AdminGrant>[] = [
 
 /** Whether a grant can still be spent, for the row's state marker. */
 function grantState(g: AdminGrant) {
-  if (g.expiresAt && new Date(g.expiresAt).getTime() <= Date.now()) return "expired";
+  if (g.expiresAt && new Date(g.expiresAt).getTime() <= Date.now())
+    return "expired";
   if (g.remaining === 0) return "spent";
   return "active";
 }
 
 export default function AdminCreditsPage() {
-  const { filters, offset, limit, update, reset } = useUrlFilters(DEFAULTS, { limit: 50 });
+  const { filters, offset, limit, update, reset } = useUrlFilters(DEFAULTS, {
+    limit: 50,
+  });
   const csv = useCsvExport();
 
   const params = {
@@ -79,14 +94,16 @@ export default function AdminCreditsPage() {
     sort: filters.sort,
     dir: filters.dir,
   };
-  const { data, isLoading, isError, error, isFetching, refetch } = useAdminCredits({
-    ...params,
-    limit,
-    offset,
-  });
+  const { data, isLoading, isError, error, isFetching, refetch } =
+    useAdminCredits({
+      ...params,
+      limit,
+      offset,
+    });
 
   if (isLoading) return <LoadingBlock />;
-  if (isError || !data) return <ErrorBlock message={(error as Error)?.message} />;
+  if (isError || !data)
+    return <ErrorBlock message={(error as Error)?.message} />;
 
   const { totals, bySource, grants, total } = data;
   const balanced = totals.drift === 0;
@@ -112,7 +129,9 @@ export default function AdminCreditsPage() {
           the only place in the product that would notice. */}
       <div
         className={`mb-6 rounded-2xl border p-5 ${
-          balanced ? "border-line bg-surface-2" : "border-accent/40 bg-accent/10"
+          balanced
+            ? "border-line bg-surface-2"
+            : "border-accent/40 bg-accent/10"
         }`}
       >
         <p className="flex items-center gap-2 text-label font-medium text-ink-soft">
@@ -125,17 +144,33 @@ export default function AdminCreditsPage() {
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Granted", value: totals.granted, note: "All CreditGrant.amount" },
-            { label: "Remaining", value: totals.remaining, note: "Unspent balance" },
-            { label: "Spent", value: totals.spent, note: "Non-failed generations" },
+            {
+              label: "Granted",
+              value: totals.granted,
+              note: "All CreditGrant.amount",
+            },
+            {
+              label: "Remaining",
+              value: totals.remaining,
+              note: "Unspent balance",
+            },
+            {
+              label: "Spent",
+              value: totals.spent,
+              note: "Non-failed generations",
+            },
             {
               label: "Drift",
               value: totals.drift,
-              note: balanced ? "Ledger balances" : "granted − remaining − spent",
+              note: balanced
+                ? "Ledger balances"
+                : "granted − remaining − spent",
             },
           ].map((s) => (
             <div key={s.label}>
-              <p className="text-caption tracking-wide text-muted uppercase">{s.label}</p>
+              <p className="text-caption tracking-wide text-muted uppercase">
+                {s.label}
+              </p>
               <p
                 className={`font-display mt-1 text-subheading font-bold ${
                   s.label === "Drift" && !balanced ? "text-accent" : "text-ink"
@@ -149,12 +184,15 @@ export default function AdminCreditsPage() {
         </div>
         {!balanced && (
           <p className="mt-4 text-body-sm text-accent">
-            The two records disagree by {Math.abs(totals.drift).toLocaleString()} credits
-            (≈${(Math.abs(totals.drift) * CREDIT_VALUE_USD).toFixed(2)}). Likely a double refund or
-            a deduction that didn&apos;t land —{" "}
+            The two records disagree by{" "}
+            {Math.abs(totals.drift).toLocaleString()} credits (≈$
+            {(Math.abs(totals.drift) * CREDIT_VALUE_USD).toFixed(2)}). Likely a
+            double refund or a deduction that didn&apos;t land —{" "}
             <button
               type="button"
-              onClick={() => update({ source: "refund", sort: "createdAt", dir: "desc" })}
+              onClick={() =>
+                update({ source: "refund", sort: "createdAt", dir: "desc" })
+              }
               className="underline"
             >
               check the refund-sourced grants
@@ -165,7 +203,10 @@ export default function AdminCreditsPage() {
       </div>
 
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Where credits come from" hint="Total granted, split by source">
+        <ChartCard
+          title="Where credits come from"
+          hint="Total granted, split by source"
+        >
           <BreakdownDonut
             data={bySource.map((s) => ({ name: s.source, value: s.amount }))}
             total={totals.granted}
@@ -174,10 +215,15 @@ export default function AdminCreditsPage() {
           />
         </ChartCard>
 
-        <ChartCard title="Outstanding by source" hint="What is still unspent — click one to list its grants">
+        <ChartCard
+          title="Outstanding by source"
+          hint="What is still unspent — click one to list its grants"
+        >
           <div className="space-y-1">
             {bySource.map((s) => {
-              const pct = s.amount ? Math.round((s.remaining / s.amount) * 100) : 0;
+              const pct = s.amount
+                ? Math.round((s.remaining / s.amount) * 100)
+                : 0;
               const active = filters.source === s.source;
               return (
                 <button
@@ -193,7 +239,8 @@ export default function AdminCreditsPage() {
                   <div className="mb-1 flex items-center justify-between text-caption">
                     <span className="font-mono text-brand">{s.source}</span>
                     <span className="text-muted">
-                      {s.remaining.toLocaleString()} / {s.amount.toLocaleString()}
+                      {s.remaining.toLocaleString()} /{" "}
+                      {s.amount.toLocaleString()}
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-white/5">
@@ -236,8 +283,16 @@ export default function AdminCreditsPage() {
           value={filters.source}
           onChange={(source) => update({ source })}
           options={[
-            { value: "", label: "All sources", count: bySource.reduce((n, s) => n + s.grants, 0) },
-            ...bySource.map((s) => ({ value: s.source, label: s.source.replace("_", " "), count: s.grants })),
+            {
+              value: "",
+              label: "All sources",
+              count: bySource.reduce((n, s) => n + s.grants, 0),
+            },
+            ...bySource.map((s) => ({
+              value: s.source,
+              label: s.source.replace("_", " "),
+              count: s.grants,
+            })),
           ]}
         />
         {filters.userId && (
@@ -261,10 +316,14 @@ export default function AdminCreditsPage() {
           csv.run(
             "credit-grants",
             () =>
-              fetchAllRows<AdminCreditsResponse, AdminGrant>("/api/admin/credits", params, (r) => ({
-                rows: r.grants,
-                total: r.total,
-              })),
+              fetchAllRows<AdminCreditsResponse, AdminGrant>(
+                "/api/admin/credits",
+                params,
+                (r) => ({
+                  rows: r.grants,
+                  total: r.total,
+                }),
+              ),
             EXPORT_COLUMNS,
           )
         }
@@ -277,16 +336,38 @@ export default function AdminCreditsPage() {
               <Th>User</Th>
               <Th>Source</Th>
               <Th>Tier</Th>
-              <SortTh field="amount" sort={filters.sort} dir={filters.dir} onSort={sortBy} className="text-right">
+              <SortTh
+                field="amount"
+                sort={filters.sort}
+                dir={filters.dir}
+                onSort={sortBy}
+                className="text-right"
+              >
                 Amount
               </SortTh>
-              <SortTh field="remaining" sort={filters.sort} dir={filters.dir} onSort={sortBy} className="text-right">
+              <SortTh
+                field="remaining"
+                sort={filters.sort}
+                dir={filters.dir}
+                onSort={sortBy}
+                className="text-right"
+              >
                 Remaining
               </SortTh>
-              <SortTh field="expiresAt" sort={filters.sort} dir={filters.dir} onSort={sortBy}>
+              <SortTh
+                field="expiresAt"
+                sort={filters.sort}
+                dir={filters.dir}
+                onSort={sortBy}
+              >
                 Expires
               </SortTh>
-              <SortTh field="createdAt" sort={filters.sort} dir={filters.dir} onSort={sortBy}>
+              <SortTh
+                field="createdAt"
+                sort={filters.sort}
+                dir={filters.dir}
+                onSort={sortBy}
+              >
                 Created
               </SortTh>
             </>
@@ -309,9 +390,15 @@ export default function AdminCreditsPage() {
             grants.map((g) => {
               const state = grantState(g);
               return (
-                <tr key={g.id} className="transition-colors hover:bg-white/[0.03]">
+                <tr
+                  key={g.id}
+                  className="transition-colors hover:bg-white/[0.03]"
+                >
                   <Td>
-                    <Link href={`/admin/users/${g.userId}`} className="hover:underline">
+                    <Link
+                      href={`/admin/users/${g.userId}`}
+                      className="hover:underline"
+                    >
                       <Mono>{g.userEmail}</Mono>
                     </Link>
                   </Td>
@@ -321,7 +408,9 @@ export default function AdminCreditsPage() {
                     </span>
                   </Td>
                   <Td className="capitalize">{g.tier}</Td>
-                  <Td className="text-right tabular-nums">{g.amount.toLocaleString()}</Td>
+                  <Td className="text-right tabular-nums">
+                    {g.amount.toLocaleString()}
+                  </Td>
                   <Td
                     className={cn(
                       "text-right tabular-nums",
@@ -334,7 +423,11 @@ export default function AdminCreditsPage() {
                     )}
                   </Td>
                   <Td>
-                    <Mono className={cn(state === "expired" && "line-through opacity-60")}>
+                    <Mono
+                      className={cn(
+                        state === "expired" && "line-through opacity-60",
+                      )}
+                    >
                       {g.expiresAt ? formatDate(g.expiresAt) : "never"}
                     </Mono>
                   </Td>

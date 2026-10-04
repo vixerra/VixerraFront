@@ -11,6 +11,11 @@ import {
 import { PlanCta } from "@/components/pricing/plan-cta";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
 import { PlanPrice } from "@/components/pricing/plan-price";
+import {
+  PricingPromoBadge,
+  PricingPromoField,
+  PricingPromoProvider,
+} from "@/components/pricing/pricing-promo";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqPageJsonLd } from "@/lib/faqs";
 import { pricingProductJsonLd } from "@/lib/structured-data";
@@ -86,58 +91,65 @@ export default function PricingPage() {
           card flag below remove themselves once the offer sells out. */}
       <LaunchOfferStrip className="mx-auto mt-12 max-w-5xl" />
 
-      <div className="mt-16 grid gap-6 lg:grid-cols-4">
-        {TIERS.map((tier) => {
-          const info = TIER_INFO[tier];
-          const isPopular = tier === "creator";
-          const isOffer = tier === LAUNCH_OFFER.tier;
-          return (
-            <Card
-              key={tier}
-              variant="standard"
-              className={cn(
-                "flex flex-col",
-                isPopular && "relative border-brand/40 shadow-glow-sm",
-                isOffer && "relative",
-              )}
-            >
-              {isOffer && <LaunchOfferPlanFlag />}
-              {isPopular && (
-                <Badge
-                  variant="brand"
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 shadow-glow-sm"
-                >
-                  Most popular
-                </Badge>
-              )}
-              <h2 className="text-subheading font-semibold text-ink">{info.label}</h2>
-              <p className="mt-4 flex items-baseline gap-1">
-                <PlanPrice
-                  priceMonthly={info.priceMonthly}
-                  className="text-heading font-bold text-ink"
-                  suffixClassName="text-body-sm text-muted"
+      {/* A promo code entered here shows its bonus on the cards it covers and
+          rides along with their buttons to checkout (pricing-promo.tsx). */}
+      <PricingPromoProvider>
+        <PricingPromoField className="mx-auto mt-12 max-w-md" />
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-4">
+          {TIERS.map((tier) => {
+            const info = TIER_INFO[tier];
+            const isPopular = tier === "creator";
+            const isOffer = tier === LAUNCH_OFFER.tier;
+            return (
+              <Card
+                key={tier}
+                variant="standard"
+                className={cn(
+                  "flex flex-col",
+                  isPopular && "relative border-brand/40 shadow-glow-sm",
+                  isOffer && "relative",
+                )}
+              >
+                {isOffer && <LaunchOfferPlanFlag />}
+                {isPopular && (
+                  <Badge
+                    variant="brand"
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 shadow-glow-sm"
+                  >
+                    Most popular
+                  </Badge>
+                )}
+                <h2 className="text-subheading font-semibold text-ink">{info.label}</h2>
+                <p className="mt-4 flex items-baseline gap-1">
+                  <PlanPrice
+                    priceMonthly={info.priceMonthly}
+                    className="text-heading font-bold text-ink"
+                    suffixClassName="text-body-sm text-muted"
+                  />
+                </p>
+                <PricingPromoBadge tier={tier} />
+                <PlanFeatureList
+                  features={info.features}
+                  note={info.featuresNote}
+                  className="mt-6 flex-1"
                 />
-              </p>
-              <PlanFeatureList
-                features={info.features}
-                note={info.featuresNote}
-                className="mt-6 flex-1"
-              />
-              {isOffer ? (
-                <LaunchOfferPlanCta className="mt-8 w-full" />
-              ) : (
-                <PlanCta
-                  tier={tier}
-                  variant={isPopular ? "primary" : "secondary"}
-                  className="mt-8 w-full"
-                >
-                  Get started
-                </PlanCta>
-              )}
-            </Card>
-          );
-        })}
-      </div>
+                {isOffer ? (
+                  <LaunchOfferPlanCta className="mt-8 w-full" />
+                ) : (
+                  <PlanCta
+                    tier={tier}
+                    variant={isPopular ? "primary" : "secondary"}
+                    className="mt-8 w-full"
+                  >
+                    Get started
+                  </PlanCta>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      </PricingPromoProvider>
 
       <p className="mx-auto mt-6 max-w-2xl text-center text-caption text-muted">
         Model quantities are estimates assuming 100% of that month&apos;s credits are spent on a

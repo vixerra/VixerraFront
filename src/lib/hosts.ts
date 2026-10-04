@@ -38,9 +38,11 @@ export function siteHref(path: string): string {
  * (RedirectIfAuthenticated) and drop the plan. Everyone else goes through
  * signup, whose ?next= survives both the email round trip and the Google
  * handoff (see post-verify-next.ts), and ?plan= makes billing single the card
- * out.
+ * out. A promo code entered on the pricing page rides along as ?promo=, and
+ * billing applies it before opening Checkout.
  */
-export function subscribeHref(tier: Tier, signedIn: boolean): string {
-  const billing = `/settings/billing?plan=${tier}`;
+export function subscribeHref(tier: Tier, signedIn: boolean, promoCode?: string | null): string {
+  const promo = promoCode ? `&promo=${encodeURIComponent(promoCode)}` : "";
+  const billing = `/settings/billing?plan=${tier}${promo}`;
   return appHref(signedIn ? billing : `/signup?next=${encodeURIComponent(billing)}`);
 }

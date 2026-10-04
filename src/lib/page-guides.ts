@@ -36,16 +36,56 @@ export type GuideNoteTone = "info" | "warn" | "gate";
  * keys to real icons.
  */
 export type GuideIcon =
-  | "sparkles" | "video" | "image" | "upload" | "sliders" | "play" | "download"
-  | "folder" | "share" | "send" | "calendar" | "zap" | "key" | "shield"
-  | "users" | "search" | "check" | "wand" | "layers" | "clock" | "eye"
-  | "alert" | "mail" | "lock" | "gauge" | "scissors" | "megaphone" | "list"
-  | "tag" | "link" | "settings" | "coins" | "activity" | "type";
+  | "sparkles"
+  | "video"
+  | "image"
+  | "upload"
+  | "sliders"
+  | "play"
+  | "download"
+  | "folder"
+  | "share"
+  | "send"
+  | "calendar"
+  | "zap"
+  | "key"
+  | "shield"
+  | "users"
+  | "search"
+  | "check"
+  | "wand"
+  | "layers"
+  | "clock"
+  | "eye"
+  | "alert"
+  | "mail"
+  | "lock"
+  | "gauge"
+  | "scissors"
+  | "megaphone"
+  | "list"
+  | "tag"
+  | "link"
+  | "settings"
+  | "coins"
+  | "activity"
+  | "type";
 
 /** Which animated illustration sits beside the steps. */
 export type GuideArt =
-  | "composer" | "gallery" | "timeline" | "presets" | "publish" | "credits"
-  | "share" | "team" | "keys" | "account" | "admin" | "welcome" | "auth";
+  | "composer"
+  | "gallery"
+  | "timeline"
+  | "presets"
+  | "publish"
+  | "credits"
+  | "share"
+  | "team"
+  | "keys"
+  | "account"
+  | "admin"
+  | "welcome"
+  | "auth";
 
 export type GuideStep = {
   icon: GuideIcon;
@@ -78,9 +118,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "credits",
     steps: [
-      { icon: "zap", title: "Check your balance", detail: "Do it before a long or high-resolution job." },
-      { icon: "activity", title: "Read the 30-day chart", detail: "It shows where your credits actually went." },
-      { icon: "play", title: "Reopen recent work", detail: "Every generation keeps its prompt and settings." },
+      {
+        icon: "zap",
+        title: "Check your balance",
+        detail: "Do it before a long or high-resolution job.",
+      },
+      {
+        icon: "activity",
+        title: "Read the 30-day chart",
+        detail: "It shows where your credits actually went.",
+      },
+      {
+        icon: "play",
+        title: "Reopen recent work",
+        detail: "Every generation keeps its prompt and settings.",
+      },
     ],
     note: "Per 1,000 credits: about 333 images, 42s of Seedance 2.0, or 28s of Seedance 2.5.",
   },
@@ -91,12 +143,36 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "composer",
     steps: [
-      { icon: "sparkles", title: "Pick a model", detail: "Seedance 2.5 for 30s and reference control; 2.0 for 4K." },
-      { icon: "upload", title: "Add a frame", detail: "Optional. A first and last frame animate a still you have." },
-      { icon: "type", title: "Describe the shot", detail: "Two concrete sentences beat a list of adjectives." },
-      { icon: "sliders", title: "Set duration and frame", detail: "Resolution, aspect, camera lock, native audio." },
-      { icon: "zap", title: "Check the price", detail: "The pill shows the cost before you spend anything." },
-      { icon: "play", title: "Generate", detail: "Progress streams live. Nothing to refresh." },
+      {
+        icon: "sparkles",
+        title: "Pick a model",
+        detail: "Seedance 2.5 for 30s and reference control; 2.0 for 4K.",
+      },
+      {
+        icon: "upload",
+        title: "Add a frame",
+        detail: "Optional. A first and last frame animate a still you have.",
+      },
+      {
+        icon: "type",
+        title: "Describe the shot",
+        detail: "Two concrete sentences beat a list of adjectives.",
+      },
+      {
+        icon: "sliders",
+        title: "Set duration and frame",
+        detail: "Resolution, aspect, camera lock, native audio.",
+      },
+      {
+        icon: "zap",
+        title: "Check the price",
+        detail: "The pill shows the cost before you spend anything.",
+      },
+      {
+        icon: "play",
+        title: "Generate",
+        detail: "Progress streams live. Nothing to refresh.",
+      },
     ],
     note: "Reusing a seed with the same settings iterates one shot instead of rolling a new one.",
   },
@@ -107,10 +183,26 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "composer",
     steps: [
-      { icon: "sparkles", title: "Pick a model", detail: "Nano Banana Pro for 4K, Recraft Vector for real SVG." },
-      { icon: "type", title: "Write the prompt", detail: "Then add a style preset for the medium and treatment." },
-      { icon: "wand", title: "Enhance it", detail: "Turns a rough idea into a model-ready prompt." },
-      { icon: "layers", title: "Edit in words", detail: "Describe the change. No masks, no region selection." },
+      {
+        icon: "sparkles",
+        title: "Pick a model",
+        detail: "Nano Banana Pro for 4K, Recraft Vector for real SVG.",
+      },
+      {
+        icon: "type",
+        title: "Write the prompt",
+        detail: "Then add a style preset for the medium and treatment.",
+      },
+      {
+        icon: "wand",
+        title: "Enhance it",
+        detail: "Turns a rough idea into a model-ready prompt.",
+      },
+      {
+        icon: "layers",
+        title: "Edit in words",
+        detail: "Describe the change. No masks, no region selection.",
+      },
     ],
   },
   {
@@ -120,9 +212,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "presets",
     steps: [
-      { icon: "tag", title: "Browse a category", detail: "Trending, Portrait, Product, Motion, Playful." },
-      { icon: "eye", title: "Read the preview", detail: "It shows the kind of shot, not that preset's own output." },
-      { icon: "play", title: "Open one to run it", detail: "The full composer is still there if you want control." },
+      {
+        icon: "tag",
+        title: "Browse a category",
+        detail: "Trending, Portrait, Product, Motion, Playful.",
+      },
+      {
+        icon: "eye",
+        title: "Read the preview",
+        detail: "It shows the kind of shot, not that preset's own output.",
+      },
+      {
+        icon: "play",
+        title: "Open one to run it",
+        detail: "The full composer is still there if you want control.",
+      },
     ],
   },
   {
@@ -132,9 +236,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "presets",
     steps: [
-      { icon: "upload", title: "Upload one image", detail: "Required. A PNG or JPG from your device." },
-      { icon: "wand", title: "Let it redraw", detail: "Some recipes build a character first, then animate it." },
-      { icon: "download", title: "Generate and download", detail: "The recipe already wrote the prompt and settings." },
+      {
+        icon: "upload",
+        title: "Upload one image",
+        detail: "Required. A PNG or JPG from your device.",
+      },
+      {
+        icon: "wand",
+        title: "Let it redraw",
+        detail: "Some recipes build a character first, then animate it.",
+      },
+      {
+        icon: "download",
+        title: "Generate and download",
+        detail: "The recipe already wrote the prompt and settings.",
+      },
     ],
     note: "If a recipe exceeds your plan, the studio steps it down and shows the job it will really submit.",
   },
@@ -145,10 +261,26 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "creator",
     art: "composer",
     steps: [
-      { icon: "image", title: "Attach your assets", detail: "The product, and a face if the ad needs one." },
-      { icon: "type", title: "Write the brief", detail: "What it is, who it is for, the format and the pace." },
-      { icon: "layers", title: "One reference sheet", detail: "Product and talent merge, because a job takes one image." },
-      { icon: "play", title: "Review and generate", detail: "The composed prompt and price are shown first." },
+      {
+        icon: "image",
+        title: "Attach your assets",
+        detail: "The product, and a face if the ad needs one.",
+      },
+      {
+        icon: "type",
+        title: "Write the brief",
+        detail: "What it is, who it is for, the format and the pace.",
+      },
+      {
+        icon: "layers",
+        title: "One reference sheet",
+        detail: "Product and talent merge, because a job takes one image.",
+      },
+      {
+        icon: "play",
+        title: "Review and generate",
+        detail: "The composed prompt and price are shown first.",
+      },
     ],
     note: "Included from the Créateur plan up.",
     noteTone: "gate",
@@ -160,11 +292,31 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "creator",
     art: "timeline",
     steps: [
-      { icon: "folder", title: "Add your clips", detail: "From the media library, or straight from the gallery." },
-      { icon: "sliders", title: "Choose the frame", detail: "9:16, 4:5, 1:1, 16:9 or 21:9." },
-      { icon: "scissors", title: "Cut on the timeline", detail: "Split, reorder, duplicate, trim. Undo covers everything." },
-      { icon: "type", title: "Layer text and sound", detail: "Overlays, your watermark, music." },
-      { icon: "download", title: "Export an MP4", detail: "It renders in your browser, so keep the tab open." },
+      {
+        icon: "folder",
+        title: "Add your clips",
+        detail: "From the media library, or straight from the gallery.",
+      },
+      {
+        icon: "sliders",
+        title: "Choose the frame",
+        detail: "9:16, 4:5, 1:1, 16:9 or 21:9.",
+      },
+      {
+        icon: "scissors",
+        title: "Cut on the timeline",
+        detail: "Split, reorder, duplicate, trim. Undo covers everything.",
+      },
+      {
+        icon: "type",
+        title: "Layer text and sound",
+        detail: "Overlays, your watermark, music.",
+      },
+      {
+        icon: "download",
+        title: "Export an MP4",
+        detail: "It renders in your browser, so keep the tab open.",
+      },
     ],
     note: "Included from the Créateur plan up.",
     noteTone: "gate",
@@ -176,10 +328,26 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "gallery",
     steps: [
-      { icon: "users", title: "Pick the workspace", detail: "Personal uses your credits; team uses the owner's pool." },
-      { icon: "search", title: "Filter it down", detail: "By type and status. Failed jobs are listed too." },
-      { icon: "eye", title: "Open a result", detail: "Its full prompt and parameters are kept with it." },
-      { icon: "share", title: "Take it further", detail: "Download, collect, send to the editor, or publish." },
+      {
+        icon: "users",
+        title: "Pick the workspace",
+        detail: "Personal uses your credits; team uses the owner's pool.",
+      },
+      {
+        icon: "search",
+        title: "Filter it down",
+        detail: "By type and status. Failed jobs are listed too.",
+      },
+      {
+        icon: "eye",
+        title: "Open a result",
+        detail: "Its full prompt and parameters are kept with it.",
+      },
+      {
+        icon: "share",
+        title: "Take it further",
+        detail: "Download, collect, send to the editor, or publish.",
+      },
     ],
   },
   {
@@ -189,9 +357,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "gallery",
     steps: [
-      { icon: "folder", title: "Create one", detail: "One per campaign, client or idea." },
-      { icon: "check", title: "Add your work", detail: "From the gallery, or a result's own menu." },
-      { icon: "share", title: "Open it to share", detail: "Reorder, remove, then mint a link." },
+      {
+        icon: "folder",
+        title: "Create one",
+        detail: "One per campaign, client or idea.",
+      },
+      {
+        icon: "check",
+        title: "Add your work",
+        detail: "From the gallery, or a result's own menu.",
+      },
+      {
+        icon: "share",
+        title: "Open it to share",
+        detail: "Reorder, remove, then mint a link.",
+      },
     ],
   },
   {
@@ -201,8 +381,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "share",
     steps: [
-      { icon: "check", title: "Review the contents", detail: "Drop anything that does not belong." },
-      { icon: "link", title: "Share it", detail: "One link, no account needed at the other end." },
+      {
+        icon: "check",
+        title: "Review the contents",
+        detail: "Drop anything that does not belong.",
+      },
+      {
+        icon: "link",
+        title: "Share it",
+        detail: "One link, no account needed at the other end.",
+      },
     ],
     note: "Anyone holding the link can open it. Treat the link itself as the permission.",
     noteTone: "warn",
@@ -214,8 +402,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "share",
     steps: [
-      { icon: "play", title: "Watch and browse", detail: "Read-only, and no sign-in needed." },
-      { icon: "sparkles", title: "Make your own", detail: "A free account opens with 10 credits." },
+      {
+        icon: "play",
+        title: "Watch and browse",
+        detail: "Read-only, and no sign-in needed.",
+      },
+      {
+        icon: "sparkles",
+        title: "Make your own",
+        detail: "A free account opens with 10 credits.",
+      },
     ],
   },
   {
@@ -225,8 +421,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "account",
     steps: [
-      { icon: "settings", title: "Update your profile", detail: "Change what you need, then save." },
-      { icon: "list", title: "Use the settings nav", detail: "Billing, API keys, security, social, team." },
+      {
+        icon: "settings",
+        title: "Update your profile",
+        detail: "Change what you need, then save.",
+      },
+      {
+        icon: "list",
+        title: "Use the settings nav",
+        detail: "Billing, API keys, security, social, team.",
+      },
     ],
   },
   {
@@ -236,9 +440,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "credits",
     steps: [
-      { icon: "gauge", title: "Check plan and balance", detail: "Both sit at the top of the page." },
-      { icon: "sparkles", title: "Switch plan", detail: "This is where 4K, API access and seats come from." },
-      { icon: "coins", title: "Or just top up", detail: "Buy a credit pack without changing plan." },
+      {
+        icon: "gauge",
+        title: "Check plan and balance",
+        detail: "Both sit at the top of the page.",
+      },
+      {
+        icon: "sparkles",
+        title: "Switch plan",
+        detail: "This is where 4K, API access and seats come from.",
+      },
+      {
+        icon: "coins",
+        title: "Or just top up",
+        detail: "Buy a credit pack without changing plan.",
+      },
     ],
     note: "On Créateur and Studio, unused credits roll over one month. On Découverte and Starter they do not.",
   },
@@ -249,9 +465,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "studio",
     art: "keys",
     steps: [
-      { icon: "key", title: "Create a key", detail: "Copy it immediately and treat it like a password." },
-      { icon: "zap", title: "Call the API", detail: "Usage draws on the same credit balance." },
-      { icon: "alert", title: "Revoke on doubt", detail: "The moment a key might have leaked." },
+      {
+        icon: "key",
+        title: "Create a key",
+        detail: "Copy it immediately and treat it like a password.",
+      },
+      {
+        icon: "zap",
+        title: "Call the API",
+        detail: "Usage draws on the same credit balance.",
+      },
+      {
+        icon: "alert",
+        title: "Revoke on doubt",
+        detail: "The moment a key might have leaked.",
+      },
     ],
     note: "API access is a Studio-plan feature.",
     noteTone: "gate",
@@ -263,8 +491,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "auth",
     steps: [
-      { icon: "lock", title: "Enter the old one", detail: "Then the new password twice." },
-      { icon: "mail", title: "Forgotten it?", detail: "Use the emailed reset flow instead." },
+      {
+        icon: "lock",
+        title: "Enter the old one",
+        detail: "Then the new password twice.",
+      },
+      {
+        icon: "mail",
+        title: "Forgotten it?",
+        detail: "Use the emailed reset flow instead.",
+      },
     ],
   },
   {
@@ -274,9 +510,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "creator",
     art: "publish",
     steps: [
-      { icon: "link", title: "Authorize a platform", detail: "You approve it on the platform's own screen." },
-      { icon: "check", title: "It appears here", detail: "Listed and ready to publish to." },
-      { icon: "alert", title: "Unlink any time", detail: "Scheduled posts for that account then stop." },
+      {
+        icon: "link",
+        title: "Authorize a platform",
+        detail: "You approve it on the platform's own screen.",
+      },
+      {
+        icon: "check",
+        title: "It appears here",
+        detail: "Listed and ready to publish to.",
+      },
+      {
+        icon: "alert",
+        title: "Unlink any time",
+        detail: "Scheduled posts for that account then stop.",
+      },
     ],
     note: "Publishing to linked accounts is included from the Créateur plan up.",
     noteTone: "gate",
@@ -288,11 +536,31 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "studio",
     art: "team",
     steps: [
-      { icon: "users", title: "Create the team", detail: "Until you do, there is nothing to invite into." },
-      { icon: "mail", title: "Invite by email", detail: "They can accept here in the app, or from the email." },
-      { icon: "shield", title: "Set each role", detail: "Creator generates, editor reshapes, viewer only looks." },
-      { icon: "coins", title: "Cap the spend", detail: "Give a member a monthly credit allowance, or leave it open." },
-      { icon: "gauge", title: "Watch the usage", detail: "Each row shows what that member spent this month." },
+      {
+        icon: "users",
+        title: "Create the team",
+        detail: "Until you do, there is nothing to invite into.",
+      },
+      {
+        icon: "mail",
+        title: "Invite by email",
+        detail: "They can accept here in the app, or from the email.",
+      },
+      {
+        icon: "shield",
+        title: "Set each role",
+        detail: "Creator generates, editor reshapes, viewer only looks.",
+      },
+      {
+        icon: "coins",
+        title: "Cap the spend",
+        detail: "Give a member a monthly credit allowance, or leave it open.",
+      },
+      {
+        icon: "gauge",
+        title: "Watch the usage",
+        detail: "Each row shows what that member spent this month.",
+      },
     ],
     note: "A Studio feature: you plus 3 teammates. Only team-workspace work spends your pool — their personal work uses their own credits.",
     noteTone: "gate",
@@ -304,9 +572,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "team",
     steps: [
-      { icon: "lock", title: "Sign in", detail: "Or create an account if you have none." },
-      { icon: "check", title: "Accept", detail: "Also possible from Settings, Team — no email needed." },
-      { icon: "users", title: "Switch workspace", detail: "The sidebar toggles between personal and the team." },
+      {
+        icon: "lock",
+        title: "Sign in",
+        detail: "Or create an account if you have none.",
+      },
+      {
+        icon: "check",
+        title: "Accept",
+        detail: "Also possible from Settings, Team — no email needed.",
+      },
+      {
+        icon: "users",
+        title: "Switch workspace",
+        detail: "The sidebar toggles between personal and the team.",
+      },
     ],
   },
 
@@ -318,9 +598,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "auth",
     steps: [
-      { icon: "mail", title: "Email and password", detail: "That is the whole form." },
-      { icon: "zap", title: "10 credits land", detail: "Waiting on your dashboard." },
-      { icon: "image", title: "Spend them well", detail: "1 image, or a 3s Grok video." },
+      {
+        icon: "mail",
+        title: "Email and password",
+        detail: "That is the whole form.",
+      },
+      {
+        icon: "zap",
+        title: "10 credits land",
+        detail: "Waiting on your dashboard.",
+      },
+      {
+        icon: "image",
+        title: "Spend them well",
+        detail: "1 image, or a 3s Grok video.",
+      },
     ],
     note: "Every model is open. Free results carry a watermark and video is capped at 480p / 5s; Starter drops the watermark and goes to 1080p.",
     noteTone: "warn",
@@ -332,8 +624,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "auth",
     steps: [
-      { icon: "lock", title: "Enter your details", detail: "Email and password, or a linked identity." },
-      { icon: "mail", title: "Forgotten it?", detail: "The reset link sits below the form." },
+      {
+        icon: "lock",
+        title: "Enter your details",
+        detail: "Email and password, or a linked identity.",
+      },
+      {
+        icon: "mail",
+        title: "Forgotten it?",
+        detail: "The reset link sits below the form.",
+      },
     ],
   },
   {
@@ -343,9 +643,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "auth",
     steps: [
-      { icon: "mail", title: "Type your email", detail: "The one your account uses." },
-      { icon: "clock", title: "Open the newest link", detail: "They expire, so ignore older ones." },
-      { icon: "lock", title: "Set a new password", detail: "Then sign in with it." },
+      {
+        icon: "mail",
+        title: "Type your email",
+        detail: "The one your account uses.",
+      },
+      {
+        icon: "clock",
+        title: "Open the newest link",
+        detail: "They expire, so ignore older ones.",
+      },
+      {
+        icon: "lock",
+        title: "Set a new password",
+        detail: "Then sign in with it.",
+      },
     ],
   },
   {
@@ -355,8 +667,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "auth",
     steps: [
-      { icon: "lock", title: "Choose it twice", detail: "Confirm to be sure it is what you meant." },
-      { icon: "check", title: "Save and sign in", detail: "The old password stops working immediately." },
+      {
+        icon: "lock",
+        title: "Choose it twice",
+        detail: "Confirm to be sure it is what you meant.",
+      },
+      {
+        icon: "check",
+        title: "Save and sign in",
+        detail: "The old password stops working immediately.",
+      },
     ],
     note: "If the link has expired, request a fresh one from forgot-password.",
     noteTone: "warn",
@@ -370,8 +690,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "welcome",
     steps: [
-      { icon: "sparkles", title: "Try the hero demo", detail: "See the flow before signing up for anything." },
-      { icon: "video", title: "Follow a try-it link", detail: "It opens the composer with that model selected." },
+      {
+        icon: "sparkles",
+        title: "Try the hero demo",
+        detail: "See the flow before signing up for anything.",
+      },
+      {
+        icon: "video",
+        title: "Follow a try-it link",
+        detail: "It opens the composer with that model selected.",
+      },
       { icon: "zap", title: "Start free", detail: "10 credits, no card." },
     ],
   },
@@ -382,8 +710,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "welcome",
     steps: [
-      { icon: "layers", title: "Compare the models", detail: "Before you spend credits on the wrong one." },
-      { icon: "list", title: "The loop never changes", detail: "Prompt or upload, pick a model, refine, export." },
+      {
+        icon: "layers",
+        title: "Compare the models",
+        detail: "Before you spend credits on the wrong one.",
+      },
+      {
+        icon: "list",
+        title: "The loop never changes",
+        detail: "Prompt or upload, pick a model, refine, export.",
+      },
     ],
   },
   {
@@ -393,9 +729,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "credits",
     steps: [
-      { icon: "gauge", title: "Three things differ", detail: "Resolution ceiling, clip length, creator suite." },
-      { icon: "scissors", title: "The creator suite", detail: "Marketing studio, editor and publishing — from Créateur." },
-      { icon: "coins", title: "Prices are in US dollars", detail: "Credits are the unit; cost is shown before you generate." },
+      {
+        icon: "gauge",
+        title: "Three things differ",
+        detail: "Resolution ceiling, clip length, creator suite.",
+      },
+      {
+        icon: "scissors",
+        title: "The creator suite",
+        detail: "Marketing studio, editor and publishing — from Créateur.",
+      },
+      {
+        icon: "coins",
+        title: "Prices are in US dollars",
+        detail: "Credits are the unit; cost is shown before you generate.",
+      },
     ],
   },
   {
@@ -405,8 +753,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "gallery",
     steps: [
-      { icon: "eye", title: "Browse for ideas", detail: "See what the models are capable of." },
-      { icon: "check", title: "Like what lands", detail: "So you can find it again." },
+      {
+        icon: "eye",
+        title: "Browse for ideas",
+        detail: "See what the models are capable of.",
+      },
+      {
+        icon: "check",
+        title: "Like what lands",
+        detail: "So you can find it again.",
+      },
     ],
   },
   {
@@ -418,9 +774,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "presets",
     steps: [
-      { icon: "tag", title: "Browse freely", detail: "The whole catalogue is open, with no account." },
-      { icon: "eye", title: "Read the preview", detail: "It shows the kind of shot, not that preset's own output." },
-      { icon: "lock", title: "Sign in to run one", detail: "You land back on the preset you picked." },
+      {
+        icon: "tag",
+        title: "Browse freely",
+        detail: "The whole catalogue is open, with no account.",
+      },
+      {
+        icon: "eye",
+        title: "Read the preview",
+        detail: "It shows the kind of shot, not that preset's own output.",
+      },
+      {
+        icon: "lock",
+        title: "Sign in to run one",
+        detail: "You land back on the preset you picked.",
+      },
     ],
     note: "Recipes are finished: prompt, camera, length and audio are already written. Prefer control? Use the full composer.",
   },
@@ -431,7 +799,11 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "welcome",
     steps: [
-      { icon: "eye", title: "Read the background", detail: "Then head to features for what it actually does." },
+      {
+        icon: "eye",
+        title: "Read the background",
+        detail: "Then head to features for what it actually does.",
+      },
     ],
   },
   {
@@ -441,8 +813,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "account",
     steps: [
-      { icon: "mail", title: "Anything account-specific", detail: "Billing, a stuck generation, a refund." },
-      { icon: "check", title: "Include your email", detail: "The one on the account, so it can be matched." },
+      {
+        icon: "mail",
+        title: "Anything account-specific",
+        detail: "Billing, a stuck generation, a refund.",
+      },
+      {
+        icon: "check",
+        title: "Include your email",
+        detail: "The one on the account, so it can be matched.",
+      },
     ],
   },
   {
@@ -452,7 +832,11 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "account",
     steps: [
-      { icon: "shield", title: "Read before uploading", detail: "Especially someone else's likeness or a client's product." },
+      {
+        icon: "shield",
+        title: "Read before uploading",
+        detail: "Especially someone else's likeness or a client's product.",
+      },
     ],
   },
   {
@@ -462,8 +846,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "any",
     art: "account",
     steps: [
-      { icon: "shield", title: "Check the licence", detail: "Before using output in paid work." },
-      { icon: "alert", title: "It starts at Starter", detail: "The free plan carries no commercial licence." },
+      {
+        icon: "shield",
+        title: "Check the licence",
+        detail: "Before using output in paid work.",
+      },
+      {
+        icon: "alert",
+        title: "It starts at Starter",
+        detail: "The free plan carries no commercial licence.",
+      },
     ],
   },
 
@@ -475,7 +867,11 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "auth",
     steps: [
-      { icon: "shield", title: "Use a staff account", detail: "Separate from your customer login." },
+      {
+        icon: "shield",
+        title: "Use a staff account",
+        detail: "Separate from your customer login.",
+      },
     ],
   },
   {
@@ -485,9 +881,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "gauge", title: "Scan the metrics", detail: "Start here before anything else." },
-      { icon: "activity", title: "Follow the anomaly", detail: "Each tile opens the jobs or accounts behind it." },
-      { icon: "search", title: "Press Ctrl K", detail: "Jump to any page, account or job id." },
+      {
+        icon: "gauge",
+        title: "Scan the metrics",
+        detail: "Start here before anything else.",
+      },
+      {
+        icon: "activity",
+        title: "Follow the anomaly",
+        detail: "Each tile opens the jobs or accounts behind it.",
+      },
+      {
+        icon: "search",
+        title: "Press Ctrl K",
+        detail: "Jump to any page, account or job id.",
+      },
     ],
   },
   {
@@ -497,9 +905,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "search", title: "Filter to the case", detail: "By status, model, account, date or prompt." },
-      { icon: "eye", title: "Open the job", detail: "Click a row for its parameters and failure reason." },
-      { icon: "list", title: "Act in bulk", detail: "Tick several rows to retry or refund them together." },
+      {
+        icon: "search",
+        title: "Filter to the case",
+        detail: "By status, model, account, date or prompt.",
+      },
+      {
+        icon: "eye",
+        title: "Open the job",
+        detail: "Click a row for its parameters and failure reason.",
+      },
+      {
+        icon: "list",
+        title: "Act in bulk",
+        detail: "Tick several rows to retry or refund them together.",
+      },
     ],
   },
   {
@@ -509,9 +929,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "search", title: "Search by email", detail: "Or name, pen name or account id. Press / to start." },
-      { icon: "sliders", title: "Narrow and sort", detail: "By plan, sign-up or last sign-in; click a column to sort." },
-      { icon: "eye", title: "Open the account", detail: "Plan, balance and generation history." },
+      {
+        icon: "search",
+        title: "Search by email",
+        detail: "Or name, pen name or account id. Press / to start.",
+      },
+      {
+        icon: "sliders",
+        title: "Narrow and sort",
+        detail: "By plan, sign-up or last sign-in; click a column to sort.",
+      },
+      {
+        icon: "eye",
+        title: "Open the account",
+        detail: "Plan, balance and generation history.",
+      },
     ],
   },
   {
@@ -521,8 +953,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "gauge", title: "Confirm plan and balance", detail: "Before acting on a support ticket." },
-      { icon: "coins", title: "Adjust from Credits", detail: "Every change lands in the audit log." },
+      {
+        icon: "gauge",
+        title: "Confirm plan and balance",
+        detail: "Before acting on a support ticket.",
+      },
+      {
+        icon: "coins",
+        title: "Adjust from Credits",
+        detail: "Every change lands in the audit log.",
+      },
     ],
   },
   {
@@ -532,11 +972,44 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "credits",
     steps: [
-      { icon: "search", title: "Find the account", detail: "Then enter the adjustment." },
-      { icon: "type", title: "Say why", detail: "Write the reason for someone who was not here." },
+      {
+        icon: "search",
+        title: "Find the account",
+        detail: "Then enter the adjustment.",
+      },
+      {
+        icon: "type",
+        title: "Say why",
+        detail: "Write the reason for someone who was not here.",
+      },
     ],
     note: "Every adjustment is recorded in the audit log.",
     noteTone: "warn",
+  },
+  {
+    path: "/admin/promo-codes",
+    title: "Promo codes",
+    what: "Bonus credits on a plan or pack",
+    plan: "staff",
+    art: "credits",
+    steps: [
+      {
+        icon: "tag",
+        title: "Create a code",
+        detail: "Pick the bonus, the packs and any limits.",
+      },
+      {
+        icon: "share",
+        title: "Hand it out",
+        detail: "Customers enter it on the billing page.",
+      },
+      {
+        icon: "check",
+        title: "Paid, then credited",
+        detail: "Once, with the plan's or pack's own credits.",
+      },
+    ],
+    note: "A code adds credits — it never changes the price Stripe charges.",
   },
   {
     path: "/admin/presets",
@@ -545,9 +1018,21 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "presets",
     steps: [
-      { icon: "sliders", title: "Compose a recipe", detail: "Any model in the catalogue, with its parameters." },
-      { icon: "eye", title: "Add an honest preview", detail: "It sells the kind of shot the recipe aims for." },
-      { icon: "send", title: "Publish it", detail: "It appears in /presets with no deploy." },
+      {
+        icon: "sliders",
+        title: "Compose a recipe",
+        detail: "Any model in the catalogue, with its parameters.",
+      },
+      {
+        icon: "eye",
+        title: "Add an honest preview",
+        detail: "It sells the kind of shot the recipe aims for.",
+      },
+      {
+        icon: "send",
+        title: "Publish it",
+        detail: "It appears in /presets with no deploy.",
+      },
     ],
     note: "A preset's prompt stays server-side. The browser only ever sends the slug.",
   },
@@ -558,8 +1043,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "gallery",
     steps: [
-      { icon: "eye", title: "Review what is public", detail: "Everything shared, in one place." },
-      { icon: "check", title: "Feature or remove", detail: "Promote the good, drop what should not be there." },
+      {
+        icon: "eye",
+        title: "Review what is public",
+        detail: "Everything shared, in one place.",
+      },
+      {
+        icon: "check",
+        title: "Feature or remove",
+        detail: "Promote the good, drop what should not be there.",
+      },
     ],
   },
   {
@@ -569,8 +1062,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "clock", title: "Work oldest first", detail: "Filter to Unread and order by oldest." },
-      { icon: "eye", title: "Read the account first", detail: "The Customer tag opens their plan and history." },
+      {
+        icon: "clock",
+        title: "Work oldest first",
+        detail: "Filter to Unread and order by oldest.",
+      },
+      {
+        icon: "eye",
+        title: "Read the account first",
+        detail: "The Customer tag opens their plan and history.",
+      },
     ],
   },
   {
@@ -580,8 +1081,16 @@ export const PAGE_GUIDES: PageGuide[] = [
     plan: "staff",
     art: "admin",
     steps: [
-      { icon: "shield", title: "Check it either side", detail: "Before and after any change to an account." },
-      { icon: "search", title: "Filter to reconstruct", detail: "By staff member, or by account." },
+      {
+        icon: "shield",
+        title: "Check it either side",
+        detail: "Before and after any change to an account.",
+      },
+      {
+        icon: "search",
+        title: "Filter to reconstruct",
+        detail: "By staff member, or by account.",
+      },
     ],
   },
 ];
@@ -604,7 +1113,9 @@ export function getPageGuide(pathname: string): PageGuide | null {
   const path = pathname.replace(/\/+$/, "") || "/";
   return (
     PAGE_GUIDES.find((guide) => guide.path === path) ??
-    PAGE_GUIDES.find((guide) => guide.path.includes("*") && matches(guide.path, path)) ??
+    PAGE_GUIDES.find(
+      (guide) => guide.path.includes("*") && matches(guide.path, path),
+    ) ??
     null
   );
 }

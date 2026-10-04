@@ -15,6 +15,7 @@ import { apiFetch } from "@/lib/api-client";
 import { cn, formatCredits } from "@/lib/utils";
 import { useInvalidateCredits } from "@/hooks/use-credits";
 import type { SubscriptionState } from "@/components/settings/billing-client";
+import { PromoBonusBadge, promoBonusFor, type AppliedPromo } from "@/components/settings/promo-code";
 
 /**
  * What POST /api/subscription/upgrade reports back — the *simulated* path,
@@ -40,6 +41,8 @@ type SwitchResult = {
   /** False on a plan with no recurring allowance (Free's credits are a
    *  one-time grant), where "arrives at your next renewal" would be a lie. */
   plan_renews: boolean;
+  /** A promo code's bonus, already on the account. */
+  bonus_credits?: number;
 };
 
 /**
@@ -60,6 +63,8 @@ type CheckoutResult = {
    *  number isn't known here yet. */
   credits_pending?: boolean;
   current_period_end?: string | null;
+  /** A promo code's bonus, granted with the same payment as the plan. */
+  bonus_credits?: number;
 };
 
 /** Stripe statuses under which a subscription still bills — the API's
@@ -132,11 +137,14 @@ function SimulatedResultDialog({ result, onClose }: { result: SwitchResult; onCl
             )} credits arrive at your next renewal.`
           : `Your balance is unchanged, and it stays that way: ${label} has no monthly allowance. Credits you already hold keep working — top up with a credit pack, or move to a paid plan for a monthly refill.`
         : `You were already on ${label}, so nothing changed.`;
+  const bonus = result.bonus_credits
+    ? ` Your promo code added ${formatCredits(result.bonus_credits)} bonus credits on top.`
+    : "";
 
   return (
     <ResultDialog
       title={result.outcome === "unchanged" ? `Still on ${label}` : `Now on ${label}`}
-      body={body}
+      body={body + bonus}
       footer={
         <div className="mt-4 flex items-baseline justify-between rounded-lg border border-line px-4 py-3">
           <span className="text-body-sm text-muted">Credit balance</span>
@@ -198,7 +206,11 @@ function StripeResultDialog({ result, onClose }: { result: CheckoutResult; onClo
     return (
       <ResultDialog
         title={`Now on ${label}`}
-        body={`You've been charged the difference for the rest of this period. ${label}'s credits land on your account as soon as that payment clears — usually a few seconds.`}
+        body={`You've been charged the difference for the rest of this period. ${label}'s credits${
+          result.bonus_credits
+            ? `, plus ${formatCredits(result.bonus_credits)} bonus credits from your promo code,`
+            : ""
+        } land on your account as soon as that payment clears — usually a few seconds.`}
         onClose={onClose}
       />
     );
@@ -215,6 +227,9 @@ export function PlanSwitcher({
   subscription,
   unavailable = false,
   highlightTier = null,
+  promo = null,
+  onPromoUsed,
+  deferAutoCheckout = false,
 }: {
   currentTier: string;
   /** The plan picked on the landing page (?plan=), singled out and
@@ -227,6 +242,13 @@ export function PlanSwitcher({
   /** Stripe is on but the Price ids were never configured, so every buy
    *  button would fail at the click. Disable them and say so instead. */
   unavailable?: boolean;
+  /** The code entered at the top of the billing page, if any. */
+  promo?: AppliedPromo | null;
+  /** Called once a code has been spent on a plan without leaving the page. */
+  onPromoUsed?: () => void;
+  /** Hold the ?plan= straight-to-Checkout until this is false — the page is
+   *  still checking a ?promo= code that should ride along. */
+  deferAutoCheckout?: boolean;
 }) {
   const { toast } = useToast();
   const confirm = useConfirm();
@@ -251,6 +273,7 @@ export function PlanSwitcher({
   const autoCheckout =
     paymentsEnabled &&
     !unavailable &&
+    !deferAutoCheckout &&
     !hasLivePlan &&
     highlightTier !== null &&
     highlightTier !== "free" &&
@@ -259,11 +282,30 @@ export function PlanSwitcher({
   const pendingCancel = subscription?.cancel_at_period_end === true;
   const periodEnd = formatDate(subscription?.current_period_end);
 
+  /** The code's bonus on a move to `tier`, or 0. Only a move that is
+   *  charged now can carry one — a new plan, or an upgrade; the API refuses
+   *  a code on a downgrade or on staying put, since no payment would carry
+   *  the bonus. */
+  const liveTier = hasLivePlan ? (subscription?.tier as Tier) : null;
+  const bonusFor = useCallback(
+    (tier: Tier) => {
+      if (tier === "free" || tier === currentTier) return 0;
+      const startsNewPlan = paymentsEnabled && !liveTier;
+      const from = liveTier ?? (currentTier as Tier);
+      if (!startsNewPlan && TIERS.indexOf(tier) <= TIERS.indexOf(from)) return 0;
+      return promoBonusFor(promo, tier);
+    },
+    [promo, currentTier, liveTier, paymentsEnabled],
+  );
+
   /** The confirm copy has to match what is actually about to happen —
    *  leaving for Stripe, being billed a proration immediately, or scheduling
    *  a cancellation for later are three different commitments. */
-  async function confirmFor(tier: Tier): Promise<boolean> {
+  async function confirmFor(tier: Tier, bonus = 0): Promise<boolean> {
     const target = TIER_INFO[tier];
+    const bonusLine = bonus
+      ? ` Your code ${promo!.code} adds ${formatCredits(bonus)} bonus credits on top, once.`
+      : "";
 
     if (!paymentsEnabled) {
       return confirm({
@@ -273,7 +315,8 @@ export function PlanSwitcher({
         // moving down doesn't take credits away, and moving back up to a
         // plan you already held this month doesn't add any.
         description:
-          "Your plan changes right away. If it ranks above any plan you've already been credited for this month, you get its full credits now — otherwise your balance stays as it is and the new allowance starts at your next renewal.",
+          "Your plan changes right away. If it ranks above any plan you've already been credited for this month, you get its full credits now — otherwise your balance stays as it is and the new allowance starts at your next renewal." +
+          bonusLine,
         confirmLabel: `Switch to ${target.label}`,
       });
     }
@@ -301,7 +344,7 @@ export function PlanSwitcher({
       return confirm({
         title: `Switch to ${target.label}?`,
         description: isUpgrade
-          ? `Your card is charged the difference for the rest of this period, and ${target.label}'s credits are added once it clears.`
+          ? `Your card is charged the difference for the rest of this period, and ${target.label}'s credits are added once it clears.${bonusLine}`
           : `The change applies right away, and what you've already paid for the rest of this period is credited against your next invoice. Nothing is taken off your balance.`,
         confirmLabel: `Switch to ${target.label}`,
       });
@@ -311,7 +354,7 @@ export function PlanSwitcher({
     // so rather than implying the plan starts on this click.
     return confirm({
       title: `Continue to payment?`,
-      description: `You'll be taken to Stripe to start ${target.label}. Your plan and credits are added as soon as the payment goes through.`,
+      description: `You'll be taken to Stripe to start ${target.label}. Your plan and credits are added as soon as the payment goes through.${bonusLine}`,
       confirmLabel: "Continue",
     });
   }
@@ -328,10 +371,13 @@ export function PlanSwitcher({
         const res = await apiFetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tier }),
+          // Only where the code covers this move — the server refuses it
+          // anywhere else, and the plan must stay buyable without it.
+          body: JSON.stringify({ tier, promoCode: bonusFor(tier) ? promo!.code : undefined }),
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error ?? "Failed to switch plan");
+        if (json.bonus_credits && json.outcome !== "checkout") onPromoUsed?.();
 
         if (!paymentsEnabled) {
           invalidateCredits();
@@ -360,11 +406,11 @@ export function PlanSwitcher({
       }
       return false;
     },
-    [paymentsEnabled, invalidateCredits, toast],
+    [paymentsEnabled, invalidateCredits, toast, promo, bonusFor, onPromoUsed],
   );
 
   async function switchTo(tier: Tier) {
-    if (!(await confirmFor(tier))) return;
+    if (!(await confirmFor(tier, bonusFor(tier)))) return;
     await runSwitch(tier);
   }
 
@@ -447,6 +493,7 @@ export function PlanSwitcher({
               <p className="mt-1 text-heading font-bold text-ink">
                 <PlanPrice priceMonthly={info.priceMonthly} showSuffix={false} />
               </p>
+              <PromoBonusBadge credits={bonusFor(tier)} />
               <PlanFeatureList
                 features={info.features.slice(0, 3)}
                 note={info.featuresNote}

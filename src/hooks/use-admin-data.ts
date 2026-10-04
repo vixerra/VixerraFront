@@ -1,6 +1,11 @@
 "use client";
 
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 
 /**
@@ -34,7 +39,11 @@ async function get<T>(path: string): Promise<T> {
   return res.json();
 }
 
-async function post<T>(path: string, body: unknown, method: "POST" | "PATCH" = "POST"): Promise<T> {
+async function post<T>(
+  path: string,
+  body: unknown,
+  method: "POST" | "PATCH" = "POST",
+): Promise<T> {
   const res = await apiFetch(path, {
     method,
     headers: { "Content-Type": "application/json" },
@@ -55,7 +64,9 @@ function useAdminMutation<TVars, TData>(fn: (vars: TVars) => Promise<TData>) {
     mutationFn: fn,
     onSuccess: () => {
       // Anything prefixed "admin" — see the note above.
-      queryClient.invalidateQueries({ predicate: (q) => isAdminKey(q.queryKey) });
+      queryClient.invalidateQueries({
+        predicate: (q) => isAdminKey(q.queryKey),
+      });
     },
   });
 }
@@ -83,13 +94,16 @@ export async function fetchAllRows<TRes, TRow>(
 ): Promise<{ rows: TRow[]; truncated: boolean }> {
   const rows: TRow[] = [];
   for (let offset = 0; ; offset += pageSize) {
-    const res = await get<TRes>(`${path}${qs({ ...params, limit: pageSize, offset })}`);
+    const res = await get<TRes>(
+      `${path}${qs({ ...params, limit: pageSize, offset })}`,
+    );
     const page = pick(res);
     rows.push(...page.rows);
     if (page.rows.length === 0 || offset + pageSize >= page.total) {
       return { rows, truncated: false };
     }
-    if (rows.length >= max) return { rows: rows.slice(0, max), truncated: true };
+    if (rows.length >= max)
+      return { rows: rows.slice(0, max), truncated: true };
   }
 }
 
@@ -128,7 +142,10 @@ export type AdminUsersResponse = {
   tierCounts?: { tier: string; count: number }[];
 };
 
-export function useAdminUsers(params: AdminUsersParams, { enabled = true } = {}) {
+export function useAdminUsers(
+  params: AdminUsersParams,
+  { enabled = true } = {},
+) {
   return useQuery({
     queryKey: ["admin-users", params],
     queryFn: () => get<AdminUsersResponse>(`/api/admin/users${qs(params)}`),
@@ -190,7 +207,10 @@ export function useChangeTier(id: string) {
 
 export function useAdjustCredits(id: string) {
   return useAdminMutation((vars: { amount: number; reason: string }) =>
-    post<{ applied: number; balance: number }>(`/api/admin/users/${id}/credits`, vars),
+    post<{ applied: number; balance: number }>(
+      `/api/admin/users/${id}/credits`,
+      vars,
+    ),
   );
 }
 
@@ -244,7 +264,8 @@ export function useAdminGenerations(
 ) {
   return useQuery({
     queryKey: ["admin-generations", params],
-    queryFn: () => get<AdminGenerationsResponse>(`/api/admin/generations${qs(params)}`),
+    queryFn: () =>
+      get<AdminGenerationsResponse>(`/api/admin/generations${qs(params)}`),
     retry: false,
     enabled,
     placeholderData: keepPreviousData,
@@ -285,7 +306,10 @@ export type AdminGenerationDetail = AdminGenerationRow & {
 export function useAdminGeneration(id: string | null) {
   return useQuery({
     queryKey: ["admin-generation", id],
-    queryFn: () => get<{ generation: AdminGenerationDetail }>(`/api/admin/generations/${id}`),
+    queryFn: () =>
+      get<{ generation: AdminGenerationDetail }>(
+        `/api/admin/generations/${id}`,
+      ),
     enabled: Boolean(id),
     retry: false,
     // Signed media URLs in the payload expire; don't serve a stale copy
@@ -302,9 +326,12 @@ export function useRetryGeneration() {
 
 export function useForceFailGeneration() {
   return useAdminMutation((vars: { id: string; reason: string }) =>
-    post<{ refundedCredits: number }>(`/api/admin/generations/${vars.id}/fail`, {
-      reason: vars.reason,
-    }),
+    post<{ refundedCredits: number }>(
+      `/api/admin/generations/${vars.id}/fail`,
+      {
+        reason: vars.reason,
+      },
+    ),
   );
 }
 
@@ -320,12 +347,18 @@ export function useForceFailGeneration() {
 export function useBulkGenerationAction() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (vars: { action: "retry" | "fail"; ids: string[]; reason: string }) => {
+    mutationFn: async (vars: {
+      action: "retry" | "fail";
+      ids: string[];
+      reason: string;
+    }) => {
       const failures: { id: string; error: string }[] = [];
       let done = 0;
       for (const id of vars.ids) {
         try {
-          await post(`/api/admin/generations/${id}/${vars.action}`, { reason: vars.reason });
+          await post(`/api/admin/generations/${id}/${vars.action}`, {
+            reason: vars.reason,
+          });
           done += 1;
         } catch (err) {
           failures.push({ id, error: (err as Error).message });
@@ -334,7 +367,9 @@ export function useBulkGenerationAction() {
       return { done, failures };
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ predicate: (q) => isAdminKey(q.queryKey) });
+      queryClient.invalidateQueries({
+        predicate: (q) => isAdminKey(q.queryKey),
+      });
     },
   });
 }
@@ -369,7 +404,10 @@ export type AdminContentParams = {
 export function useAdminContent(params: AdminContentParams) {
   return useQuery({
     queryKey: ["admin-content", params],
-    queryFn: () => get<{ items: AdminContentItem[]; total: number }>(`/api/admin/content${qs(params)}`),
+    queryFn: () =>
+      get<{ items: AdminContentItem[]; total: number }>(
+        `/api/admin/content${qs(params)}`,
+      ),
     retry: false,
     placeholderData: keepPreviousData,
   });
@@ -453,7 +491,12 @@ export type AdminCreditsParams = {
 export type AdminCreditsResponse = {
   grants: AdminGrant[];
   total: number;
-  bySource: { source: string; grants: number; amount: number; remaining: number }[];
+  bySource: {
+    source: string;
+    grants: number;
+    amount: number;
+    remaining: number;
+  }[];
   totals: { granted: number; remaining: number; spent: number; drift: number };
 };
 
@@ -511,7 +554,11 @@ export function useAdminAudit(params: AdminAuditParams) {
 
 // ── Sidebar badges ───────────────────────────────────────────────────────
 
-export type AdminBadges = { unreadMessages: number; failed24h: number; inFlight: number };
+export type AdminBadges = {
+  unreadMessages: number;
+  failed24h: number;
+  inFlight: number;
+};
 
 /** The counts behind the nav badges. Polled once a minute from the shell;
  *  an older backend without the endpoint just means no badges. */
@@ -595,29 +642,129 @@ export function useAdminPresets(params: {
   return useQuery({
     queryKey: ["admin-presets", params],
     queryFn: () =>
-      get<{ presets: AdminPresetRow[]; total: number }>(`/api/admin/presets${qs(params)}`),
+      get<{ presets: AdminPresetRow[]; total: number }>(
+        `/api/admin/presets${qs(params)}`,
+      ),
     retry: false,
     placeholderData: keepPreviousData,
   });
 }
 
 export function useCreatePreset() {
-  return useAdminMutation<AdminPresetInput, { preset: AdminPresetRow }>((vars) =>
-    post("/api/admin/presets", vars),
+  return useAdminMutation<AdminPresetInput, { preset: AdminPresetRow }>(
+    (vars) => post("/api/admin/presets", vars),
   );
 }
 
 export function useUpdatePreset() {
-  return useAdminMutation<{ id: string; patch: Partial<AdminPresetInput> }, { preset: AdminPresetRow }>(
-    (vars) => post(`/api/admin/presets/${vars.id}`, vars.patch, "PATCH"),
-  );
+  return useAdminMutation<
+    { id: string; patch: Partial<AdminPresetInput> },
+    { preset: AdminPresetRow }
+  >((vars) => post(`/api/admin/presets/${vars.id}`, vars.patch, "PATCH"));
 }
 
 export function useDeletePreset() {
-  return useAdminMutation<{ id: string }, { success: boolean }>(async (vars) => {
-    const res = await apiFetch(`/api/admin/presets/${vars.id}`, { method: "DELETE" });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(json.error ?? "Request failed");
-    return json;
+  return useAdminMutation<{ id: string }, { success: boolean }>(
+    async (vars) => {
+      const res = await apiFetch(`/api/admin/presets/${vars.id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "Request failed");
+      return json;
+    },
+  );
+}
+
+// ── Promo codes ──────────────────────────────────────────────────────────
+
+export type AdminPromoCode = {
+  id: string;
+  code: string;
+  bonusCredits: number;
+  /** Pack ids and/or paid tiers it applies to; empty means every plan and
+   *  every pack. */
+  appliesTo: string[];
+  maxRedemptions: number | null;
+  expiresAt: string | null;
+  disabledAt: string | null;
+  note: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  redemptions: number;
+  creditsGranted: number;
+};
+
+export type AdminPromoCodesParams = {
+  q?: string;
+  status?: string;
+  limit: number;
+  offset: number;
+};
+
+export type AdminPromoCodesResponse = {
+  codes: AdminPromoCode[];
+  total: number;
+};
+
+export type AdminPromoRedemption = {
+  id: string;
+  userId: string;
+  userEmail: string;
+  /** The pack id, or the tier for a plan. */
+  product: string;
+  bonusCredits: number;
+  paymentRef: string;
+  createdAt: string;
+};
+
+/** Fields shared by create and edit. */
+export type AdminPromoCodeInput = {
+  bonusCredits: number;
+  appliesTo: string[];
+  maxRedemptions: number | null;
+  expiresAt: string | null;
+};
+
+export function useAdminPromoCodes(params: AdminPromoCodesParams) {
+  return useQuery({
+    queryKey: ["admin-promo-codes", params],
+    queryFn: () =>
+      get<AdminPromoCodesResponse>(`/api/admin/promo-codes${qs(params)}`),
+    retry: false,
+    placeholderData: keepPreviousData,
   });
+}
+
+export function useAdminPromoRedemptions(id: string | null) {
+  return useQuery({
+    queryKey: ["admin-promo-redemptions", id],
+    queryFn: () =>
+      get<{ redemptions: AdminPromoRedemption[] }>(
+        `/api/admin/promo-codes/${id}/redemptions`,
+      ),
+    enabled: Boolean(id),
+    retry: false,
+  });
+}
+
+export function useCreatePromoCode() {
+  return useAdminMutation<
+    AdminPromoCodeInput & { code?: string; reason: string },
+    { code: AdminPromoCode }
+  >((vars) => post("/api/admin/promo-codes", vars));
+}
+
+export function useUpdatePromoCode() {
+  return useAdminMutation<
+    {
+      id: string;
+      patch: Partial<AdminPromoCodeInput> & {
+        active?: boolean;
+        reason: string;
+      };
+    },
+    { code: AdminPromoCode }
+  >((vars) => post(`/api/admin/promo-codes/${vars.id}`, vars.patch, "PATCH"));
 }

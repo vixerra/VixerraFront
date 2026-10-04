@@ -13,6 +13,7 @@ import { useMe } from "@/hooks/use-me";
 import { LAUNCH_OFFER, TIER_INFO } from "@/lib/constants";
 import { formatListPrice } from "@/lib/competitor-pricing";
 import { subscribeHref } from "@/lib/hosts";
+import { usePricingPromoCode } from "@/components/pricing/pricing-promo";
 import { cn, formatCredits } from "@/lib/utils";
 
 /**
@@ -391,10 +392,12 @@ export function LaunchOfferPlanFlag() {
 export function LaunchOfferPlanCta({ className }: { className?: string }) {
   const { soldOut } = useLaunchOffer();
   const { data: user } = useMe();
+  // On the pricing page, the promo code entered there (see PlanCta).
+  const promoCode = usePricingPromoCode(LAUNCH_OFFER.tier);
 
   return (
     <Link
-      href={subscribeHref(LAUNCH_OFFER.tier, Boolean(user))}
+      href={subscribeHref(LAUNCH_OFFER.tier, Boolean(user), promoCode)}
       prefetch={false}
       className={buttonVariants({
         variant: soldOut ? "secondary" : "accent",
