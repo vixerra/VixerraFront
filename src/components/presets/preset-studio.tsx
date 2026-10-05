@@ -109,7 +109,10 @@ export function PresetStudio({ preset }: { preset: Preset }) {
     },
   });
 
-  const blockedReason = settings.blockedReason ?? (imageUrl ? undefined : "Upload an image first.");
+  // Kept apart: only the plan limit sends the button to billing.
+  const blockedReason = settings.blockedReason;
+  const incompleteReason = imageUrl ? undefined : "Upload an image first.";
+  const reason = blockedReason ?? incompleteReason;
 
   return (
     // Same studio frame as /generate (see generate-workspace.tsx) — the 8rem
@@ -117,7 +120,7 @@ export function PresetStudio({ preset }: { preset: Preset }) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!blockedReason) mutation.mutate();
+        if (!reason) mutation.mutate();
       }}
       // min-h floor matters now that nothing inside scrolls: on a short
       // viewport, claiming exactly the visible height would squeeze the
@@ -199,14 +202,13 @@ export function PresetStudio({ preset }: { preset: Preset }) {
             loading={mutation.isPending || busy || uploading}
             balance={usageQuery.data?.credit_balance}
             blockedReason={blockedReason}
+            incompleteReason={incompleteReason}
             className="rounded-full py-4 text-body-sm"
           />
-          {/* The tooltip was the only place blockedReason appeared, so with
-              it gone the reason the button is dead has to be stated here —
+          {/* The tooltip was the only place the reason appeared, so with it
+              gone the reason the button is dead has to be stated here —
               otherwise a greyed-out Generate has no explanation at all. */}
-          {blockedReason && (
-            <p className="text-center text-caption text-muted">{blockedReason}</p>
-          )}
+          {reason && <p className="text-center text-caption text-muted">{reason}</p>}
         </div>
       </div>
 

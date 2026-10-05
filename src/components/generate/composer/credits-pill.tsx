@@ -22,6 +22,7 @@ export function CreditsSubmitPill({
   disabled,
   balance,
   blockedReason,
+  incompleteReason,
   fullWidth,
   hideTooltip,
   className,
@@ -35,6 +36,12 @@ export function CreditsSubmitPill({
   /** Why this generation can't be submitted as configured (e.g. a resolution
    * above the plan's cap). Shown in place of the cost and blocks submit. */
   blockedReason?: string;
+  /** Why the form isn't ready yet (no prompt, no image, conflicting inputs) —
+   * something the user fixes on this screen, not by paying. Disables submit
+   * with the reason as its hint, and never turns into the "Upgrade plan" link:
+   * routing a Studio subscriber with an empty prompt to billing told them
+   * their plan was the problem. */
+  incompleteReason?: string;
   /** Panel-footer variant: spans its container as a big labeled "Generate"
    * button instead of the compact number-only pill. */
   fullWidth?: boolean;
@@ -54,9 +61,11 @@ export function CreditsSubmitPill({
     ? blockedReason
     : unaffordable
       ? `Not enough credits — this costs ~${credits} ${unit} and you have ${balance}. Top up or upgrade to continue.`
-      : balance !== undefined
-        ? `Generate — costs ~${credits} ${unit}, leaving ${balance - credits}.`
-        : `Generate — costs ~${credits} ${unit}.`;
+      : incompleteReason
+        ? incompleteReason
+        : balance !== undefined
+          ? `Generate — costs ~${credits} ${unit}, leaving ${balance - credits}.`
+          : `Generate — costs ~${credits} ${unit}.`;
 
   const blocked = Boolean(blockedReason) || unaffordable;
 
@@ -94,7 +103,7 @@ export function CreditsSubmitPill({
     >
         <button
           type="submit"
-          disabled={disabled || loading || blocked}
+          disabled={disabled || loading || blocked || Boolean(incompleteReason)}
           aria-label={hint}
           className={cn(
             shape,
@@ -121,5 +130,15 @@ export function CreditsSubmitPill({
     </span>
   );
 
-  return hideTooltip ? control : <Tooltip content={hint}>{control}</Tooltip>;
+  if (hideTooltip) return control;
+  const withTooltip = <Tooltip content={hint}>{control}</Tooltip>;
+  // Spelled out under the button like a blocked reason, since a phone never
+  // shows the tooltip and a dead Generate needs its explanation visible.
+  if (!incompleteReason || loading) return withTooltip;
+  return (
+    <div className={cn("flex flex-col gap-2", fullWidth ? "w-full" : "items-center")}>
+      {withTooltip}
+      <p className="text-center text-caption text-muted">{incompleteReason}</p>
+    </div>
+  );
 }

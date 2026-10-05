@@ -284,11 +284,12 @@ export function MarketingStudio() {
     },
   });
 
-  const blockedReason =
-    tierBlockedReason(config, params, tierInfo) ?? promptBlockedReason(description, reference);
+  // Kept apart: only the plan limit sends the button to billing.
+  const blockedReason = tierBlockedReason(config, params, tierInfo);
+  const incompleteReason = promptBlockedReason(description, reference);
 
   function submit() {
-    if (!blockedReason && !uploading && !mutation.isPending) mutation.mutate();
+    if (!blockedReason && !incompleteReason && !uploading && !mutation.isPending) mutation.mutate();
   }
 
   const pickerModels = studioPickerModels(kind);
@@ -459,6 +460,7 @@ export function MarketingStudio() {
             loading={mutation.isPending || busy || uploading}
             balance={usageQuery.data?.credit_balance}
             blockedReason={blockedReason}
+            incompleteReason={incompleteReason}
           />
         </div>
       </div>

@@ -200,12 +200,15 @@ export function SeedanceVideoForm({
   // locked here means the clamp above had nothing to fall back to.
   const blockedReason = isResolutionLocked(resolution, tierInfo)
     ? upgradeHint(minTierForResolution(resolution), resolution)
-    : // Reference files and start/end frames are separate input modes on the
-      // provider, not extras that combine (see the schema). Resolution no
-      // longer has anything to do with it — 1080p carries the lists like the
-      // others since the model moved fully to kie.ai. Said on the button
-      // rather than left to a field error on a control scrolled out of view.
-      hasAnyReferenceList && Boolean(image)
+    : undefined;
+  // Reference files and start/end frames are separate input modes on the
+  // provider, not extras that combine (see the schema). Resolution no
+  // longer has anything to do with it — 1080p carries the lists like the
+  // others since the model moved fully to kie.ai. Said on the button
+  // rather than left to a field error on a control scrolled out of view —
+  // but not as a plan limit, so it doesn't send anyone to billing.
+  const incompleteReason =
+    hasAnyReferenceList && Boolean(image)
       ? "Reference files and a start frame can't be used together — remove one."
       : undefined;
 
@@ -687,6 +690,7 @@ export function SeedanceVideoForm({
           }
           balance={creditBalance}
           blockedReason={blockedReason}
+          incompleteReason={incompleteReason}
         />
       </div>
     </form>
