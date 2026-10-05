@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
+import { DISCORD_INVITE, DiscordIcon } from "@/components/layout/discord";
+
+const FLOATING =
+  "btn-glass relative flex size-11 items-center justify-center rounded-full text-white shadow-floating transition-transform hover:scale-105 active:scale-95";
 
 /**
- * Floating "back to top" button, bottom-right — the migration brief's one
- * persistent floating element with a real destination (unlike its Discord
- * button, which this app has no real community link for, so it's skipped).
- * Appears once the visitor has scrolled roughly past the hero.
+ * Floating buttons, bottom-right: the Discord invite, always there, and
+ * "back to top" under it once the visitor has scrolled roughly past the hero.
+ * One column anchored to the corner, so Discord steps up to make room for
+ * the arrow instead of the two overlapping.
  */
 export function BackToTop() {
   const [visible, setVisible] = useState(false);
@@ -19,16 +23,28 @@ export function BackToTop() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!visible) return null;
-
   return (
-    <button
-      type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      aria-label="Back to top"
-      className="btn-glass fixed right-5 bottom-5 z-40 flex size-11 items-center justify-center rounded-full text-white shadow-floating transition-transform hover:scale-105 active:scale-95"
-    >
-      <ArrowUp className="size-5" aria-hidden="true" />
-    </button>
+    <div className="fixed right-5 bottom-5 z-40 flex flex-col items-center gap-3">
+      <a
+        href={DISCORD_INVITE}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Join our Discord community"
+        title="Join our Discord community"
+        className={FLOATING}
+      >
+        <DiscordIcon className="size-5" />
+      </a>
+      {visible && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          className={FLOATING}
+        >
+          <ArrowUp className="size-5" aria-hidden="true" />
+        </button>
+      )}
+    </div>
   );
 }

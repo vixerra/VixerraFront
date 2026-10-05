@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./logo";
+import { DISCORD_INVITE, DiscordIcon } from "./discord";
 
 // Condensed to a single row (migration brief: "no mega-footer, the site
 // bets everything on the final CTA") rather than the old 3-column link
@@ -26,6 +27,20 @@ export function Footer() {
     <footer className="border-t border-line bg-surface">
       <div className="container-page flex flex-col items-center gap-6 py-10 text-center">
         <Logo />
+        <a
+          href={DISCORD_INVITE}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2.5 rounded-full border border-line bg-surface-2 px-4 py-2 text-label font-medium text-ink transition-colors hover:border-[#5865F2] hover:text-[#5865F2]"
+        >
+          <DiscordIcon className="size-5 text-[#5865F2]" />
+          <span>
+            <span className="mr-1.5 rounded-full bg-[#5865F2]/15 px-1.5 py-0.5 text-caption font-semibold text-[#5865F2]">
+              New
+            </span>
+            Join our Discord community
+          </span>
+        </a>
         <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
           {FOOTER_LINKS.map((link) => (
             <Link
