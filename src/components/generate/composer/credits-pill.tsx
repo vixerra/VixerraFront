@@ -56,6 +56,9 @@ export function CreditsSubmitPill({
 }) {
   const unaffordable = balance !== undefined && credits > balance;
   const unit = `credit${credits === 1 ? "" : "s"}`;
+  // A promotional run (the first AI influencer portrait) — said as "Free",
+  // not "0 credits".
+  const free = credits === 0;
 
   const hint = blockedReason
     ? blockedReason
@@ -63,7 +66,9 @@ export function CreditsSubmitPill({
       ? `Not enough credits — this costs ~${credits} ${unit} and you have ${balance}. Top up or upgrade to continue.`
       : incompleteReason
         ? incompleteReason
-        : balance !== undefined
+        : free
+          ? "Generate — free, no credits used."
+          : balance !== undefined
           ? `Generate — costs ~${credits} ${unit}, leaving ${balance - credits}.`
           : `Generate — costs ~${credits} ${unit}.`;
 
@@ -120,9 +125,11 @@ export function CreditsSubmitPill({
             <>
               Generate
               <span className="font-normal text-on-brand/70">
-                · {credits} {unit}
+                · {free ? "Free" : `${credits} ${unit}`}
               </span>
             </>
+          ) : free ? (
+            "Free"
           ) : (
             credits
           )}

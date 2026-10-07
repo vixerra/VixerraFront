@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   Clapperboard,
   Film,
+  Gift,
   ImagePlus,
   Info,
   RefreshCw,
@@ -231,16 +232,20 @@ function CreatePanel({
   const [picks, setPicks] = useState<TraitPicks>({});
   const [details, setDetails] = useState("");
   const [aspectRatio, setAspectRatio] = useState(options.portrait.defaults.aspectRatio);
-  const [imageSize, setImageSize] = useState(options.portrait.defaults.imageSize);
   const [open, setOpen] = useState<Set<string>>(() => new Set(OPEN_BY_DEFAULT));
   const face = useUploadSlot();
   const style = useUploadSlot();
 
-  const credits = estimateCreditsForRequest({
-    type: "text-to-image",
-    model: options.portrait.model,
-    imageSize,
-  });
+  // Portraits always render at the API's one size (2K). The first one a user
+  // ever makes is free; the API decides that again when it charges.
+  const firstFree = Boolean(options.portrait.firstFree);
+  const credits = firstFree
+    ? 0
+    : estimateCreditsForRequest({
+        type: "text-to-image",
+        model: options.portrait.model,
+        imageSize: options.portrait.defaults.imageSize,
+      });
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -251,7 +256,6 @@ function CreatePanel({
         faceImage: face.slot?.url ?? undefined,
         styleImage: style.slot?.url ?? undefined,
         aspectRatio,
-        imageSize,
       }),
     onSuccess: (data) => {
       onQueued(data.influencer.id, data.job_id);
@@ -361,20 +365,20 @@ function CreatePanel({
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-1.5">
-            <span className="text-caption text-muted">Shape</span>
-            <SegmentedTabs value={aspectRatio} options={options.portrait.aspectRatios} onChange={setAspectRatio} />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-caption text-muted">Resolution</span>
-            <SegmentedTabs value={imageSize} options={options.portrait.imageSizes} onChange={setImageSize} />
-          </div>
+        <div className="space-y-1.5">
+          <span className="text-caption text-muted">Shape</span>
+          <SegmentedTabs value={aspectRatio} options={options.portrait.aspectRatios} onChange={setAspectRatio} />
         </div>
       </div>
 
       {/* The pill spells out why it is disabled itself, under the button. */}
-      <div className="shrink-0 border-t border-border-subtle px-4 py-3 sm:px-5">
+      <div className="shrink-0 space-y-2 border-t border-border-subtle px-4 py-3 sm:px-5">
+        {firstFree && (
+          <p className="flex items-center justify-center gap-1.5 text-caption text-muted">
+            <Gift className="size-3.5 text-brand" aria-hidden="true" />
+            Your first influencer is on us.
+          </p>
+        )}
         <CreditsSubmitPill
           fullWidth
           credits={credits}
@@ -694,7 +698,6 @@ function InfluencerGallery({
     mutationFn: (influencer: Influencer) =>
       postJson(`/api/influencers/${influencer.id}/portrait`, {
         aspectRatio: influencer.portrait?.parameters.aspectRatio,
-        imageSize: influencer.portrait?.parameters.imageSize,
       }),
     onSuccess: () => {
       invalidateCredits();

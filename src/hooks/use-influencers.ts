@@ -69,5 +69,8 @@ export function useInvalidateInfluencers() {
   return useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["influencers"] });
     queryClient.invalidateQueries({ queryKey: ["influencer"] });
+    // Carries the per-user "first portrait is free" flag, which the first
+    // portrait just spent.
+    queryClient.invalidateQueries({ queryKey: ["influencer-options"] });
   }, [queryClient]);
 }

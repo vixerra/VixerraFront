@@ -108,7 +108,7 @@ export function ReleaseAnnouncementModal() {
           <div className="p-5 sm:p-7">
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] leading-none tracking-[0.2em] text-muted uppercase">
               <span className="size-1.5 rounded-full bg-brand shadow-glow-sm" aria-hidden="true" />
-              New · AI Influencers
+              New · <span className="text-brand">For free</span>
             </span>
 
             <Dialog.Title className="font-display mt-4 text-[28px] leading-[1.05] font-bold tracking-tight text-ink sm:text-[34px]">
@@ -119,7 +119,7 @@ export function ReleaseAnnouncementModal() {
             </Dialog.Title>
             <Dialog.Description className="mt-3 max-w-lg text-body-sm text-muted">
               Design an AI influencer once. Face, body and style stay locked in every video you
-              create.
+              create. <span className="font-semibold text-brand">For free.</span>
             </Dialog.Description>
 
             {/* Dropped on short screens (laptops, phones), where it would push
@@ -149,7 +149,7 @@ export function ReleaseAnnouncementModal() {
                 onClick={dismiss}
                 className="group/cta font-display inline-flex items-center justify-center gap-2 rounded-full bg-brand py-2 pr-2 pl-5 text-label font-semibold text-on-brand shadow-glow-md transition-[background-color,box-shadow] hover:bg-brand-hover hover:shadow-glow-lg"
               >
-                Create your influencer
+                Create yours for free
                 <span className="flex size-7 items-center justify-center rounded-full bg-on-brand text-brand transition-transform group-hover/cta:translate-x-0.5">
                   <ArrowRight className="size-3.5" aria-hidden="true" />
                 </span>

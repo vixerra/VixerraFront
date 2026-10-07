@@ -38,8 +38,12 @@ export type InfluencerOptions = {
   portrait: {
     model: string;
     aspectRatios: string[];
+    /** Only ever ["2K"] now: the API renders every portrait at 2K. */
     imageSizes: string[];
     defaults: { aspectRatio: string; imageSize: string };
+    /** This user hasn't had an influencer portrait yet, so the next one is
+     *  free. Optional so a page ahead of the API still prices normally. */
+    firstFree?: boolean;
   };
   motion: {
     models: MotionModelOption[];

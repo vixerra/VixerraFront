@@ -23,7 +23,7 @@ export function AiInfluencerBanner() {
                   className="size-1.5 rounded-full bg-brand shadow-glow-sm motion-safe:animate-status-pulse"
                   aria-hidden="true"
                 />
-                New · Now live
+                New · <span className="text-brand">For free</span>
               </span>
 
               <h2
@@ -52,8 +52,11 @@ export function AiInfluencerBanner() {
                 ))}
               </ol>
 
-              <div className="mt-8">
+              <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
                 <CreateInfluencerLink />
+                {/* Enforced by the API (firstPortraitIsFree in
+                    routes/influencers.ts), not just promised here. */}
+                <p className="text-body-sm text-muted">No credits needed for your first one.</p>
               </div>
             </div>
 
