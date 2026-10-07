@@ -255,6 +255,31 @@ export const PAGE_GUIDES: PageGuide[] = [
     note: "If a recipe exceeds your plan, the studio steps it down and shows the job it will really submit.",
   },
   {
+    path: "/influencer",
+    title: "AI Influencer",
+    what: "Build a character, then put it in motion",
+    plan: "any",
+    art: "presets",
+    steps: [
+      {
+        icon: "sliders",
+        title: "Pick the traits",
+        detail: "Every section is optional. Anything you skip, the model decides.",
+      },
+      {
+        icon: "image",
+        title: "Generate the portrait",
+        detail: "Your influencer is saved. Reshoot it any time for a new photo of the same person.",
+      },
+      {
+        icon: "video",
+        title: "Animate it",
+        detail: "In Motion, upload a 3-30s clip and your influencer copies the movement.",
+      },
+    ],
+    note: "A motion clip costs per second of the reference video, and needs a plan with 720p or more.",
+  },
+  {
     path: "/studio",
     title: "Marketing studio",
     what: "A promo from your product",

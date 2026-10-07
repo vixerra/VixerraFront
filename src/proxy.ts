@@ -47,6 +47,7 @@ const APP_PREFIXES = [
   "/collections",
   "/my-gallery",
   "/presets",
+  "/influencer",
   "/settings",
   "/studio",
   "/editor",

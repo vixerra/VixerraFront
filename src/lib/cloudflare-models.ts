@@ -301,9 +301,20 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
   },
   {
     id: "google/nano-banana-pro",
+    // On kie.ai since 2026-10-07 (nano-banana-pro, fields from
+    // docs.kie.ai/market/google/pro-image-to-image): Cloudflare serves it as
+    // one blocking /ai/run call, and a detailed prompt at 2K (the AI
+    // influencer's two-panel character sheet) ran past the function's 150s
+    // wall clock. The image was generated and billed on Cloudflare while the
+    // invocation that would have saved it was already killed (shutdown
+    // reason WallClockTime), and the row sat at 0% until swept as TIMEOUT.
+    // kie.ai's create-then-poll spreads the wait across ticks, the same
+    // reason Seedance 2.5 moved. kie also sells it for less.
+    runtime: "kie",
+    kieModel: "nano-banana-pro",
     label: "Nano Banana Pro",
     provider: "Google",
-    description: "Google's highest-fidelity Gemini image model, up to 4K",
+    description: "Runs on kie.ai — Google's highest-fidelity Gemini image model, up to 4K",
     category: "text-to-image",
     promptRequired: true,
     image: "optional",
@@ -311,15 +322,14 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     imageParamShape: "urlArray",
     fields: [
       { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["1:1", "3:2", "2:3", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"], defaultValue: "1:1" },
-      { key: "imageSize", cfParam: "image_size", label: "Resolution", type: "select", options: ["1K", "2K", "4K"], defaultValue: "2K" },
-      { key: "outputFormat", cfParam: "output_format", label: "Output format", type: "select", options: ["jpg", "png", "webp"], defaultValue: "png" },
+      { key: "imageSize", cfParam: "resolution", label: "Resolution", type: "select", options: ["1K", "2K", "4K"], defaultValue: "2K" },
+      { key: "outputFormat", cfParam: "output_format", label: "Output format", type: "select", options: ["jpg", "png"], defaultValue: "png" },
     ],
-    // image_input takes up to 3 images (Cloudflare's published schema, read
-    // 2026-09-18): the upload and two references. IMAGE_PROMPT_COST_USD
-    // prices all three.
+    // kie.ai takes up to 8 in image_input; held at Cloudflare's 3 (the upload
+    // and two references), which is what IMAGE_PROMPT_COST_USD prices.
     referenceImages: { max: 3, cfParam: "image_input" },
-    // Unlike the Seedream trio, which answer with `images: [...]`, this one
-    // returns a single scalar `image` URL — hence outputPath stays ["image"].
+    // Unused on this runtime (kie.ai answers with resultJson.resultUrls),
+    // kept from the Cloudflare shape.
     outputPath: ["image"],
     outputKind: "url",
   },

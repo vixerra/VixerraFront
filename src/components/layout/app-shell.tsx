@@ -24,6 +24,7 @@ import {
   Zap,
   ChevronLeft,
   Lock,
+  UserRound,
 } from "lucide-react";
 import { cn, formatCredits } from "@/lib/utils";
 import { hasCreatorSuite } from "@/lib/tier-limits";
@@ -98,6 +99,7 @@ const NAV_SECTIONS: { label: string; items: NavEntry[] }[] = [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { href: "/generate", label: "Generate", icon: Sparkles },
       { href: "/presets", label: "Presets", icon: Wand2 },
+      { href: "/influencer", label: "AI Influencer", icon: UserRound },
       { href: "/studio", label: "Marketing", icon: Megaphone, creatorSuite: true },
       // Sits in Workspace rather than Library because editing is something
       // you DO, like generating — Library is where finished things are kept.

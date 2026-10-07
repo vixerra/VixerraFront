@@ -203,6 +203,25 @@ const VIDEO_COST_USD: Record<
     perSecond: { default: 0.05 },
     minSeconds: 5,
   },
+  // Kling Motion Control, the AI influencer Motion tab (lib/influencer-
+  // motion.ts in aiVideo-backend). Billed per second of OUTPUT, which is the
+  // reference clip's length, so the route measures the clip and passes that
+  // as the duration. No reference-video table: the clip is not an extra on
+  // these models, it is the whole input.
+  //
+  // PROVISIONAL (2026-10-07): kie.ai's pricing page renders its table
+  // client-side and no kie-published rate for either model could be read.
+  // These are set deliberately ABOVE every third-party resale price found
+  // (~$0.064/s at 720p, ~$0.091/s at 1080p for 2.6), so a run can only be
+  // overcharged until the real kie rates replace them, never sold at a loss.
+  "kling/2.6-motion-control": {
+    perSecond: { "720p": 0.07, "1080p": 0.1 },
+    minSeconds: 3,
+  },
+  "kling/3.0-motion-control": {
+    perSecond: { "720p": 0.14, "1080p": 0.18 },
+    minSeconds: 3,
+  },
   // kie.ai's HappyHorse-1.1 image-to-video line.
   "alibaba/hh1.1-i2v": {
     perSecond: { "720p": 0.1125, "1080p": 0.145 },

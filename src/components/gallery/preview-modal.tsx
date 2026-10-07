@@ -33,6 +33,7 @@ import { PublishButton } from "@/components/social/publish-button";
 import { ResultWatermark, useResultWatermark } from "@/components/result-watermark";
 import { IMAGE_MODELS, SEEDANCE_DURATION_AUTO, VIDEO_MODELS } from "@/lib/constants";
 import { EDIT_GENERATION_MODEL } from "@/lib/editor/types";
+import { MOTION_MODEL_LABELS } from "@/lib/influencer";
 import { itemLabel, type GalleryItem } from "./generation-card";
 import { appHref } from "@/lib/hosts";
 
@@ -65,7 +66,7 @@ function modelLabel(id: string) {
   // without this the details panel would show the raw internal id.
   if (id === EDIT_GENERATION_MODEL) return "Editing studio";
   const match = [...VIDEO_MODELS, ...IMAGE_MODELS].find((m) => m.id === id);
-  return match?.label ?? id;
+  return match?.label ?? MOTION_MODEL_LABELS[id] ?? id;
 }
 
 function prettyType(type: string) {
