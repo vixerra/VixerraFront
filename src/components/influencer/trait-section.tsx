@@ -1,8 +1,10 @@
 "use client";
 
 import { createElement } from "react";
+import Image from "next/image";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { groupHasImages, traitImage } from "@/lib/influencer-trait-images";
 import {
   groupIcon,
   isPicked,
@@ -17,6 +19,9 @@ import {
  * how many are picked, and a grid of tiles. Colour groups (anything whose
  * options carry a swatch) render a chip of the colour instead of a plain
  * label tile, which is the one place the picture says more than the word.
+ * Groups with photo tiles (lib/influencer-trait-images.ts) show each option
+ * as a picture with its label under it; an option still missing its photo
+ * gets the group's icon in its place, so the grid stays even.
  *
  * Every group is optional: nothing picked leaves that trait to the model.
  * A second click on a single-pick tile clears it for the same reason.
@@ -36,6 +41,7 @@ export function TraitSection({
 }) {
   const count = pickCount(picks, group.id);
   const swatches = group.options.some((o) => o.swatch);
+  const pictures = groupHasImages(group.id);
 
   function clear() {
     const next = { ...picks };
@@ -85,6 +91,60 @@ export function TraitSection({
           {group.options.map((option) => {
             const selected = isPicked(picks, group.id, option.id);
             const atCap = Boolean(group.multi) && !selected && count >= (group.multi ?? 0);
+            if (pictures) {
+              const src = traitImage(group.id, option.id);
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onChange(togglePick(picks, group, option.id))}
+                  disabled={atCap}
+                  aria-pressed={selected}
+                  className={cn(
+                    "group/tile relative flex flex-col overflow-hidden rounded-xl border text-center transition-[border-color,box-shadow]",
+                    "disabled:cursor-not-allowed disabled:opacity-35",
+                    selected
+                      ? "border-brand shadow-glow-sm"
+                      : "border-line hover:border-border-strong",
+                  )}
+                >
+                  <span className="relative block aspect-square w-full overflow-hidden bg-[#ededed]">
+                    {src ? (
+                      // Already 165px WebP at a few KB: the optimizer would
+                      // only add a round trip per tile.
+                      <Image
+                        src={src}
+                        alt=""
+                        width={165}
+                        height={165}
+                        unoptimized
+                        className="size-full object-cover transition-transform duration-300 group-hover/tile:scale-105"
+                      />
+                    ) : (
+                      <span className="flex size-full items-center justify-center bg-surface-3">
+                        {createElement(groupIcon(group.id), {
+                          className: "size-6 text-text-tertiary",
+                          "aria-hidden": true,
+                        })}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className={cn(
+                      "px-1 py-1.5 text-[11px] leading-tight font-medium",
+                      selected ? "bg-brand/10 text-ink" : "bg-surface-3 text-muted group-hover/tile:text-ink-soft",
+                    )}
+                  >
+                    {option.label}
+                  </span>
+                  {selected && (
+                    <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm">
+                      <Check className="size-3" strokeWidth={3} aria-hidden="true" />
+                    </span>
+                  )}
+                </button>
+              );
+            }
             return (
               <button
                 key={option.id}
