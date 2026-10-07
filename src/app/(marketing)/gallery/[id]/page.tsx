@@ -14,9 +14,11 @@ import {
   fetchPublicGenerations,
   generationTitle,
   hasDisplayablePrompt,
+  isPromptPrivate,
   isVideoGeneration,
   type PublicGeneration,
 } from "@/lib/public-content";
+import { appHref } from "@/lib/hosts";
 import { absoluteUrl, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 
 // One indexable page per shared generation, with the prompt as real text
@@ -116,7 +118,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
           "@context": "https://schema.org",
           "@type": "CreativeWork",
           name: title,
-          ...(item.fromPreset ? {} : { text: item.prompt }),
+          ...(isPromptPrivate(item) ? {} : { text: item.prompt }),
           url: absoluteUrl(`/gallery/${item.id}`),
           ...(item.createdAt ? { dateCreated: item.createdAt } : {}),
           ...(item.author?.name ? { creator: { "@type": "Person", name: item.author.name } } : {}),
@@ -177,7 +179,19 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
             <p className="mt-3 text-body-sm text-muted">Shared by {item.author.name}</p>
           )}
 
-          {item.fromPreset ? (
+          {item.influencerId ? (
+            <p className="mt-6 text-body text-muted">
+              Made with{" "}
+              <Link
+                href={appHref("/influencer")}
+                prefetch={false}
+                className="text-brand underline-offset-4 hover:underline"
+              >
+                Vixlens AI Influencer
+              </Link>
+              . Design a character once — face, body and style stay locked in every video.
+            </p>
+          ) : item.fromPreset ? (
             <p className="mt-6 text-body text-muted">
               Made from one of the{" "}
               <Link href="/prompts" className="text-brand underline-offset-4 hover:underline">
@@ -218,13 +232,24 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
           </Card>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href={modelWorkspaceHref(item.model, item.fromPreset ? undefined : item.prompt)}
-              className={buttonVariants({ variant: "accent" })}
-            >
-              <Sparkles className="size-4" aria-hidden="true" />
-              Recreate this
-            </Link>
+            {item.influencerId ? (
+              <Link
+                href={appHref("/influencer")}
+                prefetch={false}
+                className={buttonVariants({ variant: "accent" })}
+              >
+                <Sparkles className="size-4" aria-hidden="true" />
+                Create your influencer
+              </Link>
+            ) : (
+              <Link
+                href={modelWorkspaceHref(item.model, item.fromPreset ? undefined : item.prompt)}
+                className={buttonVariants({ variant: "accent" })}
+              >
+                <Sparkles className="size-4" aria-hidden="true" />
+                Recreate this
+              </Link>
+            )}
             <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
               Back to the gallery
             </Link>

@@ -21,8 +21,10 @@ import {
   Share2,
   Sparkles,
   Trash2,
+  UserRound,
   X,
 } from "lucide-react";
+import { useInfluencers } from "@/hooks/use-influencers";
 import { Badge, type BadgeVariant } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -288,6 +290,16 @@ function PreviewBody({
     details.push({ label: "Created", value: formatDate(item.createdAt) });
   }
 
+  // An influencer's prompt is compiled from the builder's traits — the
+  // panel names the influencer instead. The name comes from the list the
+  // studio already caches; someone else's (or a deleted) influencer isn't in
+  // it, and falls back to a generic label.
+  const influencerId = item.influencerId ?? null;
+  const influencersQuery = useInfluencers({ enabled: Boolean(influencerId) });
+  const influencerName = influencerId
+    ? (influencersQuery.data?.find((i) => i.id === influencerId)?.name ?? null)
+    : null;
+
   const isLongPrompt = item.prompt.length > 220;
   // "Recreate" carries the prompt into the composer through the URL, which
   // is exactly what a preset's recipe must not do. Re-running the same row
@@ -310,7 +322,9 @@ function PreviewBody({
           if (e.target === e.currentTarget) onClose();
         }}
       >
-        <Dialog.Title className="sr-only">{itemLabel(item) || "Generation preview"}</Dialog.Title>
+        <Dialog.Title className="sr-only">
+          {influencerName ?? (itemLabel(item) || "Generation preview")}
+        </Dialog.Title>
 
         {hasPrev && (
           <Button
@@ -443,6 +457,16 @@ function PreviewBody({
               it stays put. A preset is a recipe we wrote and the studio that
               runs it never shows it (see PresetStudio), so this panel would
               be the one place it leaked. */}
+          {influencerId ? (
+            <section className="border-b border-border-subtle p-4">
+              <span className="flex items-center gap-2 text-caption font-semibold tracking-wide text-text-tertiary uppercase">
+                <UserRound className="size-3.5" aria-hidden="true" /> Influencer
+              </span>
+              <p className="mt-3 truncate text-body font-semibold text-ink">
+                {influencerName ?? "AI influencer"}
+              </p>
+            </section>
+          ) : (
           <section className="border-b border-border-subtle p-4">
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-2 text-caption font-semibold tracking-wide text-text-tertiary uppercase">
@@ -500,6 +524,7 @@ function PreviewBody({
               </>
             )}
           </section>
+          )}
 
           {/* Source image — what an image-to-video (or an image edit) was
               made from. Set by the API for exactly those input-driven
@@ -582,6 +607,15 @@ function PreviewBody({
                   <Sparkles className="size-4" aria-hidden="true" /> Try a preset
                 </Link>
               )
+            ) : influencerId ? (
+              // Recreate would carry the compiled prompt into the composer's
+              // URL; the influencer's own studio is the way back in.
+              <Link
+                href={appHref("/influencer")} prefetch={false}
+                className={buttonVariants({ variant: "accent", size: "sm", className: "flex-1" })}
+              >
+                <UserRound className="size-4" aria-hidden="true" /> Open AI Influencer
+              </Link>
             ) : (
               <Link
                 href={recreateHref(item)}

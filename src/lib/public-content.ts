@@ -32,6 +32,9 @@ export type PublicGeneration = {
   resultUrl: string | null;
   thumbnailUrl: string | null;
   fromPreset?: boolean;
+  /** Set when it was made in the AI Influencer builder, whose prompt is
+   *  compiled from traits and, like a preset's, never published. */
+  influencerId?: string | null;
   negativePrompt?: string | null;
   seed?: number | null;
   parameters?: Record<string, unknown> | null;
@@ -108,13 +111,20 @@ export function isVideoGeneration(item: PublicGeneration) {
  * heading, or a meta description.
  *
  * False for a preset (its prompt is ours, not the sharer's, and is never
- * published) and for a prompt pasted as a JSON brief, which several people do:
+ * published), for an AI influencer (compiled from the builder's traits, so
+ * the same rule applies) and for a prompt pasted as a JSON brief, which several people do:
  * that reads as machine noise anywhere a sentence is expected. The detail page
  * still shows such a prompt verbatim in its own Prompt block — it is what the
  * person actually wrote — it just isn't used as the page's name.
  */
+/** A prompt that is never published anywhere: not shown, not in structured
+ *  data, not carried into "Recreate". */
+export function isPromptPrivate(item: PublicGeneration) {
+  return Boolean(item.fromPreset || item.influencerId);
+}
+
 export function hasDisplayablePrompt(item: PublicGeneration) {
-  if (item.fromPreset) return false;
+  if (isPromptPrivate(item)) return false;
   const clean = item.prompt.replace(/\s+/g, " ").trim();
   return clean.length > 0 && !/^[{[]/.test(clean);
 }
@@ -138,7 +148,14 @@ export function generationTitle(
   item: PublicGeneration,
   { max = 70, modelLabel }: { max?: number; modelLabel?: string } = {},
 ) {
-  const kind = isVideoGeneration(item) ? "AI video" : "AI image";
+  const isVideo = isVideoGeneration(item);
+  const kind = item.influencerId
+    ? isVideo
+      ? "AI influencer video"
+      : "AI influencer portrait"
+    : isVideo
+      ? "AI video"
+      : "AI image";
   const clean = item.prompt.replace(/\s+/g, " ").trim();
 
   if (!hasDisplayablePrompt(item)) {

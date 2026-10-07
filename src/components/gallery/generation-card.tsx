@@ -106,6 +106,11 @@ export type GalleryItem = {
    *  keep it back (see itemLabel and the preview modal's prompt panel).
    *  Set by the API from the row's presetId. */
   fromPreset?: boolean;
+  /** The AI influencer this was made for (portrait or motion clip). Its
+   *  prompt is compiled from the builder's traits rather than written by
+   *  the viewer, so the surfaces that would print it show the influencer's
+   *  name instead. Set by the API from the row's influencerId. */
+  influencerId?: string | null;
   // Everything below is already on every serialized generation the API
   // returns (see serializeGeneration in the backend) — optional here only
   // because a few local call sites build GalleryItems by hand. The preview
@@ -130,7 +135,9 @@ export type GalleryItem = {
  *  prompt is not on show anywhere else, and an alt attribute is still on
  *  show — so those get named after the preset instead. */
 export function itemLabel(item: GalleryItem) {
-  return item.fromPreset ? "Preset generation" : item.prompt;
+  if (item.fromPreset) return "Preset generation";
+  if (item.influencerId) return "AI influencer";
+  return item.prompt;
 }
 
 export function GenerationCard({

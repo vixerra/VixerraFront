@@ -39,11 +39,14 @@ export function useInfluencerOptions() {
   });
 }
 
-export function useInfluencers() {
+/** `enabled` lets a surface that only sometimes needs a name (the gallery
+ *  preview) skip the fetch for everything else. */
+export function useInfluencers({ enabled = true }: { enabled?: boolean } = {}) {
   const { data: me } = useMe();
   const workspace = useWorkspace(Boolean(me?.organization));
   return useQuery({
     queryKey: ["influencers", workspace],
+    enabled,
     queryFn: async () =>
       (await getJson<{ items: Influencer[] }>(`/api/influencers?workspace=${workspace}`)).items,
     refetchInterval: (query) =>
