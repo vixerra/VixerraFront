@@ -155,8 +155,8 @@ export const OPEN_BY_DEFAULT = new Set(["characterType", "comicLevel", "gender",
  *  lib/influencer-motion.ts). Read by the gallery so a clip doesn't show a
  *  raw model id. */
 export const MOTION_MODEL_LABELS: Record<string, string> = {
-  "kling/2.6-motion-control": "Low",
-  "kling/3.0-motion-control": "High",
+  "kling/2.6-motion-control": "Kling 2.6 Motion Control",
+  "kling/3.0-motion-control": "Kling 3.0 Motion Control",
 };
 
 /** A portrait made as a two-panel character sheet (close-up left, full body
