@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Short viewports (laptops, landscape tablets, phones with browser chrome):
+   for trimming secondary content out of fixed-height overlays. */
+@custom-variant short (@media (max-height: 820px));
+
 /*
  * Design tokens for Vixlens' own identity — deliberately moved off the
  * violet→pink "AI SaaS" gradient (what this file used to be, modeled on
@@ -290,6 +294,20 @@
      gradient, per the rule above. The call site gives the band its width and
      the button relative + overflow-hidden. */
   --animate-shine: shine 3.6s ease-in-out infinite;
+
+  /* AI Influencer banner (landing/ai-influencer-banner.tsx): the tilted cast
+     still slowly pans, so one image reads as a living wall of characters.
+     Transform-only, so it stays on the compositor. */
+  --animate-cast-drift: cast-drift 22s ease-in-out infinite alternate;
+}
+
+@keyframes cast-drift {
+  from {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.06) translate3d(-2.5%, -2%, 0);
+  }
 }
 
 @keyframes blob-float {

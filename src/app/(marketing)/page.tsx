@@ -12,6 +12,7 @@ import { PlansSection } from "@/components/landing/plans-section";
 import { LaunchOfferBanner, LaunchOfferStickyBar } from "@/components/landing/launch-offer";
 import { PriceComparison } from "@/components/landing/price-comparison";
 import { SeedancePromoBanner } from "@/components/landing/seedance-promo-banner";
+import { AiInfluencerBanner } from "@/components/landing/ai-influencer-banner";
 import { FeaturesShowcase } from "@/components/landing/features-showcase";
 import { CapabilityConcepts } from "@/components/landing/capability-concepts";
 import { HowItWorks } from "@/components/landing/how-it-works";
@@ -58,6 +59,7 @@ export default function LandingPage() {
           spots are gone. */}
       <Hero />
       <TrustBar />
+      <AiInfluencerBanner />
       <Reviews />
       <LaunchOfferBanner />
       <PlansSection />

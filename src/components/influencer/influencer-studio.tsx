@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
   Clapperboard,
@@ -104,8 +104,20 @@ export function InfluencerStudio() {
   const optionsQuery = useInfluencerOptions();
   const [mode, setMode] = useState<Mode>("create");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [activeJob, setActiveJob] = useState<{ id: string; isVideo: boolean } | null>(null);
+  const [activeJob, setActiveJob] = useState<{ id: string; isVideo: boolean; influencerId?: string } | null>(null);
   const generation = useGeneration(activeJob?.id ?? null);
+  const invalidateInfluencers = useInvalidateInfluencers();
+
+  // The job card owns the progress of the portrait it streams, so the gallery
+  // leaves that influencer's tile out until it lands — one loader, not two.
+  const streamingInfluencerId = activeJob && !activeJob.isVideo ? activeJob.influencerId ?? null : null;
+  const finished = generation.status === "completed" || generation.status === "failed";
+
+  // The gallery only polls every few seconds; refetch the moment the stream
+  // ends so the tile comes back together with the card's result.
+  useEffect(() => {
+    if (finished) invalidateInfluencers();
+  }, [finished, invalidateInfluencers]);
 
   function animate(influencer: Influencer) {
     setSelectedId(influencer.id);
@@ -158,7 +170,7 @@ export function InfluencerStudio() {
             options={options}
             onQueued={(influencerId, jobId) => {
               setSelectedId(influencerId);
-              setActiveJob({ id: jobId, isVideo: false });
+              setActiveJob({ id: jobId, isVideo: false, influencerId });
             }}
           />
         ) : (
@@ -185,7 +197,12 @@ export function InfluencerStudio() {
           </div>
         )}
         {mode === "create" ? (
-          <InfluencerGallery selectedId={selectedId} onSelect={setSelectedId} onAnimate={animate} />
+          <InfluencerGallery
+            selectedId={selectedId}
+            streamingId={streamingInfluencerId}
+            onSelect={setSelectedId}
+            onAnimate={animate}
+          />
         ) : (
           <MotionClips influencerId={selectedId} />
         )}
@@ -657,10 +674,13 @@ function MotionPanel({
 
 function InfluencerGallery({
   selectedId,
+  streamingId,
   onSelect,
   onAnimate,
 }: {
   selectedId: string | null;
+  /** Shown in the job card above while it renders; skipped here until done. */
+  streamingId: string | null;
   onSelect: (id: string) => void;
   onAnimate: (influencer: Influencer) => void;
 }) {
@@ -701,7 +721,10 @@ function InfluencerGallery({
     invalidateInfluencers();
   }
 
-  const items = influencersQuery.data ?? [];
+  const all = influencersQuery.data ?? [];
+  const items = all.filter(
+    (i) => !(i.id === streamingId && i.portrait && isActive(i.portrait.status)),
+  );
 
   return (
     <section className="flex min-h-[20rem] flex-1 flex-col rounded-2xl border border-line bg-surface-2 p-4 shadow-card sm:p-5">
@@ -710,6 +733,10 @@ function InfluencerGallery({
         <div className="flex flex-1 items-center justify-center">
           <Spinner />
         </div>
+      ) : items.length === 0 && all.length > 0 ? (
+        <p className="flex flex-1 items-center justify-center text-center text-body-sm text-muted">
+          Your new influencer lands here as soon as it&apos;s ready.
+        </p>
       ) : items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
           <ImagePlus className="size-8 text-text-tertiary" aria-hidden="true" />
