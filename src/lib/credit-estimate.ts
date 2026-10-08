@@ -220,18 +220,6 @@ const VIDEO_COST_USD: Record<
     perSecond: { "720p": 0.1, "1080p": 0.135 },
     minSeconds: 3,
   },
-  // Wan 2.2 Animate Replace, the influencer Motion tab's "Replace in the
-  // clip" (lib/influencer-motion.ts in aiVideo-backend). Billed per second of
-  // the clip, like Kling above.
-  //
-  // PROVISIONAL (2026-10-08): kie.ai's model page lists no price. Set ABOVE
-  // the highest third-party rate found for Wan 2.2 Animate (~$0.08/s at
-  // 720p), so a run can only be overcharged until kie's real rate replaces
-  // it, never sold at a loss.
-  "wan/2.2-animate-replace": {
-    perSecond: { "480p": 0.06, "720p": 0.1 },
-    minSeconds: 3,
-  },
   // kie.ai's HappyHorse-1.1 image-to-video line.
   "alibaba/hh1.1-i2v": {
     perSecond: { "720p": 0.1125, "1080p": 0.145 },

@@ -46,6 +46,12 @@ export type MotionModelOption = {
   prompt?: boolean;
   orientation?: boolean;
   maxVideoBytes?: number | null;
+  /** The model the run is priced as ("replace" bills as Seedance 2.5). */
+  billingModel?: string;
+  minSeconds?: number;
+  /** Per-frame pixel bounds for the clip; a clip outside them is re-encoded
+   *  in the browser before it is sent (lib/downscale-video.ts). */
+  videoPixels?: { min: number; max: number } | null;
 };
 
 export type InfluencerOptions = {

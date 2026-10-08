@@ -451,7 +451,10 @@ function MotionPanel({
   const [resolution, setResolution] = useState("720p");
   const [orientation, setOrientation] = useState<"video" | "image">("video");
   const [prompt, setPrompt] = useState("");
-  const [video, setVideo] = useState<(Upload & { seconds?: number; bytes: number }) | null>(null);
+  const [video, setVideo] = useState<(Upload & { seconds?: number; bytes: number; file: File }) | null>(null);
+  // Share of the clip re-encoded so far, while a too-large clip is resized
+  // for Seedance before the run is sent; null the rest of the time.
+  const [preparing, setPreparing] = useState<number | null>(null);
 
   const ready = (influencersQuery.data ?? []).filter((i) => i.portrait?.status === "completed");
   const selected = ready.find((i) => i.id === selectedId) ?? null;
@@ -469,6 +472,7 @@ function MotionPanel({
   const takesPrompt = modelConfig?.prompt ?? true;
   const effectiveOrientation = takesOrientation ? orientation : "video";
   const maxSeconds = motion.maxSeconds[effectiveOrientation];
+  const minSeconds = modelConfig?.minSeconds ?? motion.minSeconds;
   const maxBytes = modelConfig?.maxVideoBytes ?? null;
   const maxMb = maxBytes ? Math.round(maxBytes / 1024 / 1024) : null;
 
@@ -490,10 +494,10 @@ function MotionPanel({
     }
     // Not refused here when over a model's size cap: the clip still fits the
     // other mode, so the cap is flagged under the button instead.
-    setVideo({ preview, url: null, uploading: true, seconds, bytes: file.size });
+    setVideo({ preview, url: null, uploading: true, seconds, bytes: file.size, file });
     try {
       const url = await uploadFile(file);
-      setVideo({ preview, url, uploading: false, seconds, bytes: file.size });
+      setVideo({ preview, url, uploading: false, seconds, bytes: file.size, file });
     } catch (err) {
       toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
       setVideo(null);
@@ -504,11 +508,11 @@ function MotionPanel({
   // the longest allowed when the browser couldn't measure it.
   const billedSeconds =
     video?.seconds !== undefined
-      ? Math.min(maxSeconds, Math.max(motion.minSeconds, Math.ceil(video.seconds - 0.05)))
+      ? Math.min(maxSeconds, Math.max(minSeconds, Math.ceil(video.seconds - 0.05)))
       : maxSeconds;
   const credits = estimateCreditsForRequest({
     type: "image-to-video",
-    model,
+    model: modelConfig?.billingModel ?? model,
     durationSeconds: billedSeconds,
     resolution: effectiveResolution,
     hasReferenceVideo: true,
@@ -528,6 +532,8 @@ function MotionPanel({
       ? video?.uploading
         ? "Wait for the upload to finish."
         : "Upload a reference video."
+      : video.seconds !== undefined && video.seconds < minSeconds - 0.05
+        ? `${modelConfig?.label ?? "This model"} needs a clip of at least ${minSeconds}s.`
       : maxBytes && video.bytes > maxBytes
         ? `${modelConfig?.label ?? "This model"} takes clips up to ${maxMb}MB; this one is ${(video.bytes / 1024 / 1024).toFixed(1)}MB. Use a shorter or lighter clip, or switch to "Move in their scene".`
         : video.seconds !== undefined && video.seconds > maxSeconds + 0.05
@@ -536,17 +542,32 @@ function MotionPanel({
 
   const mutation = useMutation({
     mutationFn: async () => {
+      // Seedance takes reference clips at 480p-720p only, and phones film
+      // 1080p+: such a clip is re-encoded here and the smaller copy uploaded.
+      // The encoder is a heavy module, so it loads only when needed.
+      let videoUrl = video!.url!;
+      if (modelConfig?.videoPixels) {
+        const { fitVideoToPixels } = await import("@/lib/downscale-video");
+        setPreparing(0);
+        try {
+          const fitted = await fitVideoToPixels(video!.file, modelConfig.videoPixels, setPreparing);
+          if (fitted !== video!.file) videoUrl = await uploadFile(fitted);
+        } finally {
+          setPreparing(null);
+        }
+      }
       // Only the full-body half of a character sheet goes to Kling, which
       // would otherwise animate both copies of the person. Cut and uploaded
-      // here, per run; it takes a moment and costs nothing.
+      // here, per run; it takes a moment and costs nothing. "Replace" sends
+      // the whole sheet itself (the API reads it from the portrait).
       const portrait = selected!.portrait;
       const characterImage =
-        isCharacterSheet(portrait) && portrait?.resultUrl
+        kindOf(modelConfig ?? motion.models[0]) === "move" && isCharacterSheet(portrait) && portrait?.resultUrl
           ? await uploadFile(await cropFullBodyPanel(portrait.resultUrl))
           : undefined;
       return postJson<{ job_id: string }>(`/api/influencers/${selected!.id}/motion`, {
         model,
-        video: video!.url,
+        video: videoUrl,
         characterImage,
         resolution: effectiveResolution,
         orientation: effectiveOrientation,
@@ -746,6 +767,11 @@ function MotionPanel({
           blockedReason={blockedReason}
           incompleteReason={incompleteReason}
         />
+        {preparing !== null && (
+          <p className="mt-2 text-center text-caption text-muted" aria-live="polite">
+            Resizing your clip to 720p for Seedance… {Math.round(preparing * 100)}%
+          </p>
+        )}
       </div>
     </form>
   );
