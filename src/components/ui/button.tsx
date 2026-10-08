@@ -36,7 +36,7 @@ const variants: Record<ButtonVariant, string> = {
   circular:
     "border-0 rounded-full bg-ink/5 text-muted hover:bg-ink/10 hover:text-ink-soft active:scale-95",
   accent:
-    "border-0 bg-brand text-on-brand shadow-glow-md hover:bg-brand-hover hover:shadow-glow-lg hover:scale-[1.02] active:scale-[0.98] active:bg-brand-active disabled:opacity-40 disabled:hover:scale-100",
+    "border-0 bg-brand text-on-brand ring-[1.5px] ring-ink ring-inset shadow-glow-md hover:bg-brand-hover hover:shadow-glow-lg hover:scale-[1.02] active:scale-[0.98] active:bg-brand-active disabled:opacity-40 disabled:hover:scale-100",
   // Frosted "liquid glass" pill — see .btn-glass in globals.css for the
   // gradient-reflection border. Used where a CTA needs to sit directly on
   // top of busy media (hero) rather than a flat surface, without competing

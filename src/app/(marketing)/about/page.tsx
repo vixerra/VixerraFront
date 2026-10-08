@@ -40,7 +40,7 @@ export default function AboutPage() {
             <h2 className="text-feature-title font-semibold text-ink">Get in touch</h2>
             <p className="mt-2 text-body-sm text-muted">
               Questions about plans, enterprise, or the API?{" "}
-              <a href="/contact" className="text-brand-ink hover:text-brand-hover">
+              <a href="/contact" className="text-brand-ink hover:text-ink/70">
                 Reach out
               </a>{" "}
               — we read every message.

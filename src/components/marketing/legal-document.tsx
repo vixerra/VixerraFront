@@ -25,7 +25,7 @@ export type LegalSection = {
 
 export function LegalLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="text-brand-ink underline-offset-2 hover:text-brand-hover hover:underline">
+    <Link href={href} className="text-brand-ink underline-offset-2 hover:text-ink/70 hover:underline">
       {children}
     </Link>
   );

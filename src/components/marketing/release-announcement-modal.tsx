@@ -113,7 +113,7 @@ export function ReleaseAnnouncementModal() {
 
             <Dialog.Title className="font-display mt-4 text-[28px] leading-[1.05] font-bold tracking-tight text-ink sm:text-[34px]">
               Your next influencer{" "}
-              <span className="text-accent-script text-[1.12em] tracking-normal text-brand-ink">
+              <span className="text-accent-script mark-lime text-[1.12em] tracking-normal">
                 isn’t human.
               </span>
             </Dialog.Title>

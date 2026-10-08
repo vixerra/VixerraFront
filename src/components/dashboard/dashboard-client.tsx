@@ -154,7 +154,7 @@ export function DashboardClient() {
       <div>
         <div className="flex items-center justify-between">
           <h2 className="text-subheading font-semibold text-ink">Recent generations</h2>
-          <Link href="/my-gallery" className="text-body-sm text-brand-ink hover:text-brand-hover">
+          <Link href="/my-gallery" className="text-body-sm text-brand-ink hover:text-ink/70">
             View all
           </Link>
         </div>

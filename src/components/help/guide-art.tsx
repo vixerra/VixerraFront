@@ -361,7 +361,7 @@ function Publish({ step, still }: SceneProps) {
             <motion.span
               key={p}
               className="flex h-6 flex-1 items-center justify-center rounded-md border border-brand-ink/50 text-[8px] text-brand-ink"
-              animate={{ borderColor: ["rgb(187 220 18 / 0.3)", "rgb(187 220 18 / 1)", "rgb(187 220 18 / 0.3)"] }}
+              animate={{ borderColor: ["rgb(14 16 20 / 0.2)", "rgb(14 16 20 / 0.85)", "rgb(14 16 20 / 0.2)"] }}
               transition={{ duration: 2.2, repeat: Infinity, ease: easing.smooth, delay: i * 0.3 }}
             >
               {p}

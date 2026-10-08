@@ -52,7 +52,7 @@ export function Logo({
           )}
         >
           <span className="text-ink">Vix</span>
-          <span className="text-brand-ink">lens</span>
+          <span className="mark-lime">lens</span>
         </span>
       )}
     </Link>

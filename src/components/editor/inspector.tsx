@@ -540,7 +540,7 @@ function TextPanel({
           <button
             type="button"
             onClick={onAdd}
-            className="flex items-center gap-1 text-caption text-brand-ink transition-colors hover:text-brand-hover"
+            className="flex items-center gap-1 text-caption text-brand-ink transition-colors hover:text-ink/70"
           >
             <Plus className="size-3" /> Add
           </button>

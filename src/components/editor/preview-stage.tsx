@@ -82,7 +82,7 @@ export function PreviewStage({
   const empty = project.clips.length === 0;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="stage flex min-h-0 flex-1 flex-col bg-stage">
       <div className="flex min-h-0 flex-1 items-center justify-center p-4">
         <div className="relative flex h-full max-h-full items-center justify-center">
           <canvas

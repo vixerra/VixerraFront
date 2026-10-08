@@ -713,7 +713,7 @@ function MemberRow({
               onClick={() =>
                 onUpdate({ monthlyCreditLimit: limited ? null : Math.max(spent, 500) })
               }
-              className="mt-2.5 text-caption text-brand-ink transition-colors hover:text-brand-hover"
+              className="mt-2.5 text-caption text-brand-ink transition-colors hover:text-ink/70"
             >
               {limited ? "Remove the limit" : "Set a limit"}
             </button>

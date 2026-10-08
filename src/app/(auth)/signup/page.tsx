@@ -99,7 +99,7 @@ function SignupForm() {
           <button
             type="button"
             onClick={() => setPendingEmail(null)}
-            className="text-brand-ink hover:text-brand-hover"
+            className="text-brand-ink hover:text-ink/70"
           >
             Go back
           </button>
@@ -184,18 +184,18 @@ function SignupForm() {
         Already have an account?{" "}
         <Link
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
-          className="text-brand-ink hover:text-brand-hover"
+          className="text-brand-ink hover:text-ink/70"
         >
           Log in
         </Link>
       </p>
       <p className="mt-4 text-center text-caption text-muted">
         By creating an account, you agree to our{" "}
-        <Link href="/terms" className="text-brand-ink hover:text-brand-hover">
+        <Link href="/terms" className="text-brand-ink hover:text-ink/70">
           Terms
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" className="text-brand-ink hover:text-brand-hover">
+        <Link href="/privacy" className="text-brand-ink hover:text-ink/70">
           Privacy Policy
         </Link>
         .

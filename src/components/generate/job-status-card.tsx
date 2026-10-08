@@ -115,7 +115,7 @@ export function JobStatusCard({
         {/* min-h-0 is load-bearing: without it this flex child refuses to
           * shrink below its content's natural size and the overflow comes
           * straight back. */}
-        <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-dark shadow-glow-sm">
+        <div className="relative flex min-h-0 flex-1 items-center justify-center stage overflow-hidden rounded-xl border border-line bg-stage shadow-glow-sm">
           {isVideo ? (
             <video
               ref={mediaRef}

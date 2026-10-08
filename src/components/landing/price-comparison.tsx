@@ -157,7 +157,7 @@ export function PriceComparison() {
           </span>
           <h2 className="mt-5 text-heading leading-[1.02] text-ink sm:text-display">
             Same top models.
-            <span className="block text-brand-ink">Less to get in.</span>
+            <span className="block"><span className="mark-lime">Less to get in.</span></span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-body-lg text-muted">
             We read the public pricing pages of the AI studios we get compared with most. Here is

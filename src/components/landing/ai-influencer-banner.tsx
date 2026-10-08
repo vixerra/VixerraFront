@@ -31,8 +31,8 @@ export function AiInfluencerBanner() {
                 className="mt-5 text-[40px] leading-[0.95] font-black tracking-tight text-ink sm:text-5xl xl:text-[64px]"
               >
                 Your next influencer
-                <span className="text-accent-script mt-1 block text-[1.12em] tracking-normal text-brand-ink normal-case">
-                  isn’t human.
+                <span className="text-accent-script mt-1 block text-[1.12em] tracking-normal normal-case">
+                  <span className="mark-lime">isn’t human.</span>
                 </span>
               </h2>
 

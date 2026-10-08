@@ -50,8 +50,8 @@ export function UsageChart({ data }: { data: { date: string; count: number }[] }
         <AreaChart data={data} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
           <defs>
             <linearGradient id="usageFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#bbdc12" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#bbdc12" stopOpacity={0} />
+              <stop offset="0%" stopColor="#c6f019" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#c6f019" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid stroke="rgba(14,16,20,0.12)" strokeDasharray="3 3" vertical={false} />

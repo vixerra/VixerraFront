@@ -103,7 +103,7 @@ function LoginForm() {
             </Label>
             <Link
               href="/forgot-password"
-              className="text-caption text-brand-ink hover:text-brand-hover"
+              className="text-caption text-brand-ink hover:text-ink/70"
             >
               Forgot password?
             </Link>
@@ -136,7 +136,7 @@ function LoginForm() {
         Don&apos;t have an account?{" "}
         <Link
           href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}
-          className="text-brand-ink hover:text-brand-hover"
+          className="text-brand-ink hover:text-ink/70"
         >
           Sign up
         </Link>

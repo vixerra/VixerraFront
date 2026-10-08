@@ -35,19 +35,26 @@
      lighter, the sidebar and recessed areas step darker. No warm or
      violet undertone anywhere. */
   --color-surface: #bfc7d2; /* Background Primary */
-  --color-surface-2: #cdd3db; /* Background Secondary (cards) */
-  --color-surface-3: #d9dee4; /* Background Tertiary (elevated / card hover) */
-  --color-surface-dark: #dfe3e9; /* Input fields */
+  --color-surface-2: #dde1e7; /* Background Secondary (cards) */
+  --color-surface-3: #e8ebef; /* Background Tertiary (elevated / card hover) */
+  --color-surface-dark: #f1f3f5; /* Input fields */
   /* Modal scrims (bg-overlay/80): a dark slate, not the page grey, so a
      dialog still separates from what it covers. */
   --color-overlay: #2a2f37;
-  --color-dropdown-hover: #c6cdd6; /* Hover states, dropdowns */
+  --color-dropdown-hover: #dde1e7; /* Hover states, dropdowns */
 
   /* App-shell background — the authenticated app (dashboard/generate/
      gallery/settings, see AppShell) sits on the same silver, with the
      sidebar one step deeper so body and rail read as distinct planes. */
   --color-surface-app: #bfc7d2;
   --color-surface-sidebar: #b4bcc8;
+
+  /* Stage — the dark plane media is judged on (editor preview, generation
+     result, gallery lightbox). Grading software keeps footage on near-black
+     for a reason: colour and contrast read true there, and the light chrome
+     around it frames the work instead of competing with it. Used through
+     the .stage utility below, which also flips the text/line tokens. */
+  --color-stage: #14161a;
 
   /* Text — near-black ink with a cool cast. Primary, secondary and
      tertiary are pulled well apart since there's no hue to separate them;
@@ -90,15 +97,17 @@
      focus rings, sliders, links, accent text. It is the loudest thing on
      a black screen and the one color the eye should follow to find "what
      do I press". */
-  --color-brand: #bbdc12;
-  --color-brand-hover: #cbe93a;
-  --color-brand-active: #a3c30d;
-  /* The four signal colors are all LIGHT — as fills (with on-brand ink on
-     top) they read fine on silver, but as text, borders, rings or icons
-     they vanish into it (lime on #bfc7d2 is ~1.1:1). Every non-fill use
-     (text-*, border-*, ring-*, fill-*, accent-*) takes the -ink variant: a
-     deep version of the same hue that clears 4.5:1 on the page. */
-  --color-brand-ink: #3d5000;
+  --color-brand: #c6f019;
+  --color-brand-hover: #d2f548;
+  --color-brand-active: #b2d915;
+  /* Lime never sets type or hairlines on this ground: on silver it sits at
+     almost the same value (~1.1:1) and a darkened lime turns khaki. So
+     every non-fill use of brand (text-*, border-*, ring-*, fill-*) resolves
+     to ink — a near-black with the faintest green cast — and lime survives
+     as what it's good at: fills, markers (.mark-lime) and dots. The three
+     other signal colors keep a deep -ink twin, since amber/orange/hot still
+     read as themselves when darkened. */
+  --color-brand-ink: #161c08;
 
   /* Ink for glyphs and labels sitting ON any light accent fill — all four
      signal colors and silver. Every one of them is a LIGHT color, so
@@ -162,22 +171,21 @@
   --radius-2xl: 32px;
   --radius-full: 9999px;
 
-  /* Shadows — plain black depth shadows + a soft localized brand bloom.
-     Now that the brand is a saturated lime rather than a near-white
-     metal, the glows can carry a little more alpha again without turning
-     into haze: a coloured glow reads as a halo at a strength where a
-     white one would just look like fog. Still restrained — the point is
-     that a lime button looks lit from behind, not that it flares. */
+  /* Shadows — short, crisp, cool-tinted depth. The old "glow" tokens were
+     coloured halos that read as light on black; on silver they turn into
+     grey fog, so they now resolve to tight lift shadows (names kept so
+     call sites don't churn). The 1px white inset top edge is the
+     machined-metal highlight that makes a lighter card read as raised. */
   --shadow-raised: 0 1px 2px 0 rgb(20 26 36 / 0.12);
-  --shadow-floating: 0 8px 30px -4px rgb(20 26 36 / 0.22);
-  --shadow-modal: 0 20px 60px -12px rgb(20 26 36 / 0.35);
-  --shadow-inset: inset 0 1px 0 0 rgb(255 255 255 / 0.45);
-  --shadow-card: 0 4px 12px rgb(20 26 36 / 0.1), inset 0 1px 0 0 rgb(255 255 255 / 0.45);
-  --shadow-glow-sm: 0 0 20px rgb(187 220 18 / 0.3);
-  --shadow-glow-md: 0 0 40px rgb(187 220 18 / 0.35);
-  --shadow-glow-lg: 0 0 80px rgb(187 220 18 / 0.3);
-  --shadow-glow-hot-sm: 0 0 20px rgb(255 0 82 / 0.18);
-  --shadow-glow-hot-md: 0 0 40px rgb(255 0 82 / 0.24);
+  --shadow-floating: 0 10px 28px -8px rgb(20 26 36 / 0.28);
+  --shadow-modal: 0 24px 60px -16px rgb(20 26 36 / 0.4);
+  --shadow-inset: inset 0 1px 0 0 rgb(255 255 255 / 0.7);
+  --shadow-card: 0 1px 2px rgb(20 26 36 / 0.08), 0 4px 12px -4px rgb(20 26 36 / 0.12), inset 0 1px 0 0 rgb(255 255 255 / 0.7);
+  --shadow-glow-sm: 0 2px 6px -1px rgb(20 26 36 / 0.16), inset 0 1px 0 0 rgb(255 255 255 / 0.5);
+  --shadow-glow-md: 0 4px 14px -4px rgb(20 26 36 / 0.26);
+  --shadow-glow-lg: 0 10px 28px -8px rgb(20 26 36 / 0.32);
+  --shadow-glow-hot-sm: 0 2px 8px -2px rgb(161 0 53 / 0.25);
+  --shadow-glow-hot-md: 0 6px 18px -6px rgb(161 0 53 / 0.32);
   --shadow-glow-white: 0 0 30px rgb(255 255 255 / 0.35);
 
   /* No gradient() fills anywhere in this system, full stop — a two-hue
@@ -190,7 +198,7 @@
      per-section nav colors, and the dashboard's icon chips.
      --gradient-hero-glow is now a flat solid tint too (kept the old name
      since call sites still consume it as a plain `background` value). */
-  --gradient-hero-glow: rgb(187 220 18 / 0.12);
+  --gradient-hero-glow: rgb(255 255 255 / 0.25);
 
   /* Type scale: each pairs font-size with its line-height (and, where
      useful, letter-spacing) in a single utility. Font-family is NOT
@@ -588,7 +596,7 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(61 80 0 / 0.55);
+    background-color: rgb(14 16 20 / 0.45);
   }
 
   ::-webkit-scrollbar-corner {
@@ -640,7 +648,49 @@
      Solid lime, never gradient-clipped — this app doesn't use blended
      gradient fills anywhere (see the note above --gradient-hero-glow). */
   .text-gradient {
-    color: var(--color-brand-ink);
+    color: var(--color-ink);
+    background: linear-gradient(transparent 58%, var(--color-brand) 58% 92%, transparent 92%);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* Highlighter marker — how lime carries emphasis on type now that it
+     can't be the type colour itself (see --color-brand-ink). A hard-stop
+     band under the lower part of the glyphs, not a blend: reads as a
+     felt-tip swipe, keeps the word in full-contrast ink, and lets the lime
+     stay at full chroma. */
+  .mark-lime {
+    color: var(--color-ink);
+    background: linear-gradient(transparent 58%, var(--color-brand) 58% 92%, transparent 92%);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding-inline: 0.06em;
+  }
+
+  /* Dark stage for media (see --color-stage). Re-points the theme tokens
+     locally, so every bg-surface-N, text-ink, text-muted, border-line inside
+     resolves to its dark-theme value with no per-child overrides. Lime is
+     legible again on this ground, so brand-ink goes back to lime too. */
+  .stage {
+    color-scheme: dark;
+    --color-surface: #0e1013;
+    --color-surface-2: #1a1d22;
+    --color-surface-3: #23272d;
+    --color-surface-dark: #0e1013;
+    --color-dropdown-hover: #2a2e35;
+    --color-ink: #f2f4f7;
+    --color-ink-soft: #f2f4f7;
+    --color-ink-softer: #f2f4f7;
+    --color-muted: #9aa0aa;
+    --color-text-tertiary: #6d727c;
+    --color-line: rgb(255 255 255 / 0.1);
+    --color-border-subtle: rgb(255 255 255 / 0.06);
+    --color-border-strong: rgb(255 255 255 / 0.18);
+    --color-brand-ink: var(--color-brand);
+    --color-accent-amber-ink: var(--color-accent-amber);
+    --color-accent-orange-ink: var(--color-accent-orange);
+    --color-accent-hot-ink: var(--color-accent-hot);
+    color: var(--color-ink);
   }
 
   /* Editorial italic accent — the "for artists." trick: one phrase per

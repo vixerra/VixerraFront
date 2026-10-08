@@ -179,7 +179,7 @@ export function PreviewModal({
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-overlay/95 backdrop-blur-sm" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-stage/95 backdrop-blur-sm" />
         <Dialog.Content className="fixed inset-0 z-[60] flex flex-col gap-3 overflow-y-auto p-3 outline-none lg:inset-6 lg:flex-row lg:gap-6 lg:overflow-hidden lg:p-0">
           <PreviewBody
             key={item.id}
@@ -325,7 +325,7 @@ function PreviewBody({
           keep its intrinsic size and paint over the panel below it. Both
           heights are definite, so the media's own max-h-full resolves. */}
       <div
-        className="relative flex h-[45vh] shrink-0 items-center justify-center overflow-hidden lg:h-full lg:min-h-0 lg:flex-1"
+        className="stage relative flex h-[45vh] shrink-0 items-center justify-center overflow-hidden lg:h-full lg:min-h-0 lg:flex-1"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}

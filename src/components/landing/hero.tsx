@@ -148,7 +148,7 @@ export function Hero() {
   return (
     <section className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden bg-surface">
       <div
-        className="pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[70%] -translate-x-1/2 -translate-y-1/3 rounded-full bg-brand/10 blur-[120px]"
+        className="pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[70%] -translate-x-1/2 -translate-y-1/3 rounded-full bg-white/50 blur-[120px]"
         aria-hidden="true"
       />
 
@@ -164,7 +164,7 @@ export function Hero() {
             >
               {item.kind === "video" ? (
                 <video
-                  className="h-full w-full object-cover opacity-70"
+                  className="h-full w-full object-cover"
                   autoPlay
                   muted
                   loop
@@ -175,7 +175,7 @@ export function Hero() {
                 </video>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media, decorative collage
-                <img src={item.url} alt={item.alt} className="h-full w-full object-cover opacity-70" />
+                <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
               )}
             </motion.div>
           ))}
@@ -229,10 +229,10 @@ export function Hero() {
             ))}
             <motion.span
               variants={shouldReduceMotion ? undefined : heroWordVariants}
-              className="block text-brand-ink"
+              className="block text-ink"
               style={{ WebkitTextFillColor: "initial" }}
             >
-              From {ENTRY_PRICE}
+              <span className="mark-lime">From {ENTRY_PRICE}</span>
               <span className="ml-1 align-top text-[0.35em] leading-none text-ink/60">/mo</span>
             </motion.span>
           </motion.h1>
