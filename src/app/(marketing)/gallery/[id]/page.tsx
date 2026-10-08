@@ -19,6 +19,7 @@ import {
   type PublicGeneration,
 } from "@/lib/public-content";
 import { appHref } from "@/lib/hosts";
+import { influencerModelLabel } from "@/lib/influencer";
 import { absoluteUrl, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 
 // One indexable page per shared generation, with the prompt as real text
@@ -41,8 +42,11 @@ export async function generateMetadata(props: PageProps<"/gallery/[id]">): Promi
   const item = await fetchPublicGeneration(id);
   if (!item) return {};
 
-  const entry = modelCatalogEntry(item.model);
-  const title = generationTitle(item, { max: 50, modelLabel: entry?.label });
+  // An influencer clip is named after the studio's choice, not the provider
+  // model behind it, and gets no model page to point at.
+  const influencerLabel = influencerModelLabel(item.model, item.parameters);
+  const entry = influencerLabel ? undefined : modelCatalogEntry(item.model);
+  const title = generationTitle(item, { max: 50, modelLabel: influencerLabel ?? entry?.label });
   const kind = isVideoGeneration(item) ? "AI video" : "AI image";
   // The prompt only goes in the description when it reads as prose — a preset's
   // is never published, and a JSON brief truncated to 158 characters is noise.
@@ -100,9 +104,10 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
   const item = await fetchPublicGeneration(id);
   if (!item) notFound();
 
-  const entry = modelCatalogEntry(item.model);
-  const modelHref = modelPageHref(item.model);
-  const title = generationTitle(item, { modelLabel: entry?.label });
+  const influencerLabel = influencerModelLabel(item.model, item.parameters);
+  const entry = influencerLabel ? undefined : modelCatalogEntry(item.model);
+  const modelHref = influencerLabel ? null : modelPageHref(item.model);
+  const title = generationTitle(item, { modelLabel: influencerLabel ?? entry?.label });
   const isVideo = isVideoGeneration(item);
   // Alt text is a description, not a data dump — a preset's prompt is private
   // and a JSON brief describes nothing, so both fall back to the page's title.
@@ -220,10 +225,10 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
                 <dd className="text-body-sm font-medium text-ink">
                   {modelHref ? (
                     <Link href={modelHref} className="text-brand underline-offset-4 hover:underline">
-                      {entry?.label ?? item.model}
+                      {influencerLabel ?? entry?.label ?? item.model}
                     </Link>
                   ) : (
-                    (entry?.label ?? item.model)
+                    (influencerLabel ?? entry?.label ?? item.model)
                   )}
                 </dd>
               </div>

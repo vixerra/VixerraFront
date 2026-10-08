@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PublicGalleryClient } from "@/components/gallery/public-gallery-client";
 import { JsonLd } from "@/components/seo/json-ld";
 import { modelCatalogEntry } from "@/lib/model-seo";
+import { influencerModelLabel } from "@/lib/influencer";
 import { fetchPublicGenerations, generationTitle, isVideoGeneration } from "@/lib/public-content";
 import { absoluteUrl, keywords, openGraph, SITE_NAME } from "@/lib/seo";
 
@@ -49,7 +50,10 @@ export default async function PublicGalleryPage() {
               itemListElement: items.map((item, index) => ({
                 "@type": "ListItem",
                 position: index + 1,
-                name: generationTitle(item, { modelLabel: modelCatalogEntry(item.model)?.label }),
+                name: generationTitle(item, {
+                  modelLabel:
+                    influencerModelLabel(item.model, item.parameters) ?? modelCatalogEntry(item.model)?.label,
+                }),
                 url: absoluteUrl(`/gallery/${item.id}`),
               })),
             },

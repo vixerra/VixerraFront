@@ -25,6 +25,7 @@ export function CreditsSubmitPill({
   incompleteReason,
   fullWidth,
   hideTooltip,
+  hideCost,
   className,
 }: {
   credits: number;
@@ -52,6 +53,9 @@ export function CreditsSubmitPill({
    * itself, since the tooltip was the only place it appeared; `aria-label`
    * still carries the full hint either way. */
   hideTooltip?: boolean;
+  /** Show "Generate" with no figure, for a form whose price isn't known
+   *  until something is added (the influencer Motion tab, before its clip). */
+  hideCost?: boolean;
   className?: string;
 }) {
   const unaffordable = balance !== undefined && credits > balance;
@@ -124,10 +128,14 @@ export function CreditsSubmitPill({
           {fullWidth ? (
             <>
               Generate
-              <span className="font-normal text-on-brand/70">
-                · {free ? "Free" : `${credits} ${unit}`}
-              </span>
+              {!hideCost && (
+                <span className="font-normal text-on-brand/70">
+                  · {free ? "Free" : `${credits} ${unit}`}
+                </span>
+              )}
             </>
+          ) : hideCost ? (
+            "Generate"
           ) : free ? (
             "Free"
           ) : (

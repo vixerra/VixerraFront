@@ -175,12 +175,42 @@ export const OPEN_BY_DEFAULT = new Set(["characterType", "comicLevel", "gender",
 /** Labels for the motion-transfer models, which aren't in VIDEO_MODELS (only
  *  the influencer page runs them; see aiVideo-backend's
  *  lib/influencer-motion.ts). Read by the gallery so a clip doesn't show a
- *  raw model id. */
+ *  raw model id — nor the provider's name: the studio sells "Low", "High"
+ *  and "Replace", not the models behind them. */
 export const MOTION_MODEL_LABELS: Record<string, string> = {
-  "kling/2.6-motion-control": "Kling 2.6 Motion Control",
-  "kling/3.0-motion-control": "Kling 3.0 Motion Control",
-  "wan/2.2-animate-replace": "Wan 2.2 Animate Replace",
+  "kling/2.6-motion-control": "AI influencer motion · Low",
+  "kling/3.0-motion-control": "AI influencer motion · High",
+  "wan/2.2-animate-replace": "AI influencer motion · Replace",
 };
+
+const REPLACE_LABEL = "AI influencer motion · Replace";
+
+/**
+ * What to call an influencer motion clip wherever its model is shown, or
+ * null for anything else (a portrait, an ordinary generation), which keeps
+ * its usual label. A "Replace" run is stored as a plain Seedance 2.5
+ * generation, so it is told apart by the `kind` its route saved.
+ */
+export function influencerModelLabel(
+  model: string,
+  parameters?: Record<string, unknown> | null,
+): string | null {
+  if (parameters?.kind === "replace") return REPLACE_LABEL;
+  return MOTION_MODEL_LABELS[model] ?? null;
+}
+
+/** Parameters an influencer run saves for its own bookkeeping, which the
+ *  gallery's details list has no business showing ("Kind: replace",
+ *  "Portrait Generation Id: <uuid>"). */
+export const INFLUENCER_INTERNAL_PARAMS = [
+  "kind",
+  "influencer",
+  "portraitGenerationId",
+  "measuredDuration",
+  "layout",
+  "firstPortraitFree",
+  "background",
+] as const;
 
 /** A portrait made as a two-panel character sheet (close-up left, full body
  *  right). Motion animates only its right half; see lib/influencer-crop.ts. */

@@ -35,7 +35,7 @@ import { PublishButton } from "@/components/social/publish-button";
 import { ResultWatermark, useResultWatermark } from "@/components/result-watermark";
 import { IMAGE_MODELS, SEEDANCE_DURATION_AUTO, VIDEO_MODELS } from "@/lib/constants";
 import { EDIT_GENERATION_MODEL } from "@/lib/editor/types";
-import { MOTION_MODEL_LABELS } from "@/lib/influencer";
+import { INFLUENCER_INTERNAL_PARAMS, influencerModelLabel, MOTION_MODEL_LABELS } from "@/lib/influencer";
 import { itemLabel, type GalleryItem } from "./generation-card";
 import { appHref } from "@/lib/hosts";
 
@@ -89,6 +89,10 @@ const HIDDEN_PARAM_KEYS = new Set([
   "audio",
   "maskImage",
 ]);
+
+// Only on influencer runs, which save their own bookkeeping alongside the
+// model's parameters.
+const INFLUENCER_HIDDEN_PARAM_KEYS = new Set<string>(INFLUENCER_INTERNAL_PARAMS);
 
 const PARAM_LABELS: Record<string, string> = {
   duration: "Duration",
@@ -268,12 +272,16 @@ function PreviewBody({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [index, hasPrev, hasNext, onNavigate]);
 
+  // An influencer clip is named after the studio's own choices, not the
+  // provider model it ran on.
+  const displayModel = influencerModelLabel(item.model, item.parameters) ?? modelLabel(item.model);
   const details: { label: string; value: string }[] = [
-    { label: "Model", value: modelLabel(item.model) },
+    { label: "Model", value: displayModel },
     { label: "Type", value: prettyType(item.type) },
   ];
   for (const [key, value] of Object.entries(item.parameters ?? {})) {
     if (HIDDEN_PARAM_KEYS.has(key)) continue;
+    if (item.influencerId && INFLUENCER_HIDDEN_PARAM_KEYS.has(key)) continue;
     const formatted = paramValue(key, value);
     if (formatted !== null) details.push({ label: paramLabel(key), value: formatted });
   }
@@ -436,7 +444,7 @@ function PreviewBody({
             </div>
           ) : (
             <div className="min-w-0">
-              <p className="truncate text-label font-semibold text-ink">{modelLabel(item.model)}</p>
+              <p className="truncate text-label font-semibold text-ink">{displayModel}</p>
               <p className="text-caption text-text-tertiary">{prettyType(item.type)}</p>
             </div>
           )}

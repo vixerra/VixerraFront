@@ -61,9 +61,18 @@ function creditsForUsd(costUsd: number, usdPerCredit: number): number {
   return Math.ceil(costUsd / usdPerCredit - ROUNDING_EPSILON);
 }
 
+
 function creditsFor(seconds: number, usdPerSecond: number): number {
   return creditsForUsd(seconds * usdPerSecond, COST_USD_PER_CREDIT);
 }
+
+// The AI influencer studio's "Replace in the clip" — a Seedance 2.5 run
+// whose one reference video is the measured clip — sells at 30%, not
+// TARGET_GROSS_MARGIN (2026-10-08). kie bills the clip as reference AND as
+// output, so at 60% a 20s swap cost users well over a thousand credits.
+// Only that run: Seedance in the composer keeps the standard margin.
+const INFLUENCER_REPLACE_GROSS_MARGIN = 0.3;
+const INFLUENCER_REPLACE_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - INFLUENCER_REPLACE_GROSS_MARGIN);
 
 function imageCreditsFor(costUsd: number): number {
   return creditsForUsd(costUsd, IMAGE_COST_USD_PER_CREDIT);
@@ -471,6 +480,20 @@ function imageCostUsd(model: string, size: string | undefined, quality: string |
 // as withReferenceVideo above. So that mode over-quotes rather than under-.
 const SEEDANCE25_KIE_AI_1080P_COST_USD = 0.79;
 
+// kie.ai's Seedance 2.5 rates with a reference video attached, read off its
+// pricing table 2026-10-08. Lower per second than without, but charged on
+// the reference footage AND the output: "lower per-second price × (total
+// reference-video duration + output duration)" (docs.kie.ai/market/bytedance/
+// seedance-2-5). Only usable when the caller knows how long the references
+// are — the AI influencer's "Replace in the clip", whose one reference is the
+// measured clip. The composer doesn't measure its references, so it keeps
+// the withReferenceVideo table.
+const SEEDANCE25_WITH_VIDEO_COST_USD: Record<string, number> = {
+  "480p": 0.085,
+  "720p": 0.19,
+  "1080p": 0.475,
+};
+
 function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
 }
@@ -479,7 +502,16 @@ export function estimateVideoCredits(
   model: string,
   durationSeconds: number,
   resolution: VideoResolution | string,
-  options: { hasReferenceVideo?: boolean; hasReferenceAudio?: boolean; hasAudio?: boolean; isDraft?: boolean } = {},
+  options: {
+    hasReferenceVideo?: boolean;
+    hasReferenceAudio?: boolean;
+    hasAudio?: boolean;
+    isDraft?: boolean;
+    /** Total length of the reference videos, when known — today only the
+     *  influencer studio's "Replace in the clip", which it prices exactly and
+     *  at INFLUENCER_REPLACE_GROSS_MARGIN. See SEEDANCE25_WITH_VIDEO_COST_USD. */
+    referenceVideoSeconds?: number;
+  } = {},
 ) {
   // Reference audio raises the assumed length of an auto-duration clip the
   // same way a reference video does (both carry their own timeline the output
@@ -488,6 +520,13 @@ export function estimateVideoCredits(
   const effectiveDuration = effectiveVideoSeconds(durationSeconds, {
     hasTimedReference: options.hasReferenceVideo || options.hasReferenceAudio,
   });
+
+  if (model === SEEDANCE_MODEL_ID && options.hasReferenceVideo && options.referenceVideoSeconds !== undefined) {
+    const rate =
+      SEEDANCE25_WITH_VIDEO_COST_USD[resolution] ?? Math.max(...Object.values(SEEDANCE25_WITH_VIDEO_COST_USD));
+    const outputSeconds = Math.max(SEEDANCE_DURATION_MIN, effectiveDuration);
+    return creditsForUsd((outputSeconds + options.referenceVideoSeconds) * rate, INFLUENCER_REPLACE_USD_PER_CREDIT);
+  }
 
   if (model === SEEDANCE_MODEL_ID && resolution === "1080p") {
     return Math.max(
@@ -587,6 +626,8 @@ export function estimateCreditsForRequest(input: {
   resolution?: string;
   hasReferenceVideo?: boolean;
   hasReferenceAudio?: boolean;
+  /** Total reference-video length, when measured. See estimateVideoCredits. */
+  referenceVideoSeconds?: number;
   /** Whether a soundtrack was asked for — a separate charge on Kling. Read
    *  off the saved parameters with hasAudioFromParameters. */
   hasAudio?: boolean;
@@ -607,6 +648,7 @@ export function estimateCreditsForRequest(input: {
     {
       hasReferenceVideo: input.hasReferenceVideo,
       hasReferenceAudio: input.hasReferenceAudio,
+      referenceVideoSeconds: input.referenceVideoSeconds,
       hasAudio: input.hasAudio,
       isDraft: input.isDraft,
     },

@@ -448,7 +448,8 @@ function MotionPanel({
   const [kind, setKind] = useState<MotionKind>(hasReplace ? "replace" : "move");
   const kindModels = motion.models.filter((m) => kindOf(m) === kind);
   const [model, setModel] = useState(kindModels[0]?.id ?? motion.models[0]?.id ?? "");
-  const [resolution, setResolution] = useState("720p");
+  // Empty until picked: the model's lowest resolution stands in (below).
+  const [resolution, setResolution] = useState("");
   const [orientation, setOrientation] = useState<"video" | "image">("video");
   const [prompt, setPrompt] = useState("");
   const [video, setVideo] = useState<(Upload & { seconds?: number; bytes: number; file: File }) | null>(null);
@@ -461,13 +462,10 @@ function MotionPanel({
   const modelConfig = motion.models.find((m) => m.id === model);
   // Each model says what it takes; an older API that doesn't is Kling-shaped.
   const resolutions = modelConfig?.resolutions ?? motion.resolutions;
-  // Kept as picked across model switches, and snapped to what this model
-  // offers (720p is the common ground) rather than reset.
-  const effectiveResolution = resolutions.includes(resolution)
-    ? resolution
-    : resolutions.includes("720p")
-      ? "720p"
-      : resolutions[0];
+  // Kept as picked across model switches when this model offers it; else the
+  // model's lowest (lists come cheapest first), so the default never costs
+  // more than it has to.
+  const effectiveResolution = resolutions.includes(resolution) ? resolution : resolutions[0];
   const takesOrientation = modelConfig?.orientation ?? true;
   const takesPrompt = modelConfig?.prompt ?? true;
   const effectiveOrientation = takesOrientation ? orientation : "video";
@@ -516,6 +514,9 @@ function MotionPanel({
     durationSeconds: billedSeconds,
     resolution: effectiveResolution,
     hasReferenceVideo: true,
+    // "Replace" sends the clip as Seedance's reference, billed by kie on top
+    // of the output — the API prices it the same way.
+    referenceVideoSeconds: kind === "replace" ? billedSeconds : undefined,
   });
 
   const tierInfo = usageQuery.data?.tier_info;
@@ -643,7 +644,7 @@ function MotionPanel({
           <div className="flex items-center justify-between">
             <span className="text-label font-medium text-ink-soft">Reference video</span>
             <span className="text-caption text-muted">
-              {motion.minSeconds}-{maxSeconds}s, MP4 or MOV{maxMb ? `, up to ${maxMb}MB` : ""}
+              {minSeconds}-{maxSeconds}s, MP4 or MOV{maxMb ? `, up to ${maxMb}MB` : ""}
             </span>
           </div>
           <PanelDropzone
@@ -694,7 +695,7 @@ function MotionPanel({
               only repeat the mode above. */}
           {kindModels.length > 1 && (
           <div className="space-y-1.5">
-            <span className="text-caption text-muted">Model</span>
+            <span className="text-caption text-muted">Quality</span>
             <div className="grid grid-cols-1 gap-2">
               {kindModels.map((m) => (
                 <button
@@ -749,19 +750,16 @@ function MotionPanel({
             />
           </div>
         )}
-
-        <p className="flex items-start gap-1.5 text-caption text-muted">
-          <Info className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-          The result is as long as your clip, and that&apos;s what it costs
-          {video?.seconds === undefined && video ? ` (we couldn't read its length, so it's priced at ${maxSeconds}s)` : ""}.
-        </p>
       </div>
 
-      {/* The pill spells out why it is disabled itself, under the button. */}
+      {/* The pill spells out why it is disabled itself, under the button.
+          Only the total, and only once the clip is in: before that any
+          figure is a guess at a clip that doesn't exist yet. */}
       <div className="shrink-0 border-t border-border-subtle px-4 py-3 sm:px-5">
         <CreditsSubmitPill
           fullWidth
           credits={credits}
+          hideCost={!video?.url}
           loading={mutation.isPending}
           balance={usageQuery.data?.credit_balance}
           blockedReason={blockedReason}
@@ -769,7 +767,7 @@ function MotionPanel({
         />
         {preparing !== null && (
           <p className="mt-2 text-center text-caption text-muted" aria-live="polite">
-            Resizing your clip to 720p for Seedance… {Math.round(preparing * 100)}%
+            Preparing your clip… {Math.round(preparing * 100)}%
           </p>
         )}
       </div>
