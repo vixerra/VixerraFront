@@ -30,7 +30,23 @@ import {
 export type TraitOption = { id: string; label: string; swatch?: string };
 export type TraitGroup = { id: string; label: string; multi?: number; options: TraitOption[] };
 
-export type MotionModelOption = { id: string; label: string; description: string; background: boolean };
+/** "move": the portrait is animated in its own scene (Kling). "replace": the
+ *  influencer takes the clip's person's place, in the clip's scene (Wan). */
+export type MotionKind = "move" | "replace";
+
+/** Everything past `background` is optional: an API older than "replace"
+ *  doesn't send it, and the page then treats every model as Kling-shaped. */
+export type MotionModelOption = {
+  id: string;
+  label: string;
+  description: string;
+  background: boolean;
+  kind?: MotionKind;
+  resolutions?: string[];
+  prompt?: boolean;
+  orientation?: boolean;
+  maxVideoBytes?: number | null;
+};
 
 export type InfluencerOptions = {
   groups: TraitGroup[];
@@ -157,6 +173,7 @@ export const OPEN_BY_DEFAULT = new Set(["characterType", "comicLevel", "gender",
 export const MOTION_MODEL_LABELS: Record<string, string> = {
   "kling/2.6-motion-control": "Kling 2.6 Motion Control",
   "kling/3.0-motion-control": "Kling 3.0 Motion Control",
+  "wan/2.2-animate-replace": "Wan 2.2 Animate Replace",
 };
 
 /** A portrait made as a two-panel character sheet (close-up left, full body

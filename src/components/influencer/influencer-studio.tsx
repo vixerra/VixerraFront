@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
   Clapperboard,
@@ -8,10 +8,13 @@ import {
   Gift,
   ImagePlus,
   Info,
+  Move,
   RefreshCw,
+  Replace,
   Trash2,
   UserPlus,
   Video,
+  type LucideIcon,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
@@ -26,6 +29,8 @@ import {
   type Influencer,
   type InfluencerGeneration,
   type InfluencerOptions,
+  type MotionKind,
+  type MotionModelOption,
   type TraitPicks,
 } from "@/lib/influencer";
 import {
@@ -399,6 +404,21 @@ const ORIENTATION_LABEL: Record<"video" | "image", string> = {
   image: "Match the photo",
 };
 
+const MOTION_KINDS: { id: MotionKind; title: string; body: string; icon: LucideIcon }[] = [
+  {
+    id: "replace",
+    title: "Replace in the clip",
+    body: "Takes the person's place. Keeps the clip's scene and light.",
+    icon: Replace,
+  },
+  {
+    id: "move",
+    title: "Move in their scene",
+    body: "Copies the moves in your influencer's own setting.",
+    icon: Move,
+  },
+];
+
 function MotionPanel({
   options,
   selectedId,
@@ -421,17 +441,41 @@ function MotionPanel({
   const influencersQuery = useInfluencers();
 
   const motion = options.motion;
-  const [model, setModel] = useState(motion.models[0]?.id ?? "");
-  const [resolution, setResolution] = useState(motion.resolutions[0] ?? "720p");
+  const kindOf = (m: MotionModelOption): MotionKind => m.kind ?? "move";
+  const hasReplace = motion.models.some((m) => kindOf(m) === "replace");
+  // "Replace" first when the API offers it: putting the influencer into the
+  // clip, scene and all, is what people mean by "copy this clip".
+  const [kind, setKind] = useState<MotionKind>(hasReplace ? "replace" : "move");
+  const kindModels = motion.models.filter((m) => kindOf(m) === kind);
+  const [model, setModel] = useState(kindModels[0]?.id ?? motion.models[0]?.id ?? "");
+  const [resolution, setResolution] = useState("720p");
   const [orientation, setOrientation] = useState<"video" | "image">("video");
-  const [background, setBackground] = useState<"video" | "image">("video");
   const [prompt, setPrompt] = useState("");
-  const [video, setVideo] = useState<(Upload & { seconds?: number }) | null>(null);
+  const [video, setVideo] = useState<(Upload & { seconds?: number; bytes: number }) | null>(null);
 
   const ready = (influencersQuery.data ?? []).filter((i) => i.portrait?.status === "completed");
   const selected = ready.find((i) => i.id === selectedId) ?? null;
   const modelConfig = motion.models.find((m) => m.id === model);
-  const maxSeconds = motion.maxSeconds[orientation];
+  // Each model says what it takes; an older API that doesn't is Kling-shaped.
+  const resolutions = modelConfig?.resolutions ?? motion.resolutions;
+  // Kept as picked across model switches, and snapped to what this model
+  // offers (720p is the common ground) rather than reset.
+  const effectiveResolution = resolutions.includes(resolution)
+    ? resolution
+    : resolutions.includes("720p")
+      ? "720p"
+      : resolutions[0];
+  const takesOrientation = modelConfig?.orientation ?? true;
+  const takesPrompt = modelConfig?.prompt ?? true;
+  const effectiveOrientation = takesOrientation ? orientation : "video";
+  const maxSeconds = motion.maxSeconds[effectiveOrientation];
+  const maxBytes = modelConfig?.maxVideoBytes ?? null;
+  const maxMb = maxBytes ? Math.round(maxBytes / 1024 / 1024) : null;
+
+  function pickKind(next: MotionKind) {
+    setKind(next);
+    setModel(motion.models.find((m) => kindOf(m) === next)?.id ?? model);
+  }
 
   async function pickVideo(file: File) {
     const preview = URL.createObjectURL(file);
@@ -444,10 +488,12 @@ function MotionPanel({
       toast({ title: "Clip too long", description: `Trim it to ${motion.maxSeconds.video}s or less.`, variant: "error" });
       return;
     }
-    setVideo({ preview, url: null, uploading: true, seconds });
+    // Not refused here when over a model's size cap: the clip still fits the
+    // other mode, so the cap is flagged under the button instead.
+    setVideo({ preview, url: null, uploading: true, seconds, bytes: file.size });
     try {
       const url = await uploadFile(file);
-      setVideo({ preview, url, uploading: false, seconds });
+      setVideo({ preview, url, uploading: false, seconds, bytes: file.size });
     } catch (err) {
       toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
       setVideo(null);
@@ -464,15 +510,15 @@ function MotionPanel({
     type: "image-to-video",
     model,
     durationSeconds: billedSeconds,
-    resolution,
+    resolution: effectiveResolution,
     hasReferenceVideo: true,
   });
 
   const tierInfo = usageQuery.data?.tier_info;
   const blockedReason =
     canGenerate.reason ??
-    (isResolutionLocked(resolution, tierInfo)
-      ? upgradeHint(minTierForResolution(resolution), resolution)
+    (isResolutionLocked(effectiveResolution, tierInfo)
+      ? upgradeHint(minTierForResolution(effectiveResolution), effectiveResolution)
       : video && isDurationLocked(billedSeconds, tierInfo)
         ? upgradeHint(minTierForDuration(billedSeconds), `${billedSeconds}s clips`)
         : undefined);
@@ -482,9 +528,11 @@ function MotionPanel({
       ? video?.uploading
         ? "Wait for the upload to finish."
         : "Upload a reference video."
-      : video.seconds !== undefined && video.seconds > maxSeconds + 0.05
-        ? `"${ORIENTATION_LABEL.image}" takes clips up to ${maxSeconds}s. Trim it or switch to "${ORIENTATION_LABEL.video}".`
-        : undefined;
+      : maxBytes && video.bytes > maxBytes
+        ? `${modelConfig?.label ?? "This model"} takes clips up to ${maxMb}MB; this one is ${(video.bytes / 1024 / 1024).toFixed(1)}MB. Use a shorter or lighter clip, or switch to "Move in their scene".`
+        : video.seconds !== undefined && video.seconds > maxSeconds + 0.05
+          ? `"${ORIENTATION_LABEL.image}" takes clips up to ${maxSeconds}s. Trim it or switch to "${ORIENTATION_LABEL.video}".`
+          : undefined;
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -500,10 +548,13 @@ function MotionPanel({
         model,
         video: video!.url,
         characterImage,
-        resolution,
-        orientation,
-        background: modelConfig?.background ? background : undefined,
-        prompt: prompt.trim() || undefined,
+        resolution: effectiveResolution,
+        orientation: effectiveOrientation,
+        // "Move" is set in the portrait's scene by definition. Kling 3.0's
+        // "clip background" switch existed but kie ignored it — "Replace"
+        // is the mode that keeps the clip's scene.
+        background: modelConfig?.background ? "image" : undefined,
+        prompt: takesPrompt ? prompt.trim() || undefined : undefined,
       });
     },
     onSuccess: (data) => {
@@ -571,7 +622,7 @@ function MotionPanel({
           <div className="flex items-center justify-between">
             <span className="text-label font-medium text-ink-soft">Reference video</span>
             <span className="text-caption text-muted">
-              {motion.minSeconds}-{maxSeconds}s, MP4 or MOV
+              {motion.minSeconds}-{maxSeconds}s, MP4 or MOV{maxMb ? `, up to ${maxMb}MB` : ""}
             </span>
           </div>
           <PanelDropzone
@@ -588,10 +639,43 @@ function MotionPanel({
         </section>
 
         <section className="space-y-3">
+          {hasReplace && (
+            <div className="space-y-1.5">
+              <span className="text-caption text-muted">Mode</span>
+              <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Motion mode">
+                {MOTION_KINDS.map((k) => (
+                  <button
+                    key={k.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={kind === k.id}
+                    onClick={() => pickKind(k.id)}
+                    className={cn(
+                      "flex flex-col gap-1 rounded-xl border px-3 py-2.5 text-left transition-colors",
+                      kind === k.id ? "border-brand bg-brand/10" : "border-line bg-surface hover:border-border-strong",
+                    )}
+                  >
+                    <span className="flex items-center gap-1.5 text-label font-medium text-ink">
+                      {createElement(k.icon, {
+                        className: cn("size-4", kind === k.id ? "text-brand" : "text-muted"),
+                        "aria-hidden": true,
+                      })}
+                      {k.title}
+                    </span>
+                    <span className="text-caption leading-snug text-muted">{k.body}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* One model in a mode leaves nothing to choose; its card would
+              only repeat the mode above. */}
+          {kindModels.length > 1 && (
           <div className="space-y-1.5">
             <span className="text-caption text-muted">Model</span>
             <div className="grid grid-cols-1 gap-2">
-              {motion.models.map((m) => (
+              {kindModels.map((m) => (
                 <button
                   key={m.id}
                   type="button"
@@ -608,49 +692,42 @@ function MotionPanel({
               ))}
             </div>
           </div>
+          )}
 
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="space-y-1.5">
               <span className="text-caption text-muted">Resolution</span>
-              <SegmentedTabs value={resolution} options={motion.resolutions} onChange={setResolution} />
+              <SegmentedTabs value={effectiveResolution} options={resolutions} onChange={setResolution} />
             </div>
-            <div className="space-y-1.5">
-              <span className="text-caption text-muted">Facing</span>
-              <SegmentedTabs
-                value={orientation}
-                options={motion.orientations}
-                onChange={setOrientation}
-                renderLabel={(v) => ORIENTATION_LABEL[v]}
-              />
-            </div>
+            {takesOrientation && (
+              <div className="space-y-1.5">
+                <span className="text-caption text-muted">Facing</span>
+                <SegmentedTabs
+                  value={orientation}
+                  options={motion.orientations}
+                  onChange={setOrientation}
+                  renderLabel={(v) => ORIENTATION_LABEL[v]}
+                />
+              </div>
+            )}
           </div>
-
-          {modelConfig?.background && (
-            <div className="space-y-1.5">
-              <span className="text-caption text-muted">Background</span>
-              <SegmentedTabs
-                value={background}
-                options={["video", "image"] as const}
-                onChange={setBackground}
-                renderLabel={(v) => (v === "video" ? "From the clip" : "From the portrait")}
-              />
-            </div>
-          )}
         </section>
 
-        <div className="space-y-1.5">
-          <label htmlFor="motion-prompt" className="text-label font-medium text-ink-soft">
-            Prompt <span className="font-normal text-muted">(optional)</span>
-          </label>
-          <Textarea
-            id="motion-prompt"
-            rows={2}
-            value={prompt}
-            maxLength={motion.promptMaxLength}
-            placeholder="e.g. smiling, natural daylight"
-            onChange={(e) => setPrompt(e.target.value)}
-          />
-        </div>
+        {takesPrompt && (
+          <div className="space-y-1.5">
+            <label htmlFor="motion-prompt" className="text-label font-medium text-ink-soft">
+              Prompt <span className="font-normal text-muted">(optional)</span>
+            </label>
+            <Textarea
+              id="motion-prompt"
+              rows={2}
+              value={prompt}
+              maxLength={motion.promptMaxLength}
+              placeholder="e.g. smiling, natural daylight"
+              onChange={(e) => setPrompt(e.target.value)}
+            />
+          </div>
+        )}
 
         <p className="flex items-start gap-1.5 text-caption text-muted">
           <Info className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
