@@ -543,16 +543,25 @@ function MotionPanel({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      // Seedance takes reference clips at 480p-720p only, and phones film
-      // 1080p+: such a clip is re-encoded here and the smaller copy uploaded.
-      // The encoder is a heavy module, so it loads only when needed.
+      // Seedance takes reference clips at 480p-720p only (phones film 1080p+),
+      // and ByteDance refuses the run when it flags the clip's sound (a real
+      // voice, a song). So the clip is re-encoded here, resized if needed and
+      // always without its audio, and that copy is what gets sent. The
+      // sound goes up separately and the API puts it back on the result, so
+      // the clip keeps its own song. The encoder is a heavy module, so it
+      // loads only when needed.
       let videoUrl = video!.url!;
+      let soundtrack: string | undefined;
       if (modelConfig?.videoPixels) {
-        const { fitVideoToPixels } = await import("@/lib/downscale-video");
+        const { fitVideoToPixels, extractSoundtrack } = await import("@/lib/downscale-video");
         setPreparing(0);
         try {
-          const fitted = await fitVideoToPixels(video!.file, modelConfig.videoPixels, setPreparing);
+          const fitted = await fitVideoToPixels(video!.file, modelConfig.videoPixels, setPreparing, {
+            dropAudio: true,
+          });
           if (fitted !== video!.file) videoUrl = await uploadFile(fitted);
+          const audio = await extractSoundtrack(video!.file);
+          if (audio) soundtrack = await uploadFile(audio);
         } finally {
           setPreparing(null);
         }
@@ -569,6 +578,7 @@ function MotionPanel({
       return postJson<{ job_id: string }>(`/api/influencers/${selected!.id}/motion`, {
         model,
         video: videoUrl,
+        soundtrack,
         characterImage,
         resolution: effectiveResolution,
         orientation: effectiveOrientation,

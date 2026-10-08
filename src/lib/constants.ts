@@ -8,7 +8,7 @@ import { CLOUDFLARE_MODELS } from "@/lib/cloudflare-models";
 // generation costs ~$2.31").
 //
 // It is ALSO the base credit-estimate.ts prices generations from: a credit
-// may buy CREDIT_VALUE_USD × (1 - TARGET_GROSS_MARGIN) = $0.004 of provider
+// may buy CREDIT_VALUE_USD × (1 - TARGET_GROSS_MARGIN) = $0.006 of provider
 // compute on video, or $0.0035 on images (they carry a steeper 65% margin).
 // The margin therefore rides on every generation. Until 2026-08-30 it
 // worked the other way round — generations were priced at cost (1 credit =
@@ -103,12 +103,13 @@ export const TIER_INFO: Record<
   // Credits recalibrated 2026-08-30: every plan sells credits at a flat
   // CREDIT_VALUE_USD ($0.01) — $5.99 → 600, $24 → 2,500, $49 → 5,000 — and
   // the margin now comes from generation pricing instead (credit-estimate.ts
-  // bills video at a 60% gross margin over real provider cost, images at
-  // 65% — 50% and 55% until 2026-09-14).
-  // Spending a plan's credits in full on video therefore costs us 40% of its
-  // price: ~60% gross, ~49-51% net of the ~2.9%+$0.30 Stripe fee and the ~5%
-  // storage/support/hosting overhead — about ten points above the 40% net
-  // floor the v2 pricing was built around. That is the video-only worst
+  // bills video at a 40% gross margin over real provider cost, images at
+  // 65% — video was 50% until 2026-09-14 and 60% until 2026-10-08, images
+  // 55% until 2026-09-14).
+  // Spending a plan's credits in full on video therefore costs us 60% of its
+  // price: ~40% gross, ~29-31% net of the ~2.9%+$0.30 Stripe fee and the ~5%
+  // storage/support/hosting overhead — about ten points BELOW the 40% net
+  // floor the v2 pricing was built around, a deliberate choice (2026-10-08). That is the video-only worst
   // case: images bill at a 65% gross margin (~54-56% net), so an image-heavy
   // user is the comfortable one. maxResolution/maxDurationSeconds/
   // concurrentGenerations/priorityQueue/apiAccess are enforced
@@ -253,8 +254,9 @@ export type TierInfo = (typeof TIER_INFO)[Tier];
 // pay 11 months for 12) — payments are simulated in this build, so this
 // isn't wired to any real billing cycle. Kept intentionally more modest than
 // a typical 17-20% annual discount: an annual discount cuts the price but
-// not the credits, so it comes straight out of margin — at ~60% gross, a
-// 20% discount would bring it down to the 40% net floor.
+// not the credits, so it comes straight out of margin. At the ~40% video
+// gross (2026-10-08) even this one takes a video-only annual plan to ~35%
+// gross, ~24-26% net; a 20% discount would leave ~25% gross.
 export const ANNUAL_PRICE_MONTHLY: Partial<Record<Tier, number>> = {
   starter: 5.49,
   creator: 22,
@@ -520,16 +522,21 @@ export const SEEDANCE_REFERENCE_VIDEOS_MAX = 10;
 export const SEEDANCE_REFERENCE_AUDIOS_MAX = 10;
 export const SEEDANCE_REFERENCE_MEDIA_MAX_SECONDS = 30;
 
-// Seedance 2.0's own parameter set (confirmed via the ByteDance/Cloudflare
-// integration guide, 2026-08-14) — kept separate from the 2.5 constants
-// above since the two models genuinely differ: no -1 "auto" duration, a
-// wider resolution ceiling (up to 4K), a real camera_fixed toggle (2.5
-// documents it as unsupported), and no output_format choice.
+// Seedance 2.0's own parameter set — kept separate from the 2.5 constants
+// above since the two models genuinely differ. Served by kie.ai since
+// 2026-10-08 (bytedance/seedance-2, docs.kie.ai/market/bytedance/seedance-2),
+// which dropped three values the Cloudflare integration had:
+//   - 4K: kie encodes it as H.265/HEVC, which Chrome and Edge can't play
+//     (see mp4-codec.ts) — it would sell a black tile.
+//   - 9:21, which kie's aspect_ratio doesn't list.
+//   - camera_fixed, watermark, seed and use_virtual_avatar, which kie has no
+//     field for (validation.ts refuses the first three).
+// kie takes 4-15s; the composer keeps its 4-12.
 export const SEEDANCE2_MODEL_ID = "bytedance/seedance-2.0";
 
 export const SEEDANCE2_DURATION_MIN = 4;
 export const SEEDANCE2_DURATION_MAX = 12;
-export const SEEDANCE2_RESOLUTIONS = ["480p", "720p", "1080p", "4k"] as const;
+export const SEEDANCE2_RESOLUTIONS = ["480p", "720p", "1080p"] as const;
 export const SEEDANCE2_ASPECT_RATIOS = [
   "16:9",
   "4:3",
@@ -537,7 +544,6 @@ export const SEEDANCE2_ASPECT_RATIOS = [
   "3:4",
   "9:16",
   "21:9",
-  "9:21",
 ] as const;
 
 // Seedance 2.0's subject-reference slots: up to four stills of the people or
@@ -546,3 +552,13 @@ export const SEEDANCE2_ASPECT_RATIOS = [
 // reference the model composes from — these say "this is who/what appears",
 // not "this is what the shot looks like".
 export const SEEDANCE2_REFERENCE_IMAGES_MAX = 4;
+
+// kie.ai refuses a Seedance 2.0 prompt shorter than this, in every mode.
+export const SEEDANCE2_PROMPT_MIN_LENGTH = 3;
+
+// kie.ai's bounds on Seedance 2.0's reference video: 2-15s, and 409,600 to
+// 927,408 pixels a frame (480p to 720p). The composer resizes a larger clip
+// before uploading it; the route checks the length.
+export const SEEDANCE2_REFERENCE_VIDEO_MIN_SECONDS = 2;
+export const SEEDANCE2_REFERENCE_VIDEO_MAX_SECONDS = 15;
+export const SEEDANCE2_REFERENCE_VIDEO_PIXELS = { min: 409_600, max: 927_408 } as const;

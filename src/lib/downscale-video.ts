@@ -56,48 +56,87 @@ async function decodeSoundtrack(source: Blob): Promise<AudioBuffer | null> {
   }
 }
 
+const AUDIO_CONFIG: AudioEncoderConfig = {
+  codec: "mp4a.40.2",
+  sampleRate: MIX_SAMPLE_RATE,
+  numberOfChannels: MIX_CHANNELS,
+  bitrate: 128_000,
+};
+
+async function canEncodeAudio(): Promise<boolean> {
+  return (
+    typeof window.AudioEncoder !== "undefined" &&
+    (await AudioEncoder.isConfigSupported(AUDIO_CONFIG)
+      .then((r) => r.supported ?? false)
+      .catch(() => false))
+  );
+}
+
+/**
+ * The clip's soundtrack alone, as an AAC .m4a. "Replace" sends its clip to
+ * the provider without sound (see `dropAudio` below), so Seedance writes a
+ * song of its own; this copy is uploaded beside it, never sent to the
+ * provider, and the API puts it back on the result (lib/mp4-remux.ts there).
+ *
+ * Null when the clip has no sound or this browser can't encode AAC: the run
+ * still goes ahead, with Seedance's audio.
+ */
+export async function extractSoundtrack(file: File): Promise<File | null> {
+  if (!(await canEncodeAudio())) return null;
+  const soundtrack = await decodeSoundtrack(file);
+  if (!soundtrack) return null;
+  const muxer = new Muxer({
+    target: new ArrayBufferTarget(),
+    audio: { codec: "aac", numberOfChannels: MIX_CHANNELS, sampleRate: MIX_SAMPLE_RATE },
+    fastStart: "in-memory",
+  });
+  await encodeAudio(soundtrack, AUDIO_CONFIG, muxer);
+  muxer.finalize();
+  const name = file.name.replace(/\.[^.]+$/, "") || "clip";
+  return new File([muxer.target.buffer], `${name}-soundtrack.m4a`, { type: "audio/mp4" });
+}
+
 /**
  * Returns `file` re-encoded to fit `bounds`, or `file` itself when it
- * already does. Throws ExportUnsupportedError in a browser without
- * WebCodecs.
+ * already does and there's nothing else to change. Throws
+ * ExportUnsupportedError in a browser without WebCodecs.
+ *
+ * `dropAudio` re-encodes even a clip that fits, to leave its soundtrack out:
+ * ByteDance screens a reference video's audio and refuses the whole run when
+ * it hears something it calls sensitive — a real person's voice, a song
+ * (2026-10-08: "the input audio 'content[2]' may contain sensitive
+ * information"). The sound comes back on the result through
+ * extractSoundtrack above.
  */
 export async function fitVideoToPixels(
   file: File,
   bounds: PixelBounds,
   onProgress?: (fraction: number) => void,
+  { dropAudio = false }: { dropAudio?: boolean } = {},
 ): Promise<File> {
   const objectUrl = URL.createObjectURL(file);
   const video = createDecodeVideo(objectUrl);
   try {
     const probe = await probeVideo(objectUrl);
-    const size = targetSize(probe.width, probe.height, bounds);
-    if (!size) return file;
+    const resized = targetSize(probe.width, probe.height, bounds);
+    if (!resized && !dropAudio) return file;
     if (!isExportSupported()) {
       throw new ExportUnsupportedError(
-        "Your clip is above 720p and this browser can't resize it. Use Chrome, Edge, Firefox 130+ or Safari 17+, or upload a 720p clip.",
+        "This browser can't prepare your clip. Use Chrome, Edge, Firefox 130+ or Safari 17+.",
       );
     }
 
     await waitForReady(video);
     video.pause();
+    // H.264 wants even sides; a clip that fits keeps its own size.
+    const size = resized ?? { width: evenDown(probe.width), height: evenDown(probe.height) };
     const { width, height } = size;
     const totalFrames = Math.max(1, Math.round(probe.duration * FPS));
     // Plenty for 720p; the provider re-encodes anyway.
     const bitrate = 4_000_000;
 
-    const soundtrack = await decodeSoundtrack(file);
-    const audioConfig: AudioEncoderConfig = {
-      codec: "mp4a.40.2",
-      sampleRate: MIX_SAMPLE_RATE,
-      numberOfChannels: MIX_CHANNELS,
-      bitrate: 128_000,
-    };
-    const withAudio =
-      soundtrack !== null &&
-      typeof window.AudioEncoder !== "undefined" &&
-      (await AudioEncoder.isConfigSupported(audioConfig)
-        .then((r) => r.supported ?? false)
-        .catch(() => false));
+    const soundtrack = dropAudio ? null : await decodeSoundtrack(file);
+    const withAudio = soundtrack !== null && (await canEncodeAudio());
 
     const muxer = new Muxer({
       target: new ArrayBufferTarget(),
@@ -141,7 +180,7 @@ export async function fitVideoToPixels(
         if (frame % 6 === 0) onProgress?.(0.95 * ((frame + 1) / totalFrames));
       }
       await encoder.flush();
-      if (withAudio && soundtrack) await encodeAudio(soundtrack, audioConfig, muxer);
+      if (withAudio && soundtrack) await encodeAudio(soundtrack, AUDIO_CONFIG, muxer);
       muxer.finalize();
     } finally {
       if (encoder.state !== "closed") encoder.close();
@@ -150,7 +189,7 @@ export async function fitVideoToPixels(
 
     onProgress?.(1);
     const name = file.name.replace(/\.[^.]+$/, "") || "clip";
-    return new File([muxer.target.buffer], `${name}-720p.mp4`, { type: "video/mp4" });
+    return new File([muxer.target.buffer], `${name}-prepared.mp4`, { type: "video/mp4" });
   } finally {
     video.removeAttribute("src");
     video.load();

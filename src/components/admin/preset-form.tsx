@@ -50,17 +50,15 @@ const SEEDANCE_FIELDS: Record<string, DynamicField[]> = {
     { key: "watermark", cfParam: "watermark", label: "Watermark", type: "switch", defaultValue: false },
     // No virtual-avatar switch on 2.5 since 2026-09-21: the model moved to
     // kie.ai, whose schema has no use_virtual_avatar, so a preset setting it
-    // would store a field the runner cannot send. 2.0 below still has it.
+    // would store a field the runner cannot send. 2.0 below lost it the same
+    // way on 2026-10-08, along with its camera lock and watermark.
     { key: "outputFormat", cfParam: "output_format", label: "Output format", type: "select", options: [...SEEDANCE_OUTPUT_FORMATS], defaultValue: "mp4" },
   ],
   [SEEDANCE2_MODEL_ID]: [
     { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 4, max: 12, helperText: "seconds" },
     { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: [...SEEDANCE2_RESOLUTIONS], defaultValue: "720p" },
     { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: [...SEEDANCE2_ASPECT_RATIOS], defaultValue: "16:9" },
-    { key: "cameraFixed", cfParam: "camera_fixed", label: "Fix camera position", type: "switch", defaultValue: false },
     { key: "generateAudio", cfParam: "generate_audio", label: "Generate audio", type: "switch", defaultValue: true },
-    { key: "watermark", cfParam: "watermark", label: "Watermark", type: "switch", defaultValue: false },
-    { key: "useVirtualAvatar", cfParam: "use_virtual_avatar", label: "Virtual avatar mode", type: "switch", defaultValue: true },
   ],
 };
 

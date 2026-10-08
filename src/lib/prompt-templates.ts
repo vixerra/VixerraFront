@@ -265,7 +265,7 @@ export function buildTemplateText(t: PromptTemplate): string {
     "---",
     `Model: Seedance 2.0`,
     `Duration: ${t.duration}s`,
-    `Resolution: ${t.resolution === "4k" ? "4K" : t.resolution}`,
+    `Resolution: ${t.resolution}`,
     `Aspect ratio: ${t.aspectRatio}`,
     `Camera: ${t.cameraFixed ? "Fixed" : "Dynamic"}`,
     `Audio: ${t.generateAudio ? "On" : "Off"}`,

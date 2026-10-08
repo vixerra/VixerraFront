@@ -7,7 +7,7 @@ import { useInvalidateCredits, useUsage } from "@/hooks/use-credits";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftRight, Clock, Monitor, RectangleHorizontal } from "lucide-react";
-import { FieldError, Input } from "@/components/ui/input";
+import { FieldError } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/toast";
 import { estimateVideoCredits } from "@/lib/credit-estimate";
@@ -30,6 +30,9 @@ import {
   SEEDANCE2_RESOLUTIONS,
   SEEDANCE2_ASPECT_RATIOS,
   SEEDANCE2_REFERENCE_IMAGES_MAX,
+  SEEDANCE2_REFERENCE_VIDEO_MIN_SECONDS,
+  SEEDANCE2_REFERENCE_VIDEO_MAX_SECONDS,
+  SEEDANCE2_REFERENCE_VIDEO_PIXELS,
   type VideoModelId,
   type TierInfo,
 } from "@/lib/constants";
@@ -51,6 +54,8 @@ const DURATIONS = Array.from(
   { length: SEEDANCE2_DURATION_MAX - SEEDANCE2_DURATION_MIN + 1 },
   (_, i) => SEEDANCE2_DURATION_MIN + i,
 );
+
+const FRAMES_LOCKED_HINT = "Remove the characters to use a first frame — Seedance 2.0 takes one or the other.";
 
 function clampDuration(value: number | undefined): number | undefined {
   if (value === undefined || !Number.isInteger(value)) return undefined;
@@ -95,6 +100,10 @@ export function Seedance2VideoForm({
   const [endFramePreview, setEndFramePreview] = useState<string | null>(null);
   const [uploadingRefVideo, setUploadingRefVideo] = useState(false);
   const [refVideoPreview, setRefVideoPreview] = useState<string | null>(null);
+  // The clip's length, for the quote: kie bills its seconds on top of the
+  // output's. Undefined until measured, which the estimate prices at the
+  // 15s ceiling — the same assumption the API makes for a clip it can't read.
+  const [refVideoSeconds, setRefVideoSeconds] = useState<number | undefined>(undefined);
   const [refMode, setRefMode] = useState<ReferenceMode>("reference");
   // Character references are a growable list rather than fixed slots: the
   // form only ever holds the ones actually uploaded, so referenceImages stays
@@ -106,7 +115,6 @@ export function Seedance2VideoForm({
   const [uploadingCharacter, setUploadingCharacter] = useState(false);
 
   const {
-    register,
     handleSubmit,
     control,
     setValue,
@@ -119,13 +127,9 @@ export function Seedance2VideoForm({
       duration: clampDuration(initialParams?.duration) ?? 5,
       resolution: initialParams?.resolution ?? "720p",
       aspectRatio: initialParams?.aspectRatio ?? "16:9",
-      cameraFixed: false,
       generateAudio: true,
-      watermark: false,
-      // Pinned on and no longer offered as a switch: it routes character
-      // references through ByteDance's trusted avatar library instead of its
-      // face/deepfake detector, so it only ever unblocks a generation.
-      useVirtualAvatar: true,
+      // No camera lock, watermark, seed or virtual avatar since the move to
+      // kie.ai (2026-10-08): its schema has no field for any of them.
     },
   });
 
@@ -141,6 +145,7 @@ export function Seedance2VideoForm({
   // request the server is about to charge for. See credit-estimate.ts.
   const estimatedCredits = estimateVideoCredits(SEEDANCE2_MODEL_ID, duration, resolution, {
     hasReferenceVideo: Boolean(referenceVideo),
+    referenceVideoSeconds: refVideoSeconds,
   });
 
   // Defaults are 720p / 5s, and the free plan caps at 480p — so the composer
@@ -159,10 +164,10 @@ export function Seedance2VideoForm({
     }
   }, [tierInfo, resolution, duration, setValue]);
 
-  // Both clamps can come up empty — 4K is Studio-only, and a plan could cap
-  // below this model's 4s floor — so say why instead of letting it 403.
+  // Both clamps can come up empty — a plan could cap below this model's
+  // lowest resolution or its 4s floor — so say why instead of letting it 403.
   const blockedReason = isResolutionLocked(resolution, tierInfo)
-    ? upgradeHint(minTierForResolution(resolution), resolution === "4k" ? "4K" : resolution)
+    ? upgradeHint(minTierForResolution(resolution), resolution)
     : isDurationLocked(duration, tierInfo)
       ? upgradeHint(minTierForDuration(duration), duration + "s clips")
       : undefined;
@@ -213,10 +218,30 @@ export function Seedance2VideoForm({
     setUploadingRefVideo(true);
     setRefVideoPreview(URL.createObjectURL(file));
     try {
-      setValue("referenceVideo", await uploadFile(file), { shouldValidate: true });
+      // kie.ai takes reference clips at 480p-720p only, and phones film
+      // 1080p+: such a clip is resized here, sound kept, before it goes up.
+      // A clip that already fits is uploaded as it is. Heavy module, so it
+      // loads only when a clip is picked.
+      const [{ fitVideoToPixels }, { probeVideo }] = await Promise.all([
+        import("@/lib/downscale-video"),
+        import("@/lib/editor/media"),
+      ]);
+      const fitted = await fitVideoToPixels(file, SEEDANCE2_REFERENCE_VIDEO_PIXELS);
+      const fittedUrl = URL.createObjectURL(fitted);
+      try {
+        // Rounded the way the API rounds its own reading of the file.
+        const { duration: seconds } = await probeVideo(fittedUrl);
+        setRefVideoSeconds(Number.isFinite(seconds) ? Math.ceil(seconds - 0.05) : undefined);
+      } catch {
+        setRefVideoSeconds(undefined);
+      } finally {
+        URL.revokeObjectURL(fittedUrl);
+      }
+      setValue("referenceVideo", await uploadFile(fitted), { shouldValidate: true });
     } catch (err) {
       reportUploadFailure(err);
       setRefVideoPreview(null);
+      setRefVideoSeconds(undefined);
     } finally {
       setUploadingRefVideo(false);
     }
@@ -224,6 +249,7 @@ export function Seedance2VideoForm({
 
   function clearRefVideo() {
     setRefVideoPreview(null);
+    setRefVideoSeconds(undefined);
     setValue("referenceVideo", undefined, { shouldValidate: true });
   }
 
@@ -259,7 +285,9 @@ export function Seedance2VideoForm({
   /** The three modes are mutually exclusive on the wire — the model follows
    * a video reference instead of frame references, not alongside them — so
    * leaving a mode drops whatever only that mode could set. Character
-   * references survive the switch: they are additive to all three. */
+   * references survive the switch, but kie.ai takes them only with a
+   * reference video or on their own, never beside a frame: the frame slots
+   * and the character slots lock each other out below. */
   function handleModeChange(next: ReferenceMode) {
     setRefMode(next);
     if (next !== "keyframe") {
@@ -334,8 +362,8 @@ export function Seedance2VideoForm({
             refMode === "keyframe"
               ? "First and last frame — the video interpolates between them."
               : refMode === "video"
-                ? "Optional — MP4 or MOV, up to 50MB. The clip's motion and framing drive the generation; this mode bills at the model's higher reference-video rate."
-                : "Optional — JPG, PNG or WEBP. Guides the whole generation."
+                ? `Optional — MP4 or MOV, ${SEEDANCE2_REFERENCE_VIDEO_MIN_SECONDS}-${SEEDANCE2_REFERENCE_VIDEO_MAX_SECONDS}s, up to 50MB; a clip above 720p is resized first. The clip's motion and framing drive the generation; this mode bills at the model's higher reference-video rate.`
+                : "Optional — JPG, PNG or WEBP. Used as the first frame."
           }
         >
           {refMode === "keyframe" ? (
@@ -347,6 +375,8 @@ export function Seedance2VideoForm({
                 previewUrl={preview}
                 uploading={uploading}
                 onFile={handleFile}
+                disabled={characters.length > 0 && !image}
+                disabledHint={FRAMES_LOCKED_HINT}
                 onRemove={() => {
                   setPreview(null);
                   setValue("image", undefined, { shouldValidate: true });
@@ -399,6 +429,8 @@ export function Seedance2VideoForm({
               previewUrl={preview}
               uploading={uploading}
               onFile={handleFile}
+              disabled={characters.length > 0 && !image}
+              disabledHint={FRAMES_LOCKED_HINT}
               onRemove={() => {
                 setPreview(null);
                 setValue("image", undefined, { shouldValidate: true });
@@ -413,7 +445,7 @@ export function Seedance2VideoForm({
             what appears and travel with whichever mode is selected above. */}
         <PanelSection
           label="Characters"
-          hint={`Optional — up to ${SEEDANCE2_REFERENCE_IMAGES_MAX} people or objects to keep recognisable across the clip. Refer to them in the prompt.`}
+          hint={`Optional — up to ${SEEDANCE2_REFERENCE_IMAGES_MAX} people or objects to keep recognisable across the clip. Refer to them in the prompt. Works with a reference video or on its own, not with a first frame.`}
         >
           <div className="grid grid-cols-4 gap-1.5">
             {characters.map((character, index) => (
@@ -438,6 +470,8 @@ export function Seedance2VideoForm({
                 uploading={uploadingCharacter}
                 onFile={handleCharacterFile}
                 onRemove={() => {}}
+                disabled={Boolean(image)}
+                disabledHint="Remove the first frame to add characters, or switch to Video."
               />
             )}
           </div>
@@ -488,10 +522,9 @@ export function Seedance2VideoForm({
                 icon={Monitor}
                 value={resolution}
                 options={SEEDANCE2_RESOLUTIONS}
-                renderLabel={(r) => (r === "4k" ? "4K" : r)}
                 onChange={(r) => setValue("resolution", r, { shouldValidate: true })}
                 isOptionLocked={(r) => isResolutionLocked(r, tierInfo)}
-                lockedHint={(r) => upgradeHint(minTierForResolution(r), r === "4k" ? "4K" : r)}
+                lockedHint={(r) => upgradeHint(minTierForResolution(r), r)}
               />
             </FieldRow>
 
@@ -511,14 +544,6 @@ export function Seedance2VideoForm({
               />
             </FieldRow>
 
-            <FieldRow label="Fix camera position" description="Lock the camera instead of letting it move.">
-              <Controller
-                control={control}
-                name="cameraFixed"
-                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />}
-              />
-            </FieldRow>
-
             <FieldRow label="Generate audio" description="Sync ambient sound / dialogue to the video.">
               <Controller
                 control={control}
@@ -526,20 +551,6 @@ export function Seedance2VideoForm({
                 render={({ field }) => <Switch checked={field.value ?? true} onCheckedChange={field.onChange} />}
               />
             </FieldRow>
-
-            <div className="py-3.5">
-              <label htmlFor="sd2-seed" className="mb-1.5 block text-label text-ink-soft">
-                Seed (optional)
-              </label>
-              <Input
-                id="sd2-seed"
-                type="number"
-                placeholder="Random"
-                {...register("seed", {
-                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                })}
-              />
-            </div>
           </PanelFieldList>
         </PanelSection>
       </div>

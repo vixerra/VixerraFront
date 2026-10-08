@@ -27,6 +27,7 @@ import {
   SEEDANCE2_RESOLUTIONS,
   SEEDANCE2_ASPECT_RATIOS,
   SEEDANCE2_REFERENCE_IMAGES_MAX,
+  SEEDANCE2_PROMPT_MIN_LENGTH,
 } from "@/lib/constants";
 import { referenceImageSlots, type CloudflareModelConfig } from "@/lib/cloudflare-models";
 
@@ -236,24 +237,31 @@ export const seedanceVideoSchema = z
   });
 export type SeedanceVideoInput = z.infer<typeof seedanceVideoSchema>;
 
-// Seedance 2.0's own parameter set — see SEEDANCE2_* in constants.ts for why
-// this is a separate schema rather than reusing seedanceVideoSchema: no -1
-// "auto" duration, a different resolution/aspect-ratio enum, a real
-// cameraFixed toggle, and no outputFormat choice.
+// Seedance 2.0's own parameter set, as kie.ai takes it (bytedance/seedance-2,
+// docs.kie.ai/market/bytedance/seedance-2, read 2026-10-08; it ran on
+// Cloudflare before that). Like 2.5 on kie, three input modes exclude each
+// other — first frame, first-and-last frame, and references — so a
+// reference image or video refuses any frame, and kie wants a prompt of at
+// least 3 characters in every mode.
 export const seedance2VideoSchema = z
   .object({
-    prompt: z.string().trim().max(PROMPT_MAX_LENGTH).optional(),
+    prompt: z
+      .string({ error: `Describe the video in at least ${SEEDANCE2_PROMPT_MIN_LENGTH} characters.` })
+      .trim()
+      .min(SEEDANCE2_PROMPT_MIN_LENGTH, {
+        error: `Describe the video in at least ${SEEDANCE2_PROMPT_MIN_LENGTH} characters.`,
+      })
+      .max(PROMPT_MAX_LENGTH),
     image: z.string().min(1).optional(),
     lastFrameImage: z.string().min(1).optional(),
     // Motion/style source — the clip the generation is conditioned on. The
     // provider bills this mode off its own, higher per-second table (see
-    // estimateVideoCredits' hasReferenceVideo), and the model reads a video
-    // reference in place of a frame reference rather than alongside one, so
-    // it is exclusive with image/lastFrameImage instead of combinable.
+    // estimateVideoCredits' hasReferenceVideo). kie takes 2-15s at 480p-720p;
+    // the composer resizes a larger clip before uploading it.
     referenceVideo: z.string().min(1).optional(),
     // Subject references — the people or objects that must stay recognisable
-    // across the clip. Additive: they combine with any of the media inputs
-    // above, since they answer "who appears", not "what the shot looks like".
+    // across the clip. They go with a reference video or on their own, never
+    // with a frame (see the top note).
     referenceImages: z
       .array(z.string().min(1))
       .max(SEEDANCE2_REFERENCE_IMAGES_MAX, {
@@ -272,16 +280,18 @@ export const seedance2VideoSchema = z
       .default(5),
     resolution: z.enum(SEEDANCE2_RESOLUTIONS).default("720p"),
     aspectRatio: z.enum(SEEDANCE2_ASPECT_RATIOS).default("16:9"),
-    cameraFixed: z.boolean().default(false),
     generateAudio: z.boolean().default(true),
+    // Four switches the Cloudflare integration had and kie's schema doesn't.
+    // Still parsed, so a page opened before the move doesn't fail on them:
+    // the three a user turns on deliberately are refused below rather than
+    // billed and ignored. useVirtualAvatar is accepted and dropped — the old
+    // composer sent it on by default, and kie runs this model with real
+    // people allowed, which is what the switch existed to work around.
+    cameraFixed: z.boolean().default(false),
     watermark: z.boolean().default(false),
-    useVirtualAvatar: z.boolean().default(true),
+    useVirtualAvatar: z.boolean().default(false),
     seed: z.number().int().min(-9007199254740991).max(9007199254740991).optional(),
   })
-  .refine(
-    (data) => Boolean(data.prompt?.trim()) || Boolean(data.image) || Boolean(data.referenceVideo),
-    { error: "Add a prompt, a reference image or a reference video.", path: ["prompt"] },
-  )
   .refine((data) => !data.lastFrameImage || Boolean(data.image), {
     error: "Add a start frame before setting an end frame.",
     path: ["lastFrameImage"],
@@ -289,6 +299,22 @@ export const seedance2VideoSchema = z
   .refine((data) => !data.referenceVideo || (!data.image && !data.lastFrameImage), {
     error: "A reference video can't be combined with a reference image or keyframes.",
     path: ["referenceVideo"],
+  })
+  .refine((data) => !data.referenceImages?.length || (!data.image && !data.lastFrameImage), {
+    error: "Character references can't be combined with a start image or keyframes. Remove one of the two.",
+    path: ["referenceImages"],
+  })
+  .refine((data) => !data.cameraFixed, {
+    error: "Seedance 2.0 can't lock the camera on its current provider. Turn it off.",
+    path: ["cameraFixed"],
+  })
+  .refine((data) => !data.watermark, {
+    error: "Seedance 2.0 can't watermark on its current provider. Turn the watermark off.",
+    path: ["watermark"],
+  })
+  .refine((data) => data.seed === undefined, {
+    error: "Seedance 2.0 doesn't take a seed on its current provider. Remove it.",
+    path: ["seed"],
   });
 export type Seedance2VideoInput = z.infer<typeof seedance2VideoSchema>;
 

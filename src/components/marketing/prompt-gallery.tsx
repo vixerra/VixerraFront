@@ -105,7 +105,7 @@ function PromptCard({ template, index }: { template: PromptTemplate; index: numb
 
           <div className="flex flex-wrap gap-1.5">
             <ParamChip icon={Clock} label={`${template.duration}s`} />
-            <ParamChip icon={Monitor} label={template.resolution === "4k" ? "4K" : template.resolution} />
+            <ParamChip icon={Monitor} label={template.resolution} />
             <ParamChip icon={RectangleHorizontal} label={template.aspectRatio} />
             <ParamChip icon={Clapperboard} label={template.cameraFixed ? "Fixed cam" : "Dynamic cam"} />
             <ParamChip

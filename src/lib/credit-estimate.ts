@@ -7,6 +7,9 @@ import {
   CREDIT_VALUE_USD,
   SEEDANCE_MODEL_ID,
   SEEDANCE2_MODEL_ID,
+  SEEDANCE2_DURATION_MIN,
+  SEEDANCE2_REFERENCE_VIDEO_MIN_SECONDS,
+  SEEDANCE2_REFERENCE_VIDEO_MAX_SECONDS,
   SEEDANCE_DURATION_MIN,
   SEEDANCE_REFERENCE_MEDIA_MAX_SECONDS,
   type GenerationType,
@@ -21,13 +24,13 @@ import {
 // A credit SELLS for CREDIT_VALUE_USD ($0.01 — see constants.ts, where
 // every plan and pack is priced at that rate). TARGET_GROSS_MARGIN is the
 // cut of that we keep, so a credit may only buy COST_USD_PER_CREDIT =
-// $0.004 of provider compute on video. Images use their own, steeper
+// $0.006 of provider compute on video. Images use their own, steeper
 // IMAGE_GROSS_MARGIN (65%, so IMAGE_COST_USD_PER_CREDIT = $0.0035):
 //
 //   credits = ceil(seconds × usdPerSecond / COST_USD_PER_CREDIT)
 //
 // Both margins are measured against the provider's price, before Stripe's
-// fee: after it, ~54-57% survives on video and ~59-62% on images, depending
+// fee: after it, ~34-37% survives on video and ~59-62% on images, depending
 // on which plan or pack the credits were bought through.
 //
 // Before 2026-08-30 credits were sold and spent at par ($0.01 of compute
@@ -36,8 +39,10 @@ import {
 // were repriced to a flat 1000/2500/5000 credits — at par those grant more
 // compute than they cost — so the markup now lives on the generation side,
 // where it scales with actual usage instead of with the grant.
-// 50% until 2026-09-14.
-const TARGET_GROSS_MARGIN = 0.6;
+// 50% until 2026-09-14, then 60% until 2026-10-08, when it was lowered to
+// 40% on purpose — below the 40% net floor constants.ts describes (see
+// TIER_INFO there for the net figures).
+const TARGET_GROSS_MARGIN = 0.4;
 const COST_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - TARGET_GROSS_MARGIN);
 
 // Images carry a steeper margin than video. A single image is cheap enough in
@@ -138,6 +143,11 @@ const VIDEO_COST_USD: Record<
     minSeconds: 4,
     minSecondsWithReferenceVideo: 4,
   },
+  // perSecond matches kie.ai's own table for bytedance/seedance-2 (screenshot
+  // of its pricing page, 2026-10-08: $0.205 at 720p, $0.51 at 1080p, $1.04
+  // at 4K). withReferenceVideo no longer prices 2.0 itself — a 2.0 run with a
+  // clip is quoted off SEEDANCE20_WITH_VIDEO_COST_USD in estimateVideoCredits
+  // — and stays only as the fallback table for a model missing from here.
   "bytedance/seedance-2.0": {
     perSecond: { "480p": 0.095, "720p": 0.205, "1080p": 0.51, "4k": 1.04 },
     withReferenceVideo: { "480p": 0.172, "720p": 0.372, "1080p": 0.914, "4k": 1.866 },
@@ -494,6 +504,19 @@ const SEEDANCE25_WITH_VIDEO_COST_USD: Record<string, number> = {
   "1080p": 0.475,
 };
 
+// kie.ai's Seedance 2.0 rates with a reference video attached, billed on the
+// clip AND the output: "Unit Price × (Input + Output) Duration" (kie's
+// pricing page, 2026-10-08). 1080p is kie's figure, from that page. 480p and
+// 720p weren't in the screenshot: they are derived from their no-video
+// rates at the ratio every visible row shows (with-video is 0.60-0.615 of
+// no-video, on 2.0 and 2.5 alike) and rounded UP, so a guess can't sell a run
+// below cost. Replace them with kie's figures once read.
+const SEEDANCE20_WITH_VIDEO_COST_USD: Record<string, number> = {
+  "480p": 0.06,
+  "720p": 0.13,
+  "1080p": 0.31,
+};
+
 function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
 }
@@ -507,9 +530,10 @@ export function estimateVideoCredits(
     hasReferenceAudio?: boolean;
     hasAudio?: boolean;
     isDraft?: boolean;
-    /** Total length of the reference videos, when known — today only the
-     *  influencer studio's "Replace in the clip", which it prices exactly and
-     *  at INFLUENCER_REPLACE_GROSS_MARGIN. See SEEDANCE25_WITH_VIDEO_COST_USD. */
+    /** Total length of the reference videos, when known: the influencer
+     *  studio's "Replace in the clip" (priced at INFLUENCER_REPLACE_GROSS_MARGIN,
+     *  see SEEDANCE25_WITH_VIDEO_COST_USD) and Seedance 2.0's reference clip
+     *  (see SEEDANCE20_WITH_VIDEO_COST_USD). */
     referenceVideoSeconds?: number;
   } = {},
 ) {
@@ -526,6 +550,21 @@ export function estimateVideoCredits(
       SEEDANCE25_WITH_VIDEO_COST_USD[resolution] ?? Math.max(...Object.values(SEEDANCE25_WITH_VIDEO_COST_USD));
     const outputSeconds = Math.max(SEEDANCE_DURATION_MIN, effectiveDuration);
     return creditsForUsd((outputSeconds + options.referenceVideoSeconds) * rate, INFLUENCER_REPLACE_USD_PER_CREDIT);
+  }
+
+  // Seedance 2.0 with its reference clip: kie bills the clip's seconds on top
+  // of the output's, at the lower with-video rate. A clip whose length isn't
+  // known (the composer before it has measured, a /duplicate) is priced at
+  // the longest kie accepts, the only guess that can't undercharge.
+  if (model === SEEDANCE2_MODEL_ID && options.hasReferenceVideo) {
+    const rate =
+      SEEDANCE20_WITH_VIDEO_COST_USD[resolution] ?? Math.max(...Object.values(SEEDANCE20_WITH_VIDEO_COST_USD));
+    const outputSeconds = Math.max(SEEDANCE2_DURATION_MIN, effectiveDuration);
+    const referenceSeconds = Math.min(
+      SEEDANCE2_REFERENCE_VIDEO_MAX_SECONDS,
+      Math.max(SEEDANCE2_REFERENCE_VIDEO_MIN_SECONDS, options.referenceVideoSeconds ?? SEEDANCE2_REFERENCE_VIDEO_MAX_SECONDS),
+    );
+    return creditsForUsd((outputSeconds + referenceSeconds) * rate, COST_USD_PER_CREDIT);
   }
 
   if (model === SEEDANCE_MODEL_ID && resolution === "1080p") {

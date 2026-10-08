@@ -84,19 +84,19 @@ export const MODEL_PAGES: ModelPageContent[] = [
   {
     slug: "seedance-2-0",
     id: SEEDANCE2_MODEL_ID,
-    tagline: "4K AI video with a lockable camera and multi-subject references",
+    tagline: "1080p AI video with multi-subject references and motion from a clip",
     intro:
-      "Seedance 2.0 trades Seedance 2.5's length for resolution and control. It takes up to four subject references — the people and objects that must stay recognisable — and it can lock the camera outright, which is what makes a clean product turntable or a static interview frame possible instead of the drifting handheld look most models default to.",
+      "Seedance 2.0 is the reference-driven member of the Seedance family. It takes up to four subject references — the people and objects that must stay recognisable — and can follow the motion and camera path of a reference clip, so a cast stays consistent while the shot copies a move you already have on video.",
     strengths: [
       "Up to four subject reference images, so a cast or a product line stays consistent",
-      "A real fixed-camera mode for locked-off shots",
-      "The widest resolution range of any video model here, topping out at 4K",
+      "Follows the motion and camera path of a short reference clip",
+      "Renders at up to 1080p",
       "Native audio generated with the clip",
     ],
     useCases: [
-      "Packshots and turntables that need an absolutely still frame",
       "Campaign sets where the same two or three characters recur across clips",
-      "Delivery at 4K for large-format or downstream reframing",
+      "Recreating a camera move or a choreography from a clip you already have",
+      "Product shots that start from a first frame and land on a last one",
     ],
     prompts: [
       "Locked-off macro shot on a matte-black perfume bottle rotating slowly on a mirrored plinth, single hard key light from the left, deep shadow falloff, no camera movement",
