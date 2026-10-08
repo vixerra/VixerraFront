@@ -14,7 +14,7 @@ export function Slider({ className, ...props }: ComponentProps<typeof SliderPrim
         <SliderPrimitive.Range className="absolute h-full rounded-full bg-brand" />
       </SliderPrimitive.Track>
       <SliderPrimitive.Thumb
-        className="block size-4 rounded-full border-2 border-brand bg-white shadow-raised focus-visible:outline-none"
+        className="block size-4 rounded-full border-2 border-brand-ink bg-white shadow-raised focus-visible:outline-none"
         aria-label="Value"
       />
     </SliderPrimitive.Root>

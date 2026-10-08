@@ -33,7 +33,7 @@ function Sparks() {
           key={spark.d}
           d={spark.d}
           fill="currentColor"
-          className="text-accent-amber motion-safe:animate-sparkle-twinkle"
+          className="text-accent-amber-ink motion-safe:animate-sparkle-twinkle"
           style={{
             animationDelay: `${spark.delay}ms`,
             // SVG children scale from the user-space origin by default, which
@@ -68,7 +68,7 @@ export function GenerationLoader({
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="relative size-18 text-brand"
+        className="relative size-18 text-brand-ink"
       >
         {/* Ghost outline underneath, so the icon still reads as a shape
           * during the part of the cycle where the traced stroke is gone. */}

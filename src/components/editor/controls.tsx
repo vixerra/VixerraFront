@@ -136,8 +136,8 @@ export function Segmented<T extends string | number>({
           className={cn(
             "min-w-0 flex-1 truncate rounded-lg px-2 py-1.5 text-caption font-medium transition-colors",
             value === option.value
-              ? "bg-brand/15 text-brand"
-              : "text-muted hover:bg-white/5 hover:text-ink-soft",
+              ? "bg-brand/15 text-brand-ink"
+              : "text-muted hover:bg-ink/5 hover:text-ink-soft",
           )}
         >
           {option.label}
@@ -185,7 +185,7 @@ export function ColorRow({
             aria-pressed={value === ""}
             className={cn(
               "relative size-6 overflow-hidden rounded-md border transition-colors",
-              value === "" ? "border-brand" : "border-line hover:border-border-strong",
+              value === "" ? "border-brand-ink" : "border-line hover:border-border-strong",
             )}
           >
             <span className="absolute top-1/2 left-1/2 h-px w-8 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-accent" />
@@ -201,7 +201,7 @@ export function ColorRow({
             className={cn(
               "size-6 rounded-md border transition-transform",
               value.toLowerCase() === swatch
-                ? "border-brand scale-110"
+                ? "border-brand-ink scale-110"
                 : "border-line hover:border-border-strong",
             )}
             style={{ backgroundColor: swatch }}

@@ -57,7 +57,7 @@ export function FeaturesGrid() {
         {FEATURES.map((feature, index) => (
           <Reveal key={feature.title} delayMs={(index % 3) * 100} className={feature.span}>
             <TiltCard className="h-full">
-              <Card variant="feature" className="h-full transition-colors duration-300 hover:border-brand/40">
+              <Card variant="feature" className="h-full transition-colors duration-300 hover:border-brand-ink/40">
                 <span
                   className={cn(
                     "flex size-12 items-center justify-center rounded-xl shadow-glow-sm",

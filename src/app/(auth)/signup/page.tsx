@@ -86,7 +86,7 @@ function SignupForm() {
   if (pendingEmail) {
     return (
       <Card variant="standard" className="text-center">
-        <MailCheck className="mx-auto size-8 text-brand" aria-hidden="true" />
+        <MailCheck className="mx-auto size-8 text-brand-ink" aria-hidden="true" />
         <h1 className="mt-4 text-subheading font-semibold text-ink">Check your email</h1>
         <p className="mt-2 text-body-sm text-muted">
           We sent a confirmation link to{" "}
@@ -99,7 +99,7 @@ function SignupForm() {
           <button
             type="button"
             onClick={() => setPendingEmail(null)}
-            className="text-brand hover:text-brand-hover"
+            className="text-brand-ink hover:text-brand-hover"
           >
             Go back
           </button>
@@ -184,18 +184,18 @@ function SignupForm() {
         Already have an account?{" "}
         <Link
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
-          className="text-brand hover:text-brand-hover"
+          className="text-brand-ink hover:text-brand-hover"
         >
           Log in
         </Link>
       </p>
       <p className="mt-4 text-center text-caption text-muted">
         By creating an account, you agree to our{" "}
-        <Link href="/terms" className="text-brand hover:text-brand-hover">
+        <Link href="/terms" className="text-brand-ink hover:text-brand-hover">
           Terms
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" className="text-brand hover:text-brand-hover">
+        <Link href="/privacy" className="text-brand-ink hover:text-brand-hover">
           Privacy Policy
         </Link>
         .

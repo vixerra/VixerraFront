@@ -26,8 +26,8 @@ export function SettingsNav() {
             className={cn(
               "shrink-0 rounded-xl px-4 py-3 text-label transition-colors",
               active
-                ? "bg-brand/10 text-brand"
-                : "text-muted hover:bg-white/5 hover:text-ink-soft",
+                ? "bg-brand/10 text-brand-ink"
+                : "text-muted hover:bg-ink/5 hover:text-ink-soft",
             )}
           >
             {item.label}

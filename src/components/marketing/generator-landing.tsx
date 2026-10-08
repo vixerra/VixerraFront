@@ -177,7 +177,7 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
         <ol className="mt-8 grid gap-4 md:grid-cols-3">
           {content.steps.map((step, i) => (
             <li key={step.title} className="flex flex-col gap-2 rounded-2xl border border-line bg-surface-2 p-6 shadow-card">
-              <span className="text-caption font-semibold text-brand">Step {i + 1}</span>
+              <span className="text-caption font-semibold text-brand-ink">Step {i + 1}</span>
               <h3 className="text-feature-title font-semibold text-ink">{step.title}</h3>
               <p className="text-body-sm text-muted">{step.detail}</p>
             </li>
@@ -203,7 +203,7 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
               <span className="text-caption text-muted">
                 {entry.provider} · {CATEGORY_LABEL[entry.category]}
               </span>
-              <h3 className="mt-2 text-feature-title font-semibold text-ink group-hover:text-brand">
+              <h3 className="mt-2 text-feature-title font-semibold text-ink group-hover:text-brand-ink">
                 {entry.label}
               </h3>
               <p className="mt-2 text-body-sm text-muted">{page.tagline}</p>
@@ -231,12 +231,12 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
         className="group mt-16 flex flex-col gap-2 rounded-2xl border border-line bg-surface-2 p-6 transition-colors hover:border-border-strong hover:bg-surface-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h2 className="text-feature-title font-semibold text-ink group-hover:text-brand">
+          <h2 className="text-feature-title font-semibold text-ink group-hover:text-brand-ink">
             {content.sibling.label}
           </h2>
           <p className="mt-1 text-body-sm text-muted">{content.sibling.blurb}</p>
         </div>
-        <ArrowUpRight className="size-5 shrink-0 text-brand" aria-hidden="true" />
+        <ArrowUpRight className="size-5 shrink-0 text-brand-ink" aria-hidden="true" />
       </Link>
 
       {/* --------------------------------------------------------------- cta */}

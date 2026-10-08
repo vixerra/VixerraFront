@@ -19,7 +19,7 @@ export function CtaSection() {
       <Reveal className="relative">
         <Card
           variant="feature"
-          className="flex flex-col items-center gap-6 border-brand/30 text-center shadow-glow-md"
+          className="flex flex-col items-center gap-6 border-brand-ink/30 text-center shadow-glow-md"
         >
           <h2 className="text-heading font-bold text-ink sm:text-5xl">
             Every top model. <span className="text-gradient">One subscription.</span>
@@ -36,7 +36,7 @@ export function CtaSection() {
             <Link
               href={appHref("/signup")}
               prefetch={false}
-              className="text-ink underline decoration-white/20 underline-offset-4 hover:text-brand"
+              className="text-ink underline decoration-ink/20 underline-offset-4 hover:text-brand-ink"
             >
               start free with {TIER_INFO.free.monthlyCredits} credits
             </Link>

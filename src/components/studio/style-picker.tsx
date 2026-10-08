@@ -136,11 +136,11 @@ export function StylePicker({
                               "flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2 text-label font-medium whitespace-nowrap transition-colors",
                               active
                                 ? "bg-brand/10 text-ink"
-                                : "text-muted hover:bg-white/5 hover:text-ink-soft",
+                                : "text-muted hover:bg-ink/5 hover:text-ink-soft",
                             )}
                           >
                             <Icon
-                              className={cn("size-4 shrink-0", active ? "text-brand" : "text-muted")}
+                              className={cn("size-4 shrink-0", active ? "text-brand-ink" : "text-muted")}
                               aria-hidden="true"
                             />
                             {c.label}
@@ -229,8 +229,8 @@ function StyleCard({
         className={cn(
           "relative aspect-[3/4] w-full overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300",
           selected
-            ? "border-brand shadow-glow-sm"
-            : "border-line group-hover:-translate-y-1 group-hover:border-brand/40 group-hover:shadow-glow-sm",
+            ? "border-brand-ink shadow-glow-sm"
+            : "border-line group-hover:-translate-y-1 group-hover:border-brand-ink/40 group-hover:shadow-glow-sm",
         )}
       >
         <StylePreview style={style} playing={previewing} />

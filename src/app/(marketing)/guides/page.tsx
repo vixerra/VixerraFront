@@ -75,13 +75,13 @@ export default function GuidesIndexPage() {
               </time>{" "}
               · {guide.readingMinutes} min read
             </p>
-            <h2 className="mt-3 text-feature-title font-semibold text-ink group-hover:text-brand">
+            <h2 className="mt-3 text-feature-title font-semibold text-ink group-hover:text-brand-ink">
               <Link href={`/guides/${guide.slug}`}>{guide.title}</Link>
             </h2>
             <p className="mt-3 text-body-sm text-muted">{guide.excerpt}</p>
             <Link
               href={`/guides/${guide.slug}`}
-              className="mt-6 inline-flex w-fit items-center gap-1.5 text-label font-semibold text-brand"
+              className="mt-6 inline-flex w-fit items-center gap-1.5 text-label font-semibold text-brand-ink"
             >
               Read the guide
               <ArrowUpRight className="size-4" aria-hidden="true" />

@@ -62,7 +62,7 @@ export function TraitSection({
           <span className="truncate text-label font-medium text-ink-soft">{group.label}</span>
           <span className="text-caption text-text-tertiary">{group.options.length}</span>
           {count > 0 && (
-            <span className="rounded-full bg-brand/15 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-brand">
+            <span className="rounded-full bg-brand/15 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-brand-ink">
               {group.multi ? `${count}/${group.multi}` : "1"}
             </span>
           )}
@@ -104,7 +104,7 @@ export function TraitSection({
                     "group/tile relative flex flex-col overflow-hidden rounded-xl border text-center transition-[border-color,box-shadow]",
                     "disabled:cursor-not-allowed disabled:opacity-35",
                     selected
-                      ? "border-brand shadow-glow-sm"
+                      ? "border-brand-ink shadow-glow-sm"
                       : "border-line hover:border-border-strong",
                   )}
                 >
@@ -156,13 +156,13 @@ export function TraitSection({
                   "relative flex min-h-11 flex-col items-center justify-center gap-1.5 rounded-xl border px-1.5 py-2 text-center transition-colors",
                   "disabled:cursor-not-allowed disabled:opacity-35",
                   selected
-                    ? "border-brand bg-brand/10 text-ink"
+                    ? "border-brand-ink bg-brand/10 text-ink"
                     : "border-line bg-surface-3 text-muted hover:border-border-strong hover:text-ink-soft",
                 )}
               >
                 {option.swatch && (
                   <span
-                    className="size-7 rounded-full border border-white/15 shadow-inner"
+                    className="size-7 rounded-full border border-ink/15 shadow-inner"
                     // background, not backgroundColor: a few swatches (two-tone,
                     // rainbow) are gradients.
                     style={{ background: option.swatch }}

@@ -251,7 +251,7 @@ export default function AdminPresetsPage() {
                   <button
                     type="button"
                     onClick={() => reset([...FILTER_KEYS])}
-                    className="text-brand hover:underline"
+                    className="text-brand-ink hover:underline"
                   >
                     Clear filters
                   </button>
@@ -400,7 +400,7 @@ function PresetRow({
   });
 
   return (
-    <tr className="transition-colors hover:bg-white/[0.03]">
+    <tr className="transition-colors hover:bg-ink/[0.03]">
       <Td>
         <button type="button" onClick={onEdit} className="text-left">
           <span className="font-medium text-ink hover:underline">{preset.title}</span>

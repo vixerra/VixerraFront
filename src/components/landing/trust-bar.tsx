@@ -15,9 +15,9 @@ export function TrustBar() {
       <div className="container-page flex flex-col items-center gap-6">
         {users && (
           <p className="flex items-center gap-2 text-body text-ink">
-            <Users className="size-5 text-brand" aria-hidden="true" />
+            <Users className="size-5 text-brand-ink" aria-hidden="true" />
             <span>
-              <span className="font-display font-bold text-brand">
+              <span className="font-display font-bold text-brand-ink">
                 {users.count.toLocaleString("en-US")}+
               </span>{" "}
               active creators use Vixlens
@@ -46,7 +46,7 @@ export function TrustBar() {
 
 export function PlaceholderTag() {
   return (
-    <span className="rounded-full border border-accent-amber/40 bg-accent-amber/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-accent-amber uppercase">
+    <span className="rounded-full border border-accent-amber-ink/40 bg-accent-amber/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-accent-amber-ink uppercase">
       Placeholder · dev only
     </span>
   );

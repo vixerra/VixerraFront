@@ -107,7 +107,7 @@ export function Inspector({
             className={cn(
               "flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
               tab === entry.id
-                ? "border-b-2 border-brand text-brand"
+                ? "border-b-2 border-brand-ink text-brand-ink"
                 : "border-b-2 border-transparent text-muted hover:text-ink-soft",
             )}
           >
@@ -238,7 +238,7 @@ function ClipPanel({
               className={cn(
                 "flex-1 rounded-lg border py-1.5 text-caption font-medium transition-colors",
                 Math.abs(clip.speed - step.value) < 0.001
-                  ? "border-brand bg-brand/10 text-brand"
+                  ? "border-brand-ink bg-brand/10 text-brand-ink"
                   : "border-line text-muted hover:text-ink-soft",
               )}
             >
@@ -369,7 +369,7 @@ function ClipPanel({
               className={cn(
                 "rounded-lg border py-1.5 text-caption transition-colors",
                 activePreset?.id === preset.id
-                  ? "border-brand bg-brand/10 text-brand"
+                  ? "border-brand-ink bg-brand/10 text-brand-ink"
                   : "border-line text-muted hover:text-ink-soft",
               )}
             >
@@ -540,7 +540,7 @@ function TextPanel({
           <button
             type="button"
             onClick={onAdd}
-            className="flex items-center gap-1 text-caption text-brand transition-colors hover:text-brand-hover"
+            className="flex items-center gap-1 text-caption text-brand-ink transition-colors hover:text-brand-hover"
           >
             <Plus className="size-3" /> Add
           </button>
@@ -561,8 +561,8 @@ function TextPanel({
                 className={cn(
                   "flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-caption transition-colors",
                   overlay?.id === entry.id
-                    ? "bg-brand/10 text-brand"
-                    : "text-muted hover:bg-white/5 hover:text-ink-soft",
+                    ? "bg-brand/10 text-brand-ink"
+                    : "text-muted hover:bg-ink/5 hover:text-ink-soft",
                 )}
               >
                 <span className="truncate">{entry.text || "Empty"}</span>
@@ -836,7 +836,7 @@ function BrandPanel({
                 "flex aspect-[4/3] rounded-lg border p-1 transition-colors",
                 ANCHOR_ALIGNMENT[position],
                 watermark.position === position
-                  ? "border-brand bg-brand/15"
+                  ? "border-brand-ink bg-brand/15"
                   : "border-line hover:border-border-strong",
               )}
             >
@@ -994,7 +994,7 @@ function AudioPanel({
         {music ? (
           <>
             <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-dark px-3 py-2">
-              <Music className="size-4 shrink-0 text-brand" aria-hidden="true" />
+              <Music className="size-4 shrink-0 text-brand-ink" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-caption text-ink-soft">{music.name}</p>
                 <p className="text-[10px] text-text-tertiary">
@@ -1114,14 +1114,14 @@ function OutputPanel({
               className={cn(
                 "flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors",
                 project.aspect === preset.id
-                  ? "border-brand bg-brand/10"
+                  ? "border-brand-ink bg-brand/10"
                   : "border-line hover:border-border-strong",
               )}
             >
               <span
                 className={cn(
                   "shrink-0 rounded-[3px] border",
-                  project.aspect === preset.id ? "border-brand bg-brand/30" : "border-muted",
+                  project.aspect === preset.id ? "border-brand-ink bg-brand/30" : "border-muted",
                 )}
                 style={{
                   width: 18 * Math.min(1, preset.w / preset.h),

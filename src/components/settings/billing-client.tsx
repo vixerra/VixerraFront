@@ -348,7 +348,7 @@ export function BillingClient() {
   return (
     <div className="max-w-2xl space-y-6">
       {awaiting && (
-        <div className="flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/10 px-4 py-3 text-caption text-ink">
+        <div className="flex items-center gap-3 rounded-xl border border-brand-ink/30 bg-brand/10 px-4 py-3 text-caption text-ink">
           <Spinner size={16} />
           Payment received — updating your account…
         </div>
@@ -386,7 +386,7 @@ export function BillingClient() {
 
         <div className="relative mt-6 flex items-baseline justify-between">
           <p className="text-caption text-muted">Credit balance</p>
-          <p className="text-subheading font-bold text-accent-amber">
+          <p className="text-subheading font-bold text-accent-amber-ink">
             {formatCredits(credit_balance)}
           </p>
         </div>

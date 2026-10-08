@@ -168,11 +168,11 @@ export function MyGalleryClient() {
           className={cn(
             "flex h-11 shrink-0 items-center gap-2 rounded-xl border px-4 text-label font-medium transition-colors",
             likedOnly
-              ? "border-brand bg-brand/10 text-brand"
+              ? "border-brand-ink bg-brand/10 text-brand-ink"
               : "border-line bg-surface-dark text-muted hover:text-ink-soft",
           )}
         >
-          <Heart className={cn("size-4", likedOnly && "fill-brand")} aria-hidden="true" />
+          <Heart className={cn("size-4", likedOnly && "fill-brand-ink")} aria-hidden="true" />
           Liked
         </button>
       </div>

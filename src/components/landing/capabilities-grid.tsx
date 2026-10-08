@@ -64,7 +64,7 @@ export function CapabilitiesGrid() {
         {REASONS.map((reason, index) => (
           <motion.div key={reason.title} variants={gridItemVariants}>
             <TiltCard className="h-full">
-              <div className="flex h-full flex-col gap-6 rounded-2xl border border-line bg-surface-2 p-6 shadow-card transition-colors duration-300 hover:border-brand/40">
+              <div className="flex h-full flex-col gap-6 rounded-2xl border border-line bg-surface-2 p-6 shadow-card transition-colors duration-300 hover:border-brand-ink/40">
                 <span
                   className={cn(
                     "flex size-12 items-center justify-center rounded-xl shadow-glow-sm",

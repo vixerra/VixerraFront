@@ -615,7 +615,7 @@ export function EditingStudio() {
             type="button"
             onClick={() => setLibraryOpen((v) => !v)}
             aria-label={libraryOpen ? "Hide library" : "Show library"}
-            className="hidden rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink lg:block"
+            className="hidden rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink lg:block"
           >
             {libraryOpen ? (
               <PanelLeftClose className="size-4" />
@@ -631,7 +631,7 @@ export function EditingStudio() {
           type="button"
           onClick={() => setMobilePanel("library")}
           aria-label="Show your library"
-          className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink lg:hidden"
+          className="rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink lg:hidden"
         >
           <PanelLeftOpen className="size-4" />
         </button>
@@ -658,7 +658,7 @@ export function EditingStudio() {
               onClick={undo}
               disabled={!canUndo}
               aria-label="Undo"
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-30"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink disabled:opacity-30"
             >
               <Undo2 className="size-4" />
             </button>
@@ -669,7 +669,7 @@ export function EditingStudio() {
               onClick={redo}
               disabled={!canRedo}
               aria-label="Redo"
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-30"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink disabled:opacity-30"
             >
               <Redo2 className="size-4" />
             </button>
@@ -682,7 +682,7 @@ export function EditingStudio() {
               type="button"
               onClick={() => setMobilePanel("inspector")}
               aria-label="Edit settings"
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink xl:hidden"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink xl:hidden"
             >
               <SlidersHorizontal className="size-4" />
             </button>
@@ -695,7 +695,7 @@ export function EditingStudio() {
               type="button"
               onClick={() => setShortcutsOpen(true)}
               aria-label="Keyboard shortcuts"
-              className="hidden rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink sm:block"
+              className="hidden rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink sm:block"
             >
               <Keyboard className="size-4" />
             </button>
@@ -989,7 +989,7 @@ function ProjectList({
               key={stored.id}
               className={cn(
                 "flex items-center gap-3 rounded-xl border p-3",
-                stored.id === currentId ? "border-brand/40 bg-brand/5" : "border-line",
+                stored.id === currentId ? "border-brand-ink/40 bg-brand/5" : "border-line",
               )}
             >
               <button
@@ -1008,7 +1008,7 @@ function ProjectList({
               </button>
 
               {stored.id === currentId ? (
-                <span className="shrink-0 text-caption text-brand">Open</span>
+                <span className="shrink-0 text-caption text-brand-ink">Open</span>
               ) : (
                 <>
                   <ChevronLeft className="size-4 shrink-0 rotate-180 text-text-tertiary" aria-hidden="true" />

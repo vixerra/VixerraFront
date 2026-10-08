@@ -38,7 +38,7 @@ export function PresetStudioLoader({ slug }: { slug: string }) {
         </p>
         <Link
           href="/presets"
-          className="text-body-sm text-brand underline-offset-4 hover:underline"
+          className="text-body-sm text-brand-ink underline-offset-4 hover:underline"
         >
           Browse all presets
         </Link>

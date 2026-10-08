@@ -27,12 +27,12 @@ import { cn } from "@/lib/utils";
  * renders SVG attributes, not classes, and can't resolve var(--color-brand).
  * They mirror globals.css — keep them in step if the palette moves.
  */
-const BRAND = "#bbdc12";
-const AMBER = "#ffd400";
-const RED = "#e8404f";
-const INFO = "#56a8e8";
-const MUTED = "#979ca6";
-const GRID = "rgba(255,255,255,0.1)";
+const BRAND = "#5a7400";
+const AMBER = "#a07800";
+const RED = "#b4212f";
+const INFO = "#1d5f99";
+const MUTED = "#434953";
+const GRID = "rgba(14,16,20,0.12)";
 
 /** Series arrive as "MM-DD" (see the backend's to_char). `new Date("09-02")`
  *  is not a spec-conformant date string — V8 guesses, WebKit returns Invalid
@@ -63,12 +63,12 @@ function useIsMobile() {
 
 const tooltipProps = {
   contentStyle: {
-    background: "#17171a",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: "#d9dee4",
+    border: "1px solid rgba(14,16,20,0.12)",
     borderRadius: 12,
     fontSize: 12,
   },
-  labelStyle: { color: "#f7f8fa" },
+  labelStyle: { color: "#0e1014" },
 } as const;
 
 export function ChartCard({
@@ -282,7 +282,7 @@ export function RankedBars({
             axisLine={false}
             width={150}
           />
-          <Tooltip {...tooltipProps} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+          <Tooltip {...tooltipProps} cursor={{ fill: "rgba(14,16,20,0.05)" }} />
           <Bar
             dataKey="value"
             fill={color}

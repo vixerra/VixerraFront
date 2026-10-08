@@ -54,11 +54,11 @@ export function UsageChart({ data }: { data: { date: string; count: number }[] }
               <stop offset="100%" stopColor="#bbdc12" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="rgba(14,16,20,0.12)" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={formatTick}
-            stroke="#979ca6"
+            stroke="#434953"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -66,7 +66,7 @@ export function UsageChart({ data }: { data: { date: string; count: number }[] }
             minTickGap={isMobile ? 16 : 8}
           />
           <YAxis
-            stroke="#979ca6"
+            stroke="#434953"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -76,18 +76,18 @@ export function UsageChart({ data }: { data: { date: string; count: number }[] }
           <Tooltip
             labelFormatter={formatTick}
             contentStyle={{
-              background: "#17171a",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "#d9dee4",
+              border: "1px solid rgba(14,16,20,0.12)",
               borderRadius: 12,
               fontSize: 12,
             }}
-            labelStyle={{ color: "#f7f8fa" }}
-            itemStyle={{ color: "#bbdc12" }}
+            labelStyle={{ color: "#0e1014" }}
+            itemStyle={{ color: "#3d5000" }}
           />
           <Area
             type="monotone"
             dataKey="count"
-            stroke="#bbdc12"
+            stroke="#5a7400"
             strokeWidth={2}
             fill="url(#usageFill)"
           />

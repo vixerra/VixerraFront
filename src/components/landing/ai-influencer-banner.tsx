@@ -18,12 +18,12 @@ export function AiInfluencerBanner() {
         <div className="relative isolate overflow-hidden rounded-[28px] border border-line bg-surface-2">
           <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div className="relative z-10 p-7 sm:p-10 lg:py-14 lg:pr-4 lg:pl-14">
-              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] leading-none tracking-[0.2em] text-muted uppercase">
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.03] px-3 py-1.5 font-mono text-[11px] leading-none tracking-[0.2em] text-muted uppercase">
                 <span
                   className="size-1.5 rounded-full bg-brand shadow-glow-sm motion-safe:animate-status-pulse"
                   aria-hidden="true"
                 />
-                New · <span className="text-brand">For free</span>
+                New · <span className="text-brand-ink">For free</span>
               </span>
 
               <h2
@@ -31,7 +31,7 @@ export function AiInfluencerBanner() {
                 className="mt-5 text-[40px] leading-[0.95] font-black tracking-tight text-ink sm:text-5xl xl:text-[64px]"
               >
                 Your next influencer
-                <span className="text-accent-script mt-1 block text-[1.12em] tracking-normal text-brand normal-case">
+                <span className="text-accent-script mt-1 block text-[1.12em] tracking-normal text-brand-ink normal-case">
                   isn’t human.
                 </span>
               </h2>
@@ -46,7 +46,7 @@ export function AiInfluencerBanner() {
                   <li key={step} className="flex items-center gap-3">
                     {i > 0 && <span className="h-px w-4 bg-line" aria-hidden="true" />}
                     <span>
-                      <span className="text-brand">0{i + 1}</span> {step}
+                      <span className="text-brand-ink">0{i + 1}</span> {step}
                     </span>
                   </li>
                 ))}

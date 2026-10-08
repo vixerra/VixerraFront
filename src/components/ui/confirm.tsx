@@ -126,7 +126,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               <span
                 className={cn(
                   "flex size-10 shrink-0 items-center justify-center rounded-full",
-                  danger ? "bg-accent/10 text-accent" : "bg-white/5 text-ink-soft",
+                  danger ? "bg-accent/10 text-accent" : "bg-ink/5 text-ink-soft",
                 )}
               >
                 <AlertTriangle className="size-5" aria-hidden="true" />

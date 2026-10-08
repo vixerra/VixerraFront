@@ -190,7 +190,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
               <Link
                 href={appHref("/influencer")}
                 prefetch={false}
-                className="text-brand underline-offset-4 hover:underline"
+                className="text-brand-ink underline-offset-4 hover:underline"
               >
                 Vixlens AI Influencer
               </Link>
@@ -199,7 +199,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
           ) : item.fromPreset ? (
             <p className="mt-6 text-body text-muted">
               Made from one of the{" "}
-              <Link href="/prompts" className="text-brand underline-offset-4 hover:underline">
+              <Link href="/prompts" className="text-brand-ink underline-offset-4 hover:underline">
                 Vixlens video presets
               </Link>
               . A preset writes the prompt for you — upload one photo and generate.
@@ -224,7 +224,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
                 <dt className="text-body-sm text-muted">Model</dt>
                 <dd className="text-body-sm font-medium text-ink">
                   {modelHref ? (
-                    <Link href={modelHref} className="text-brand underline-offset-4 hover:underline">
+                    <Link href={modelHref} className="text-brand-ink underline-offset-4 hover:underline">
                       {influencerLabel ?? entry?.label ?? item.model}
                     </Link>
                   ) : (
@@ -274,7 +274,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
           <p className="mt-2 max-w-2xl text-body-sm text-muted">{entry.description}</p>
           <Link
             href={modelHref}
-            className="mt-5 inline-flex items-center gap-1.5 text-label font-semibold text-brand hover:underline"
+            className="mt-5 inline-flex items-center gap-1.5 text-label font-semibold text-brand-ink hover:underline"
           >
             {entry.label} specs and example prompts
             <ArrowUpRight className="size-4" aria-hidden="true" />

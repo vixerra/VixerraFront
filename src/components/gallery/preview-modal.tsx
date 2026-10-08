@@ -700,7 +700,7 @@ function PreviewBody({
                 aria-label={item.isPublic ? "Make private" : "Share publicly"}
                 title={item.isPublic ? "Make private" : "Share publicly"}
               >
-                <Share2 className={cn("size-4", item.isPublic && "text-brand")} />
+                <Share2 className={cn("size-4", item.isPublic && "text-brand-ink")} />
               </Button>
             )}
             {onAddToCollection && (

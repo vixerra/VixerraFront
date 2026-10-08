@@ -140,7 +140,7 @@ export function ClickableRow({
         onActivate(e);
       }}
       className={cn(
-        "cursor-pointer transition-colors hover:bg-white/[0.03]",
+        "cursor-pointer transition-colors hover:bg-ink/[0.03]",
         selected && "bg-brand/[0.05] hover:bg-brand/[0.07]",
         className,
       )}
@@ -183,7 +183,7 @@ export function StatusPill({ status }: { status: string }) {
     <span
       className={cn(
         "inline-flex rounded-full border px-2 py-0.5 text-caption font-medium whitespace-nowrap",
-        STATUS_TONE[status] ?? "border-line bg-white/5 text-muted",
+        STATUS_TONE[status] ?? "border-line bg-ink/5 text-muted",
       )}
     >
       {status}
@@ -272,7 +272,7 @@ export function Pagination({
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-2.5">
       <div className="flex flex-wrap items-center gap-4 text-caption text-muted">
         {pastEnd ? (
-          <button type="button" onClick={() => onOffset(0)} className="text-brand hover:underline">
+          <button type="button" onClick={() => onOffset(0)} className="text-brand-ink hover:underline">
             Past the last page — back to the first
           </button>
         ) : (
@@ -363,7 +363,7 @@ export function CopyButton({
       aria-label={copied ? "Copied" : label}
       title={copied ? "Copied" : label}
       className={cn(
-        "inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-white/5 hover:text-ink-soft",
+        "inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-ink/5 hover:text-ink-soft",
         className,
       )}
     >
@@ -400,7 +400,7 @@ export function Checkbox({
       onChange={(e) => onChange(e.target.checked)}
       onClick={(e) => e.stopPropagation()}
       aria-label={label}
-      className="size-4 cursor-pointer rounded accent-brand disabled:cursor-not-allowed disabled:opacity-30"
+      className="size-4 cursor-pointer rounded accent-brand-ink disabled:cursor-not-allowed disabled:opacity-30"
     />
   );
 }
@@ -410,7 +410,7 @@ export function TierPill({ tier }: { tier: string }) {
     <span
       className={cn(
         "inline-flex rounded-full border px-2 py-0.5 text-caption capitalize",
-        tier === "free" ? "border-line bg-white/5 text-muted" : "border-brand/30 bg-brand/10 text-brand",
+        tier === "free" ? "border-line bg-ink/5 text-muted" : "border-brand-ink/30 bg-brand/10 text-brand-ink",
       )}
     >
       {tier}
@@ -490,7 +490,7 @@ export function ActionDialog({
               <button
                 type="button"
                 aria-label="Close"
-                className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-ink/5 hover:text-ink-soft"
               >
                 <X className="size-4" />
               </button>

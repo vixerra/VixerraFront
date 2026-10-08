@@ -233,7 +233,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           <ul className="mt-6 space-y-3">
             {page.strengths.map((strength) => (
               <li key={strength} className="flex gap-3 text-body text-ink-soft">
-                <Check className="mt-1 size-4 shrink-0 text-brand" aria-hidden="true" />
+                <Check className="mt-1 size-4 shrink-0 text-brand-ink" aria-hidden="true" />
                 <span>{strength}</span>
               </li>
             ))}
@@ -245,7 +245,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           <ul className="mt-4 space-y-3">
             {page.useCases.map((useCase) => (
               <li key={useCase} className="flex gap-3 text-body text-ink-soft">
-                <Check className="mt-1 size-4 shrink-0 text-brand" aria-hidden="true" />
+                <Check className="mt-1 size-4 shrink-0 text-brand-ink" aria-hidden="true" />
                 <span>{useCase}</span>
               </li>
             ))}
@@ -267,7 +267,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           </dl>
           <p className="mt-4 text-caption text-muted">
             Plan limits apply on top of these — see{" "}
-            <Link href="/pricing" className="text-brand underline-offset-4 hover:underline">
+            <Link href="/pricing" className="text-brand-ink underline-offset-4 hover:underline">
               pricing
             </Link>
             .
@@ -289,7 +289,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
               <p className="text-body-sm text-ink-soft">&ldquo;{prompt}&rdquo;</p>
               <Link
                 href={modelWorkspaceHref(page.id, prompt)}
-                className="mt-auto inline-flex w-fit items-center gap-1.5 text-label font-semibold text-brand transition-transform hover:translate-x-0.5"
+                className="mt-auto inline-flex w-fit items-center gap-1.5 text-label font-semibold text-brand-ink transition-transform hover:translate-x-0.5"
               >
                 Try this prompt
                 <ArrowUpRight className="size-4" aria-hidden="true" />
@@ -329,7 +329,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
                   className="group rounded-2xl border border-line bg-surface-2 p-5 transition-colors hover:border-border-strong hover:bg-surface-3"
                 >
                   <span className="text-caption text-muted">{otherEntry.provider}</span>
-                  <h3 className="mt-1 text-feature-title font-semibold text-ink group-hover:text-brand">
+                  <h3 className="mt-1 text-feature-title font-semibold text-ink group-hover:text-brand-ink">
                     {otherEntry.label}
                   </h3>
                   <p className="mt-2 text-body-sm text-muted">{other.tagline}</p>
@@ -339,7 +339,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           </div>
           <Link
             href="/models"
-            className="mt-8 inline-flex items-center gap-1.5 text-label font-semibold text-brand hover:underline"
+            className="mt-8 inline-flex items-center gap-1.5 text-label font-semibold text-brand-ink hover:underline"
           >
             Browse every model
             <ArrowUpRight className="size-4" aria-hidden="true" />

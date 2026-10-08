@@ -21,8 +21,8 @@ export function TabsTrigger({ className, ...props }: ComponentProps<typeof TabsP
     <TabsPrimitive.Trigger
       className={cn(
         "shrink-0 border-b-2 border-transparent pb-3.5 text-label text-muted transition-colors",
-        "hover:text-brand/80",
-        "data-[state=active]:border-brand data-[state=active]:text-brand",
+        "hover:text-brand-ink/80",
+        "data-[state=active]:border-brand-ink data-[state=active]:text-brand-ink",
         "focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
         className,
       )}

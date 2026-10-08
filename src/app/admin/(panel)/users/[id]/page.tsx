@@ -38,7 +38,7 @@ function SectionHeading({ title, href, linkLabel }: { title: string; href?: stri
       {href && (
         <Link
           href={href}
-          className="inline-flex items-center gap-1 text-caption text-brand hover:underline"
+          className="inline-flex items-center gap-1 text-caption text-brand-ink hover:underline"
         >
           {linkLabel}
           <ArrowRight className="size-3" aria-hidden="true" />
@@ -201,7 +201,7 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <StatTile label="Tier">{user.tier}</StatTile>
         <StatTile label="Credit balance">
-          <span className="text-accent-amber">{user.creditBalance.toLocaleString()}</span>
+          <span className="text-accent-amber-ink">{user.creditBalance.toLocaleString()}</span>
         </StatTile>
         <StatTile label="Generations">
           {user.generationCount !== undefined ? user.generationCount.toLocaleString() : "—"}
@@ -248,13 +248,13 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
               grants.map((g) => (
                 <tr key={g.id}>
                   <Td>
-                    <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 font-mono text-caption">
+                    <span className="rounded-full border border-line bg-ink/5 px-2 py-0.5 font-mono text-caption">
                       {g.source}
                     </span>
                   </Td>
                   <Td className="capitalize">{g.tier}</Td>
                   <Td className="text-right">{g.amount.toLocaleString()}</Td>
-                  <Td className="text-right text-accent-amber">{g.remaining.toLocaleString()}</Td>
+                  <Td className="text-right text-accent-amber-ink">{g.remaining.toLocaleString()}</Td>
                   <Td>
                     <Mono>{g.expiresAt ? formatDate(g.expiresAt) : "never"}</Mono>
                   </Td>
@@ -360,7 +360,7 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
                 {audit.map((a) => (
                   <li key={a.id} className="border-b border-line pb-3 last:border-0 last:pb-0">
                     <p className="text-body-sm text-ink-soft">
-                      <span className="font-mono text-caption text-brand">{a.action}</span>{" "}
+                      <span className="font-mono text-caption text-brand-ink">{a.action}</span>{" "}
                       by {a.adminEmail}
                     </p>
                     {typeof a.details.reason === "string" && (

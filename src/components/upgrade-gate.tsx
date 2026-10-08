@@ -108,7 +108,7 @@ export function CreatorSuiteUpsell({
       className={cn("flex flex-col items-center gap-3 py-12 text-center", className)}
     >
       <span className="relative flex size-12 items-center justify-center rounded-2xl bg-brand/10">
-        <Icon className="size-5 text-brand" aria-hidden="true" />
+        <Icon className="size-5 text-brand-ink" aria-hidden="true" />
         {/* The lock rides the tool's own icon rather than replacing it — the
             point is which tool this is, with "locked" as the modifier. */}
         <span className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full border border-line bg-surface-2">

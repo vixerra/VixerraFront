@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 export function Spinner({ className, size = 20 }: { className?: string; size?: number }) {
   return (
     <Loader2
-      className={cn("animate-spin text-brand", className)}
+      className={cn("animate-spin text-brand-ink", className)}
       size={size}
       aria-hidden="true"
     />

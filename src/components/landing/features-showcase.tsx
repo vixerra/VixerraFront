@@ -98,7 +98,7 @@ function SectionMedia({
           overlay pattern — shows the real prompt that produced the sample,
           not a fabricated one. */}
       <div className="glass absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3 rounded-xl px-3 py-2 sm:right-auto sm:max-w-[80%]">
-        <p className="line-clamp-1 text-caption text-white/85">{prompt}</p>
+        <p className="line-clamp-1 text-caption text-ink/85">{prompt}</p>
       </div>
 
       <Link
@@ -143,7 +143,7 @@ export function FeaturesShowcase() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-mono text-caption tracking-widest text-brand uppercase"
+                  className="font-mono text-caption tracking-widest text-brand-ink uppercase"
                 >
                   {section.label}
                 </motion.span>
@@ -162,7 +162,7 @@ export function FeaturesShowcase() {
                       className="flex items-start gap-4 rounded-2xl border border-border-subtle bg-surface-2 p-6"
                     >
                       <span className="flex size-10 flex-none items-center justify-center rounded-lg bg-brand/15">
-                        <item.icon className="size-5 text-brand" aria-hidden="true" />
+                        <item.icon className="size-5 text-brand-ink" aria-hidden="true" />
                       </span>
                       <div>
                         <h3 className="text-feature-title font-semibold text-ink">{item.title}</h3>

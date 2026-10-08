@@ -25,7 +25,7 @@ export type LegalSection = {
 
 export function LegalLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="text-brand underline-offset-2 hover:text-brand-hover hover:underline">
+    <Link href={href} className="text-brand-ink underline-offset-2 hover:text-brand-hover hover:underline">
       {children}
     </Link>
   );
@@ -79,7 +79,7 @@ export function LegalDocument({
               <li key={section.id} className="mb-1.5 break-inside-avoid text-body-sm">
                 <a
                   href={`#${section.id}`}
-                  className="text-muted transition-colors hover:text-brand"
+                  className="text-muted transition-colors hover:text-brand-ink"
                 >
                   {i + 1}. {section.title}
                 </a>

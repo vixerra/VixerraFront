@@ -57,17 +57,17 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                       ? // The accent bar's colour must stay under before: — a
                         // bare bg-brand here paints the whole link solid.
                         "bg-brand/10 text-ink before:absolute before:top-1/2 before:left-0 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-brand"
-                      : "text-muted hover:bg-white/5 hover:text-ink-soft",
+                      : "text-muted hover:bg-ink/5 hover:text-ink-soft",
                   )}
                 >
                   <span
                     className={cn(
                       "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-                      active ? "bg-brand/15" : "bg-white/5",
+                      active ? "bg-brand/15" : "bg-ink/5",
                     )}
                   >
                     <item.icon
-                      className={cn("size-4", active ? "text-brand" : "text-muted")}
+                      className={cn("size-4", active ? "text-brand-ink" : "text-muted")}
                       aria-hidden="true"
                     />
                   </span>
@@ -78,7 +78,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                         "ml-auto rounded-full px-1.5 py-px text-[11px] leading-4 font-semibold tabular-nums",
                         item.badge === "failed24h"
                           ? "bg-accent/15 text-accent"
-                          : "bg-brand/15 text-brand",
+                          : "bg-brand/15 text-brand-ink",
                       )}
                       title={
                         item.badge === "failed24h" ? "Failed in the last 24 hours" : "Unread messages"
@@ -147,7 +147,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const brandMark = (
     <div className="flex items-center gap-2.5">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-        <ShieldCheck className="size-4 text-brand" aria-hidden="true" />
+        <ShieldCheck className="size-4 text-brand-ink" aria-hidden="true" />
       </span>
       <span className="font-display text-label font-bold tracking-wide text-ink uppercase">
         Admin
@@ -163,14 +163,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
         {/* Shown from day one even though nothing enforces it yet, so an
             operator always knows which hat they are wearing — and so the gap
             stays visible rather than forgotten once roles get meanings. */}
-        <span className="mt-1.5 inline-flex rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-caption text-brand capitalize">
+        <span className="mt-1.5 inline-flex rounded-full border border-brand-ink/20 bg-brand/10 px-2 py-0.5 text-caption text-brand-ink capitalize">
           {admin.role}
         </span>
       </div>
       <button
         type="button"
         onClick={() => logout.mutate()}
-        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-label text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-label text-muted transition-colors hover:bg-ink/5 hover:text-ink-soft"
       >
         <LogOut className="size-4.5" aria-hidden="true" />
         Sign out

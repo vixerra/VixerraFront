@@ -13,12 +13,12 @@ export default function PresetsPage() {
     <div className="space-y-8">
       <div className="max-w-2xl">
         <h1 className="font-display text-heading font-bold tracking-tight text-ink">
-          Viral <span className="text-brand">presets</span>
+          Viral <span className="text-brand-ink">presets</span>
         </h1>
         <p className="mt-3 text-body text-muted">
           Finished recipes — prompt, camera, length and audio already written. Pick a look, upload
           one photo, and generate. Want to change something? The{" "}
-          <Link href="/generate" className="text-brand underline-offset-4 hover:underline">
+          <Link href="/generate" className="text-brand-ink underline-offset-4 hover:underline">
             full composer
           </Link>{" "}
           is still there.

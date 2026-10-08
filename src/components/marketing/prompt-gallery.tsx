@@ -119,7 +119,7 @@ function PromptCard({ template, index }: { template: PromptTemplate; index: numb
             <button
               type="button"
               onClick={() => copy(template.prompt, setCopiedPrompt)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-caption font-medium text-ink-soft transition-colors hover:border-border-strong hover:bg-white/5"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-caption font-medium text-ink-soft transition-colors hover:border-border-strong hover:bg-ink/5"
             >
               {copiedPrompt ? (
                 <Check className="size-3.5 text-success" aria-hidden="true" />
@@ -132,7 +132,7 @@ function PromptCard({ template, index }: { template: PromptTemplate; index: numb
             <button
               type="button"
               onClick={() => copy(buildTemplateText(template), setCopiedTemplate)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-caption font-medium text-ink-soft transition-colors hover:border-border-strong hover:bg-white/5"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-caption font-medium text-ink-soft transition-colors hover:border-border-strong hover:bg-ink/5"
               title="Copy the full prompt + parameter recipe as text"
             >
               {copiedTemplate ? (

@@ -60,7 +60,7 @@ export default function LandingPage() {
       <Hero />
       <TrustBar />
       <AiInfluencerBanner />
-      <Reviews />
+      {/*<Reviews />*/}
       <LaunchOfferBanner />
       <PlansSection />
       <PriceComparison />

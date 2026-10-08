@@ -12,7 +12,7 @@ export default function NotFound() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-surface px-4 text-center">
       <Logo />
       <span className="flex size-14 items-center justify-center rounded-2xl bg-brand/10">
-        <Compass className="size-6 text-brand" aria-hidden="true" />
+        <Compass className="size-6 text-brand-ink" aria-hidden="true" />
       </span>
       <div>
         <h1 className="font-display text-heading font-bold tracking-tight text-ink">Page not found</h1>

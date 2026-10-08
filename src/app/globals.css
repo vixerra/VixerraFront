@@ -8,8 +8,10 @@
  * Design tokens for Vixlens' own identity — deliberately moved off the
  * violet→pink "AI SaaS" gradient (what this file used to be, modeled on
  * leonardo.ai) toward a palette that actually means something for a video
- * tool: a black/white/silver base broken by four saturated signal colors
- * (lime, amber, orange, hot magenta). The base carries every structural
+ * tool: a light silver/ink base (the ground is the logo's own silver, not
+ * white) broken by four saturated signal colors (lime, amber, orange, hot
+ * magenta), each with a deep "-ink" twin for text/borders on that light
+ * ground. The base carries every structural
  * surface; the four are confined to things that DO something or MEAN
  * something — actions, credits, categories, announcements. Read the
  * "signal set" note below before reaching for one, and before adding a
@@ -27,44 +29,39 @@
  * sm(640)/md(768)/lg(1024).
  */
 @theme {
-  /* Surfaces — true near-black with the faintest cool cast, no warm or
-     violet undertone. This palette is monochrome by design (black, white,
-     silver), so every bit of hierarchy has to come from VALUE rather than
-     hue: the ramp below is spaced widely enough that surface / card /
-     elevated stay distinguishable without a single colored tint doing the
-     work. Deeper than a typical #111 dark theme on purpose — the darker
-     the ground, the more silver reads as an actual metal catching light
-     rather than as another gray box. */
-  --color-surface: #050506; /* Background Primary */
-  --color-surface-2: #0f0f11; /* Background Secondary (cards) */
-  --color-surface-3: #17171a; /* Background Tertiary (elevated / card hover) */
-  --color-surface-dark: #0a0a0c; /* Input fields */
-  --color-overlay: #050506;
-  --color-dropdown-hover: #1f1f23; /* Hover states, dropdowns */
+  /* Surfaces — light silver-grey, taken from the logo tile (#bfc7d2)
+     rather than white: the page sits on the same cool metal as the mark,
+     and hierarchy comes from VALUE — cards and elevated panels step
+     lighter, the sidebar and recessed areas step darker. No warm or
+     violet undertone anywhere. */
+  --color-surface: #bfc7d2; /* Background Primary */
+  --color-surface-2: #cdd3db; /* Background Secondary (cards) */
+  --color-surface-3: #d9dee4; /* Background Tertiary (elevated / card hover) */
+  --color-surface-dark: #dfe3e9; /* Input fields */
+  /* Modal scrims (bg-overlay/80): a dark slate, not the page grey, so a
+     dialog still separates from what it covers. */
+  --color-overlay: #2a2f37;
+  --color-dropdown-hover: #c6cdd6; /* Hover states, dropdowns */
 
   /* App-shell background — the authenticated app (dashboard/generate/
-     gallery/settings, see AppShell) uses a hair softer near-black than the
-     marketing site's pure --color-surface, and the sidebar sits one step
-     above that again — closer to ArtCraft's own studio UI (distinct body/
-     sidebar/canvas planes) than a single flat tone everywhere. */
-  --color-surface-app: #0b0b0d;
-  --color-surface-sidebar: #101013;
+     gallery/settings, see AppShell) sits on the same silver, with the
+     sidebar one step deeper so body and rail read as distinct planes. */
+  --color-surface-app: #bfc7d2;
+  --color-surface-sidebar: #b4bcc8;
 
-  /* Text — cool neutrals, matching the silver below. In a monochrome
-     system the text ramp IS most of the design, so these three steps are
-     pulled further apart than they would be in a colored palette: primary
-     near-white, secondary clearly dimmer, tertiary dimmer again. Without
-     a hue to separate them, anything closer collapses into one gray. */
-  --color-ink: #f7f8fa; /* Text Primary — off-white, cool not warm */
-  --color-ink-soft: #f7f8fa;
-  --color-ink-softer: #f7f8fa;
-  --color-muted: #979ca6; /* Text Secondary */
-  --color-text-tertiary: #676c76; /* Labels, captions */
+  /* Text — near-black ink with a cool cast. Primary, secondary and
+     tertiary are pulled well apart since there's no hue to separate them;
+     secondary clears 4.5:1 on the page silver, tertiary is captions only. */
+  --color-ink: #0e1014; /* Text Primary */
+  --color-ink-soft: #0e1014;
+  --color-ink-softer: #0e1014;
+  --color-muted: #434953; /* Text Secondary */
+  --color-text-tertiary: #5a606b; /* Labels, captions */
 
-  /* Borders — translucent white, not opaque gray */
-  --color-line: rgb(255 255 255 / 0.1); /* Default border */
-  --color-border-subtle: rgb(255 255 255 / 0.06); /* Subtle dividers */
-  --color-border-strong: rgb(255 255 255 / 0.16); /* Focus rings, active borders */
+  /* Borders — translucent ink, not opaque gray */
+  --color-line: rgb(14 16 20 / 0.12); /* Default border */
+  --color-border-subtle: rgb(14 16 20 / 0.07); /* Subtle dividers */
+  --color-border-strong: rgb(14 16 20 / 0.24); /* Focus rings, active borders */
 
   /* Silver — the base metal. Everything structural (surfaces, type,
      borders) is black/white/grey, and this is the neutral accent that
@@ -73,6 +70,8 @@
      Pitched below pure white on purpose — an accent sitting at the same
      value as body text (#f7f8fa) stops being an accent. */
   --color-silver: #bfc7d2;
+  /* Silver is now the ground itself, so the logo tile inverts to ink with
+     a silver glyph (see layout/logo.tsx). */
 
   /* ---- The signal set ------------------------------------------------
      Four saturated colors that break the monochrome. The base stays black
@@ -94,24 +93,32 @@
   --color-brand: #bbdc12;
   --color-brand-hover: #cbe93a;
   --color-brand-active: #a3c30d;
+  /* The four signal colors are all LIGHT — as fills (with on-brand ink on
+     top) they read fine on silver, but as text, borders, rings or icons
+     they vanish into it (lime on #bfc7d2 is ~1.1:1). Every non-fill use
+     (text-*, border-*, ring-*, fill-*, accent-*) takes the -ink variant: a
+     deep version of the same hue that clears 4.5:1 on the page. */
+  --color-brand-ink: #3d5000;
 
   /* Ink for glyphs and labels sitting ON any light accent fill — all four
      signal colors and silver. Every one of them is a LIGHT color, so
      white-on-accent is unreadable (as low as 1.4:1); black is between 5:1
      and 15:1 on all of them, and on a saturated fill it is also the only
      choice that looks deliberate rather than washed. */
-  --color-on-brand: #050506;
+  --color-on-brand: #0e1014;
 
   /* Amber — value. Reserved for credits: the balance chips, the Zap
      glyphs, the cost on the generate button. Money-adjacent UI reads
      faster with a color of its own, and keeping it off the action color
      means "what this costs" never gets confused with "what to press". */
   --color-accent-amber: #ffd400;
+  --color-accent-amber-ink: #6a4f00;
 
   /* Orange — the third categorical slot (per-section icons, chip
      rotations). Sits between lime and hot in temperature, so a row of all
      four still reads as a deliberate sequence. */
   --color-accent-orange: #ff8f00;
+  --color-accent-orange-ink: #7c3e00;
 
   /* Hot magenta — announcements. The loudest of the four and the most
      rationed: exclusives, "new", the promo banner, the section beam.
@@ -121,15 +128,16 @@
   /* The hot as a fill under small white text: #ff0052 only reaches 3.9:1
      against white, short of WCAG AA's 4.5:1 for caption-size labels. */
   --color-accent-hot-strong: #e0004a;
+  --color-accent-hot-ink: #a10035;
 
   /* Status — separate from the signal set above, and deliberately so:
      these mean something fixed, and must never be mistaken for
      decoration. Warning is the one to watch — it sits closest to amber,
      so it is kept clearly deeper and less acid than the credits color. */
-  --color-success: #3fbe80;
-  --color-warning: #d99a20; /* deeper + duller than accent-amber/-orange */
-  --color-accent: #e8404f; /* error — a true red, not the hot's magenta */
-  --color-info: #56a8e8;
+  --color-success: #17703f;
+  --color-warning: #8a5a00; /* deeper + duller than accent-amber/-orange */
+  --color-accent: #b4212f; /* error — a true red, not the hot's magenta */
+  --color-info: #1d5f99;
 
   /* Fonts (next/font variables set on <html> in layout.tsx). Three roles
      instead of one: a geometric grotesk carries display/heading weight
@@ -160,17 +168,17 @@
      into haze: a coloured glow reads as a halo at a strength where a
      white one would just look like fog. Still restrained — the point is
      that a lime button looks lit from behind, not that it flares. */
-  --shadow-raised: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-floating: 0 8px 30px -4px rgb(0 0 0 / 0.5);
-  --shadow-modal: 0 20px 60px -12px rgb(0 0 0 / 0.6);
-  --shadow-inset: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
-  --shadow-card: 0 4px 12px rgb(0 0 0 / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
-  --shadow-glow-sm: 0 0 20px rgb(187 220 18 / 0.16);
-  --shadow-glow-md: 0 0 40px rgb(187 220 18 / 0.2);
-  --shadow-glow-lg: 0 0 80px rgb(187 220 18 / 0.16);
+  --shadow-raised: 0 1px 2px 0 rgb(20 26 36 / 0.12);
+  --shadow-floating: 0 8px 30px -4px rgb(20 26 36 / 0.22);
+  --shadow-modal: 0 20px 60px -12px rgb(20 26 36 / 0.35);
+  --shadow-inset: inset 0 1px 0 0 rgb(255 255 255 / 0.45);
+  --shadow-card: 0 4px 12px rgb(20 26 36 / 0.1), inset 0 1px 0 0 rgb(255 255 255 / 0.45);
+  --shadow-glow-sm: 0 0 20px rgb(187 220 18 / 0.3);
+  --shadow-glow-md: 0 0 40px rgb(187 220 18 / 0.35);
+  --shadow-glow-lg: 0 0 80px rgb(187 220 18 / 0.3);
   --shadow-glow-hot-sm: 0 0 20px rgb(255 0 82 / 0.18);
   --shadow-glow-hot-md: 0 0 40px rgb(255 0 82 / 0.24);
-  --shadow-glow-white: 0 0 30px rgb(255 255 255 / 0.05);
+  --shadow-glow-white: 0 0 30px rgb(255 255 255 / 0.35);
 
   /* No gradient() fills anywhere in this system, full stop — a two-hue
      blend used to fill buttons/badges/icon chips/decor blobs app-wide, and
@@ -182,7 +190,7 @@
      per-section nav colors, and the dashboard's icon chips.
      --gradient-hero-glow is now a flat solid tint too (kept the old name
      since call sites still consume it as a plain `background` value). */
-  --gradient-hero-glow: rgb(187 220 18 / 0.06);
+  --gradient-hero-glow: rgb(187 220 18 / 0.12);
 
   /* Type scale: each pairs font-size with its line-height (and, where
      useful, letter-spacing) in a single utility. Font-family is NOT
@@ -507,7 +515,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   * {
@@ -542,7 +550,7 @@
 
   ::selection {
     background: var(--color-brand);
-    color: var(--color-surface);
+    color: var(--color-on-brand);
   }
 
   /* Custom scrollbar — the default OS scrollbar (light gray, ~15-17px) reads
@@ -560,7 +568,7 @@
      itself stays transparent so it blends into whatever surface it sits on. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(255 255 255 / 0.15) transparent;
+    scrollbar-color: rgb(14 16 20 / 0.22) transparent;
   }
 
   ::-webkit-scrollbar {
@@ -573,14 +581,14 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: rgb(255 255 255 / 0.15);
+    background-color: rgb(14 16 20 / 0.22);
     border-radius: var(--radius-full);
     border: 2px solid transparent;
     background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(187 220 18 / 0.55);
+    background-color: rgb(61 80 0 / 0.55);
   }
 
   ::-webkit-scrollbar-corner {
@@ -603,7 +611,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid var(--color-brand-ink);
     outline-offset: 2px;
   }
 }
@@ -632,7 +640,7 @@
      Solid lime, never gradient-clipped — this app doesn't use blended
      gradient fills anywhere (see the note above --gradient-hero-glow). */
   .text-gradient {
-    color: var(--color-brand);
+    color: var(--color-brand-ink);
   }
 
   /* Editorial italic accent — the "for artists." trick: one phrase per
@@ -647,10 +655,10 @@
 
   /* Glassmorphism surface — floating toolbars, demo widgets, overlays. */
   .glass {
-    background: rgb(10 10 10 / 0.7);
+    background: rgb(217 222 228 / 0.72);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgb(255 255 255 / 0.06);
+    border: 1px solid rgb(14 16 20 / 0.08);
   }
 
   /* "Liquid glass" button — frosted pill with a thin gradient-reflection
@@ -672,7 +680,7 @@
      position requirement. */
   .btn-glass {
     isolation: isolate;
-    background: rgb(255 255 255 / 0.08);
+    background: rgb(255 255 255 / 0.3);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
@@ -729,8 +737,8 @@
      without reaching for another gradient blob. Opt-in per section. */
   .grid-texture {
     background-image:
-      linear-gradient(135deg, rgb(255 255 255 / 0.05) 1px, transparent 1px),
-      linear-gradient(45deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+      linear-gradient(135deg, rgb(14 16 20 / 0.06) 1px, transparent 1px),
+      linear-gradient(45deg, rgb(14 16 20 / 0.06) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
   }

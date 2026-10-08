@@ -112,7 +112,7 @@ export function ProviderModelPicker<T extends string>({
                         <Check
                           className={cn(
                             "mt-0.5 size-3.5 shrink-0",
-                            model.id === value ? "text-brand" : "text-transparent",
+                            model.id === value ? "text-brand-ink" : "text-transparent",
                           )}
                           aria-hidden="true"
                         />

@@ -29,7 +29,7 @@ export function Reviews() {
                     key={i}
                     className={
                       i < review.rating
-                        ? "size-4 fill-brand text-brand"
+                        ? "size-4 fill-brand-ink text-brand-ink"
                         : "size-4 text-line"
                     }
                     aria-hidden="true"
@@ -45,7 +45,7 @@ export function Reviews() {
 
             <div className="mt-6 flex items-center gap-3">
               <span
-                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/15 font-display text-label font-semibold text-brand"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/15 font-display text-label font-semibold text-brand-ink"
                 aria-hidden="true"
               >
                 {review.name.charAt(0)}

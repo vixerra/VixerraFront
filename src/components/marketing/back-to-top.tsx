@@ -5,7 +5,7 @@ import { ArrowUp } from "lucide-react";
 import { DISCORD_INVITE, DiscordIcon } from "@/components/layout/discord";
 
 const FLOATING =
-  "btn-glass relative flex size-11 items-center justify-center rounded-full text-white shadow-floating transition-transform hover:scale-105 active:scale-95";
+  "btn-glass relative flex size-11 items-center justify-center rounded-full text-ink shadow-floating transition-transform hover:scale-105 active:scale-95";
 
 /**
  * Floating buttons, bottom-right: the Discord invite, always there, and

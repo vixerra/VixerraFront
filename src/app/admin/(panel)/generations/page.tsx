@@ -284,7 +284,7 @@ export default function AdminGenerationsPage() {
       </ResultBar>
 
       {picked.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-brand/30 bg-brand/[0.06] px-4 py-2.5">
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-brand-ink/30 bg-brand/[0.06] px-4 py-2.5">
           <p className="mr-auto text-body-sm text-ink-soft">
             <span className="font-medium tabular-nums">{picked.length}</span> selected
           </p>
@@ -392,7 +392,7 @@ export default function AdminGenerationsPage() {
                   <button
                     type="button"
                     onClick={() => reset([...FILTER_KEYS])}
-                    className="text-brand hover:underline"
+                    className="text-brand-ink hover:underline"
                   >
                     Clear filters
                   </button>

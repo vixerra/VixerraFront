@@ -116,7 +116,7 @@ export default async function GuidePage(props: PageProps<"/guides/[slug]">) {
                 className="group rounded-xl border border-line bg-surface-2 p-4 transition-colors hover:border-border-strong hover:bg-surface-3"
               >
                 <span className="text-caption text-muted">{entry.provider}</span>
-                <p className="mt-1 text-label font-semibold text-ink group-hover:text-brand">
+                <p className="mt-1 text-label font-semibold text-ink group-hover:text-brand-ink">
                   {entry.label}
                 </p>
                 <p className="mt-1 text-body-sm text-muted">{page.tagline}</p>
@@ -151,10 +151,10 @@ export default async function GuidePage(props: PageProps<"/guides/[slug]">) {
               <li key={other.slug}>
                 <Link
                   href={`/guides/${other.slug}`}
-                  className="group flex items-start gap-2 text-body text-ink-soft hover:text-brand"
+                  className="group flex items-start gap-2 text-body text-ink-soft hover:text-brand-ink"
                 >
                   <ArrowUpRight
-                    className="mt-1 size-4 shrink-0 text-brand"
+                    className="mt-1 size-4 shrink-0 text-brand-ink"
                     aria-hidden="true"
                   />
                   {other.title}

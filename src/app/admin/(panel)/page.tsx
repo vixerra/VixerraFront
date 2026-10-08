@@ -46,7 +46,7 @@ function ListCard({
     <Card variant="standard" className="p-5 shadow-card hover:translate-y-0">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h3 className="font-display text-feature-title font-bold text-ink">{title}</h3>
-        <Link href={href} className="inline-flex items-center gap-1 text-caption text-brand hover:underline">
+        <Link href={href} className="inline-flex items-center gap-1 text-caption text-brand-ink hover:underline">
           See all <ArrowRight className="size-3" aria-hidden="true" />
         </Link>
       </div>
@@ -97,7 +97,7 @@ function Stat({
       <p
         className={cn(
           "font-display mt-2 text-heading font-bold tracking-tight",
-          tone === "alert" ? "text-accent" : tone === "amber" ? "text-accent-amber" : "text-ink",
+          tone === "alert" ? "text-accent" : tone === "amber" ? "text-accent-amber-ink" : "text-ink",
         )}
       >
         {value}
@@ -181,7 +181,7 @@ export default function AdminOverviewPage() {
             aria-hidden="true"
           />
           <div className="relative flex items-center gap-2 text-caption text-muted">
-            <Activity className="size-3.5 text-brand" aria-hidden="true" />
+            <Activity className="size-3.5 text-brand-ink" aria-hidden="true" />
             Generations · last {days} days
           </div>
           <p className="font-display relative mt-2 text-heading font-bold tracking-tight text-ink sm:text-display">
@@ -242,7 +242,7 @@ export default function AdminOverviewPage() {
           label="Credits spent · 30d"
           value={data.creditsSpent30d.toLocaleString()}
           sub={`≈$${(data.creditsSpent30d * CREDIT_VALUE_USD).toFixed(2)} of value`}
-          icon={<Zap className="size-3.5 text-accent-amber" aria-hidden="true" />}
+          icon={<Zap className="size-3.5 text-accent-amber-ink" aria-hidden="true" />}
           tone="amber"
           href="/admin/credits"
         />
@@ -267,7 +267,7 @@ export default function AdminOverviewPage() {
             <li key={g.id}>
               <Link
                 href={`/admin/generations?status=failed&open=${g.id}`}
-                className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-white/[0.03]"
+                className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-ink/[0.03]"
               >
                 <span className="min-w-0">
                   <Mono className="block truncate text-ink-soft">{g.model}</Mono>
@@ -292,7 +292,7 @@ export default function AdminOverviewPage() {
             <li key={u.id}>
               <Link
                 href={`/admin/users/${u.id}`}
-                className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-white/[0.03]"
+                className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-ink/[0.03]"
               >
                 <span className="min-w-0">
                   <span className="block truncate text-body-sm text-ink">{u.name}</span>
@@ -310,11 +310,11 @@ export default function AdminOverviewPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title="Signups" hint={`New accounts per day, last ${days} days`}>
-          <TrendChart data={data.signupSeries} color="#56a8e8" height={200} />
+          <TrendChart data={data.signupSeries} color="#1d5f99" height={200} />
         </ChartCard>
 
         <ChartCard title="Credit burn" hint="Credits spent per day on successful generations">
-          <TrendChart data={data.creditSeries} color="#ffd400" height={200} />
+          <TrendChart data={data.creditSeries} color="#a07800" height={200} />
         </ChartCard>
       </div>
 
@@ -330,7 +330,7 @@ export default function AdminOverviewPage() {
         <ChartCard title="Accounts by plan" hint="Where the user base actually sits — click a plan to list it">
           <RankedBars
             data={tiers.map((t) => ({ label: t.tier, value: t.count }))}
-            color="#bbdc12"
+            color="#5a7400"
             height={200}
             onSelect={(i) => tiers[i] && router.push(`/admin/users?tier=${tiers[i].tier}`)}
           />
@@ -364,7 +364,7 @@ export default function AdminOverviewPage() {
         </ul>
         <Link
           href="/admin/generations"
-          className="inline-flex items-center gap-1.5 text-body-sm text-brand hover:underline"
+          className="inline-flex items-center gap-1.5 text-body-sm text-brand-ink hover:underline"
         >
           Review the queue instead
           <ArrowUpRight className="size-3.5" aria-hidden="true" />
