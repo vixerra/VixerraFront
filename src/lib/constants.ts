@@ -1,5 +1,6 @@
 // DUPLIQUÉ dans aiVideo-backend/src/lib/constants.ts (et son miroir Deno
 // supabase/functions/api/lib/constants.ts) — garder synchronisé.
+import { MOTION_COMPOSER_MODELS } from "@/lib/motion-models";
 import { CLOUDFLARE_MODELS } from "@/lib/cloudflare-models";
 
 // The selling price of one credit. Every plan and pack below charges exactly
@@ -404,9 +405,17 @@ export const VIDEO_MODELS = byPopularity([
     id: "bytedance/seedance-2.0",
     label: "Seedance 2.0",
     provider: "ByteDance",
-    description: "Up to 4K, fixed camera & native audio",
+    description: "Up to 1080p, character & clip references, native audio",
   },
   ...DYNAMIC_VIDEO_ENTRIES,
+  // Motion transfer — an image plus a reference clip. Hand-written like
+  // Seedance, see lib/motion-models.ts.
+  ...MOTION_COMPOSER_MODELS.map((m) => ({
+    id: m.id,
+    label: m.label,
+    provider: m.provider,
+    description: m.description,
+  })),
 ] as const);
 export type VideoModelId = (typeof VIDEO_MODELS)[number]["id"];
 

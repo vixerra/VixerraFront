@@ -107,19 +107,23 @@ export async function extractSoundtrack(file: File): Promise<File | null> {
  * (2026-10-08: "the input audio 'content[2]' may contain sensitive
  * information"). The sound comes back on the result through
  * extractSoundtrack above.
+ *
+ * `maxBytes` re-encodes a clip over that size too, at a bitrate chosen to
+ * land under it — for a provider that caps the file rather than the frame.
  */
 export async function fitVideoToPixels(
   file: File,
   bounds: PixelBounds,
   onProgress?: (fraction: number) => void,
-  { dropAudio = false }: { dropAudio?: boolean } = {},
+  { dropAudio = false, maxBytes }: { dropAudio?: boolean; maxBytes?: number } = {},
 ): Promise<File> {
   const objectUrl = URL.createObjectURL(file);
   const video = createDecodeVideo(objectUrl);
   try {
     const probe = await probeVideo(objectUrl);
     const resized = targetSize(probe.width, probe.height, bounds);
-    if (!resized && !dropAudio) return file;
+    const tooLarge = maxBytes !== undefined && file.size > maxBytes;
+    if (!resized && !dropAudio && !tooLarge) return file;
     if (!isExportSupported()) {
       throw new ExportUnsupportedError(
         "This browser can't prepare your clip. Use Chrome, Edge, Firefox 130+ or Safari 17+.",
@@ -132,8 +136,12 @@ export async function fitVideoToPixels(
     const size = resized ?? { width: evenDown(probe.width), height: evenDown(probe.height) };
     const { width, height } = size;
     const totalFrames = Math.max(1, Math.round(probe.duration * FPS));
-    // Plenty for 720p; the provider re-encodes anyway.
-    const bitrate = 4_000_000;
+    // Plenty for 720p; the provider re-encodes anyway. Under `maxBytes`
+    // (Wan 2.2 Animate takes 10MB) it is lowered to fit, with 10% headroom
+    // for the container and 128 kb/s set aside for the soundtrack.
+    const bitrate = maxBytes
+      ? Math.max(500_000, Math.min(4_000_000, Math.floor((maxBytes * 0.9 * 8) / Math.max(1, probe.duration)) - 128_000))
+      : 4_000_000;
 
     const soundtrack = dropAudio ? null : await decodeSoundtrack(file);
     const withAudio = soundtrack !== null && (await canEncodeAudio());

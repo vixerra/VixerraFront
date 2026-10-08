@@ -4,6 +4,8 @@ import { useState } from "react";
 import { SeedanceVideoForm } from "./seedance-video-form";
 import { Seedance2VideoForm } from "./seedance2-video-form";
 import { DynamicModelForm } from "./dynamic-model-form";
+import { MotionVideoForm } from "./motion-video-form";
+import { getMotionComposerModel } from "@/lib/motion-models";
 import { UnsupportedModelNotice } from "./unsupported-model-notice";
 import { getCloudflareModel } from "@/lib/cloudflare-models";
 import {
@@ -85,6 +87,26 @@ export function TextToVideoForm({
     );
   }
 
+  // Motion transfer: an image and a reference clip, no registry entry —
+  // see lib/motion-models.ts.
+  const motionConfig = getMotionComposerModel(model);
+  if (motionConfig) {
+    return (
+      <MotionVideoForm
+        key={model}
+        models={VIDEO_MODELS}
+        model={model}
+        config={motionConfig}
+        onModelChange={setModel}
+        initialPrompt={prompt}
+        onPromptChange={setPrompt}
+        onCreated={onCreated}
+        busy={busy}
+        tierInfo={tierInfo}
+      />
+    );
+  }
+
   if (dynamicConfig && dynamicConfig.category === "text-to-video") {
     return (
       <DynamicModelForm
@@ -125,8 +147,8 @@ export function TextToVideoForm({
     );
   }
 
-  // Unreachable today: VIDEO_MODELS is the two Seedance ids plus the
-  // registry itself, so every id it can hold is caught above. It stays as a
+  // Unreachable today: VIDEO_MODELS is the two Seedance ids, the registry
+  // and the motion models, so every id it can hold is caught above. It stays as a
   // visible dead end rather than a crash in case an id is ever added to that
   // list without a matching registry entry.
   return <UnsupportedModelNotice modelId={model} />;

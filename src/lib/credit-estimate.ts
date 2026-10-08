@@ -222,7 +222,21 @@ const VIDEO_COST_USD: Record<
     perSecond: { default: 0.05 },
     minSeconds: 5,
   },
-  // Kling Motion Control, the AI influencer Motion tab (lib/influencer-
+  // Wan 2.2 Animate Move and Replace, motion models on the generate
+  // composer (lib/influencer-motion.ts in aiVideo-backend). Billed per second
+  // of output, which is the reference clip's length, like Kling below. The
+  // rates are what production billed these at on 2026-10-08 (480p $0.06/s,
+  // 720p $0.10/s, from two influencer runs), not yet checked against kie's
+  // pricing page — confirm them there. No minimum documented; 1s.
+  "wan/2.2-animate-move": {
+    perSecond: { "480p": 0.06, "720p": 0.1 },
+    minSeconds: 1,
+  },
+  "wan/2.2-animate-replace": {
+    perSecond: { "480p": 0.06, "720p": 0.1 },
+    minSeconds: 1,
+  },
+  // Kling Motion Control, the AI influencer Motion tab and the generate composer (lib/influencer-
   // motion.ts in aiVideo-backend). Billed per second of OUTPUT, which is the
   // reference clip's length, so the route measures the clip and passes that
   // as the duration. No reference-video table: the clip is not an extra on

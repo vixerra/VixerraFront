@@ -1,6 +1,7 @@
 // Structured "spec badges" (max duration, max resolution, ...) for the model
 // picker dropdown — derived from data this app already has, never invented:
 //   - Seedance 2.5/2.0: their own SEEDANCE*_DURATION_MAX/RESOLUTIONS constants.
+//   - Motion models: lib/motion-models.ts — the clip ceiling and resolutions.
 //   - Live Cloudflare-registry models: the same `duration`/`resolution`/`size`
 //     field definitions that already drive their generation form (see
 //     cloudflare-models.ts) — the max of a field's `options`, or its `max`.
@@ -9,6 +10,7 @@
 
 import { Clock, Monitor } from "lucide-react";
 import { getCloudflareModel } from "@/lib/cloudflare-models";
+import { getMotionComposerModel, MOTION_MAX_SECONDS } from "@/lib/motion-models";
 import {
   SEEDANCE_MODEL_ID,
   SEEDANCE_DURATION_MAX,
@@ -52,6 +54,16 @@ export function getModelBadges(modelId: string): ModelBadge[] {
     return [
       { icon: Clock, label: `Up to ${SEEDANCE2_DURATION_MAX}s` },
       { icon: Monitor, label: `${bestResolution(SEEDANCE2_RESOLUTIONS)} max` },
+    ];
+  }
+
+  const motion = getMotionComposerModel(modelId);
+  if (motion) {
+    // The output is as long as the reference clip, so the clip ceiling is
+    // the length ceiling.
+    return [
+      { icon: Clock, label: `Up to ${MOTION_MAX_SECONDS.video}s` },
+      { icon: Monitor, label: `${bestResolution(motion.resolutions)} max` },
     ];
   }
 
