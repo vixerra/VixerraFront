@@ -13,11 +13,11 @@ const base =
 // variants are the ones carrying actual colour here — see the "occasional
 // color" note in globals.css.
 const variants: Record<BadgeVariant, string> = {
-  neutral: "border border-transparent bg-white/5 text-muted",
+  neutral: "border border-transparent bg-ink/5 text-muted",
   success: "border border-success/30 bg-success/15 text-success",
   accent: "border border-accent/30 bg-accent/15 text-accent",
   outline: "border border-line bg-transparent text-muted",
-  brand: "border border-brand/20 bg-brand/10 text-brand",
+  brand: "border border-brand-ink/20 bg-brand/10 text-brand-ink",
 };
 
 export function Badge({

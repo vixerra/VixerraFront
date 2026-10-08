@@ -53,7 +53,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               onClick={() => dismiss(item.id)}
               className={cn(
                 "shrink-0 rounded-full p-1 text-muted transition-colors",
-                "hover:bg-white/8 hover:text-ink",
+                "hover:bg-ink/8 hover:text-ink",
               )}
               aria-label="Dismiss notification"
             >
@@ -73,7 +73,7 @@ function ToastIcon({ variant }: { variant: ToastVariant }) {
   if (variant === "error") {
     return <XCircle className="size-5 shrink-0 text-accent" aria-hidden="true" />;
   }
-  return <Info className="size-5 shrink-0 text-brand" aria-hidden="true" />;
+  return <Info className="size-5 shrink-0 text-brand-ink" aria-hidden="true" />;
 }
 
 export function useToast() {

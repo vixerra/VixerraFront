@@ -86,7 +86,7 @@ export function AddToCollectionModal({
             type="button"
             onClick={() => addMutation.mutate(collection.id)}
             disabled={addMutation.isPending}
-            className="flex w-full items-center justify-between rounded-xl border border-line bg-surface-2 px-4 py-3 text-left transition-colors hover:border-brand disabled:opacity-50"
+            className="flex w-full items-center justify-between rounded-xl border border-line bg-surface-2 px-4 py-3 text-left transition-colors hover:border-brand-ink disabled:opacity-50"
           >
             <span className="flex items-center gap-2 text-label text-ink-soft">
               <FolderPlus className="size-4 text-muted" aria-hidden="true" />

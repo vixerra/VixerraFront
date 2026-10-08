@@ -108,10 +108,10 @@ function SeatGrid({
             transition={{ duration: 0.35, delay: i * 0.03, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
               "aspect-square rounded-md border",
-              state === "taken" && "border-accent-hot/60 bg-accent-hot/70",
-              state === "next" && "border-brand bg-brand/25 shadow-glow-sm motion-safe:animate-pulse",
-              state === "open" && "border-brand/40 bg-brand/10",
-              state === "unknown" && "border-line bg-white/5",
+              state === "taken" && "border-accent-hot-ink/60 bg-accent-hot/70",
+              state === "next" && "border-brand-ink bg-brand/25 shadow-glow-sm motion-safe:animate-pulse",
+              state === "open" && "border-brand-ink/40 bg-brand/10",
+              state === "unknown" && "border-line bg-ink/5",
             )}
           />
         );
@@ -132,10 +132,10 @@ export function LaunchOfferPill() {
   return (
     <a
       href={`#${LAUNCH_OFFER_ANCHOR}`}
-      className="group inline-flex items-center gap-2.5 rounded-full border border-accent-hot/40 bg-accent-hot/10 py-1.5 pr-2.5 pl-3 text-caption text-white/85 shadow-glow-hot-sm backdrop-blur transition-colors hover:border-accent-hot/70 hover:text-white"
+      className="group inline-flex items-center gap-2.5 rounded-full border border-accent-hot-ink/40 bg-accent-hot/10 py-1.5 pr-2.5 pl-3 text-caption text-ink/85 shadow-glow-hot-sm backdrop-blur transition-colors hover:border-accent-hot-ink/70 hover:text-ink"
     >
       <LiveDot />
-      <span className="font-bold tracking-wide text-accent-hot uppercase">Launch offer</span>
+      <span className="font-bold tracking-wide text-accent-hot-ink uppercase">Launch offer</span>
       <span className="hidden sm:inline">
         {OFFER_PRICE}/mo locked in for the first {places}
       </span>
@@ -159,7 +159,7 @@ export function LaunchOfferBanner() {
   return (
     <section id={LAUNCH_OFFER_ANCHOR} className="container-page scroll-mt-20 py-10 sm:py-14">
       <Reveal>
-        <div className="relative overflow-hidden rounded-[28px] border border-accent-hot/30 bg-surface-2 p-7 shadow-glow-hot-md sm:p-12">
+        <div className="relative overflow-hidden rounded-[28px] border border-accent-hot-ink/30 bg-surface-2 p-7 shadow-glow-hot-md sm:p-12">
           {/* Halftone dots and a hot glow from the counter's side — the
               Seedance banner's texture, mirrored. Decorative only. */}
           <div
@@ -187,14 +187,14 @@ export function LaunchOfferBanner() {
                   <Flame className="size-3.5" aria-hidden="true" />
                   Limited offer
                 </span>
-                <span className="rounded-md border border-accent-hot/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot uppercase">
+                <span className="rounded-md border border-accent-hot-ink/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot-ink uppercase">
                   {places} spots only
                 </span>
               </div>
 
               <h2 className="mt-4 text-heading leading-[1.05] font-black tracking-tight uppercase sm:text-5xl">
                 <span className="block text-ink">Lock in {OFFER_PRICE}/mo</span>
-                <span className="block text-accent-hot">Only {places} spots</span>
+                <span className="block text-accent-hot-ink">Only {places} spots</span>
               </h2>
 
               <p className="mt-4 max-w-lg text-body text-muted">
@@ -218,7 +218,7 @@ export function LaunchOfferBanner() {
               </Link>
             </div>
 
-            <div className="rounded-2xl border border-line bg-black/40 p-6 backdrop-blur">
+            <div className="rounded-2xl border border-line bg-surface-2/70 p-6 backdrop-blur">
               <div className="flex items-center justify-between gap-3">
                 <p className="flex items-center gap-2 text-caption font-semibold tracking-wide text-muted uppercase">
                   <LiveDot />
@@ -234,7 +234,7 @@ export function LaunchOfferBanner() {
                 <span
                   className={cn(
                     "text-6xl font-black",
-                    taken === null ? "text-ink" : "text-accent-hot",
+                    taken === null ? "text-ink" : "text-accent-hot-ink",
                   )}
                 >
                   {taken === null ? (
@@ -268,15 +268,15 @@ export function LaunchOfferMeter({ className }: { className?: string }) {
   const claimed = taken === null ? 0 : (taken / places) * 100;
 
   return (
-    <div className={cn("rounded-xl border border-accent-hot/25 bg-accent-hot/5 px-3.5 py-3", className)}>
+    <div className={cn("rounded-xl border border-accent-hot-ink/25 bg-accent-hot/5 px-3.5 py-3", className)}>
       <div className="flex items-center justify-between gap-2 text-caption">
-        <span className="flex items-center gap-1.5 font-semibold text-accent-hot">
+        <span className="flex items-center gap-1.5 font-semibold text-accent-hot-ink">
           <Lock className="size-3.5" aria-hidden="true" />
           Locked in for the first {places}
         </span>
         <span className="text-muted tabular-nums">{spotsLabel(places, remaining)}</span>
       </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/10">
         <motion.div
           className="h-full rounded-full bg-accent-hot"
           initial={{ width: 0 }}
@@ -305,7 +305,7 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
   // it at opacity 0 until hydration, which held LCP back ~2s on mobile.
   return (
     <div className={className}>
-      <div className="relative overflow-hidden rounded-2xl border border-accent-hot/30 bg-surface-2 p-6 shadow-glow-hot-md sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-accent-hot-ink/30 bg-surface-2 p-6 shadow-glow-hot-md sm:p-8">
         {/* Same halftone and hot glow as the landing banner, from the left
             this time, behind the copy. Decorative only. */}
         <div
@@ -333,13 +333,13 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
                 <Flame className="size-3.5" aria-hidden="true" />
                 Limited offer
               </span>
-              <span className="rounded-md border border-accent-hot/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot uppercase">
+              <span className="rounded-md border border-accent-hot-ink/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot-ink uppercase">
                 {places} spots only
               </span>
             </div>
             <p className="font-display mt-3 text-subheading leading-tight font-black tracking-tight text-ink uppercase sm:text-heading">
               Lock in {OFFER_PRICE}/mo{" "}
-              <span className="text-accent-hot">· first {places} only</span>
+              <span className="text-accent-hot-ink">· first {places} only</span>
             </p>
             <p className="mt-2 max-w-xl text-body-sm text-muted">
               The first {places} {OFFER.label} subscribers keep {OFFER_PRICE} a month for as long
@@ -375,7 +375,7 @@ export function LaunchOfferPlanFlag() {
   return (
     <>
       <span
-        className="pointer-events-none absolute -inset-px rounded-2xl shadow-glow-hot-md ring-1 ring-accent-hot/70 motion-safe:animate-pulse"
+        className="pointer-events-none absolute -inset-px rounded-2xl shadow-glow-hot-md ring-1 ring-accent-hot-ink/70 motion-safe:animate-pulse"
         aria-hidden="true"
       />
       <span className="font-display absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent-hot-strong px-3 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-white uppercase shadow-glow-hot-sm">
@@ -479,7 +479,7 @@ export function LaunchOfferStickyBar() {
 
   return (
     <div className="animate-fade-up fixed right-20 bottom-5 left-4 z-40 sm:right-auto sm:left-1/2 sm:w-max sm:-translate-x-1/2">
-      <div className="flex items-center gap-3 rounded-full border border-accent-hot/40 bg-surface-2/90 py-2 pr-2 pl-4 shadow-floating backdrop-blur-md">
+      <div className="flex items-center gap-3 rounded-full border border-accent-hot-ink/40 bg-surface-2/90 py-2 pr-2 pl-4 shadow-floating backdrop-blur-md">
         <LiveDot />
         <p className="min-w-0 truncate text-caption text-muted sm:text-body-sm">
           {/* Phone: "14 left · $5.99/mo". Wider: "14 spots left at $5.99/mo, locked in". */}
@@ -513,7 +513,7 @@ export function LaunchOfferStickyBar() {
           type="button"
           onClick={dismiss}
           aria-label="Dismiss the launch offer"
-          className="shrink-0 rounded-full p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink"
+          className="shrink-0 rounded-full p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink"
         >
           <X className="size-4" aria-hidden="true" />
         </button>

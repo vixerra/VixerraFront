@@ -103,11 +103,11 @@ export default function ModelsIndexPage() {
                   <span className="text-caption text-muted">
                     {entry.provider} · {CATEGORY_LABEL[entry.category]}
                   </span>
-                  <h3 className="mt-2 text-feature-title font-semibold text-ink group-hover:text-brand">
+                  <h3 className="mt-2 text-feature-title font-semibold text-ink group-hover:text-brand-ink">
                     {entry.label}
                   </h3>
                   <p className="mt-2 text-body-sm text-muted">{page.tagline}</p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-label font-semibold text-brand">
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-label font-semibold text-brand-ink">
                     Specs and prompts
                     <ArrowUpRight className="size-4" aria-hidden="true" />
                   </span>

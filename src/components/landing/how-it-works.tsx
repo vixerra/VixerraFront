@@ -76,7 +76,7 @@ export function HowItWorks() {
               </div>
               <span
                 className={cn(
-                  "mt-4 block font-mono text-caption text-brand sm:mt-0",
+                  "mt-4 block font-mono text-caption text-brand-ink sm:mt-0",
                 )}
               >
                 0{index + 1}

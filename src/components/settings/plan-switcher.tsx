@@ -460,7 +460,7 @@ export function PlanSwitcher({
   return (
     <>
       {autoTier && (
-        <div className="mb-4 flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/10 px-4 py-3 text-caption text-ink">
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-brand-ink/30 bg-brand/10 px-4 py-3 text-caption text-ink">
           <Spinner size={16} />
           Taking you to secure checkout for {tierLabel(autoTier)}…
         </div>
@@ -481,7 +481,7 @@ export function PlanSwitcher({
               key={tier}
               ref={isPicked ? pickedRef : undefined}
               variant="compact"
-              className={cn("flex flex-col", isPicked && "border-brand/50 shadow-glow-md")}
+              className={cn("flex flex-col", isPicked && "border-brand-ink/50 shadow-glow-md")}
             >
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-mono text-label font-semibold text-ink">{info.label}</h3>

@@ -62,7 +62,7 @@ function Part({
       transition={{ duration: 0.42, ease: easing.elegant }}
       className={cn(
         "relative rounded-lg",
-        on && "ring-1 shadow-[0_0_18px_-4px_rgb(187_220_18_/_0.5)] ring-brand/70",
+        on && "ring-1 shadow-[0_0_18px_-4px_rgb(187_220_18_/_0.5)] ring-brand-ink/70",
         className,
       )}
     >
@@ -73,8 +73,8 @@ function Part({
 
 function Bar({ w, tone = "line" }: { w: string; tone?: "line" | "ink" | "brand" | "amber" }) {
   const tones = {
-    line: "bg-white/12",
-    ink: "bg-white/30",
+    line: "bg-ink/12",
+    ink: "bg-ink/30",
     brand: "bg-brand",
     amber: "bg-accent-amber",
   } as const;
@@ -100,7 +100,7 @@ function Shimmer({ still }: { still: boolean }) {
   return (
     <motion.span
       aria-hidden="true"
-      className="pointer-events-none absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+      className="pointer-events-none absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-ink/10 to-transparent"
       animate={{ x: ["-120%", "420%"] }}
       transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1.4, ease: easing.smooth }}
     />
@@ -112,7 +112,7 @@ function Typing({ still, w = "70%" }: { still: boolean; w?: string }) {
   if (still) return <Bar w={w} />;
   return (
     <motion.span
-      className="block h-1.5 rounded-full bg-white/25"
+      className="block h-1.5 rounded-full bg-ink/25"
       animate={{ width: ["8%", w, "8%"] }}
       transition={{ duration: 5, repeat: Infinity, ease: easing.smooth, times: [0, 0.55, 1] }}
     />
@@ -128,7 +128,7 @@ function Composer({ step, still }: SceneProps) {
     <Plate>
       <Part on={at(0)} still={still} className="flex items-center justify-between px-1">
         <Chip on>Seedance 2.5</Chip>
-        <span className="text-[8px] font-semibold text-accent-amber">113 cr</span>
+        <span className="text-[8px] font-semibold text-accent-amber-ink">113 cr</span>
       </Part>
 
       <Part on={at(1)} still={still} className="flex gap-1.5 p-0.5">
@@ -162,13 +162,13 @@ function Composer({ step, still }: SceneProps) {
       <Part
         on={at(4)}
         still={still}
-        className="flex items-center justify-between rounded-lg border border-accent-amber/30 bg-accent-amber/10 px-2 py-1"
+        className="flex items-center justify-between rounded-lg border border-accent-amber-ink/30 bg-accent-amber/10 px-2 py-1"
       >
         <span className="text-[8px] text-muted">Cost</span>
-        <span className="font-mono text-[9px] font-semibold text-accent-amber">113 credits</span>
+        <span className="font-mono text-[9px] font-semibold text-accent-amber-ink">113 credits</span>
       </Part>
 
-      <Part on={at(5)} still={still} className="h-1.5 overflow-hidden rounded-full bg-white/8">
+      <Part on={at(5)} still={still} className="h-1.5 overflow-hidden rounded-full bg-ink/8">
         {still ? (
           <span className="block h-full w-2/3 rounded-full bg-brand" />
         ) : (
@@ -199,12 +199,12 @@ function Gallery({ step, still }: SceneProps) {
           still ? (
             <span
               key={i}
-              className="block aspect-[4/3] rounded-md border border-line bg-gradient-to-br from-white/14 to-transparent"
+              className="block aspect-[4/3] rounded-md border border-line bg-gradient-to-br from-ink/14 to-transparent"
             />
           ) : (
             <motion.span
               key={i}
-              className="block aspect-[4/3] rounded-md border border-line bg-gradient-to-br from-white/14 to-transparent"
+              className="block aspect-[4/3] rounded-md border border-line bg-gradient-to-br from-ink/14 to-transparent"
               animate={{ opacity: [0.3, 1, 0.3], y: [1, -1, 1] }}
               transition={{
                 duration: 3,
@@ -236,7 +236,7 @@ function Timeline({ step, still }: SceneProps) {
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className="block h-4 rounded border border-line bg-gradient-to-br from-white/14 to-transparent"
+              className="block h-4 rounded border border-line bg-gradient-to-br from-ink/14 to-transparent"
             />
           ))}
         </Part>
@@ -259,8 +259,8 @@ function Timeline({ step, still }: SceneProps) {
                   key={i}
                   style={{ flex }}
                   className={cn(
-                    "h-5 rounded border bg-gradient-to-br from-white/14 to-transparent",
-                    i === 2 ? "border-brand" : "border-line",
+                    "h-5 rounded border bg-gradient-to-br from-ink/14 to-transparent",
+                    i === 2 ? "border-brand-ink" : "border-line",
                   )}
                 />
               ))}
@@ -277,8 +277,8 @@ function Timeline({ step, still }: SceneProps) {
           </Part>
 
           <Part on={at(3)} still={still} className="flex gap-1 p-0.5">
-            <span className="h-3 flex-[2] rounded border border-accent-hot/50 bg-accent-hot/15" />
-            <span className="h-3 flex-[5] rounded border border-accent-amber/30 bg-accent-amber/10" />
+            <span className="h-3 flex-[2] rounded border border-accent-hot-ink/50 bg-accent-hot/15" />
+            <span className="h-3 flex-[5] rounded border border-accent-amber-ink/30 bg-accent-amber/10" />
           </Part>
         </div>
       </div>
@@ -313,12 +313,12 @@ function Presets({ step, still }: SceneProps) {
           still ? (
             <span
               key={i}
-              className="block aspect-video rounded-md border border-line bg-gradient-to-br from-white/14 to-transparent"
+              className="block aspect-video rounded-md border border-line bg-gradient-to-br from-ink/14 to-transparent"
             />
           ) : (
             <motion.span
               key={i}
-              className="block aspect-video rounded-md border border-line bg-gradient-to-br from-white/14 to-transparent"
+              className="block aspect-video rounded-md border border-line bg-gradient-to-br from-ink/14 to-transparent"
               animate={{ scale: [1, 1.05, 1], opacity: [0.55, 1, 0.55] }}
               transition={{
                 duration: 3.2,
@@ -352,7 +352,7 @@ function Publish({ step, still }: SceneProps) {
               key={p}
               className={cn(
                 "flex h-6 flex-1 items-center justify-center rounded-md border text-[8px]",
-                i < 3 ? "border-brand/50 text-brand" : "border-line text-tertiary",
+                i < 3 ? "border-brand-ink/50 text-brand-ink" : "border-line text-tertiary",
               )}
             >
               {p}
@@ -360,7 +360,7 @@ function Publish({ step, still }: SceneProps) {
           ) : (
             <motion.span
               key={p}
-              className="flex h-6 flex-1 items-center justify-center rounded-md border border-brand/50 text-[8px] text-brand"
+              className="flex h-6 flex-1 items-center justify-center rounded-md border border-brand-ink/50 text-[8px] text-brand-ink"
               animate={{ borderColor: ["rgb(187 220 18 / 0.3)", "rgb(187 220 18 / 1)", "rgb(187 220 18 / 0.3)"] }}
               transition={{ duration: 2.2, repeat: Infinity, ease: easing.smooth, delay: i * 0.3 }}
             >
@@ -397,10 +397,10 @@ function Credits({ step, still }: SceneProps) {
     <Plate>
       <Part on={at(0)} still={still} className="flex items-baseline gap-1 px-1">
         {still ? (
-          <span className="font-display text-xl font-bold text-accent-amber">1,000</span>
+          <span className="font-display text-xl font-bold text-accent-amber-ink">1,000</span>
         ) : (
           <motion.span
-            className="font-display text-xl font-bold text-accent-amber"
+            className="font-display text-xl font-bold text-accent-amber-ink"
             animate={{ opacity: [0.55, 1, 0.55] }}
             transition={{ duration: 2.4, repeat: Infinity, ease: easing.smooth }}
           >
@@ -410,7 +410,7 @@ function Credits({ step, still }: SceneProps) {
         <span className="text-[8px] text-muted">credits</span>
       </Part>
 
-      <Part on={at(1)} still={still} className="h-1.5 overflow-hidden rounded-full bg-white/8">
+      <Part on={at(1)} still={still} className="h-1.5 overflow-hidden rounded-full bg-ink/8">
         {still ? (
           <span className="block h-full w-2/3 rounded-full bg-accent-amber" />
         ) : (
@@ -425,11 +425,11 @@ function Credits({ step, still }: SceneProps) {
       <Part on={at(2)} still={still} className="flex items-end gap-1 p-1">
         {[40, 62, 34, 78, 52, 88, 46].map((h, i) =>
           still ? (
-            <span key={i} className="flex-1 rounded-sm bg-white/14" style={{ height: h * 0.28 }} />
+            <span key={i} className="flex-1 rounded-sm bg-ink/14" style={{ height: h * 0.28 }} />
           ) : (
             <motion.span
               key={i}
-              className="flex-1 rounded-sm bg-white/14"
+              className="flex-1 rounded-sm bg-ink/14"
               animate={{ height: [h * 0.16, h * 0.32, h * 0.16] }}
               transition={{
                 duration: 2.8,
@@ -454,7 +454,7 @@ function Share({ step, still }: SceneProps) {
         {Array.from({ length: 3 }).map((_, i) => (
           <span
             key={i}
-            className="block aspect-square rounded-md border border-line bg-gradient-to-br from-white/14 to-transparent"
+            className="block aspect-square rounded-md border border-line bg-gradient-to-br from-ink/14 to-transparent"
           />
         ))}
       </Part>
@@ -462,7 +462,7 @@ function Share({ step, still }: SceneProps) {
       <Part
         on={at(1)}
         still={still}
-        className="relative flex items-center gap-1.5 overflow-hidden rounded-lg border border-brand/40 bg-brand/10 px-2 py-1.5"
+        className="relative flex items-center gap-1.5 overflow-hidden rounded-lg border border-brand-ink/40 bg-brand/10 px-2 py-1.5"
       >
         <span className="size-1.5 shrink-0 rounded-full bg-brand" />
         {still ? (
@@ -494,8 +494,8 @@ function Team({ step, still }: SceneProps) {
         >
           {i === 2 && !still ? (
             <motion.span
-              className="flex size-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[9px] font-semibold text-muted"
-              animate={{ scale: [1, 1.15, 1], backgroundColor: ["rgb(255 255 255 / 0.1)", "rgb(187 220 18 / 0.25)", "rgb(255 255 255 / 0.1)"] }}
+              className="flex size-5 shrink-0 items-center justify-center rounded-full bg-ink/10 text-[9px] font-semibold text-muted"
+              animate={{ scale: [1, 1.15, 1], backgroundColor: ["rgb(14 16 20 / 0.1)", "rgb(187 220 18 / 0.45)", "rgb(14 16 20 / 0.1)"] }}
               transition={{ duration: 2.4, repeat: Infinity, ease: easing.smooth }}
             >
               +
@@ -504,7 +504,7 @@ function Team({ step, still }: SceneProps) {
             <span
               className={cn(
                 "flex size-5 shrink-0 items-center justify-center rounded-full text-[9px] font-semibold",
-                i === 0 ? "bg-brand text-on-brand" : "bg-white/10 text-muted",
+                i === 0 ? "bg-brand text-on-brand" : "bg-ink/10 text-muted",
               )}
             >
               {i === 0 ? "O" : i === 1 ? "M" : "+"}
@@ -527,15 +527,15 @@ function Keys({ step, still }: SceneProps) {
         still={still}
         className="flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-2 px-2 py-2"
       >
-        <span className="font-mono text-[9px] text-brand">vx_</span>
+        <span className="font-mono text-[9px] text-brand-ink">vx_</span>
         <span className="flex flex-1 gap-0.5">
           {Array.from({ length: 16 }).map((_, d) =>
             still ? (
-              <span key={d} className="size-1 rounded-full bg-white/25" />
+              <span key={d} className="size-1 rounded-full bg-ink/25" />
             ) : (
               <motion.span
                 key={d}
-                className="size-1 rounded-full bg-white/25"
+                className="size-1 rounded-full bg-ink/25"
                 animate={{ opacity: [0.2, 1, 0.2] }}
                 transition={{
                   duration: 1.8,
@@ -551,7 +551,7 @@ function Keys({ step, still }: SceneProps) {
 
       <Part on={at(1)} still={still} className="flex items-center justify-between px-1.5 py-1">
         <span className="text-[8px] text-muted">Usage</span>
-        <span className="font-mono text-[9px] text-accent-amber">draws on credits</span>
+        <span className="font-mono text-[9px] text-accent-amber-ink">draws on credits</span>
       </Part>
 
       <Part
@@ -626,7 +626,7 @@ function Admin({ step, still }: SceneProps) {
               <span
                 className={cn(
                   "size-1.5 rounded-full",
-                  i === 0 ? "bg-accent-hot" : "bg-white/25",
+                  i === 0 ? "bg-accent-hot" : "bg-ink/25",
                 )}
               />
             )}
@@ -653,12 +653,12 @@ function Welcome({ step, still }: SceneProps) {
           {!still && (
             <>
               <motion.span
-                className="absolute size-14 rounded-full border border-brand/50"
+                className="absolute size-14 rounded-full border border-brand-ink/50"
                 animate={{ scale: [1, 1.7], opacity: [0.7, 0] }}
                 transition={{ duration: 2.6, repeat: Infinity, ease: easing.smooth }}
               />
               <motion.span
-                className="absolute size-14 rounded-full border border-brand/50"
+                className="absolute size-14 rounded-full border border-brand-ink/50"
                 animate={{ scale: [1, 1.7], opacity: [0.7, 0] }}
                 transition={{
                   duration: 2.6,
@@ -671,7 +671,7 @@ function Welcome({ step, still }: SceneProps) {
           )}
           <span className="absolute size-14 rounded-full border border-line" />
           <span className="font-display text-base font-bold tracking-tight text-ink">
-            V<span className="text-brand">.</span>
+            V<span className="text-brand-ink">.</span>
           </span>
         </span>
       </Part>
@@ -698,7 +698,7 @@ function Auth({ step, still }: SceneProps) {
     <Plate>
       <div className="mx-auto w-full max-w-[160px] space-y-2 rounded-lg border border-border-subtle bg-surface-2 p-3">
         <Part on={at(0)} still={still} className="flex justify-center p-0.5">
-          <span className="flex size-6 items-center justify-center rounded-full border border-brand/40">
+          <span className="flex size-6 items-center justify-center rounded-full border border-brand-ink/40">
             {still ? (
               <span className="size-1.5 rounded-full bg-brand" />
             ) : (

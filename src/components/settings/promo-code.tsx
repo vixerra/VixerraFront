@@ -134,7 +134,7 @@ export function PromoCodeField({
           type="button"
           onClick={() => onApply(null)}
           aria-label="Remove promo code"
-          className="flex size-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-white/10"
+          className="flex size-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-ink/10"
         >
           <X className="size-3.5" aria-hidden="true" />
         </button>

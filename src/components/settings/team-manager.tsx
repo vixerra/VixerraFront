@@ -122,7 +122,7 @@ function PendingInvites({ invites, onChanged }: { invites: MyInvite[]; onChanged
   return (
     <Card variant="standard" className="space-y-4">
       <div className="flex items-center gap-2">
-        <Users className="size-4 text-brand" aria-hidden="true" />
+        <Users className="size-4 text-brand-ink" aria-hidden="true" />
         <h2 className="text-subheading font-semibold text-ink">
           {invites.length === 1 ? "You've been invited" : "You've been invited to a few teams"}
         </h2>
@@ -317,7 +317,7 @@ export function TeamManager() {
         <PendingInvites invites={pending} onChanged={invalidateAfterJoin} />
         <Card variant="standard" className="flex flex-col items-center gap-3 py-12 text-center">
         <span className="flex size-12 items-center justify-center rounded-2xl bg-brand/10">
-          <Users className="size-5 text-brand" aria-hidden="true" />
+          <Users className="size-5 text-brand-ink" aria-hidden="true" />
         </span>
         <h2 className="text-subheading font-semibold text-ink">Team accounts are a Studio feature</h2>
         <p className="max-w-sm text-body-sm text-muted">
@@ -337,7 +337,7 @@ export function TeamManager() {
         <PendingInvites invites={pending} onChanged={invalidateAfterJoin} />
         <Card variant="standard" className="flex flex-col items-center gap-3 py-12 text-center">
         <span className="flex size-12 items-center justify-center rounded-2xl bg-brand/10">
-          <Users className="size-5 text-brand" aria-hidden="true" />
+          <Users className="size-5 text-brand-ink" aria-hidden="true" />
         </span>
         <h2 className="text-subheading font-semibold text-ink">Create your team</h2>
         <p className="max-w-sm text-body-sm text-muted">
@@ -471,7 +471,7 @@ export function TeamManager() {
 
       <Card variant="standard" className="divide-y divide-line p-0">
         <div className="flex items-center gap-2 p-4">
-          <Crown className="size-3.5 text-brand" aria-hidden="true" />
+          <Crown className="size-3.5 text-brand-ink" aria-hidden="true" />
           <p className="text-label text-ink-soft">{me.name} (you) — owner</p>
         </div>
         {data.members.map((m) => (
@@ -620,7 +620,7 @@ function MemberRow({
                       <span className="mt-0.5 block text-caption text-muted">{ROLE_BLURB[r]}</span>
                     </span>
                     {r === role && (
-                      <Check className="mt-1 size-3.5 shrink-0 text-brand" aria-hidden="true" />
+                      <Check className="mt-1 size-3.5 shrink-0 text-brand-ink" aria-hidden="true" />
                     )}
                   </DropdownItem>
                 ))}
@@ -713,7 +713,7 @@ function MemberRow({
               onClick={() =>
                 onUpdate({ monthlyCreditLimit: limited ? null : Math.max(spent, 500) })
               }
-              className="mt-2.5 text-caption text-brand transition-colors hover:text-brand-hover"
+              className="mt-2.5 text-caption text-brand-ink transition-colors hover:text-brand-hover"
             >
               {limited ? "Remove the limit" : "Set a limit"}
             </button>

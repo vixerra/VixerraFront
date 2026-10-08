@@ -194,7 +194,7 @@ export default function AdminAuditPage() {
                   <button
                     type="button"
                     onClick={() => reset([...FILTER_KEYS])}
-                    className="text-brand hover:underline"
+                    className="text-brand-ink hover:underline"
                   >
                     Clear filters
                   </button>
@@ -225,7 +225,7 @@ export default function AdminAuditPage() {
                       <button
                         type="button"
                         onClick={() => update({ action: e.action })}
-                        className="font-mono text-caption text-brand hover:underline"
+                        className="font-mono text-caption text-brand-ink hover:underline"
                         title="Show only this action"
                       >
                         {e.action}

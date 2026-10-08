@@ -123,7 +123,7 @@ export function GenerateStudio({ type }: { type: GenerationType }) {
               className={cn(
                 "border-b-2 pb-2.5 text-body-sm font-semibold whitespace-nowrap transition-colors",
                 m.type === type
-                  ? "border-brand text-ink"
+                  ? "border-brand-ink text-ink"
                   : "border-transparent text-muted hover:text-ink-soft",
               )}
             >
@@ -209,8 +209,8 @@ export function GenerateStudio({ type }: { type: GenerationType }) {
 
           {usageQuery.data && (
             <div className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface-2 px-3 py-1.5 text-body-sm text-ink-soft">
-              <Zap className="size-4 text-accent-amber" aria-hidden="true" />
-              <span className="font-semibold text-accent-amber">
+              <Zap className="size-4 text-accent-amber-ink" aria-hidden="true" />
+              <span className="font-semibold text-accent-amber-ink">
                 {formatCredits(usageQuery.data.credit_balance)}
               </span>
               <span className="text-muted">credits remaining</span>
@@ -233,12 +233,12 @@ export function GenerateStudio({ type }: { type: GenerationType }) {
             // The empty state is framed as a "canvas" — a large dashed,
             // brand-tinted card — rather than text floating in open space.
             // Same accent language as the composer's upload drop zones
-            // (dashed border-brand, tinted icon ring), so "this is where
+            // (dashed border-brand-ink, tinted icon ring), so "this is where
             // your creation will appear" reads consistently the very first
             // time someone lands here and every time after.
             <div
               {...spotlight}
-              className="group relative flex h-full min-h-[24rem] flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-brand/15 bg-surface-2/20 p-10 text-center"
+              className="group relative flex h-full min-h-[24rem] flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-brand-ink/15 bg-surface-2/20 p-10 text-center"
             >
               {/* Ambient drifting glow at rest — crossfades out for the
                   cursor spotlight below once hovered. Kept faint on

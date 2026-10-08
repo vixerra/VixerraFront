@@ -9,7 +9,7 @@ export function Switch({ className, ...props }: ComponentProps<typeof SwitchPrim
     <SwitchPrimitive.Root
       className={cn(
         "relative h-6 w-11 shrink-0 rounded-full border border-line bg-surface-3 transition-colors",
-        "data-[state=checked]:border-brand data-[state=checked]:bg-brand",
+        "data-[state=checked]:border-brand-ink data-[state=checked]:bg-brand",
         "disabled:opacity-50",
         className,
       )}

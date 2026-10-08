@@ -106,20 +106,20 @@ export function ReleaseAnnouncementModal() {
           <FilmPlayer />
 
           <div className="p-5 sm:p-7">
-            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] leading-none tracking-[0.2em] text-muted uppercase">
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.03] px-3 py-1.5 font-mono text-[11px] leading-none tracking-[0.2em] text-muted uppercase">
               <span className="size-1.5 rounded-full bg-brand shadow-glow-sm" aria-hidden="true" />
-              New · <span className="text-brand">For free</span>
+              New · <span className="text-brand-ink">For free</span>
             </span>
 
             <Dialog.Title className="font-display mt-4 text-[28px] leading-[1.05] font-bold tracking-tight text-ink sm:text-[34px]">
               Your next influencer{" "}
-              <span className="text-accent-script text-[1.12em] tracking-normal text-brand">
+              <span className="text-accent-script text-[1.12em] tracking-normal text-brand-ink">
                 isn’t human.
               </span>
             </Dialog.Title>
             <Dialog.Description className="mt-3 max-w-lg text-body-sm text-muted">
               Design an AI influencer once. Face, body and style stay locked in every video you
-              create. <span className="font-semibold text-brand">For free.</span>
+              create. <span className="font-semibold text-brand-ink">For free.</span>
             </Dialog.Description>
 
             {/* Dropped on short screens (laptops, phones), where it would push
@@ -128,7 +128,7 @@ export function ReleaseAnnouncementModal() {
             <ol className="mt-5 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3 short:hidden">
               {STEPS.map((step, i) => (
                 <li key={step.title} className="bg-surface-2 px-4 py-3">
-                  <p className="font-mono text-[11px] tracking-[0.2em] text-brand uppercase">
+                  <p className="font-mono text-[11px] tracking-[0.2em] text-brand-ink uppercase">
                     Step 0{i + 1}
                   </p>
                   <p className="mt-1 text-label font-semibold text-ink">{step.title}</p>
@@ -150,7 +150,7 @@ export function ReleaseAnnouncementModal() {
                 className="group/cta font-display inline-flex items-center justify-center gap-2 rounded-full bg-brand py-2 pr-2 pl-5 text-label font-semibold text-on-brand shadow-glow-md transition-[background-color,box-shadow] hover:bg-brand-hover hover:shadow-glow-lg"
               >
                 Create yours for free
-                <span className="flex size-7 items-center justify-center rounded-full bg-on-brand text-brand transition-transform group-hover/cta:translate-x-0.5">
+                <span className="flex size-7 items-center justify-center rounded-full bg-on-brand text-brand-ink transition-transform group-hover/cta:translate-x-0.5">
                   <ArrowRight className="size-3.5" aria-hidden="true" />
                 </span>
               </Link>

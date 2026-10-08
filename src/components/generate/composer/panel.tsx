@@ -253,7 +253,7 @@ function MentionThumb({ mention }: { mention: PromptMention }) {
   if (mention.mediaKind === "audio" || !mention.preview) {
     const Icon = mention.mediaKind === "audio" ? AudioLines : mention.mediaKind === "video" ? FileVideo : ImagePlus;
     return (
-      <span className={cn(box, "flex items-center justify-center text-brand")}>
+      <span className={cn(box, "flex items-center justify-center text-brand-ink")}>
         <Icon className="size-4" aria-hidden="true" />
       </span>
     );
@@ -340,9 +340,9 @@ export function PanelDropzone({
         compact ? "h-28 px-2" : "h-36 px-4",
         hasFile
           ? "border-solid border-line bg-surface-2 shadow-glow-sm"
-          : "border-dashed border-brand/25 bg-surface-2/40",
-        clickable && "cursor-pointer hover:border-brand/50 hover:bg-brand/5 hover:shadow-glow-sm",
-        clickable && dragOver && "border-brand/60 bg-brand/10 shadow-glow-sm",
+          : "border-dashed border-brand-ink/25 bg-surface-2/40",
+        clickable && "cursor-pointer hover:border-brand-ink/50 hover:bg-brand/5 hover:shadow-glow-sm",
+        clickable && dragOver && "border-brand-ink/60 bg-brand/10 shadow-glow-sm",
         disabled && "cursor-not-allowed opacity-35",
         className,
       )}
@@ -400,7 +400,7 @@ export function PanelDropzone({
           <>
             <span
               className={cn(
-                "flex items-center justify-center rounded-full border border-brand/40 bg-brand/15 text-brand",
+                "flex items-center justify-center rounded-full border border-brand-ink/40 bg-brand/15 text-brand-ink",
                 compact ? "size-8" : "size-10",
               )}
             >
@@ -448,7 +448,7 @@ export function PanelDropzone({
               <img
                 src={previewUrl}
                 alt=""
-                className="max-h-full max-w-full rounded-lg object-contain shadow-floating ring-1 ring-white/15"
+                className="max-h-full max-w-full rounded-lg object-contain shadow-floating ring-1 ring-ink/15"
               />
             </span>
           </>
@@ -460,12 +460,12 @@ export function PanelDropzone({
         <>
           <span
             className={cn(
-              "flex items-center justify-center rounded-full border border-brand/30 bg-brand/10 text-brand transition-colors duration-200 group-hover:border-brand/60 group-hover:bg-brand/20",
+              "flex items-center justify-center rounded-full border border-brand-ink/30 bg-brand/10 text-brand-ink transition-colors duration-200 group-hover:border-brand-ink/60 group-hover:bg-brand/20",
               compact ? "size-8" : "size-10",
             )}
           >
             {uploading ? (
-              <span className="size-3.5 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
+              <span className="size-3.5 animate-spin rounded-full border-2 border-brand-ink/30 border-t-brand" />
             ) : mediaKind === "video" ? (
               <FileVideo className={compact ? "size-4" : "size-5"} aria-hidden="true" />
             ) : mediaKind === "audio" ? (

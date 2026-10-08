@@ -67,7 +67,7 @@ export function JobStatusCard({
         variant="standard"
         className="flex h-full min-h-80 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-line bg-surface-2/50 text-center shadow-none hover:translate-y-0 hover:border-line hover:shadow-none"
       >
-        <span className="flex size-14 items-center justify-center rounded-2xl bg-white/5">
+        <span className="flex size-14 items-center justify-center rounded-2xl bg-ink/5">
           <Sparkles className="size-6 text-muted" aria-hidden="true" />
         </span>
         <p className="text-body-sm text-muted">

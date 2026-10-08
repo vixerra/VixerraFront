@@ -81,7 +81,7 @@ function LoginForm() {
         {unverifiedEmail && (
           <div
             role="status"
-            className="rounded-lg border border-brand/40 bg-brand/10 px-4 py-3 text-caption text-ink"
+            className="rounded-lg border border-brand-ink/40 bg-brand/10 px-4 py-3 text-caption text-ink"
           >
             <p>
               Your email isn&apos;t confirmed yet. We&apos;ve just sent a new link to{" "}
@@ -103,7 +103,7 @@ function LoginForm() {
             </Label>
             <Link
               href="/forgot-password"
-              className="text-caption text-brand hover:text-brand-hover"
+              className="text-caption text-brand-ink hover:text-brand-hover"
             >
               Forgot password?
             </Link>
@@ -136,7 +136,7 @@ function LoginForm() {
         Don&apos;t have an account?{" "}
         <Link
           href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}
-          className="text-brand hover:text-brand-hover"
+          className="text-brand-ink hover:text-brand-hover"
         >
           Sign up
         </Link>

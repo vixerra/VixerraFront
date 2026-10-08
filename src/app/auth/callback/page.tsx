@@ -64,7 +64,7 @@ export default function AuthCallbackPage() {
         {error ? (
           <>
             <p className="text-body-sm text-accent">{error}</p>
-            <Link href="/login" className="mt-4 inline-block text-brand hover:text-brand-hover">
+            <Link href="/login" className="mt-4 inline-block text-brand-ink hover:text-brand-hover">
               Back to login
             </Link>
           </>

@@ -46,7 +46,7 @@ export function SeedancePromoBanner() {
             aria-hidden="true"
           />
           <svg
-            className="pointer-events-none absolute top-1/2 right-0 h-[140%] w-auto -translate-y-1/2 translate-x-[15%] text-white opacity-[0.06]"
+            className="pointer-events-none absolute top-1/2 right-0 h-[140%] w-auto -translate-y-1/2 translate-x-[15%] text-ink opacity-[0.06]"
             viewBox="0 0 200 240"
             fill="none"
             aria-hidden="true"
@@ -64,13 +64,13 @@ export function SeedancePromoBanner() {
               <span className="rounded-md bg-brand px-2.5 py-1 text-caption font-black tracking-wide text-on-brand uppercase">
                 Exclusive access
               </span>
-              <span className="rounded-md border border-accent-hot/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot uppercase">
+              <span className="rounded-md border border-accent-hot-ink/40 bg-accent-hot/15 px-2.5 py-1 text-caption font-black tracking-wide text-accent-hot-ink uppercase">
                 Seedance 2.5 at 1080p
               </span>
             </div>
 
             <h2 className="mt-4 text-heading leading-[1.05] font-black tracking-tight uppercase sm:text-display">
-              <span className="block text-accent-hot">Exclusive Seedance 2.5</span>
+              <span className="block text-accent-hot-ink">Exclusive Seedance 2.5</span>
               <span className="block text-ink">Reference control & native audio</span>
             </h2>
 
@@ -79,7 +79,7 @@ export function SeedancePromoBanner() {
               native audio generation. Live now on every plan.
             </p>
 
-            <span className="font-display mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-label font-semibold text-black transition-transform group-hover:translate-x-1">
+            <span className="font-display mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-label font-semibold text-surface-2 transition-transform group-hover:translate-x-1">
               Try it now
               <ArrowRight className="size-4" aria-hidden="true" />
             </span>

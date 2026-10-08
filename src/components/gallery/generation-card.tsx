@@ -240,7 +240,7 @@ export function GenerationCard({
               : "sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
           )}
         >
-          <Heart className={cn("size-4.5", liked && "fill-brand text-brand")} aria-hidden="true" />
+          <Heart className={cn("size-4.5", liked && "fill-brand-ink text-brand-ink")} aria-hidden="true" />
           {likeCount > 0 && (
             <span className="text-caption font-semibold tabular-nums">{likeCount}</span>
           )}

@@ -77,7 +77,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 py-12">
       <div className="mb-8 flex flex-col items-center gap-3">
         <span className="flex size-12 items-center justify-center rounded-2xl border border-line bg-surface-2">
-          <ShieldCheck className="size-6 text-brand" aria-hidden="true" />
+          <ShieldCheck className="size-6 text-brand-ink" aria-hidden="true" />
         </span>
         <p className="font-display text-label font-semibold tracking-wide text-muted uppercase">
           Staff access

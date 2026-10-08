@@ -51,7 +51,7 @@ export function PlansSection() {
       />
       <div className="container-page">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-caption font-semibold tracking-wide text-brand uppercase">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand-ink/25 bg-brand/10 px-3 py-1 text-caption font-semibold tracking-wide text-brand-ink uppercase">
             <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
             Subscribe
           </span>
@@ -77,17 +77,17 @@ export function PlansSection() {
                   className={cn(
                     "relative flex h-full flex-col rounded-2xl border bg-surface-2 p-8 transition-[border-color,box-shadow,transform] duration-500 ease-out",
                     isPopular
-                      ? "border-brand/50 shadow-glow-md lg:-translate-y-4"
+                      ? "border-brand-ink/50 shadow-glow-md lg:-translate-y-4"
                       : isOffer
-                        ? "border-accent-hot/50 shadow-glow-hot-md"
+                        ? "border-accent-hot-ink/50 shadow-glow-hot-md"
                         : isEntry
-                          ? "border-brand/30 shadow-card hover:border-brand/50"
+                          ? "border-brand-ink/30 shadow-card hover:border-brand-ink/50"
                           : "border-line shadow-card hover:border-border-strong",
                   )}
                 >
                   {isOffer && (
                     <span
-                      className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-accent-hot/70 motion-safe:animate-pulse"
+                      className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-accent-hot-ink/70 motion-safe:animate-pulse"
                       aria-hidden="true"
                     />
                   )}
@@ -105,7 +105,7 @@ export function PlansSection() {
                   ) : (
                     isEntry &&
                     !isPopular && (
-                      <span className="font-display absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full border border-brand/50 bg-surface-2 px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-brand uppercase">
+                      <span className="font-display absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full border border-brand-ink/50 bg-surface-2 px-3.5 py-1 text-caption font-bold tracking-wide whitespace-nowrap text-brand-ink uppercase">
                         {ENTRY_BADGE}
                       </span>
                     )
@@ -128,9 +128,9 @@ export function PlansSection() {
                   )}
                   {isOffer && <LaunchOfferMeter className="mt-4" />}
 
-                  <div className="mt-5 flex items-center gap-2 rounded-xl border border-accent-amber/20 bg-accent-amber/5 px-3.5 py-2.5">
-                    <Zap className="size-4 shrink-0 text-accent-amber" aria-hidden="true" />
-                    <span className="font-display text-label font-semibold text-accent-amber">
+                  <div className="mt-5 flex items-center gap-2 rounded-xl border border-accent-amber-ink/20 bg-accent-amber/5 px-3.5 py-2.5">
+                    <Zap className="size-4 shrink-0 text-accent-amber-ink" aria-hidden="true" />
+                    <span className="font-display text-label font-semibold text-accent-amber-ink">
                       {formatCredits(info.monthlyCredits)} credits
                     </span>
                     <span className="text-caption text-muted">every month</span>

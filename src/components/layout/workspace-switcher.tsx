@@ -51,10 +51,10 @@ export function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
       <span
         className={cn(
           "flex size-5 shrink-0 items-center justify-center rounded-md",
-          isTeam ? "bg-brand/15" : "bg-white/8",
+          isTeam ? "bg-brand/15" : "bg-ink/8",
         )}
       >
-        <Icon className={cn("size-3", isTeam ? "text-brand" : "text-muted")} aria-hidden="true" />
+        <Icon className={cn("size-3", isTeam ? "text-brand-ink" : "text-muted")} aria-hidden="true" />
       </span>
       {!collapsed && (
         <>
@@ -80,12 +80,12 @@ export function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
         <DropdownItem onSelect={() => choose("personal")}>
           <UserIcon className="size-4 text-muted" aria-hidden="true" />
           <span className="flex-1">Personal</span>
-          {!isTeam && <Check className="size-3.5 text-brand" aria-hidden="true" />}
+          {!isTeam && <Check className="size-3.5 text-brand-ink" aria-hidden="true" />}
         </DropdownItem>
         <DropdownItem onSelect={() => choose("team")}>
           <Users className="size-4 text-muted" aria-hidden="true" />
           <span className="flex-1 truncate">{org.name}</span>
-          {isTeam && <Check className="size-3.5 text-brand" aria-hidden="true" />}
+          {isTeam && <Check className="size-3.5 text-brand-ink" aria-hidden="true" />}
         </DropdownItem>
         <p className="px-2 pt-2 text-caption text-text-tertiary">
           {org.role === "owner"

@@ -43,7 +43,7 @@ export function BottomSheet({
               <button
                 type="button"
                 aria-label="Close"
-                className="flex size-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+                className="flex size-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-ink/5 hover:text-ink-soft"
               >
                 <X className="size-4" aria-hidden="true" />
               </button>

@@ -42,11 +42,11 @@ import {
 // page — monthly is the plan allowance, recharge is money in, refund and
 // admin_grant are credits nobody paid for.
 const SOURCE_COLORS: Record<string, string> = {
-  monthly: "#bbdc12",
-  recharge: "#ffd400",
-  refund: "#56a8e8",
-  admin_grant: "#ff8f00",
-  promo: "#c86bfa",
+  monthly: "#5a7400",
+  recharge: "#a07800",
+  refund: "#1d5f99",
+  admin_grant: "#b35f00",
+  promo: "#7a3fb0",
 };
 
 const DEFAULTS = {
@@ -232,18 +232,18 @@ export default function AdminCreditsPage() {
                   aria-pressed={active}
                   onClick={() => update({ source: active ? null : s.source })}
                   className={cn(
-                    "block w-full rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-white/[0.03]",
+                    "block w-full rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-ink/[0.03]",
                     active && "bg-brand/10",
                   )}
                 >
                   <div className="mb-1 flex items-center justify-between text-caption">
-                    <span className="font-mono text-brand">{s.source}</span>
+                    <span className="font-mono text-brand-ink">{s.source}</span>
                     <span className="text-muted">
                       {s.remaining.toLocaleString()} /{" "}
                       {s.amount.toLocaleString()}
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-white/5">
+                  <div className="h-2 overflow-hidden rounded-full bg-ink/5">
                     <div
                       className="h-full rounded-full bg-brand"
                       style={{ width: `${pct}%` }}
@@ -380,7 +380,7 @@ export default function AdminCreditsPage() {
                 <button
                   type="button"
                   onClick={() => reset([...FILTER_KEYS])}
-                  className="text-brand hover:underline"
+                  className="text-brand-ink hover:underline"
                 >
                   Clear filters
                 </button>
@@ -392,7 +392,7 @@ export default function AdminCreditsPage() {
               return (
                 <tr
                   key={g.id}
-                  className="transition-colors hover:bg-white/[0.03]"
+                  className="transition-colors hover:bg-ink/[0.03]"
                 >
                   <Td>
                     <Link
@@ -403,7 +403,7 @@ export default function AdminCreditsPage() {
                     </Link>
                   </Td>
                   <Td>
-                    <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 font-mono text-caption">
+                    <span className="rounded-full border border-line bg-ink/5 px-2 py-0.5 font-mono text-caption">
                       {g.source}
                     </span>
                   </Td>
@@ -414,7 +414,7 @@ export default function AdminCreditsPage() {
                   <Td
                     className={cn(
                       "text-right tabular-nums",
-                      state === "active" ? "text-accent-amber" : "text-muted",
+                      state === "active" ? "text-accent-amber-ink" : "text-muted",
                     )}
                   >
                     {g.remaining.toLocaleString()}

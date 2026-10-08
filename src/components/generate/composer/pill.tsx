@@ -115,7 +115,7 @@ export function PillSelect<T extends string | number>({
               )}
             >
               <Check
-                className={cn("size-3.5 shrink-0", opt === value ? "text-brand" : "text-transparent")}
+                className={cn("size-3.5 shrink-0", opt === value ? "text-brand-ink" : "text-transparent")}
                 aria-hidden="true"
               />
               <span className="flex min-w-0 flex-1 items-baseline gap-2">

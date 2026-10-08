@@ -34,7 +34,7 @@ const LABEL: Record<SocialPlatform, string> = {
 /** Backgrounds for the icon tile and the card's hover glow, tinted to each
  *  platform. Kept beside the marks so a platform's colour is defined once. */
 const TINT: Record<SocialPlatform, { tile: string; glow: string }> = {
-  tiktok: { tile: "bg-white/8", glow: "bg-white" },
+  tiktok: { tile: "bg-ink/8", glow: "bg-ink" },
   youtube: { tile: "bg-[#FF0033]/12", glow: "bg-[#FF0033]" },
   facebook: { tile: "bg-[#1877F2]/12", glow: "bg-[#1877F2]" },
   instagram: { tile: "bg-[#E4405F]/12", glow: "bg-[#E4405F]" },

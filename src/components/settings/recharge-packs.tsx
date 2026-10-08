@@ -134,7 +134,7 @@ export function RechargePacks({
               <span className="flex size-10 items-center justify-center rounded-full bg-accent-amber">
                 <Zap className="size-4.5 text-on-brand" aria-hidden="true" />
               </span>
-              <p className="mt-3 text-subheading font-bold text-accent-amber">
+              <p className="mt-3 text-subheading font-bold text-accent-amber-ink">
                 {formatCredits(pack.credits)}
               </p>
               <p className="text-caption text-muted">credits</p>

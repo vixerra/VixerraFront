@@ -130,7 +130,7 @@ function ExpiredLinkCard({ message }: { message: string | null }) {
         </p>
         <Link
           href="/login"
-          className="mt-6 inline-block text-body-sm text-brand hover:text-brand-hover"
+          className="mt-6 inline-block text-body-sm text-brand-ink hover:text-brand-hover"
         >
           Back to log in
         </Link>
@@ -161,7 +161,7 @@ function ExpiredLinkCard({ message }: { message: string | null }) {
         </Button>
       </form>
       <p className="mt-6 text-center text-body-sm text-muted">
-        <Link href="/login" className="text-brand hover:text-brand-hover">
+        <Link href="/login" className="text-brand-ink hover:text-brand-hover">
           Back to log in
         </Link>
       </p>

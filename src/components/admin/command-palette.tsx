@@ -284,7 +284,7 @@ function PaletteRow({
         <span
           className={cn(
             "flex size-8 shrink-0 items-center justify-center rounded-lg",
-            active ? "bg-brand/15 text-brand" : "bg-white/5 text-muted",
+            active ? "bg-brand/15 text-brand-ink" : "bg-ink/5 text-muted",
           )}
         >
           <Icon className="size-4" aria-hidden="true" />

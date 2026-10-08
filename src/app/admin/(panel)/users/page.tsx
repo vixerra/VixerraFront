@@ -214,7 +214,7 @@ export default function AdminUsersPage() {
                   <button
                     type="button"
                     onClick={() => reset([...FILTER_KEYS])}
-                    className="text-brand hover:underline"
+                    className="text-brand-ink hover:underline"
                   >
                     Clear filters
                   </button>
@@ -258,7 +258,7 @@ export default function AdminUsersPage() {
                     <Td>
                       <TierPill tier={u.tier} />
                     </Td>
-                    <Td className="text-right font-medium text-accent-amber tabular-nums">
+                    <Td className="text-right font-medium text-accent-amber-ink tabular-nums">
                       {u.creditBalance.toLocaleString()}
                     </Td>
                     <Td className="text-right tabular-nums">{u.generationCount.toLocaleString()}</Td>

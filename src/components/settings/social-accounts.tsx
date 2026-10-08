@@ -118,7 +118,7 @@ export function SocialAccounts() {
           <span>
             Your plan no longer includes publishing, so these accounts can&apos;t be used to post and
             no new ones can be connected. Disconnecting still works.{" "}
-            <Link href="/settings/billing" className="text-brand hover:text-brand-hover">
+            <Link href="/settings/billing" className="text-brand-ink hover:text-brand-hover">
               See plans
             </Link>
             .

@@ -101,13 +101,13 @@ function PriceBoard({ animate }: { animate: boolean }) {
             <span
               className={
                 row.ours
-                  ? "font-display text-body-sm font-bold text-brand"
+                  ? "font-display text-body-sm font-bold text-brand-ink"
                   : "text-body-sm text-muted"
               }
             >
               {row.name}
             </span>
-            <div className="h-2.5 overflow-hidden rounded-full bg-white/5">
+            <div className="h-2.5 overflow-hidden rounded-full bg-ink/5">
               <motion.div
                 className={
                   row.ours
@@ -124,14 +124,14 @@ function PriceBoard({ animate }: { animate: boolean }) {
               <span
                 className={
                   row.ours
-                    ? "font-display text-body font-bold text-brand"
+                    ? "font-display text-body font-bold text-brand-ink"
                     : "font-display text-body-sm font-semibold text-ink"
                 }
               >
                 {formatListPrice(row.price)}
               </span>
               {row.savings !== null && (
-                <span className="text-[11px] text-accent-amber">+${row.savings}/yr</span>
+                <span className="text-[11px] text-accent-amber-ink">+${row.savings}/yr</span>
               )}
             </span>
           </li>
@@ -146,7 +146,7 @@ export function Hero() {
   const { data: user } = useMe();
 
   return (
-    <section className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden bg-black">
+    <section className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden bg-surface">
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[70%] -translate-x-1/2 -translate-y-1/3 rounded-full bg-brand/10 blur-[120px]"
         aria-hidden="true"
@@ -160,7 +160,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className={`absolute ${item.className} ${item.aspect} overflow-hidden rounded-2xl border border-white/10 shadow-floating`}
+              className={`absolute ${item.className} ${item.aspect} overflow-hidden rounded-2xl border border-ink/10 shadow-floating`}
             >
               {item.kind === "video" ? (
                 <video
@@ -203,7 +203,7 @@ export function Hero() {
                 key={model.label}
                 href={appHref(model.path)}
                 prefetch={false}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1.5 pl-3 pr-2.5 text-caption text-white/80 backdrop-blur transition-colors hover:border-white/25 hover:text-white"
+                className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/5 py-1.5 pl-3 pr-2.5 text-caption text-ink/80 backdrop-blur transition-colors hover:border-ink/25 hover:text-ink"
               >
                 <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
                 {model.label}
@@ -216,7 +216,7 @@ export function Hero() {
             variants={shouldReduceMotion ? undefined : heroContainerVariants}
             initial="hidden"
             animate="visible"
-            className="font-display mt-6 bg-gradient-to-b from-white to-white/50 bg-clip-text text-4xl leading-[0.95] font-bold tracking-tight text-transparent uppercase sm:text-5xl md:text-6xl lg:text-display"
+            className="font-display mt-6 bg-gradient-to-b from-ink to-ink/60 bg-clip-text text-4xl leading-[0.95] font-bold tracking-tight text-transparent uppercase sm:text-5xl md:text-6xl lg:text-display"
           >
             {TITLE_WORDS.map((word, i) => (
               <motion.span
@@ -229,11 +229,11 @@ export function Hero() {
             ))}
             <motion.span
               variants={shouldReduceMotion ? undefined : heroWordVariants}
-              className="block text-brand"
+              className="block text-brand-ink"
               style={{ WebkitTextFillColor: "initial" }}
             >
               From {ENTRY_PRICE}
-              <span className="ml-1 align-top text-[0.35em] leading-none text-white/60">/mo</span>
+              <span className="ml-1 align-top text-[0.35em] leading-none text-ink/60">/mo</span>
             </motion.span>
           </motion.h1>
 
@@ -241,7 +241,7 @@ export function Hero() {
             initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20, filter: "blur(6px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-            className="text-accent-script mt-3 text-3xl text-white/90 sm:text-4xl md:text-5xl"
+            className="text-accent-script mt-3 text-3xl text-ink/90 sm:text-4xl md:text-5xl"
           >
             {TITLE_SCRIPT_LINE}
           </motion.p>
@@ -289,13 +289,13 @@ export function Hero() {
             initial={shouldReduceMotion ? undefined : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.9 }}
-            className="mt-4 text-caption text-white/50"
+            className="mt-4 text-caption text-ink/50"
           >
             {formatCredits(ENTRY.monthlyCredits)} credits every month. Just looking?{" "}
             <Link
               href={appHref("/signup")}
               prefetch={false}
-              className="text-white/70 underline decoration-white/20 underline-offset-4 transition-colors hover:text-white"
+              className="text-ink/70 underline decoration-ink/20 underline-offset-4 transition-colors hover:text-ink"
             >
               Try it with {TIER_INFO.free.monthlyCredits} free credits
             </Link>{" "}

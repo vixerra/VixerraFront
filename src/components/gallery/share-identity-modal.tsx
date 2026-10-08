@@ -60,7 +60,7 @@ function IdentityOption({
       className={cn(
         "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors",
         selected
-          ? "border-brand bg-brand/10"
+          ? "border-brand-ink bg-brand/10"
           : "border-line bg-surface-dark hover:border-border-strong",
       )}
     >
@@ -75,7 +75,7 @@ function IdentityOption({
       <span
         className={cn(
           "flex size-5 shrink-0 items-center justify-center rounded-full border",
-          selected ? "border-brand bg-brand text-on-brand" : "border-line",
+          selected ? "border-brand-ink bg-brand text-on-brand" : "border-line",
         )}
         aria-hidden="true"
       >

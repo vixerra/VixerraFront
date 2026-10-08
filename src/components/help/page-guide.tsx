@@ -135,15 +135,15 @@ const PLAN_LABEL: Record<GuidePlan, string> = {
 // plan chip must never read as a failure.
 const PLAN_CHIP: Record<GuidePlan, string> = {
   any: "border-line text-muted",
-  creator: "border-brand/40 bg-brand/10 text-brand",
-  studio: "border-accent-hot/40 bg-accent-hot/10 text-accent-hot",
-  staff: "border-accent-orange/40 bg-accent-orange/10 text-accent-orange",
+  creator: "border-brand-ink/40 bg-brand/10 text-brand-ink",
+  studio: "border-accent-hot-ink/40 bg-accent-hot/10 text-accent-hot-ink",
+  staff: "border-accent-orange-ink/40 bg-accent-orange/10 text-accent-orange-ink",
 };
 
 const NOTE_TONE: Record<GuideNoteTone, string> = {
-  info: "border-line/60 bg-white/[0.03] text-muted",
+  info: "border-line/60 bg-ink/[0.03] text-muted",
   warn: "border-warning/40 bg-warning/5 text-ink-soft",
-  gate: "border-brand/40 bg-brand/5 text-ink-soft",
+  gate: "border-brand-ink/40 bg-brand/5 text-ink-soft",
 };
 
 export function PageGuide({
@@ -251,20 +251,20 @@ export function PageGuide({
           className={cn(
             // Bottom-left, lifted a row: BackToTop owns bottom-right, and
             // `next dev`'s indicator badge sits flush at bottom-left.
-            "group fixed bottom-20 left-5 z-40 flex items-center gap-2 overflow-hidden rounded-full border border-line bg-surface-2/90 px-4 py-2.5 text-label text-ink-soft shadow-floating backdrop-blur-md transition-all hover:border-brand/50 hover:text-ink hover:shadow-glow-md",
+            "group fixed bottom-20 left-5 z-40 flex items-center gap-2 overflow-hidden rounded-full border border-line bg-surface-2/90 px-4 py-2.5 text-label text-ink-soft shadow-floating backdrop-blur-md transition-all hover:border-brand-ink/50 hover:text-ink hover:shadow-glow-md",
             className,
           )}
         >
           <span className="relative flex size-4 items-center justify-center">
             <HelpCircle
-              className="size-4 transition-transform group-hover:scale-110 group-hover:text-brand"
+              className="size-4 transition-transform group-hover:scale-110 group-hover:text-brand-ink"
               aria-hidden="true"
             />
             {/* A slow halo, so the button reads as offering something. */}
             {!reduced && (
               <motion.span
                 aria-hidden="true"
-                className="absolute inset-0 rounded-full border border-brand"
+                className="absolute inset-0 rounded-full border border-brand-ink"
                 animate={{ scale: [1, 1.9], opacity: [0.55, 0] }}
                 transition={{ duration: 2.8, repeat: Infinity, ease: easing.smooth, repeatDelay: 1.2 }}
               />
@@ -298,13 +298,13 @@ export function PageGuide({
             <div>
               <div className="flex items-center gap-2">
                 {reduced ? (
-                  <Lightbulb className="size-3.5 text-brand" aria-hidden="true" />
+                  <Lightbulb className="size-3.5 text-brand-ink" aria-hidden="true" />
                 ) : (
                   <motion.span
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2.6, repeat: Infinity, ease: easing.smooth }}
                   >
-                    <Lightbulb className="size-3.5 text-brand" aria-hidden="true" />
+                    <Lightbulb className="size-3.5 text-brand-ink" aria-hidden="true" />
                   </motion.span>
                 )}
                 <span className="text-caption tracking-widest text-tertiary uppercase">
@@ -338,7 +338,7 @@ export function PageGuide({
                 aria-current={i === step ? "step" : undefined}
                 className="group/rail flex-1 py-1"
               >
-                <span className="block h-1 overflow-hidden rounded-full bg-white/10 transition-colors group-hover/rail:bg-white/25">
+                <span className="block h-1 overflow-hidden rounded-full bg-ink/10 transition-colors group-hover/rail:bg-ink/25">
                   {i === step && autoplay ? (
                     <motion.span
                       key={`fill-${step}`}
@@ -380,12 +380,12 @@ export function PageGuide({
                 >
                   <div className="flex items-center gap-2.5">
                     <motion.span
-                      className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-brand/30 bg-brand/10"
+                      className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-brand-ink/30 bg-brand/10"
                       initial={reduced ? false : { scale: 0.7, rotate: -8 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ duration: durations.slow, ease: easing.bouncy }}
                     >
-                      <StepIcon className="size-5 text-brand" aria-hidden="true" />
+                      <StepIcon className="size-5 text-brand-ink" aria-hidden="true" />
                     </motion.span>
                     <span className="font-mono text-caption text-tertiary tabular-nums">
                       Step {step + 1}
@@ -425,7 +425,7 @@ export function PageGuide({
                     type="button"
                     onClick={() => setPlaying((p) => !p)}
                     aria-label={playing ? "Pause the walkthrough" : "Play the walkthrough"}
-                    className="flex size-7 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-brand/50 hover:text-brand"
+                    className="flex size-7 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-brand-ink/50 hover:text-brand-ink"
                   >
                     {playing ? (
                       <Pause className="size-3" aria-hidden="true" />

@@ -35,7 +35,7 @@ function Mark({ children, className }: { children: React.ReactNode; className?: 
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="relative size-16 text-brand"
+        className="relative size-16 text-brand-ink"
       >
         {children}
       </svg>
@@ -72,7 +72,7 @@ export function PickPresetMark({ className }: { className?: string }) {
         cy={40}
         r={2}
         fill="currentColor"
-        className="text-accent-amber motion-safe:animate-status-pulse"
+        className="text-accent-amber-ink motion-safe:animate-status-pulse"
         style={centered}
       />
     </Mark>

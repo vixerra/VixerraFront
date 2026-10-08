@@ -122,7 +122,7 @@ export function PreviewStage({
               onClick={() => onSeek(0)}
               disabled={empty}
               aria-label="Back to start"
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-30"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink disabled:opacity-30"
             >
               <SkipBack className="size-4" />
             </button>
@@ -153,7 +153,7 @@ export function PreviewStage({
               onClick={() => onSeek(duration)}
               disabled={empty}
               aria-label="To end"
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-ink disabled:opacity-30"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-ink/5 hover:text-ink disabled:opacity-30"
             >
               <SkipForward className="size-4" />
             </button>
@@ -197,7 +197,7 @@ export function PreviewStage({
               aria-pressed={loop}
               className={cn(
                 "rounded-lg p-1.5 transition-colors disabled:opacity-30",
-                loop ? "bg-brand/15 text-brand" : "text-muted hover:bg-white/5 hover:text-ink",
+                loop ? "bg-brand/15 text-brand-ink" : "text-muted hover:bg-ink/5 hover:text-ink",
               )}
             >
               <Repeat className="size-4" />
@@ -242,7 +242,7 @@ function SpeedMenu({
             aria-label={`Preview speed, currently ${rate}x`}
             className={cn(
               "flex items-center gap-1 rounded-lg px-1.5 py-1.5 transition-colors disabled:opacity-30",
-              rate === 1 ? "text-muted hover:bg-white/5 hover:text-ink" : "bg-brand/15 text-brand",
+              rate === 1 ? "text-muted hover:bg-ink/5 hover:text-ink" : "bg-brand/15 text-brand-ink",
             )}
           >
             <Gauge className="size-4" />
@@ -255,7 +255,7 @@ function SpeedMenu({
           <DropdownItem
             key={option}
             onSelect={() => onRateChange(option)}
-            className={cn("py-2", option === rate && "text-brand")}
+            className={cn("py-2", option === rate && "text-brand-ink")}
           >
             {option}× {option === 1 ? "· Normal" : null}
           </DropdownItem>
@@ -296,7 +296,7 @@ function VolumeControl({
           aria-pressed={silent}
           className={cn(
             "rounded-lg p-1.5 transition-colors disabled:opacity-30",
-            silent ? "text-accent hover:bg-white/5" : "text-muted hover:bg-white/5 hover:text-ink",
+            silent ? "text-accent hover:bg-ink/5" : "text-muted hover:bg-ink/5 hover:text-ink",
           )}
         >
           {silent ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}

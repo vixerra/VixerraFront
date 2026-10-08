@@ -189,7 +189,7 @@ function CollectionEditor({
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={() => name.trim() && name !== collection.name && handleSave({ name })}
-            className="w-full rounded-lg bg-transparent text-heading font-bold tracking-tight text-ink outline-none focus:bg-white/5"
+            className="w-full rounded-lg bg-transparent text-heading font-bold tracking-tight text-ink outline-none focus:bg-ink/5"
           />
           {collection.description && (
             <p className="mt-2 text-body-sm text-muted">{collection.description}</p>

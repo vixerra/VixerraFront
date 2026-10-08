@@ -14,7 +14,7 @@ const base =
   "font-display inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full text-label font-semibold " +
   "transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out disabled:pointer-events-none disabled:opacity-40";
 
-// primary = solid white pill, black text — brand-silver never fills a
+// primary = solid ink pill, light text (the light-theme inverse of the old white pill) — brand-silver never fills a
 // button, it's reserved for text/badge/link accents (see globals.css) so
 // it stays legible as emphasis rather than becoming the default chrome.
 // secondary = ghost pill: transparent + translucent white border.
@@ -28,13 +28,13 @@ const base =
 // white-on-silver would be illegible — see --color-on-brand.
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "border-0 bg-white text-black shadow-[0_0_20px_rgb(255_255_255_/_0.1)] hover:bg-white/90 hover:shadow-[0_0_30px_rgb(255_255_255_/_0.15)] hover:scale-[1.02] active:scale-[0.98] disabled:bg-line disabled:text-muted disabled:shadow-none disabled:hover:scale-100",
+    "border-0 bg-ink text-surface-2 shadow-raised hover:bg-ink/85 hover:shadow-floating hover:scale-[1.02] active:scale-[0.98] disabled:bg-line disabled:text-muted disabled:shadow-none disabled:hover:scale-100",
   secondary:
-    "border border-line bg-transparent text-ink hover:bg-white/5 hover:border-border-strong active:scale-[0.98] disabled:text-muted",
+    "border border-line bg-transparent text-ink hover:bg-ink/5 hover:border-border-strong active:scale-[0.98] disabled:text-muted",
   ghost:
-    "rounded-full border-0 bg-transparent text-ink-soft hover:bg-white/8 hover:text-ink active:bg-white/12",
+    "rounded-full border-0 bg-transparent text-ink-soft hover:bg-ink/8 hover:text-ink active:bg-ink/12",
   circular:
-    "border-0 rounded-full bg-white/5 text-muted hover:bg-white/10 hover:text-ink-soft active:scale-95",
+    "border-0 rounded-full bg-ink/5 text-muted hover:bg-ink/10 hover:text-ink-soft active:scale-95",
   accent:
     "border-0 bg-brand text-on-brand shadow-glow-md hover:bg-brand-hover hover:shadow-glow-lg hover:scale-[1.02] active:scale-[0.98] active:bg-brand-active disabled:opacity-40 disabled:hover:scale-100",
   // Frosted "liquid glass" pill — see .btn-glass in globals.css for the
@@ -46,7 +46,7 @@ const variants: Record<ButtonVariant, string> = {
   // to; a call site that's already `fixed`/`absolute` for other reasons
   // (e.g. BackToTop) satisfies that without needing this variant at all.
   glass:
-    "btn-glass relative border-0 text-white hover:bg-white/12 hover:scale-[1.02] active:scale-[0.98]",
+    "btn-glass relative border-0 text-ink hover:bg-white/45 hover:scale-[1.02] active:scale-[0.98]",
 };
 
 const sizes: Record<ButtonSize, string> = {

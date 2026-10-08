@@ -33,7 +33,7 @@ function inline(text: string): ReactNode[] {
           <Link
             key={key++}
             href={href}
-            className="text-brand underline underline-offset-4 hover:text-ink"
+            className="text-brand-ink underline underline-offset-4 hover:text-ink"
           >
             {linkLabel}
           </Link>
@@ -42,7 +42,7 @@ function inline(text: string): ReactNode[] {
             key={key++}
             href={href}
             rel="noopener noreferrer"
-            className="text-brand underline underline-offset-4 hover:text-ink"
+            className="text-brand-ink underline underline-offset-4 hover:text-ink"
           >
             {linkLabel}
           </a>
@@ -88,7 +88,7 @@ export function GuideBody({ blocks }: { blocks: GuideBlock[] }) {
             return (
               <ul key={index} className="space-y-2 pl-5">
                 {block.items.map((item, i) => (
-                  <li key={i} className="list-disc text-body text-ink-soft marker:text-brand">
+                  <li key={i} className="list-disc text-body text-ink-soft marker:text-brand-ink">
                     {inline(item)}
                   </li>
                 ))}

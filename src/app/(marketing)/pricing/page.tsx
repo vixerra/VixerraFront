@@ -107,7 +107,7 @@ export default function PricingPage() {
                 variant="standard"
                 className={cn(
                   "flex flex-col",
-                  isPopular && "relative border-brand/40 shadow-glow-sm",
+                  isPopular && "relative border-brand-ink/40 shadow-glow-sm",
                   isOffer && "relative",
                 )}
               >

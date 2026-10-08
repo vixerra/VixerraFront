@@ -90,7 +90,7 @@ function ResetPasswordForm() {
         <p className="mt-2 text-body-sm text-muted">Request a new reset link and try again.</p>
         <Link
           href="/forgot-password"
-          className="mt-6 inline-block text-body-sm text-brand hover:text-brand-hover"
+          className="mt-6 inline-block text-body-sm text-brand-ink hover:text-brand-hover"
         >
           Send another link
         </Link>

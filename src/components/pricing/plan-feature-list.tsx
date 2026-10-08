@@ -39,7 +39,7 @@ export function PlanFeatureList({
             )}
           >
             <Check
-              className={cn("mt-0.5 shrink-0 text-brand", sm ? "size-3.5" : "size-4")}
+              className={cn("mt-0.5 shrink-0 text-brand-ink", sm ? "size-3.5" : "size-4")}
               aria-hidden="true"
             />
             {feature}
@@ -50,7 +50,7 @@ export function PlanFeatureList({
         <Tooltip content={note}>
           <button
             type="button"
-            className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full text-caption text-muted transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
+            className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full text-caption text-muted transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-ink"
           >
             <Info className="size-3.5 shrink-0" aria-hidden="true" />
             How these are estimated

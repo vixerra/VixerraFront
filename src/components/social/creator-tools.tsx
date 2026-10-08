@@ -339,7 +339,7 @@ export function CreatorTools({
       {accounts.length === 0 ? (
         <div className="rounded-xl border border-line bg-surface-3/40 p-5 text-center">
           <span className="mx-auto flex size-11 items-center justify-center rounded-2xl bg-brand/10">
-            <Link2 className="size-5 text-brand" aria-hidden="true" />
+            <Link2 className="size-5 text-brand-ink" aria-hidden="true" />
           </span>
           <p className="mt-3 text-label text-ink">No accounts connected</p>
           <p className="mx-auto mt-1 max-w-xs text-caption text-muted">
@@ -401,7 +401,7 @@ export function CreatorTools({
                     {platform.configured && takesThis && (
                       <Link
                         href="/settings/social"
-                        className="inline-flex items-center gap-1 self-center text-caption text-brand hover:underline"
+                        className="inline-flex items-center gap-1 self-center text-caption text-brand-ink hover:underline"
                       >
                         Connect <ExternalLink className="size-3" aria-hidden="true" />
                       </Link>
@@ -424,7 +424,7 @@ export function CreatorTools({
                   className={cn(
                     "flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left transition-colors",
                     active
-                      ? "border-brand bg-brand/10"
+                      ? "border-brand-ink bg-brand/10"
                       : "border-line hover:border-border-strong",
                     stale && "opacity-60",
                   )}
@@ -435,7 +435,7 @@ export function CreatorTools({
                       {stale ? "Reconnect this account in Settings" : account.displayName}
                     </p>
                   </div>
-                  {active && <Check className="size-4 shrink-0 text-brand" aria-hidden="true" />}
+                  {active && <Check className="size-4 shrink-0 text-brand-ink" aria-hidden="true" />}
                 </button>
               );
             });
@@ -462,12 +462,12 @@ export function CreatorTools({
                   aria-pressed={active}
                   className={cn(
                     "rounded-xl border px-3 py-2.5 text-left transition-colors",
-                    active ? "border-brand bg-brand/10" : "border-line hover:border-border-strong",
+                    active ? "border-brand-ink bg-brand/10" : "border-line hover:border-border-strong",
                   )}
                 >
                   <span className="flex items-center gap-1.5">
                     <option.icon
-                      className={cn("size-3.5 shrink-0", active ? "text-brand" : "text-muted")}
+                      className={cn("size-3.5 shrink-0", active ? "text-brand-ink" : "text-muted")}
                       aria-hidden="true"
                     />
                     <span
@@ -630,7 +630,7 @@ export function CreatorTools({
                     href={post.providerUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-caption text-brand hover:underline"
+                    className="inline-flex items-center gap-1 text-caption text-brand-ink hover:underline"
                   >
                     View post <ExternalLink className="size-3" aria-hidden="true" />
                   </a>

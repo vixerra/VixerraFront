@@ -128,7 +128,7 @@ export function SearchField({
             type="button"
             onClick={clear}
             aria-label="Clear search"
-            className="flex size-6 items-center justify-center rounded-md text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+            className="flex size-6 items-center justify-center rounded-md text-muted transition-colors hover:bg-ink/5 hover:text-ink-soft"
           >
             <X className="size-3.5" />
           </button>
@@ -175,7 +175,7 @@ export function ChipGroup<T extends string>({
             className={cn(
               "rounded-full border px-3 py-1.5 text-caption font-medium capitalize transition-colors",
               active
-                ? "border-brand/40 bg-brand/15 text-brand"
+                ? "border-brand-ink/40 bg-brand/15 text-brand-ink"
                 : "border-line bg-surface-2 text-muted hover:border-border-strong hover:text-ink-soft",
             )}
           >
@@ -229,7 +229,7 @@ export function FilterSelect({
       className={cn(
         "relative inline-flex items-center rounded-full border text-caption font-medium transition-colors focus-within:border-border-strong",
         active
-          ? "border-brand/40 bg-brand/10 text-brand"
+          ? "border-brand-ink/40 bg-brand/10 text-brand-ink"
           : "border-line bg-surface-2 text-muted hover:border-border-strong hover:text-ink-soft",
         className,
       )}
@@ -277,8 +277,8 @@ export function FilterToken({
   onRemove: () => void;
 }) {
   return (
-    <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 py-1 pr-1 pl-3 text-caption text-brand">
-      <span className="text-brand/70">{label}:</span>
+    <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-brand-ink/40 bg-brand/10 py-1 pr-1 pl-3 text-caption text-brand-ink">
+      <span className="text-brand-ink/70">{label}:</span>
       <span className="truncate font-mono">{value}</span>
       <button
         type="button"
@@ -336,7 +336,7 @@ export function ResultBar({
               <button
                 type="button"
                 onClick={onClear}
-                className="text-brand transition-colors hover:underline"
+                className="text-brand-ink transition-colors hover:underline"
               >
                 Clear filters
               </button>
@@ -391,7 +391,7 @@ export function ToolbarButton({
       className={cn(
         "inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-caption font-medium transition-colors disabled:pointer-events-none disabled:opacity-40",
         active
-          ? "border-brand/40 bg-brand/10 text-brand"
+          ? "border-brand-ink/40 bg-brand/10 text-brand-ink"
           : "border-line text-muted hover:border-border-strong hover:text-ink-soft",
       )}
     >

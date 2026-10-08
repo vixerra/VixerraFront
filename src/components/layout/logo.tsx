@@ -29,7 +29,7 @@ export function Logo({
           the glyph takes the black on-brand ink. */}
       <span
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-xl bg-silver text-on-brand",
+          "flex shrink-0 items-center justify-center rounded-xl bg-ink text-silver",
           compact ? "size-7" : "size-8",
         )}
       >
@@ -52,7 +52,7 @@ export function Logo({
           )}
         >
           <span className="text-ink">Vix</span>
-          <span className="text-brand">lens</span>
+          <span className="text-brand-ink">lens</span>
         </span>
       )}
     </Link>

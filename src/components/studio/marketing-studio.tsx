@@ -476,8 +476,8 @@ export function MarketingStudio() {
           </Link>
           {usageQuery.data && (
             <div className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface-2 px-3 py-1.5 text-body-sm text-ink-soft">
-              <Zap className="size-4 text-accent-amber" aria-hidden="true" />
-              <span className="font-semibold text-accent-amber">
+              <Zap className="size-4 text-accent-amber-ink" aria-hidden="true" />
+              <span className="font-semibold text-accent-amber-ink">
                 {formatCredits(usageQuery.data.credit_balance)}
               </span>
               <span className="text-muted">credits remaining</span>
@@ -543,7 +543,7 @@ function StyleChip({ style, onChange }: { style: MarketingStyle; onChange: () =>
       <button
         type="button"
         onClick={onChange}
-        className="shrink-0 rounded-full border border-line px-3 py-1.5 text-caption font-semibold text-ink-soft transition-colors hover:border-border-strong hover:bg-white/5"
+        className="shrink-0 rounded-full border border-line px-3 py-1.5 text-caption font-semibold text-ink-soft transition-colors hover:border-border-strong hover:bg-ink/5"
       >
         Change
       </button>
@@ -587,7 +587,7 @@ function AssetSlot({
 function StyleCanvas({ style }: { style: MarketingStyle }) {
   const [previewing, setPreviewing] = useState(false);
   return (
-    <div className="flex h-full min-h-[24rem] flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-brand/15 bg-surface-2/20 p-10 text-center">
+    <div className="flex h-full min-h-[24rem] flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-brand-ink/15 bg-surface-2/20 p-10 text-center">
       <div
         className="w-40 overflow-hidden rounded-2xl border border-line shadow-floating"
         onPointerEnter={() => setPreviewing(true)}

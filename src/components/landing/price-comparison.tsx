@@ -74,7 +74,7 @@ function SavingsCard({ competitor, index }: { competitor: Competitor; index: num
     <Reveal delayMs={index * 120} className="h-full">
       <div
         ref={ref}
-        className="group relative h-full overflow-hidden rounded-2xl border border-line bg-surface-2 p-3.5 shadow-card transition-[border-color,box-shadow] duration-500 hover:border-accent-amber/40 sm:p-7"
+        className="group relative h-full overflow-hidden rounded-2xl border border-line bg-surface-2 p-3.5 shadow-card transition-[border-color,box-shadow] duration-500 hover:border-accent-amber-ink/40 sm:p-7"
       >
         <div
           className="pointer-events-none absolute -top-16 -right-16 size-40 rounded-full bg-accent-amber/15 opacity-60 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
@@ -84,14 +84,14 @@ function SavingsCard({ competitor, index }: { competitor: Competitor; index: num
           <span className="hidden sm:inline">vs </span>
           {competitor.name}
         </p>
-        <p className="font-display mt-2 text-3xl leading-none font-bold tracking-tight text-accent-amber tabular-nums sm:mt-3 sm:text-5xl lg:text-6xl">
+        <p className="font-display mt-2 text-3xl leading-none font-bold tracking-tight text-accent-amber-ink tabular-nums sm:mt-3 sm:text-5xl lg:text-6xl">
           ${value}
         </p>
         <p className="mt-2 text-caption text-ink sm:mt-3 sm:text-body-sm">
           less per year<span className="hidden sm:inline"> to get started</span>
         </p>
         <div className="mt-5 hidden flex-wrap items-center gap-x-2 border-t border-line pt-4 text-caption text-muted sm:flex">
-          <span className="font-semibold text-brand">
+          <span className="font-semibold text-brand-ink">
             {ENTRY_LABEL} {formatListPrice(ENTRY_PRICE_MONTHLY)}
           </span>
           <span aria-hidden="true">vs</span>
@@ -116,7 +116,7 @@ function CellView({ cell, ours }: { cell: Cell; ours?: boolean }) {
       >
         {cell.ok === true && (
           <Check
-            className={cn("size-4 shrink-0", ours ? "text-brand" : "text-muted")}
+            className={cn("size-4 shrink-0", ours ? "text-brand-ink" : "text-muted")}
             aria-hidden="true"
           />
         )}
@@ -124,7 +124,7 @@ function CellView({ cell, ours }: { cell: Cell; ours?: boolean }) {
         {cell.text}
       </span>
       {cell.sub && (
-        <span className={cn("text-caption", ours ? "text-brand" : "text-text-tertiary")}>
+        <span className={cn("text-caption", ours ? "text-brand-ink" : "text-text-tertiary")}>
           {cell.sub}
         </span>
       )}
@@ -142,7 +142,7 @@ export function PriceComparison() {
       <div
         className="pointer-events-none absolute inset-0 -z-10 opacity-60"
         style={{
-          backgroundImage: "radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(rgb(14 16 20 / 0.08) 1px, transparent 1px)",
           backgroundSize: "22px 22px",
           maskImage: "radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)",
         }}
@@ -151,13 +151,13 @@ export function PriceComparison() {
 
       <div className="container-page">
         <Reveal className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-accent-amber/25 bg-accent-amber/10 px-3 py-1 text-caption font-semibold tracking-wide text-accent-amber uppercase">
+          <span className="inline-flex items-center gap-2 rounded-full border border-accent-amber-ink/25 bg-accent-amber/10 px-3 py-1 text-caption font-semibold tracking-wide text-accent-amber-ink uppercase">
             <span className="size-1.5 rounded-full bg-accent-amber" aria-hidden="true" />
             Price check · {PRICES_CHECKED_ON}
           </span>
           <h2 className="mt-5 text-heading leading-[1.02] text-ink sm:text-display">
             Same top models.
-            <span className="block text-brand">Less to get in.</span>
+            <span className="block text-brand-ink">Less to get in.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-body-lg text-muted">
             We read the public pricing pages of the AI studios we get compared with most. Here is
@@ -190,7 +190,7 @@ export function PriceComparison() {
                     scope="col"
                     className="relative bg-brand/[0.07] px-4 py-5 text-center shadow-[inset_0_2px_0_var(--color-brand)]"
                   >
-                    <span className="font-display text-label font-bold tracking-wide text-brand uppercase">
+                    <span className="font-display text-label font-bold tracking-wide text-brand-ink uppercase">
                       Vixlens
                     </span>
                   </th>
@@ -235,7 +235,7 @@ export function PriceComparison() {
                   href={c.pricingUrl}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="underline decoration-white/20 underline-offset-2 transition-colors hover:text-ink"
+                  className="underline decoration-ink/20 underline-offset-2 transition-colors hover:text-ink"
                 >
                   {c.name}
                 </a>
@@ -252,9 +252,9 @@ export function PriceComparison() {
             {PERKS.map((perk) => (
               <li
                 key={perk}
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3.5 py-1.5 text-caption text-muted"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.03] px-3.5 py-1.5 text-caption text-muted"
               >
-                <Check className="size-3.5 text-brand" aria-hidden="true" />
+                <Check className="size-3.5 text-brand-ink" aria-hidden="true" />
                 {perk}
               </li>
             ))}

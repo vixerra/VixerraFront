@@ -46,7 +46,7 @@ export function DropdownItem({ className, ...props }: ComponentProps<typeof Drop
     <DropdownMenu.Item
       className={cn(
         "cursor-pointer px-4 py-3 text-label text-ink-soft outline-none transition-colors",
-        "data-[highlighted]:bg-dropdown-hover data-[highlighted]:text-brand",
+        "data-[highlighted]:bg-dropdown-hover data-[highlighted]:text-brand-ink",
         className,
       )}
       {...props}

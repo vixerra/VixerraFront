@@ -151,7 +151,7 @@ function LibraryCard({
       title={item.prompt}
       className={cn(
         "group relative aspect-[9/16] overflow-hidden rounded-xl border bg-surface-3 text-left transition-colors",
-        used ? "border-brand/40" : "border-line hover:border-border-strong",
+        used ? "border-brand-ink/40" : "border-line hover:border-border-strong",
         busy && "opacity-60",
       )}
     >

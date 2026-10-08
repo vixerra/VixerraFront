@@ -70,8 +70,8 @@ function CreditsBadge() {
       {/* Credits are amber everywhere they appear — see --color-accent-amber.
           Keeping value off the lime action color means "what you have"
           never reads as "what to press". */}
-      <Zap className="size-3.5 text-accent-amber" aria-hidden="true" />
-      <span className="font-semibold text-accent-amber">{formatCredits(data.credit_balance)}</span>
+      <Zap className="size-3.5 text-accent-amber-ink" aria-hidden="true" />
+      <span className="font-semibold text-accent-amber-ink">{formatCredits(data.credit_balance)}</span>
       <span className="hidden text-muted sm:inline">credits</span>
     </Link>
   );
@@ -176,16 +176,16 @@ function NavItem({
             // whole link solid instead of just the 4px bar, which is
             // exactly the bug that made the active icon disappear.
             "bg-brand/10 text-ink before:absolute before:top-1/2 before:left-0 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-brand"
-          : "text-muted hover:bg-white/5 hover:text-ink-soft",
+          : "text-muted hover:bg-ink/5 hover:text-ink-soft",
       )}
     >
       <span
         className={cn(
           "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-          active ? "bg-brand/15" : "bg-white/5",
+          active ? "bg-brand/15" : "bg-ink/5",
         )}
       >
-        <item.icon className={cn("size-4", active ? "text-brand" : "text-muted")} aria-hidden="true" />
+        <item.icon className={cn("size-4", active ? "text-brand-ink" : "text-muted")} aria-hidden="true" />
       </span>
       {!collapsed && item.label}
       {!collapsed && locked && (
@@ -342,9 +342,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                   type="button"
                   onClick={() => logout.mutate()}
                   aria-label="Log out"
-                  className="mx-auto flex w-8 items-center justify-center rounded-xl py-2 text-label text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+                  className="mx-auto flex w-8 items-center justify-center rounded-xl py-2 text-label text-muted transition-colors hover:bg-ink/5 hover:text-ink-soft"
                 >
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-ink/5">
                     <LogOut className="size-4 text-muted" aria-hidden="true" />
                   </span>
                 </button>
@@ -353,9 +353,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => logout.mutate()}
-                className="font-display flex w-full items-center gap-3 rounded-xl py-2 pr-3 pl-2 text-label font-medium text-muted transition-colors hover:bg-white/5 hover:text-ink-soft"
+                className="font-display flex w-full items-center gap-3 rounded-xl py-2 pr-3 pl-2 text-label font-medium text-muted transition-colors hover:bg-ink/5 hover:text-ink-soft"
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-ink/5">
                   <LogOut className="size-4 text-muted" aria-hidden="true" />
                 </span>
                 Log out
@@ -368,7 +368,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           type="button"
           onClick={toggleCollapsed}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="absolute top-1/2 -right-3 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface-3 text-muted shadow-card transition-colors hover:border-brand/40 hover:bg-brand/15 hover:text-brand"
+          className="absolute top-1/2 -right-3 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface-3 text-muted shadow-card transition-colors hover:border-brand-ink/40 hover:bg-brand/15 hover:text-brand-ink"
         >
           <ChevronLeft className={cn("size-3.5 transition-transform duration-300", collapsed && "rotate-180")} aria-hidden="true" />
         </button>

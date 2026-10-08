@@ -167,7 +167,7 @@ function ShowcaseSection({
 }) {
   return (
     <div>
-      <h3 className="text-heading font-extrabold uppercase tracking-tight text-brand">{name}</h3>
+      <h3 className="text-heading font-extrabold uppercase tracking-tight text-brand-ink">{name}</h3>
       <p className="mt-1 text-body text-muted">{description}</p>
       <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
         {children}

@@ -89,7 +89,7 @@ function PresetPreview({
 
 function MetaChip({ icon: Icon, label }: { icon: typeof Clock; label: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-line bg-black/40 px-2 py-0.5 text-caption text-ink-soft backdrop-blur-sm">
+    <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/40 px-2 py-0.5 text-caption text-white/90 backdrop-blur-sm">
       <Icon className="size-3" aria-hidden="true" />
       {label}
     </span>
@@ -118,7 +118,7 @@ function PresetCard({ preset, isAuthed }: { preset: Preset; isAuthed: boolean })
     <Link
       href={presetHref(preset.slug, isAuthed)}
       prefetch={false}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface-2 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-glow-sm"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface-2 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-brand-ink/40 hover:shadow-glow-sm"
       {...hoverProps}
     >
       <PresetPreview
@@ -129,11 +129,11 @@ function PresetCard({ preset, isAuthed }: { preset: Preset; isAuthed: boolean })
       />
 
       {preset.badge && (
-        <span className="absolute top-3 left-3 rounded-full border border-brand/30 bg-brand/15 px-2.5 py-0.5 text-caption font-semibold text-brand backdrop-blur-sm">
+        <span className="absolute top-3 left-3 rounded-full border border-brand/40 bg-black/50 px-2.5 py-0.5 text-caption font-semibold text-brand backdrop-blur-sm">
           {preset.badge}
         </span>
       )}
-      <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full border border-line bg-black/50 px-2.5 py-0.5 text-caption font-semibold text-accent-amber backdrop-blur-sm">
+      <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/50 px-2.5 py-0.5 text-caption font-semibold text-accent-amber backdrop-blur-sm">
         <Sparkles className="size-3" aria-hidden="true" />
         {credits}
       </span>
@@ -150,7 +150,7 @@ function PresetCard({ preset, isAuthed }: { preset: Preset; isAuthed: boolean })
               product than the card would otherwise promise. */}
           {preset.styleModel && <MetaChip icon={Wand2} label="AI character" />}
         </div>
-        <h3 className="font-display text-feature-title font-bold text-ink">{preset.title}</h3>
+        <h3 className="font-display text-feature-title font-bold text-white">{preset.title}</h3>
         <p className="mt-1 text-caption text-white/70">{preset.tagline}</p>
       </div>
     </Link>
@@ -175,11 +175,11 @@ export function PresetsGallery() {
       {!meLoading && !isAuthed && (
         <p className="rounded-xl border border-line bg-surface-2 px-4 py-3 text-body-sm text-muted">
           Browse the whole catalogue freely — running a preset needs an account.{" "}
-          <Link href={appHref("/signup")} prefetch={false} className="text-brand underline-offset-4 hover:underline">
+          <Link href={appHref("/signup")} prefetch={false} className="text-brand-ink underline-offset-4 hover:underline">
             Create one
           </Link>{" "}
           or{" "}
-          <Link href={appHref("/login")} prefetch={false} className="text-brand underline-offset-4 hover:underline">
+          <Link href={appHref("/login")} prefetch={false} className="text-brand-ink underline-offset-4 hover:underline">
             log in
           </Link>
           , and you land straight back on the preset you picked.
@@ -195,7 +195,7 @@ export function PresetsGallery() {
             className={cn(
               "rounded-full border px-3.5 py-1.5 text-label font-medium transition-colors",
               f === filter
-                ? "border-brand/40 bg-brand/15 text-brand"
+                ? "border-brand-ink/40 bg-brand/15 text-brand-ink"
                 : "border-line bg-surface-2 text-muted hover:border-border-strong hover:text-ink-soft",
             )}
           >

@@ -273,7 +273,7 @@ function PresetHeaderCard({ preset }: { preset: Preset }) {
 
       <Link
         href="/presets"
-        className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-line bg-black/60 px-3 py-1.5 text-caption font-semibold text-ink backdrop-blur-sm transition-colors hover:border-border-strong hover:bg-black/80"
+        className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 text-caption font-semibold text-white backdrop-blur-sm transition-colors hover:border-white/30 hover:bg-black/80"
       >
         <Pencil className="size-3.5" aria-hidden="true" />
         Change
@@ -349,7 +349,7 @@ function HowItWorks() {
               aria-current={i === index}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
-                i === index ? "w-6 bg-brand" : "w-1.5 bg-white/20 hover:bg-white/40",
+                i === index ? "w-6 bg-brand" : "w-1.5 bg-ink/20 hover:bg-ink/40",
               )}
             />
           ))}
@@ -364,7 +364,7 @@ function HowItWorks() {
       <p className="flex items-center gap-1.5 text-caption text-muted">
         <Sparkles className="size-3" aria-hidden="true" />
         Want to change the prompt or settings?{" "}
-        <Link href="/generate" className="text-brand underline-offset-4 hover:underline">
+        <Link href="/generate" className="text-brand-ink underline-offset-4 hover:underline">
           Open the full composer
         </Link>
       </p>

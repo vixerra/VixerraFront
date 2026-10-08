@@ -98,12 +98,12 @@ export function DashboardClient() {
             aria-hidden="true"
           />
           <div className="relative flex items-center gap-2 text-caption text-muted">
-            <Zap className="size-3.5 text-accent-amber" aria-hidden="true" />
+            <Zap className="size-3.5 text-accent-amber-ink" aria-hidden="true" />
             Credits remaining
           </div>
           {/* The balance is the one number this card exists for, so it takes
               the amber outright rather than just an amber icon beside it. */}
-          <p className="font-display relative mt-2 text-heading font-bold tracking-tight text-accent-amber sm:text-display">
+          <p className="font-display relative mt-2 text-heading font-bold tracking-tight text-accent-amber-ink sm:text-display">
             {formatCredits(creditBalance)}
           </p>
           {/* No monthly ceiling to draw a bar against: the balance is the
@@ -122,7 +122,7 @@ export function DashboardClient() {
         <div className="flex flex-col gap-4">
           <Card variant="compact" className="flex-1">
             <span className="flex size-9 items-center justify-center rounded-lg bg-accent-hot/15">
-              <TrendingUp className="size-4 text-accent-hot" aria-hidden="true" />
+              <TrendingUp className="size-4 text-accent-hot-ink" aria-hidden="true" />
             </span>
             <p className="mt-3 text-caption text-muted">Generations this month</p>
             <p className="mt-1 text-subheading font-bold text-ink">{usage.generationsCount}</p>
@@ -133,7 +133,7 @@ export function DashboardClient() {
             className="group flex flex-1 items-center gap-3 rounded-2xl border border-border-subtle bg-surface-2 p-6 transition-colors hover:border-border-strong hover:bg-surface-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent-amber/15">
-              <CreditCard className="size-4 text-accent-amber" aria-hidden="true" />
+              <CreditCard className="size-4 text-accent-amber-ink" aria-hidden="true" />
             </span>
             <span className="flex-1 text-label text-ink-soft">Manage plan &amp; billing</span>
             <ArrowUpRight
@@ -154,7 +154,7 @@ export function DashboardClient() {
       <div>
         <div className="flex items-center justify-between">
           <h2 className="text-subheading font-semibold text-ink">Recent generations</h2>
-          <Link href="/my-gallery" className="text-body-sm text-brand hover:text-brand-hover">
+          <Link href="/my-gallery" className="text-body-sm text-brand-ink hover:text-brand-hover">
             View all
           </Link>
         </div>

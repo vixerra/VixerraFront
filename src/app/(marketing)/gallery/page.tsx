@@ -68,7 +68,7 @@ export default async function PublicGalleryPage() {
         <p className="mt-4 text-body text-muted">
           A public showcase of generations from the Vixlens community — every one with the prompt
           that produced it and the model that ran it. Open any of them to read the full prompt, or{" "}
-          <Link href="/models" className="text-brand underline-offset-4 hover:underline">
+          <Link href="/models" className="text-brand-ink underline-offset-4 hover:underline">
             browse the models
           </Link>{" "}
           behind them.

@@ -64,7 +64,7 @@ function promoStatus(p: AdminPromoCode): PromoStatus {
 const STATUS_TONE: Record<PromoStatus, string> = {
   active: "border-success/30 bg-success/15 text-success",
   exhausted: "border-warning/30 bg-warning/15 text-warning",
-  expired: "border-line bg-white/5 text-muted",
+  expired: "border-line bg-ink/5 text-muted",
   disabled: "border-accent/30 bg-accent/15 text-accent",
 };
 
@@ -209,7 +209,7 @@ function PromoFields({
                 <label key={option.id} className="flex items-center gap-2 text-body-sm text-ink-soft">
                   <input
                     type="checkbox"
-                    className="size-4 accent-brand"
+                    className="size-4 accent-brand-ink"
                     disabled={disabled}
                     checked={draft.appliesTo.includes(option.id)}
                     onChange={(e) =>
@@ -377,7 +377,7 @@ function Redemptions({ promo }: { promo: AdminPromoCode }) {
   return (
     <div className="mt-6">
       <h2 className="mb-3 text-label font-medium text-ink-soft">
-        Who used <span className="font-mono text-brand">{promo.code}</span>
+        Who used <span className="font-mono text-brand-ink">{promo.code}</span>
         {promo.note && (
           <span className="ml-2 font-normal text-muted">— {promo.note}</span>
         )}
@@ -413,7 +413,7 @@ function Redemptions({ promo }: { promo: AdminPromoCode }) {
                     </Link>
                   </Td>
                   <Td>{productLabel(r.product)}</Td>
-                  <Td className="text-right text-accent-amber tabular-nums">
+                  <Td className="text-right text-accent-amber-ink tabular-nums">
                     +{formatCredits(r.bonusCredits)}
                   </Td>
                   <Td>
@@ -536,7 +536,7 @@ export default function AdminPromoCodesPage() {
                       </Mono>
                     )}
                   </Td>
-                  <Td className="text-right text-accent-amber tabular-nums">
+                  <Td className="text-right text-accent-amber-ink tabular-nums">
                     +{formatCredits(p.bonusCredits)}
                   </Td>
                   <Td>{appliesToLabel(p.appliesTo)}</Td>

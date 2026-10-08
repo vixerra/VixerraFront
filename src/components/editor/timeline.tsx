@@ -144,7 +144,7 @@ export function Timeline({
             onClick={() => setAutoFit(true)}
             className={cn(
               "rounded-lg px-2 py-1 text-caption transition-colors",
-              autoFit ? "text-brand" : "text-muted hover:text-ink-soft",
+              autoFit ? "text-brand-ink" : "text-muted hover:text-ink-soft",
             )}
           >
             Fit
@@ -359,7 +359,7 @@ function ClipLane({
             key={clip.id}
             className={cn(
               "group absolute top-2 bottom-2 overflow-hidden rounded-lg border-2 bg-surface-3 select-none",
-              selected ? "border-brand shadow-glow-sm" : "border-transparent hover:border-line",
+              selected ? "border-brand-ink shadow-glow-sm" : "border-transparent hover:border-line",
             )}
             style={{ left: placed.start * pps, width: Math.max(14, placed.duration * pps) }}
             onPointerDown={(e) => {
@@ -389,8 +389,8 @@ function ClipLane({
               <span className="truncate text-[11px] font-medium text-white/90">{clip.label}</span>
               <span className="flex items-center gap-1 font-mono text-[10px] text-white/70">
                 {placed.duration.toFixed(1)}s
-                {clip.speed !== 1 && <span className="text-brand">{clip.speed}x</span>}
-                {state === "loading" && <Spinner size={9} className="text-brand" />}
+                {clip.speed !== 1 && <span className="text-brand-ink">{clip.speed}x</span>}
+                {state === "loading" && <Spinner size={9} className="text-brand-ink" />}
                 {state === "error" && <AlertCircle className="size-2.5 text-accent" />}
               </span>
             </div>
@@ -399,7 +399,7 @@ function ClipLane({
                 space, so it is shown as the band it actually occupies. */}
             {placed.transitionDuration > 0 && (
               <div
-                className="pointer-events-none absolute inset-y-0 left-0 border-r border-brand/50 bg-brand/20"
+                className="pointer-events-none absolute inset-y-0 left-0 border-r border-brand-ink/50 bg-brand/20"
                 style={{ width: placed.transitionDuration * pps }}
               />
             )}
@@ -531,8 +531,8 @@ function OverlayLane({
             className={cn(
               "absolute top-1 bottom-1 flex items-center overflow-hidden rounded-md border px-2 select-none",
               selected
-                ? "border-accent-amber bg-accent-amber/20"
-                : "border-accent-amber/40 bg-accent-amber/10 hover:border-accent-amber/70",
+                ? "border-accent-amber-ink bg-accent-amber/20"
+                : "border-accent-amber-ink/40 bg-accent-amber/10 hover:border-accent-amber-ink/70",
             )}
             style={{
               left: overlay.start * pps,
@@ -543,7 +543,7 @@ function OverlayLane({
             tabIndex={0}
             aria-label={`Text: ${overlay.text}`}
           >
-            <span className="truncate text-[10px] text-accent-amber">
+            <span className="truncate text-[10px] text-accent-amber-ink">
               {overlay.text || "Text"}
             </span>
             <div
@@ -593,7 +593,7 @@ function ToolbarButton({
           "rounded-lg p-2 transition-colors disabled:pointer-events-none disabled:opacity-30",
           danger
             ? "text-muted hover:bg-accent/10 hover:text-accent"
-            : "text-muted hover:bg-white/5 hover:text-ink",
+            : "text-muted hover:bg-ink/5 hover:text-ink",
         )}
       >
         <Icon className="size-4" />

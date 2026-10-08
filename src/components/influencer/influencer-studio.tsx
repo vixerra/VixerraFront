@@ -380,7 +380,7 @@ function CreatePanel({
       <div className="shrink-0 space-y-2 border-t border-border-subtle px-4 py-3 sm:px-5">
         {firstFree && (
           <p className="flex items-center justify-center gap-1.5 text-caption text-muted">
-            <Gift className="size-3.5 text-brand" aria-hidden="true" />
+            <Gift className="size-3.5 text-brand-ink" aria-hidden="true" />
             Your first influencer is on us.
           </p>
         )}
@@ -619,7 +619,7 @@ function MotionPanel({
                   aria-pressed={influencer.id === selected?.id}
                   className={cn(
                     "group overflow-hidden rounded-xl border bg-surface text-left transition-colors",
-                    influencer.id === selected?.id ? "border-brand ring-1 ring-brand" : "border-line hover:border-border-strong",
+                    influencer.id === selected?.id ? "border-brand-ink ring-1 ring-brand-ink" : "border-line hover:border-border-strong",
                   )}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -674,12 +674,12 @@ function MotionPanel({
                     onClick={() => pickKind(k.id)}
                     className={cn(
                       "flex flex-col gap-1 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                      kind === k.id ? "border-brand bg-brand/10" : "border-line bg-surface hover:border-border-strong",
+                      kind === k.id ? "border-brand-ink bg-brand/10" : "border-line bg-surface hover:border-border-strong",
                     )}
                   >
                     <span className="flex items-center gap-1.5 text-label font-medium text-ink">
                       {createElement(k.icon, {
-                        className: cn("size-4", kind === k.id ? "text-brand" : "text-muted"),
+                        className: cn("size-4", kind === k.id ? "text-brand-ink" : "text-muted"),
                         "aria-hidden": true,
                       })}
                       {k.title}
@@ -705,7 +705,7 @@ function MotionPanel({
                   aria-pressed={m.id === model}
                   className={cn(
                     "rounded-xl border px-3 py-2.5 text-left transition-colors",
-                    m.id === model ? "border-brand bg-brand/10" : "border-line bg-surface hover:border-border-strong",
+                    m.id === model ? "border-brand-ink bg-brand/10" : "border-line bg-surface hover:border-border-strong",
                   )}
                 >
                   <span className="block text-label font-medium text-ink">{m.label}</span>
@@ -857,7 +857,7 @@ function InfluencerGallery({
                 key={influencer.id}
                 className={cn(
                   "group overflow-hidden rounded-xl border bg-surface transition-colors",
-                  influencer.id === selectedId ? "border-brand" : "border-line",
+                  influencer.id === selectedId ? "border-brand-ink" : "border-line",
                 )}
               >
                 <button type="button" onClick={() => onSelect(influencer.id)} className="relative block w-full">

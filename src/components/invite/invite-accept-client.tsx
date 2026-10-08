@@ -53,14 +53,14 @@ export function InviteAcceptClient({ token }: { token: string }) {
             <CheckCircle2 className="mx-auto size-8 text-success" aria-hidden="true" />
             <h1 className="mt-4 text-subheading font-semibold text-ink">You&apos;re in</h1>
             <p className="mt-2 text-body-sm text-muted">You&apos;ve joined the team.</p>
-            <Link href="/settings/team" className="mt-6 inline-block text-body-sm text-brand hover:text-brand-hover">
+            <Link href="/settings/team" className="mt-6 inline-block text-body-sm text-brand-ink hover:text-brand-hover">
               View your team
             </Link>
           </>
         ) : (
           <>
             <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-brand/10">
-              <Users className="size-5 text-brand" aria-hidden="true" />
+              <Users className="size-5 text-brand-ink" aria-hidden="true" />
             </span>
             <h1 className="mt-4 text-subheading font-semibold text-ink">Team invite</h1>
             <p className="mt-2 text-body-sm text-muted">
