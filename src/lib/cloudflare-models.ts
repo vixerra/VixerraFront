@@ -528,6 +528,49 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     outputPath: [],
     outputKind: "url",
   },
+  // Wan 3.0, on kie.ai since 2026-10-10 (wan/3-0-video, fields from
+  // docs.kie.ai/market/wan/3-0-video). Same exclusive modes as Seedance:
+  // text, a first (and last) frame, or up to 10 reference images. Its
+  // reference videos, audio, files and links aren't exposed here; the AI
+  // influencer studio sends a reference clip through its own path
+  // (lib/influencer-motion.ts in aiVideo-backend). kie also sells a faster
+  // "Prime" variant, not offered. Images: 240-8000px a side, at most 8:1.
+  {
+    id: "alibaba/wan-3.0",
+    runtime: "kie",
+    kieModel: "wan/3-0-video",
+    label: "Wan 3.0",
+    provider: "Alibaba",
+    description: "Runs on kie.ai — 2 to 30s up to 1080p, native audio",
+    category: "text-to-video",
+    promptRequired: true,
+    image: "optional",
+    imageCfParam: "first_frame_url",
+    lastFrameCfParam: "last_frame_url",
+    imageLimits: { minSide: 240, maxSide: 8000, minAspect: 0.125, maxAspect: 8 },
+    fields: [
+      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 2, max: 30, helperText: "seconds" },
+      {
+        key: "resolution",
+        cfParam: "resolution",
+        label: "Resolution",
+        type: "select",
+        options: ["480p", "720p", "1080p"],
+        defaultValue: "720p",
+        cfValueMap: { "480p": "480P", "720p": "720P", "1080p": "1080P" },
+      },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["16:9", "9:16", "1:1", "4:3", "3:4", "adaptive"], defaultValue: "16:9" },
+      { key: "audio", cfParam: "audio", label: "Native audio", type: "switch", defaultValue: true },
+    ],
+    referenceImages: {
+      max: 10,
+      cfParam: "reference_image_urls",
+      exclusiveWithFrames: true,
+      hint: "Point at them from the prompt as Image1, Image2…",
+    },
+    outputPath: [],
+    outputKind: "url",
+  },
   // Discriminated union on `mode`: "t2v" (prompt) vs "i2v" (keyframes).
   // It calls the resolution tiers "hd"/"fhd", rejects `seed` outright, and
   // its aspect_ratio list has "auto"/"2:1" but no "9:21".

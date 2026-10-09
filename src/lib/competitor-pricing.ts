@@ -18,7 +18,7 @@ import { formatMoney } from "@/lib/currency";
  * PRICES_CHECKED_ON — a stale competitor price is the claim that gets a
  * comparison pulled.
  */
-export const PRICES_CHECKED_ON = "September 2026";
+export const PRICES_CHECKED_ON = "October 2026";
 
 export type Competitor = {
   name: string;
@@ -33,8 +33,8 @@ export type Competitor = {
 export const COMPETITORS: readonly Competitor[] = [
   {
     name: "Higgsfield",
-    entryPlan: "Starter",
-    entryPriceMonthly: 19,
+    entryPlan: "Basic",
+    entryPriceMonthly: 9,
     rollover: null,
     pricingUrl: "https://higgsfield.ai/pricing",
   },

@@ -362,6 +362,8 @@ export const MODEL_POPULARITY: readonly string[] = [
   // group rather than ranked by counts it doesn't have.
   "minimax/h3-max",
   "minimax/hailuo-2.3",
+  // New on 2026-10-10: heads the Alibaba group, ahead of Wan 2.7.
+  "alibaba/wan-3.0",
   "alibaba/wan-2.7-i2v",
   "kling/3.0-omni",
   "kling/2.1-pro",

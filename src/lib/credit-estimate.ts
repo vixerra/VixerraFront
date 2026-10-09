@@ -75,7 +75,8 @@ function creditsFor(seconds: number, usdPerSecond: number): number {
 // whose one reference video is the measured clip — sells at 30%, not
 // TARGET_GROSS_MARGIN (2026-10-08). kie bills the clip as reference AND as
 // output, so at 60% a 20s swap cost users well over a thousand credits.
-// Only that run: Seedance in the composer keeps the standard margin.
+// Only that run, and its Wan 3.0 "Low" sibling (2026-10-10): Seedance and
+// Wan 3.0 in the composer keep the standard margin.
 const INFLUENCER_REPLACE_GROSS_MARGIN = 0.3;
 const INFLUENCER_REPLACE_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - INFLUENCER_REPLACE_GROSS_MARGIN);
 
@@ -252,6 +253,15 @@ const VIDEO_COST_USD: Record<
   "kling/3.0-motion-control": {
     perSecond: { "720p": 0.1, "1080p": 0.135 },
     minSeconds: 3,
+  },
+  // Wan 3.0 on kie.ai (wan/3-0-video), its own pricing table read
+  // 2026-10-10: $0.04/s at 480p, $0.08 at 720p, $0.16 at 1080p, with or
+  // without sound. The composer entry sends no reference video, so output
+  // seconds are all it bills; the influencer "Replace" adds the clip's (see
+  // WAN3_REPLACE_MODEL_ID). Its shortest clip is 2s.
+  "alibaba/wan-3.0": {
+    perSecond: { "480p": 0.04, "720p": 0.08, "1080p": 0.16 },
+    minSeconds: 2,
   },
   // kie.ai's HappyHorse-1.1 image-to-video line.
   "alibaba/hh1.1-i2v": {
@@ -531,6 +541,13 @@ const SEEDANCE20_WITH_VIDEO_COST_USD: Record<string, number> = {
   "1080p": 0.31,
 };
 
+// The AI influencer studio's Wan 3.0 "Replace" (lib/influencer-motion.ts in
+// aiVideo-backend): a Wan 3.0 run whose one reference video is the measured
+// clip. kie bills Wan 3.0 on "output duration + total duration of reference
+// videos" (docs.kie.ai/market/wan/3-0-video) at the composer entry's own
+// rates, and the output is as long as the clip.
+const WAN3_REPLACE_MODEL_ID = "wan/3.0-replace";
+
 function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
 }
@@ -564,6 +581,15 @@ export function estimateVideoCredits(
       SEEDANCE25_WITH_VIDEO_COST_USD[resolution] ?? Math.max(...Object.values(SEEDANCE25_WITH_VIDEO_COST_USD));
     const outputSeconds = Math.max(SEEDANCE_DURATION_MIN, effectiveDuration);
     return creditsForUsd((outputSeconds + options.referenceVideoSeconds) * rate, INFLUENCER_REPLACE_USD_PER_CREDIT);
+  }
+
+  // A clip whose length wasn't passed is the output's own length here: the
+  // route bills the output on the clip.
+  if (model === WAN3_REPLACE_MODEL_ID) {
+    const rates = VIDEO_COST_USD["alibaba/wan-3.0"].perSecond;
+    const rate = rates[resolution] ?? Math.max(...Object.values(rates));
+    const referenceSeconds = options.referenceVideoSeconds ?? effectiveDuration;
+    return creditsForUsd((effectiveDuration + referenceSeconds) * rate, INFLUENCER_REPLACE_USD_PER_CREDIT);
   }
 
   // Seedance 2.0 with its reference clip: kie bills the clip's seconds on top

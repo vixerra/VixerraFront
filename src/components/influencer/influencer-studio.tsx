@@ -469,7 +469,8 @@ function MotionPanel({
   const takesOrientation = modelConfig?.orientation ?? true;
   const takesPrompt = modelConfig?.prompt ?? true;
   const effectiveOrientation = takesOrientation ? orientation : "video";
-  const maxSeconds = motion.maxSeconds[effectiveOrientation];
+  const orientationMaxSeconds = motion.maxSeconds[effectiveOrientation];
+  const maxSeconds = Math.min(orientationMaxSeconds, modelConfig?.maxSeconds ?? Infinity);
   const minSeconds = modelConfig?.minSeconds ?? motion.minSeconds;
   const maxBytes = modelConfig?.maxVideoBytes ?? null;
   const maxMb = maxBytes ? Math.round(maxBytes / 1024 / 1024) : null;
@@ -514,8 +515,8 @@ function MotionPanel({
     durationSeconds: billedSeconds,
     resolution: effectiveResolution,
     hasReferenceVideo: true,
-    // "Replace" sends the clip as Seedance's reference, billed by kie on top
-    // of the output — the API prices it the same way.
+    // "Replace" sends the clip as Seedance's or Wan's reference, billed by
+    // kie on top of the output — the API prices it the same way.
     referenceVideoSeconds: kind === "replace" ? billedSeconds : undefined,
   });
 
@@ -538,7 +539,9 @@ function MotionPanel({
       : maxBytes && video.bytes > maxBytes
         ? `${modelConfig?.label ?? "This model"} takes clips up to ${maxMb}MB; this one is ${(video.bytes / 1024 / 1024).toFixed(1)}MB. Use a shorter or lighter clip, or switch to "Move in their scene".`
         : video.seconds !== undefined && video.seconds > maxSeconds + 0.05
-          ? `"${ORIENTATION_LABEL.image}" takes clips up to ${maxSeconds}s. Trim it or switch to "${ORIENTATION_LABEL.video}".`
+          ? maxSeconds < orientationMaxSeconds
+            ? `"${modelConfig?.label ?? "This quality"}" takes clips up to ${maxSeconds}s. Trim it or pick another quality.`
+            : `"${ORIENTATION_LABEL.image}" takes clips up to ${maxSeconds}s. Trim it or switch to "${ORIENTATION_LABEL.video}".`
           : undefined;
 
   const mutation = useMutation({
@@ -565,6 +568,13 @@ function MotionPanel({
         } finally {
           setPreparing(null);
         }
+      } else if (kindOf(modelConfig ?? motion.models[0]) === "replace") {
+        // Wan 3.0's "Replace" takes the clip as filmed, sound and all, but
+        // writes a soundtrack of its own; the clip's goes up too so the API
+        // can put it back on the result, as it does for Seedance.
+        const { extractSoundtrack } = await import("@/lib/downscale-video");
+        const audio = await extractSoundtrack(video!.file);
+        if (audio) soundtrack = await uploadFile(audio);
       }
       // Only the full-body half of a character sheet goes to Kling, which
       // would otherwise animate both copies of the person. Cut and uploaded

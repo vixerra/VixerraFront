@@ -46,9 +46,12 @@ export type MotionModelOption = {
   prompt?: boolean;
   orientation?: boolean;
   maxVideoBytes?: number | null;
-  /** The model the run is priced as ("replace" bills as Seedance 2.5). */
+  /** The model the run is priced as (a Seedance "replace" bills as Seedance
+   *  2.5). */
   billingModel?: string;
   minSeconds?: number;
+  /** A clip cap below the orientation's own (Wan 3.0: 15s); null for none. */
+  maxSeconds?: number | null;
   /** Per-frame pixel bounds for the clip; a clip outside them is re-encoded
    *  in the browser before it is sent (lib/downscale-video.ts). */
   videoPixels?: { min: number; max: number } | null;
