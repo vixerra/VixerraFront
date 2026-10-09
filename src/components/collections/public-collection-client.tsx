@@ -41,7 +41,7 @@ export function PublicCollectionClient({ token }: { token: string }) {
           </div>
         ) : (
           <>
-            <h1 className="font-display text-heading font-bold tracking-tight text-ink">{data.name}</h1>
+            <h1 className="text-heading font-light text-ink">{data.name}</h1>
             {data.description && (
               <p className="mt-2 text-body text-muted">{data.description}</p>
             )}

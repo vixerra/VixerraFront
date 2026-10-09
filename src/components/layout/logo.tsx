@@ -22,14 +22,11 @@ export function Logo({
 }) {
   return (
     <Link href={href} className={cn("inline-flex items-center gap-2 text-ink", className)}>
-      {/* The mark stays silver while the wordmark's accent goes lime: the
-          identity belongs to the monochrome base, and the signal colors
-          are for things you can act on (see globals.css). currentColor
-          rather than a hardcoded #fff because silver is a light fill, so
-          the glyph takes the black on-brand ink. */}
+      {/* Ink glyph on an electric-yellow tile; currentColor so the glyph
+          follows --color-on-brand. */}
       <span
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-xl bg-ink text-silver",
+          "flex shrink-0 items-center justify-center rounded-lg bg-brand text-on-brand",
           compact ? "size-7" : "size-8",
         )}
       >
@@ -52,7 +49,7 @@ export function Logo({
           )}
         >
           <span className="text-ink">Vix</span>
-          <span className="mark-lime">lens</span>
+          <span className="text-brand">lens</span>
         </span>
       )}
     </Link>

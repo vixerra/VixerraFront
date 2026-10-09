@@ -34,7 +34,7 @@ export function CollectionsClient() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-heading font-bold tracking-tight text-ink">Collections</h1>
+          <h1 className="text-heading font-light text-ink">Collections</h1>
           <p className="mt-2 text-body-sm text-muted">Organize generations into shareable groups.</p>
         </div>
         <CreateCollectionButton />

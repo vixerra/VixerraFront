@@ -42,11 +42,11 @@ import {
 // page — monthly is the plan allowance, recharge is money in, refund and
 // admin_grant are credits nobody paid for.
 const SOURCE_COLORS: Record<string, string> = {
-  monthly: "#5a7400",
-  recharge: "#a07800",
-  refund: "#1d5f99",
-  admin_grant: "#b35f00",
-  promo: "#7a3fb0",
+  monthly: "#f2ff59",
+  recharge: "#fabc25",
+  refund: "#7cb7ff",
+  admin_grant: "#ff8a4c",
+  promo: "#a894ef",
 };
 
 const DEFAULTS = {

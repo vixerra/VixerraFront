@@ -68,7 +68,7 @@ export default function ModelsIndexPage() {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Models" }]} />
 
       <header className="mt-8 max-w-2xl">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
+        <h1 className="text-heading font-light text-ink sm:text-display">
           Every model on <span className="text-gradient">{SITE_NAME}</span>
         </h1>
         <p className="mt-4 text-body-lg text-muted">

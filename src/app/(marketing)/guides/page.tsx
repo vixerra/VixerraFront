@@ -54,7 +54,7 @@ export default function GuidesIndexPage() {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Guides" }]} />
 
       <header className="mt-8 max-w-2xl">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
+        <h1 className="text-heading font-light text-ink sm:text-display">
           AI video and image <span className="text-gradient">guides</span>
         </h1>
         <p className="mt-4 text-body-lg text-muted">

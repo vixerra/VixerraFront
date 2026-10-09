@@ -5,12 +5,12 @@ export type CardVariant = "standard" | "compact" | "feature" | "glass";
 
 const variants: Record<CardVariant, string> = {
   standard:
-    "rounded-2xl border border-line bg-surface-2 p-8 shadow-card transition-[background-color,border-color,box-shadow,transform] duration-500 ease-out hover:-translate-y-2 hover:border-border-strong hover:shadow-floating",
+    "rounded-2xl border border-line bg-surface-2 p-6 shadow-card sm:p-8 transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-1 hover:border-border-strong hover:bg-surface-3",
   compact: "rounded-2xl border border-line bg-surface-2 p-6 shadow-card",
   // Doc's Feature Card spec exactly: secondary bg at rest, shifts to
   // tertiary + stronger border + bigger shadow on hover — no lift/scale.
   feature:
-    "rounded-2xl border border-border-subtle bg-surface-2 px-8 py-12 text-ink transition-[background-color,border-color,box-shadow] duration-500 ease-out hover:border-border-strong hover:bg-surface-3 hover:shadow-floating",
+    "rounded-2xl border border-line bg-surface-2 px-6 py-10 text-ink transition-[background-color,border-color] duration-300 ease-out hover:border-border-strong hover:bg-surface-3 sm:px-8 sm:py-12",
   // Frosted glass panel — floating/overlay surfaces that sit on top of
   // imagery or gradients (docked composer, canvas toolbars, stat callouts)
   // where an opaque bg-surface-2 card would look flat. Reuses the .glass

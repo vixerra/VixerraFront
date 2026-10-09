@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { TrackingTags } from "@/components/analytics/tracking-tags";
-import { Inter, Space_Grotesk, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Archivo, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
@@ -10,27 +10,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReleaseAnnouncementModal } from "@/components/marketing/release-announcement-modal";
 import { DEFAULT_OG_IMAGE, keywords, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 
-// Three type roles instead of one Inter-everywhere system — see the
-// --font-sans/--font-display/--font-accent tokens in globals.css for how
-// these get assigned. body = plain-legible UI copy, display = grotesk with
-// actual character for headlines/nav/buttons, accent = italic serif
-// reserved for one editorial phrase per hero/section.
-const body = Inter({
+// One variable grotesk for every role — see the --font-* tokens in
+// globals.css. The wdth axis is what lets `font-narrow` set condensed
+// uppercase display titles from the same file as body copy.
+const body = Archivo({
   variable: "--font-body",
   subsets: ["latin"],
-});
-
-const display = Space_Grotesk({
-  variable: "--font-display-face",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
-const accent = Instrument_Serif({
-  variable: "--font-accent-face",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["italic", "normal"],
+  axes: ["wdth"],
 });
 
 const mono = JetBrains_Mono({
@@ -92,7 +78,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${body.variable} ${display.variable} ${accent.variable} ${mono.variable}`}>
+    <html lang="en" className={`${body.variable} ${mono.variable}`}>
       <body>
         {/* Google Tag Manager (noscript) — must be the first thing in <body>. */}
         <noscript>

@@ -142,7 +142,7 @@ export function PriceComparison() {
       <div
         className="pointer-events-none absolute inset-0 -z-10 opacity-60"
         style={{
-          backgroundImage: "radial-gradient(rgb(14 16 20 / 0.08) 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px)",
           backgroundSize: "22px 22px",
           maskImage: "radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)",
         }}

@@ -11,7 +11,7 @@ export function TrustBar() {
   const users = visibleActiveUsers();
 
   return (
-    <section className="border-y border-line bg-surface-2/40 py-10">
+    <section className="border-y border-line py-12 sm:py-14">
       <div className="container-page flex flex-col items-center gap-6">
         {users && (
           <p className="flex items-center gap-2 text-body text-ink">
@@ -26,14 +26,14 @@ export function TrustBar() {
           </p>
         )}
 
-        <p className="text-caption tracking-widest text-muted uppercase">
+        <p className="eyebrow">
           Built on models from
         </p>
-        <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+        <ul className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           {PROVIDERS.map((provider) => (
             <li
               key={provider}
-              className="font-display text-body-lg font-semibold tracking-tight whitespace-nowrap text-ink-soft opacity-70 transition-opacity hover:opacity-100"
+              className="flex h-14 min-w-[7.5rem] items-center justify-center rounded-2xl border border-line bg-ink/[0.04] px-5 text-body font-medium tracking-tight whitespace-nowrap text-muted transition-colors hover:border-border-strong hover:bg-ink/[0.08] hover:text-ink sm:h-16"
             >
               {provider}
             </li>

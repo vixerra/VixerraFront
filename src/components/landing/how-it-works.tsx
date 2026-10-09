@@ -1,93 +1,60 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Type, Sparkles, Wand2, Download } from "lucide-react";
 import { Reveal } from "@/components/marketing/reveal";
-import { useInView } from "@/hooks/use-in-view";
-import { cn } from "@/lib/utils";
 
-// leonardo.ai's real "How it works" section is a simple linear 4-step flow
-// (Prompt/upload → Pick a style → Refine & adjust → Export with ease) —
-// separate from their Create/Refine/Scale features section (see
-// features-showcase.tsx). Steps adapted to what Vixlens actually does.
+// Linear four-step flow, laid out like comfy.org's "Get started in minutes":
+// a big light title on the left, numbered rows with oversized light numerals
+// and hairline dividers on the right. Stacks on mobile.
 const STEPS = [
   {
-    icon: Type,
     title: "Prompt or upload",
     body: "Type a text prompt, or start from an image or audio clip.",
   },
   {
-    icon: Sparkles,
     title: "Pick a model",
     body: "Choose from Seedance 2.5, Kling 3.0, GPT Image 2, Nano Banana Pro, and more.",
   },
   {
-    icon: Wand2,
     title: "Refine & adjust",
     body: "Use plain-language editing and reference control to polish the result.",
   },
   {
-    icon: Download,
     title: "Export with ease",
     body: "Download in HD, drop it into a collection, or share a public link.",
   },
 ];
 
 export function HowItWorks() {
-  const { ref, inView } = useInView<HTMLDivElement>(0.4);
-
   return (
     <section className="container-page py-20 sm:py-28">
-      <Reveal className="mx-auto max-w-2xl text-center">
-        <h2 className="text-heading font-bold text-ink">How Vixlens works</h2>
-        <p className="mt-4 text-body text-muted">
-          Prompt, refine, and export — ready to share.
-        </p>
-      </Reveal>
+      <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+        <Reveal className="lg:sticky lg:top-28 lg:self-start">
+          <p className="eyebrow">How it works</p>
+          <h2 className="mt-4 text-heading text-ink">Get started in minutes</h2>
+          <p className="mt-4 max-w-sm text-body text-muted">
+            Prompt, refine, and export — ready to share.
+          </p>
+        </Reveal>
 
-      <div ref={ref} className="mt-16">
-        {/* Icon row + connecting line that fills in once scrolled into view (desktop only) */}
-        <div className="relative hidden sm:grid sm:grid-cols-4">
-          <div
-            className="pointer-events-none absolute top-6 right-[12.5%] left-[12.5%] h-px bg-line"
-            aria-hidden="true"
-          >
-            <motion.div
-              className="h-full origin-left bg-brand"
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: inView ? 1 : 0 }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-            />
-          </div>
-          {STEPS.map((step) => (
-            <div key={step.title} className="flex justify-center">
-              <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-brand shadow-glow-sm">
-                <step.icon className="size-5 text-on-brand" aria-hidden="true" />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid gap-10 sm:mt-6 sm:grid-cols-4 sm:gap-6">
+        <ol className="border-t border-line">
           {STEPS.map((step, index) => (
-            <Reveal key={step.title} delayMs={index * 150}>
-              <div className="flex size-12 items-center justify-center rounded-full bg-brand shadow-glow-sm sm:hidden">
-                <step.icon className="size-5 text-on-brand" aria-hidden="true" />
-              </div>
-              <span
-                className={cn(
-                  "mt-4 block font-mono text-caption text-brand-ink sm:mt-0",
-                )}
+            <li key={step.title} className="border-b border-line">
+              <Reveal
+                delayMs={index * 100}
+                className="grid grid-cols-[3.5rem_1fr] items-start gap-x-4 gap-y-2 py-7 sm:grid-cols-[5rem_1fr_1fr] sm:gap-x-8 sm:py-9"
               >
-                0{index + 1}
-              </span>
-              <h3 className="mt-2 text-feature-title font-semibold text-ink">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-body-sm text-muted">{step.body}</p>
-            </Reveal>
+                <span
+                  className="row-span-2 text-5xl leading-none font-light tracking-tight text-muted tabular-nums sm:row-span-1 sm:text-6xl"
+                  aria-hidden="true"
+                >
+                  {index + 1}
+                </span>
+                <h3 className="text-feature-title text-ink sm:text-2xl">{step.title}</h3>
+                <p className="text-body-sm text-muted sm:pt-1.5">{step.body}</p>
+              </Reveal>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

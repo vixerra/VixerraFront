@@ -2,58 +2,56 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "circular" | "accent" | "glass";
-export type ButtonSize = "default" | "sm" | "icon" | "icon-circular";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "circular"
+  | "accent"
+  | "glass";
+export type ButtonSize = "default" | "sm" | "lg" | "icon" | "icon-circular";
 
-// Focus ring comes from the global :focus-visible rule in globals.css —
-// no need to repeat it on every interactive primitive. font-display (Space
-// Grotesk) rather than the body sans gives every button in the app the
-// same bit of typographic character as the headlines, so CTAs read as
-// "designed" even in plain lists of Cancel/Save actions.
+// Focus ring comes from the global :focus-visible rule in globals.css.
+// Small, bold, uppercase and tracked-out with a 16px radius — the
+// comfy.org button. Icon-only sizes drop the tracking so glyphs center.
 const base =
-  "font-display inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full text-label font-semibold " +
-  "transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out disabled:pointer-events-none disabled:opacity-40";
+  "font-sans inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg text-[12px] leading-none font-bold tracking-[0.06em] uppercase " +
+  "transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out disabled:pointer-events-none disabled:opacity-40";
 
-// primary = solid ink pill, light text (the light-theme inverse of the old white pill) — brand-silver never fills a
-// button, it's reserved for text/badge/link accents (see globals.css) so
-// it stays legible as emphasis rather than becoming the default chrome.
-// secondary = ghost pill: transparent + translucent white border.
-// accent = the one deliberate exception to "brand never fills a button":
-// reserved for the single highest-emphasis CTA on a screen (hero, generate
-// submit, upgrade/recharge). In a monochrome palette this sits one step
-// BELOW the white primary pill rather than shouting past it — silver next
-// to white is a difference of material, not of volume, which is the whole
-// reason the two can coexist on a screen without fighting. Its label is
-// text-on-brand (black), not white: silver is a light metal, so
-// white-on-silver would be illegible — see --color-on-brand.
+// primary   = solid electric-yellow fill, ink label — the action color.
+// accent    = the same fill plus a yellow halo, for the single loudest CTA
+//             on a screen (hero, generate submit, upgrade).
+// outline   = yellow hairline + yellow label — the partner CTA next to a
+//             primary (comfy's "Desktop" next to "Try free").
+// secondary = quiet white/4% pill with stone label (comfy's "Sign in") —
+//             Cancel, Back, secondary actions in forms.
+// ghost     = no chrome until hover.
+// glass     = the outline treatment on a frosted ink pill, for CTAs sitting
+//             directly on media. `relative` anchors .btn-glass's ::before.
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "border-0 bg-ink text-surface-2 shadow-raised hover:bg-ink/85 hover:shadow-floating hover:scale-[1.02] active:scale-[0.98] disabled:bg-line disabled:text-muted disabled:shadow-none disabled:hover:scale-100",
-  secondary:
-    "border border-line bg-transparent text-ink hover:bg-ink/5 hover:border-border-strong active:scale-[0.98] disabled:text-muted",
-  ghost:
-    "rounded-full border-0 bg-transparent text-ink-soft hover:bg-ink/8 hover:text-ink active:bg-ink/12",
-  circular:
-    "border-0 rounded-full bg-ink/5 text-muted hover:bg-ink/10 hover:text-ink-soft active:scale-95",
+    "border-0 bg-brand text-on-brand hover:bg-brand-hover active:scale-[0.98] active:bg-brand-active",
   accent:
-    "border-0 bg-brand text-on-brand ring-[1.5px] ring-ink ring-inset shadow-glow-md hover:bg-brand-hover hover:shadow-glow-lg hover:scale-[1.02] active:scale-[0.98] active:bg-brand-active disabled:opacity-40 disabled:hover:scale-100",
-  // Frosted "liquid glass" pill — see .btn-glass in globals.css for the
-  // gradient-reflection border. Used where a CTA needs to sit directly on
-  // top of busy media (hero) rather than a flat surface, without competing
-  // with the solid-white primary pill's visual weight. `relative` is
-  // required here (not baked into .btn-glass itself — see its comment) so
-  // the ::before gradient-border overlay has a containing block to anchor
-  // to; a call site that's already `fixed`/`absolute` for other reasons
-  // (e.g. BackToTop) satisfies that without needing this variant at all.
+    "border-0 bg-brand text-on-brand shadow-glow-md hover:bg-brand-hover hover:shadow-glow-lg active:scale-[0.98] active:bg-brand-active",
+  outline:
+    "border border-brand/90 bg-transparent text-brand hover:border-brand hover:bg-brand/10 active:scale-[0.98]",
+  secondary:
+    "border border-line bg-ink/[0.04] text-muted hover:border-border-strong hover:bg-ink/[0.08] hover:text-ink active:scale-[0.98]",
+  ghost:
+    "border-0 bg-transparent text-muted hover:bg-ink/[0.06] hover:text-ink active:bg-ink/10",
+  circular:
+    "rounded-full border-0 bg-ink/[0.06] text-muted tracking-normal hover:bg-ink/10 hover:text-ink active:scale-95",
   glass:
-    "btn-glass relative border-0 text-ink hover:bg-white/45 hover:scale-[1.02] active:scale-[0.98]",
+    "btn-glass relative border-0 text-brand hover:bg-brand/10 active:scale-[0.98]",
 };
 
 const sizes: Record<ButtonSize, string> = {
-  default: "px-7 py-3.5 sm:px-6 sm:py-3",
-  sm: "px-4 py-2",
-  icon: "size-11 p-0 sm:size-10",
-  "icon-circular": "size-11 p-0 sm:size-9",
+  default: "h-11 px-6 sm:h-10",
+  sm: "h-9 px-4 text-[11px]",
+  lg: "h-12 px-7 text-[13px] sm:h-[52px] sm:px-8",
+  icon: "size-11 p-0 tracking-normal sm:size-10",
+  "icon-circular": "size-11 p-0 tracking-normal sm:size-9",
 };
 
 export function buttonVariants(

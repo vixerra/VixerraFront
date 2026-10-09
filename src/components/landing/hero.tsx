@@ -6,10 +6,9 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { LaunchOfferPill } from "@/components/landing/launch-offer";
 import { SEEDANCE_MODEL_ID, TIER_INFO } from "@/lib/constants";
-import { heroContainerVariants, heroWordVariants } from "@/lib/animations";
 import { useMe } from "@/hooks/use-me";
 import { appHref, subscribeHref } from "@/lib/hosts";
-import { formatCredits } from "@/lib/utils";
+import { cn, formatCredits } from "@/lib/utils";
 import {
   COMPETITORS,
   ENTRY_PRICE_MONTHLY,
@@ -20,18 +19,15 @@ import {
 } from "@/lib/competitor-pricing";
 
 // Price-led, subscribe-first: the headline IS the offer (every model, from
-// the entry plan's price), the main CTA subscribes to that entry plan
-// directly (the plans section is one scroll away for anyone comparing), and
-// the one object under it is the entry-price board — the same comparison the
-// #compare section details, at a glance. Same two-beat title as before: an
-// all-caps grotesk statement, then a quieter italic-serif line.
-const TITLE_WORDS = ["EVERY", "TOP", "AI", "MODEL."];
-const TITLE_SCRIPT_LINE = "one plan, every model.";
+// the entry plan's price), set as two narrow uppercase lines on slanted
+// yellow tags; the main CTA subscribes to the entry plan directly, and the
+// one object under it is the entry-price board.
+const TITLE_LINES = ["Every top AI model", "One plan"];
 const ENTRY_PRICE = formatListPrice(ENTRY_PRICE_MONTHLY);
 const ENTRY = TIER_INFO[ENTRY_TIER];
+const EASE = [0.16, 1, 0.3, 1] as const;
 
-// Featured models, each a direct link into its workspace — the same
-// flagship lineup the competitors in the board below sell.
+// Featured models, each a direct link into its workspace.
 const FEATURED_MODELS = [
   { label: "Seedance 2.5", path: `/generate?model=${encodeURIComponent(SEEDANCE_MODEL_ID)}` },
   { label: "Kling 3.0", path: `/generate?model=${encodeURIComponent("kling/3.0")}` },
@@ -39,38 +35,71 @@ const FEATURED_MODELS = [
   { label: "Nano Banana Pro", path: `/generate/image?model=${encodeURIComponent("google/nano-banana-pro")}` },
 ];
 
-// Scattered photo/video collage around the centre column — local media from
-// public/media, hidden below lg where overlapping tiles have no room. The
-// bottom-centre tile the old hero had is gone: the price board sits there.
-const COLLAGE = [
+// Media laid out as graph nodes around the centre column, each wired toward
+// it — the node-canvas look. Hidden below lg, where there's no room.
+const NODES = [
   {
     kind: "image" as const,
+    label: "GPT Image 2",
     url: "/media/images/gpt-image-11.webp",
     alt: "AI-generated image from GPT Image 2",
-    className: "left-[2%] top-[14%] w-44 -rotate-3 xl:w-52",
+    className: "left-[2.5%] top-[12%] w-44 xl:w-52",
     aspect: "aspect-[3/4]",
+    side: "left" as const,
   },
   {
     kind: "video" as const,
+    label: "Output · Seedance",
     url: "/media/videos/01_seedance_2_0_1b29ad9ce6.mp4",
-    className: "right-[3%] top-[10%] w-48 rotate-3 xl:w-56",
+    className: "right-[2.5%] top-[10%] w-52 xl:w-64",
     aspect: "aspect-video",
+    side: "right" as const,
   },
   {
     kind: "image" as const,
+    label: "Text render",
     url: "/media/images/gpt-image-09.webp",
     alt: "AI-generated image with production-ready text rendering from GPT Image 2",
-    className: "left-[6%] top-[56%] w-36 rotate-2 xl:w-44",
+    className: "left-[5%] top-[58%] w-36 xl:w-44",
     aspect: "aspect-[3/4]",
+    side: "left" as const,
   },
   {
     kind: "image" as const,
+    label: "Product shot",
     url: "/media/images/gpt-image-06.webp",
     alt: "Photorealistic AI-generated product image from GPT Image 2",
-    className: "right-[5%] top-[50%] w-36 -rotate-2 xl:w-44",
+    className: "right-[5%] top-[50%] w-36 xl:w-44",
     aspect: "aspect-[3/4]",
+    side: "right" as const,
   },
 ];
+
+/** A dashed wire leaving a node's header port toward the centre column. It
+ *  hangs off the node itself, so it always lines up with the port. */
+function Wire({ side }: { side: "left" | "right" }) {
+  return (
+    <svg
+      className={cn(
+        "absolute top-[7px] h-16 w-24 overflow-visible",
+        side === "left" ? "left-full" : "right-full -scale-x-100",
+      )}
+      viewBox="0 0 96 64"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M0 7 C 52 7, 44 56, 96 56"
+        stroke="var(--color-brand)"
+        strokeOpacity="0.7"
+        strokeWidth="1.5"
+        strokeDasharray="4 4"
+        className="motion-safe:animate-wire-flow"
+      />
+      <circle cx="96" cy="56" r="3.5" fill="var(--color-brand)" />
+    </svg>
+  );
+}
 
 const BOARD_ROWS = [
   { name: "Vixlens", price: ENTRY_PRICE_MONTHLY, savings: null, ours: true },
@@ -83,55 +112,54 @@ const BOARD_ROWS = [
 ];
 const BOARD_MAX = Math.max(...BOARD_ROWS.map((row) => row.price));
 
-/** Cheapest paid plan per month, as bars — ours in lime, theirs in silver,
- *  with what theirs costs over a year beyond ours in amber (the money
- *  colour, see globals.css). */
+/** Cheapest paid plan per month, as bars — ours in yellow, theirs in stone,
+ *  with what theirs costs over a year beyond ours in amber. Styled as a
+ *  graph node: header row with ports, body below. */
 function PriceBoard({ animate }: { animate: boolean }) {
   return (
-    <div className="glass mx-auto w-full max-w-xl rounded-2xl p-5 text-left shadow-floating sm:p-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p className="font-display text-label font-semibold text-ink">
-          Cheapest paid plan, per month
-        </p>
-        <p className="text-caption text-text-tertiary">Public prices · {PRICES_CHECKED_ON}</p>
+    <div className="node-card mx-auto w-full max-w-xl text-left">
+      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5 sm:px-5">
+        <span className="flex items-center gap-2 text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
+          <span className="size-2 rounded-full bg-brand" aria-hidden="true" />
+          Cheapest paid plan / month
+        </span>
+        <span className="text-[11px] text-text-tertiary">Public prices · {PRICES_CHECKED_ON}</span>
       </div>
-      <ul className="mt-5 space-y-3.5">
+      <ul className="space-y-3.5 p-4 sm:p-5">
         {BOARD_ROWS.map((row, i) => (
-          <li key={row.name} className="grid grid-cols-[5.25rem_1fr_4.75rem] items-center gap-3">
+          <li key={row.name} className="grid grid-cols-[5rem_1fr_4.5rem] items-center gap-3">
             <span
               className={
-                row.ours
-                  ? "font-display text-body-sm font-bold text-brand-ink"
-                  : "text-body-sm text-muted"
+                row.ours ? "text-body-sm font-bold text-brand" : "text-body-sm text-muted"
               }
             >
               {row.name}
             </span>
-            <div className="h-2.5 overflow-hidden rounded-full bg-ink/5">
+            <div className="h-2 overflow-hidden rounded-full bg-ink/[0.06]">
               <motion.div
                 className={
                   row.ours
                     ? "h-full origin-left rounded-full bg-brand shadow-glow-sm"
-                    : "h-full origin-left rounded-full bg-silver/30"
+                    : "h-full origin-left rounded-full bg-silver/35"
                 }
                 style={{ width: `${(row.price / BOARD_MAX) * 100}%` }}
                 initial={animate ? { scaleX: 0 } : false}
                 animate={{ scaleX: 1 }}
-                transition={{ duration: 0.9, delay: 1.1 + i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.9, delay: 1.1 + i * 0.12, ease: EASE }}
               />
             </div>
             <span className="flex flex-col items-end leading-tight">
               <span
                 className={
                   row.ours
-                    ? "font-display text-body font-bold text-brand-ink"
-                    : "font-display text-body-sm font-semibold text-ink"
+                    ? "text-body font-bold text-brand tabular-nums"
+                    : "text-body-sm font-semibold text-ink tabular-nums"
                 }
               >
                 {formatListPrice(row.price)}
               </span>
               {row.savings !== null && (
-                <span className="text-[11px] text-accent-amber-ink">+${row.savings}/yr</span>
+                <span className="text-[11px] text-accent-amber tabular-nums">+${row.savings}/yr</span>
               )}
             </span>
           </li>
@@ -144,112 +172,82 @@ function PriceBoard({ animate }: { animate: boolean }) {
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
   const { data: user } = useMe();
+  const rise = (delay: number, y = 20) =>
+    shouldReduceMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.7, ease: EASE, delay },
+        };
 
   return (
-    <section className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden bg-surface">
-      <div
-        className="pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[70%] -translate-x-1/2 -translate-y-1/3 rounded-full bg-white/50 blur-[120px]"
-        aria-hidden="true"
-      />
+    <section className="relative isolate flex min-h-[calc(100svh-4rem)] flex-col justify-center overflow-hidden bg-surface">
+      <div className="grid-texture pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
 
       {!shouldReduceMotion && (
         <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden="true">
-          {COLLAGE.map((item, i) => (
+          {NODES.map((node, i) => (
             <motion.div
-              key={item.url}
+              key={node.url}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className={`absolute ${item.className} ${item.aspect} overflow-hidden rounded-2xl border border-ink/10 shadow-floating`}
+              transition={{ duration: 0.8, delay: 0.3 + i * 0.1, ease: EASE }}
+              className={cn("node-card absolute", node.className)}
             >
-              {item.kind === "video" ? (
-                <video
-                  className="h-full w-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                >
-                  <source src={item.url} type="video/mp4" />
-                </video>
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media, decorative collage
-                <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
-              )}
+              <Wire side={node.side} />
+              <div className="flex items-center justify-between px-3 py-2 text-[10px] font-bold tracking-[0.08em] text-muted uppercase">
+                <span className="size-1.5 rounded-full bg-brand" />
+                {node.label}
+                <span className="size-1.5 rounded-full bg-brand" />
+              </div>
+              <div className={cn("mx-1.5 mb-1.5 overflow-hidden rounded-xl", node.aspect)}>
+                {node.kind === "video" ? (
+                  <video
+                    className="h-full w-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={node.url} type="video/mp4" />
+                  </video>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element -- local asset from public/media, decorative collage
+                  <img src={node.url} alt={node.alt} className="h-full w-full object-cover" />
+                )}
+              </div>
             </motion.div>
           ))}
         </div>
       )}
 
-      <div className="container-page relative py-20 sm:py-24">
+      <div className="container-page relative py-14 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">
-          <motion.div
-            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-4 flex justify-center"
-          >
+          <motion.div {...rise(0, 16)} className="mb-5 flex justify-center">
             <LaunchOfferPill />
           </motion.div>
-          <motion.div
-            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap items-center justify-center gap-2"
-          >
-            {FEATURED_MODELS.map((model) => (
-              <Link
-                key={model.label}
-                href={appHref(model.path)}
-                prefetch={false}
-                className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-ink/5 py-1.5 pl-3 pr-2.5 text-caption text-ink/80 backdrop-blur transition-colors hover:border-ink/25 hover:text-ink"
-              >
-                <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
-                {model.label}
-                <ArrowUpRight className="size-3.5" aria-hidden="true" />
-              </Link>
-            ))}
-          </motion.div>
 
-          <motion.h1
-            variants={shouldReduceMotion ? undefined : heroContainerVariants}
-            initial="hidden"
-            animate="visible"
-            className="font-display mt-6 bg-gradient-to-b from-ink to-ink/60 bg-clip-text text-4xl leading-[0.95] font-bold tracking-tight text-transparent uppercase sm:text-5xl md:text-6xl lg:text-display"
-          >
-            {TITLE_WORDS.map((word, i) => (
-              <motion.span
-                key={`w-${i}`}
-                variants={shouldReduceMotion ? undefined : heroWordVariants}
-                className="mr-[0.25em] inline-block"
-              >
-                {word}
+          <h1 className="font-narrow flex flex-col items-center gap-1.5 text-[2.2rem] leading-none font-semibold tracking-[-0.01em] uppercase min-[400px]:text-5xl sm:gap-2 sm:text-6xl lg:text-[5.25rem]">
+            {TITLE_LINES.map((line, i) => (
+              <motion.span key={line} {...rise(0.15 + i * 0.12, 30)} className="tag-slant">
+                {line}
               </motion.span>
             ))}
             <motion.span
-              variants={shouldReduceMotion ? undefined : heroWordVariants}
-              className="block text-ink"
-              style={{ WebkitTextFillColor: "initial" }}
+              {...rise(0.4, 30)}
+              className="mt-2 flex items-baseline gap-2 text-ink sm:mt-3"
             >
-              <span className="mark-lime">From {ENTRY_PRICE}</span>
-              <span className="ml-1 align-top text-[0.35em] leading-none text-ink/60">/mo</span>
+              From {ENTRY_PRICE}
+              <span className="font-sans text-[0.3em] font-normal tracking-normal text-muted normal-case">
+                /mo
+              </span>
             </motion.span>
-          </motion.h1>
+          </h1>
 
           <motion.p
-            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 20, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-            className="text-accent-script mt-3 text-3xl text-ink/90 sm:text-4xl md:text-5xl"
-          >
-            {TITLE_SCRIPT_LINE}
-          </motion.p>
-
-          <motion.p
-            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+            {...rise(0.55, 24)}
             className="mx-auto mt-6 max-w-xl text-body-lg text-muted"
           >
             Seedance 2.5, Kling 3.0, Veo 3.1, GPT Image 2 and Nano Banana Pro in one studio.
@@ -258,44 +256,49 @@ export function Hero() {
           </motion.p>
 
           <motion.div
-            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
-            className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+            {...rise(0.65, 16)}
+            className="mt-6 flex flex-wrap items-center justify-center gap-2"
+          >
+            {FEATURED_MODELS.map((model) => (
+              <Link
+                key={model.label}
+                href={appHref(model.path)}
+                prefetch={false}
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.04] py-1.5 pr-2.5 pl-3 text-caption text-muted transition-colors hover:border-brand/50 hover:text-ink"
+              >
+                <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
+                {model.label}
+                <ArrowUpRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            ))}
+          </motion.div>
+
+          <motion.div
+            {...rise(0.75, 24)}
+            className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
           >
             <Link
               href={subscribeHref(ENTRY_TIER, Boolean(user))}
               prefetch={false}
-              className={buttonVariants({
-                variant: "accent",
-                className: "w-full px-8 py-4 text-body sm:w-auto sm:px-8 sm:py-4",
-              })}
+              className={buttonVariants({ variant: "accent", size: "lg" })}
             >
               Get {ENTRY.label} for {ENTRY_PRICE}/mo
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
-            <a
-              href="#compare"
-              className={buttonVariants({
-                variant: "glass",
-                className: "w-full px-8 py-4 text-body sm:w-auto sm:px-8 sm:py-4",
-              })}
-            >
+            <a href="#compare" className={buttonVariants({ variant: "outline", size: "lg" })}>
               Compare prices
             </a>
           </motion.div>
 
           <motion.p
-            initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.9 }}
-            className="mt-4 text-caption text-ink/50"
+            {...rise(0.9, 0)}
+            className="mt-4 text-caption text-text-tertiary"
           >
             {formatCredits(ENTRY.monthlyCredits)} credits every month. Just looking?{" "}
             <Link
               href={appHref("/signup")}
               prefetch={false}
-              className="text-ink/70 underline decoration-ink/20 underline-offset-4 transition-colors hover:text-ink"
+              className="text-muted underline decoration-brand/50 underline-offset-4 transition-colors hover:text-brand"
             >
               Try it with {TIER_INFO.free.monthlyCredits} free credits
             </Link>{" "}
@@ -303,12 +306,7 @@ export function Hero() {
           </motion.p>
         </div>
 
-        <motion.div
-          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 30, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.95 }}
-          className="relative z-10 mt-12"
-        >
+        <motion.div {...rise(0.95, 30)} className="relative z-10 mt-12">
           <PriceBoard animate={!shouldReduceMotion} />
         </motion.div>
       </div>

@@ -50,15 +50,15 @@ export function UsageChart({ data }: { data: { date: string; count: number }[] }
         <AreaChart data={data} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
           <defs>
             <linearGradient id="usageFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c6f019" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="#c6f019" stopOpacity={0} />
+              <stop offset="0%" stopColor="#f2ff59" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#f2ff59" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(14,16,20,0.12)" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={formatTick}
-            stroke="#434953"
+            stroke="#8f8c87"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -66,7 +66,7 @@ export function UsageChart({ data }: { data: { date: string; count: number }[] }
             minTickGap={isMobile ? 16 : 8}
           />
           <YAxis
-            stroke="#434953"
+            stroke="#8f8c87"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -76,18 +76,18 @@ export function UsageChart({ data }: { data: { date: string; count: number }[] }
           <Tooltip
             labelFormatter={formatTick}
             contentStyle={{
-              background: "#d9dee4",
-              border: "1px solid rgba(14,16,20,0.12)",
+              background: "#332b38",
+              border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 12,
               fontSize: 12,
             }}
-            labelStyle={{ color: "#0e1014" }}
-            itemStyle={{ color: "#3d5000" }}
+            labelStyle={{ color: "#f0efed" }}
+            itemStyle={{ color: "#f2ff59" }}
           />
           <Area
             type="monotone"
             dataKey="count"
-            stroke="#5a7400"
+            stroke="#f2ff59"
             strokeWidth={2}
             fill="url(#usageFill)"
           />

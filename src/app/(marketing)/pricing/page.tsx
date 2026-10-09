@@ -79,7 +79,7 @@ export default function PricingPage() {
         ]}
       />
       <div className="mx-auto max-w-2xl text-center">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
+        <h1 className="text-heading font-light text-ink sm:text-display">
           <span className="text-gradient">Pricing</span>
         </h1>
         <p className="mt-4 text-body text-muted">

@@ -110,7 +110,7 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
 
       {/* ------------------------------------------------------------ hero */}
       <header className="mt-8 max-w-3xl">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
+        <h1 className="text-heading font-light text-ink sm:text-display">
           <span className="text-gradient">{content.heading}</span>
         </h1>
         <p className="mt-4 text-body-lg text-muted">{content.tagline}</p>

@@ -53,7 +53,8 @@ export function DashboardClient() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-heading font-bold tracking-tight text-ink">
+          <p className="eyebrow">Dashboard</p>
+          <h1 className="mt-3 text-heading font-light text-ink">
             Welcome back, {user.name.split(" ")[0]}
           </h1>
           <p className="mt-2 text-body-sm text-muted">
@@ -69,75 +70,59 @@ export function DashboardClient() {
       </div>
 
       {/* Bento layout: the credit balance is the one number people check
-          most, so it gets a wide hero cell with a glow ring behind the
-          number; generations count + plan sit stacked beside it. */}
+          most, so it gets the wide cell as a solid yellow block — the same
+          "this one matters" treatment as comfy.org's highlighted card. */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card
-          variant="standard"
-          onMouseMove={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            e.currentTarget.style.setProperty("--spot-x", `${e.clientX - rect.left}px`);
-            e.currentTarget.style.setProperty("--spot-y", `${e.clientY - rect.top}px`);
-          }}
-          className="group relative overflow-hidden p-6 sm:p-8 lg:col-span-2 hover:translate-y-0 hover:shadow-card"
-        >
-          {/* Ambient corner glow at rest — crossfades out for the cursor
-              spotlight below once hovered. */}
-          <div
-            className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-brand opacity-20 blur-3xl transition-opacity duration-300 group-hover:opacity-0"
-            aria-hidden="true"
-          />
-          {/* Cursor spotlight — same blurred-solid technique as the glow
-              above (see globals.css: no gradient() anywhere in this system),
-              just repositioned live from onMouseMove instead of pinned to a
-              corner, so it reads as the same glow "picked up" and following
-              the pointer rather than a second, different effect. */}
-          <div
-            className="pointer-events-none absolute size-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-20"
-            style={{ left: "var(--spot-x, 50%)", top: "var(--spot-y, 0%)" }}
-            aria-hidden="true"
-          />
-          <div className="relative flex items-center gap-2 text-caption text-muted">
-            <Zap className="size-3.5 text-accent-amber-ink" aria-hidden="true" />
-            Credits remaining
+        <div className="relative flex flex-col justify-between gap-8 overflow-hidden rounded-2xl bg-brand p-6 text-on-brand sm:p-8 lg:col-span-2">
+          <div className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-2 text-[11px] font-bold tracking-[0.08em] uppercase">
+              <Zap className="size-3.5" aria-hidden="true" />
+              Credits remaining
+            </span>
+            <Link
+              href="/settings/billing"
+              className="rounded-lg bg-on-brand px-3 py-2 text-[11px] font-bold tracking-[0.06em] text-brand uppercase transition-opacity hover:opacity-85"
+            >
+              Top up
+            </Link>
           </div>
-          {/* The balance is the one number this card exists for, so it takes
-              the amber outright rather than just an amber icon beside it. */}
-          <p className="font-display relative mt-2 text-heading font-bold tracking-tight text-accent-amber-ink sm:text-display">
+          <p className="font-narrow text-[3.5rem] leading-[0.9] font-semibold tracking-[-0.02em] tabular-nums sm:text-[5.5rem]">
             {formatCredits(creditBalance)}
           </p>
           {/* No monthly ceiling to draw a bar against: the balance is the
               only thing that limits a generation, so this month's spend is
               reported as a plain figure rather than a progress meter. */}
-          <div className="relative mt-6 flex flex-wrap items-center justify-between gap-2 text-caption text-muted">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-on-brand/15 pt-4 text-caption font-medium">
             <span>{formatCredits(usage.creditsUsed)} used this month</span>
             {creditsExpiringSoon > 0 && (
-              <span className="text-warning">
+              <span className="rounded-md bg-on-brand/10 px-2 py-0.5">
                 {formatCredits(creditsExpiringSoon)} credits expire soon
               </span>
             )}
           </div>
-        </Card>
+        </div>
 
         <div className="flex flex-col gap-4">
           <Card variant="compact" className="flex-1">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-accent-hot/15">
-              <TrendingUp className="size-4 text-accent-hot-ink" aria-hidden="true" />
+            <span className="flex items-center gap-2 text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
+              <TrendingUp className="size-3.5 text-accent-hot-ink" aria-hidden="true" />
+              Generations this month
             </span>
-            <p className="mt-3 text-caption text-muted">Generations this month</p>
-            <p className="mt-1 text-subheading font-bold text-ink">{usage.generationsCount}</p>
-            <p className="mt-1 text-caption text-muted">On the {tierInfo.label} plan</p>
+            <p className="mt-4 text-5xl leading-none font-light tracking-tight text-ink tabular-nums">
+              {usage.generationsCount}
+            </p>
+            <p className="mt-3 text-caption text-muted">On the {tierInfo.label} plan</p>
           </Card>
           <Link
             href="/settings/billing"
-            className="group flex flex-1 items-center gap-3 rounded-2xl border border-border-subtle bg-surface-2 p-6 transition-colors hover:border-border-strong hover:bg-surface-3"
+            className="group flex flex-1 items-center gap-3 rounded-2xl border border-line bg-surface-2 p-6 transition-colors hover:border-brand/50 hover:bg-surface-3"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent-amber/15">
               <CreditCard className="size-4 text-accent-amber-ink" aria-hidden="true" />
             </span>
             <span className="flex-1 text-label text-ink-soft">Manage plan &amp; billing</span>
             <ArrowUpRight
-              className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink-soft"
+              className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand"
               aria-hidden="true"
             />
           </Link>
@@ -145,7 +130,7 @@ export function DashboardClient() {
       </div>
 
       <Card variant="standard" className="hover:translate-y-0 hover:shadow-card">
-        <h2 className="text-subheading font-semibold text-ink">Usage — last 30 days</h2>
+        <h2 className="text-subheading font-light text-ink">Usage — last 30 days</h2>
         <div className="mt-6">
           <UsageChart data={dailyCounts} />
         </div>
@@ -153,8 +138,8 @@ export function DashboardClient() {
 
       <div>
         <div className="flex items-center justify-between">
-          <h2 className="text-subheading font-semibold text-ink">Recent generations</h2>
-          <Link href="/my-gallery" className="text-body-sm text-brand-ink hover:text-ink/70">
+          <h2 className="text-subheading font-light text-ink">Recent generations</h2>
+          <Link href="/my-gallery" className={buttonVariants({ variant: "outline", size: "sm" })}>
             View all
           </Link>
         </div>

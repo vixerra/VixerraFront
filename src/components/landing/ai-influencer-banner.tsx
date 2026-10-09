@@ -76,7 +76,7 @@ export function AiInfluencerBanner() {
                 className="pointer-events-none absolute inset-0"
                 style={{
                   background:
-                    "radial-gradient(ellipse 45% 55% at 35% 75%, rgb(187 220 18 / 0.14), transparent 70%)",
+                    "radial-gradient(ellipse 45% 55% at 35% 75%, rgb(242 255 89 / 0.12), transparent 70%)",
                 }}
                 aria-hidden="true"
               />

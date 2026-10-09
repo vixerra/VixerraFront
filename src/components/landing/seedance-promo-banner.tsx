@@ -31,7 +31,7 @@ export function SeedancePromoBanner() {
           <div
             className="pointer-events-none absolute inset-0 opacity-40"
             style={{
-              backgroundImage: "radial-gradient(rgb(255 0 82 / 0.5) 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(rgb(168 148 239 / 0.45) 1px, transparent 1px)",
               backgroundSize: "14px 14px",
               maskImage: "radial-gradient(ellipse 70% 100% at 0% 50%, black, transparent)",
             }}
@@ -41,7 +41,7 @@ export function SeedancePromoBanner() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse 60% 80% at 5% 40%, rgb(255 0 82 / 0.2), transparent 70%)",
+                "radial-gradient(ellipse 60% 80% at 5% 40%, rgb(242 255 89 / 0.12), transparent 70%)",
             }}
             aria-hidden="true"
           />
@@ -79,7 +79,7 @@ export function SeedancePromoBanner() {
               native audio generation. Live now on every plan.
             </p>
 
-            <span className="font-display mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-label font-semibold text-surface-2 transition-transform group-hover:translate-x-1">
+            <span className="font-display mt-6 inline-flex items-center gap-2 rounded-lg bg-brand px-5 py-3 text-[12px] font-bold tracking-[0.06em] uppercase text-on-brand transition-transform group-hover:translate-x-1">
               Try it now
               <ArrowRight className="size-4" aria-hidden="true" />
             </span>

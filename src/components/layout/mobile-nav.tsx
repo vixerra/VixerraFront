@@ -34,9 +34,9 @@ export function MobileNav({ isAuthed }: { isAuthed: boolean }) {
   // we're already running in the browser post-hydration — so `panel` (and
   // the `document.body` access it gates) never evaluates during SSR.
   const panel = open && (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-surface p-6">
+    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-surface px-4 pt-3 pb-6 sm:px-6">
       <div className="flex items-center justify-between">
-        <span className="text-subheading font-semibold text-ink">Menu</span>
+        <span className="eyebrow">Menu</span>
         <Button variant="ghost" size="icon" onClick={close} aria-label="Close menu">
           <X className="size-5" />
         </Button>
@@ -50,19 +50,19 @@ export function MobileNav({ isAuthed }: { isAuthed: boolean }) {
               href={link.href}
               onClick={close}
               className={cn(
-                "flex items-center justify-between py-4 text-body transition-colors",
-                active ? "text-ink" : "text-ink-soft hover:text-ink",
+                "font-narrow flex items-center justify-between py-4 text-3xl leading-none font-semibold tracking-[-0.01em] uppercase transition-colors",
+                active ? "text-brand" : "text-ink hover:text-brand",
               )}
             >
               {link.label}
-              {active && <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />}
+              {active && <span className="size-2 rounded-full bg-brand" aria-hidden="true" />}
             </Link>
           );
         })}
       </nav>
       <div className="mt-auto flex flex-col gap-3 pt-6">
         {isAuthed ? (
-          <Link href={appHref("/dashboard")} prefetch={false} onClick={close} className={buttonVariants({ className: "w-full" })}>
+          <Link href={appHref("/dashboard")} prefetch={false} onClick={close} className={buttonVariants({ size: "lg", className: "w-full" })}>
             Dashboard
           </Link>
         ) : (
@@ -70,11 +70,11 @@ export function MobileNav({ isAuthed }: { isAuthed: boolean }) {
             <Link
               href={appHref("/login")} prefetch={false}
               onClick={close}
-              className={buttonVariants({ variant: "secondary", className: "w-full" })}
+              className={buttonVariants({ variant: "secondary", size: "lg", className: "w-full" })}
             >
               Log in
             </Link>
-            <Link href={appHref("/signup")} prefetch={false} onClick={close} className={buttonVariants({ className: "w-full" })}>
+            <Link href={appHref("/signup")} prefetch={false} onClick={close} className={buttonVariants({ size: "lg", className: "w-full" })}>
               Start for Free
             </Link>
           </>

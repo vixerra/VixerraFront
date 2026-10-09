@@ -6,9 +6,9 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     <input
       ref={ref}
       className={cn(
-        "w-full rounded-xl border border-border-subtle bg-surface-dark px-4 py-3 font-sans text-input text-ink-soft",
+        "w-full rounded-xl border border-line bg-surface-dark px-4 py-3 font-sans text-input text-ink-soft",
         "placeholder:text-muted transition-[border-color,background-color]",
-        "focus:border-border-strong focus:bg-surface-3 focus:outline-none",
+        "focus:border-brand/60 focus:bg-surface-dark focus:outline-none",
         "disabled:border-border-subtle disabled:bg-surface disabled:text-muted disabled:opacity-50",
         className,
       )}
@@ -25,9 +25,9 @@ export const Textarea = forwardRef<
   <textarea
     ref={ref}
     className={cn(
-      "w-full resize-y rounded-xl border border-border-subtle bg-surface-dark px-4 py-3 font-sans text-body-sm text-ink-soft",
+      "w-full resize-y rounded-xl border border-line bg-surface-dark px-4 py-3 font-sans text-body-sm text-ink-soft",
       "placeholder:text-muted transition-[border-color,background-color]",
-      "focus:border-border-strong focus:bg-surface-3 focus:outline-none",
+      "focus:border-brand/60 focus:bg-surface-dark focus:outline-none",
       "disabled:border-border-subtle disabled:bg-surface disabled:text-muted disabled:opacity-50",
       className,
     )}
@@ -43,8 +43,8 @@ export const Select = forwardRef<
   <select
     ref={ref}
     className={cn(
-      "w-full rounded-xl border border-border-subtle bg-surface-dark px-4 py-3 font-sans text-[14px] leading-[20px] font-normal text-ink-soft",
-      "transition-[border-color,background-color] focus:border-border-strong focus:bg-surface-3 focus:outline-none",
+      "w-full rounded-xl border border-line bg-surface-dark px-4 py-3 font-sans text-[14px] leading-[20px] font-normal text-ink-soft",
+      "transition-[border-color,background-color] focus:border-brand/60 focus:bg-surface-dark focus:outline-none",
       "disabled:border-border-subtle disabled:bg-surface disabled:text-muted disabled:opacity-50",
       className,
     )}

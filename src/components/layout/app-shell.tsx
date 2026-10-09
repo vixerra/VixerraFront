@@ -64,7 +64,7 @@ function CreditsBadge() {
   return (
     <Link
       href="/settings/billing"
-      className="flex items-center gap-1.5 rounded-full border border-line bg-surface-2 px-3 py-1.5 text-label text-ink-soft transition-colors hover:border-border-strong"
+      className="flex items-center gap-1.5 rounded-lg border border-line bg-ink/[0.04] px-3 py-1.5 text-label text-ink-soft transition-colors hover:border-border-strong"
       title="Credits remaining"
     >
       {/* Credits are amber everywhere they appear — see --color-accent-amber.
@@ -159,7 +159,7 @@ function NavItem({
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        "font-display relative flex items-center gap-3 rounded-xl py-2 text-label font-medium transition-colors",
+        "font-display relative flex items-center gap-3 rounded-xl py-1.5 text-label font-medium transition-colors",
         // Collapsed: pin every item (active or not) to the exact same
         // fixed width as the icon chip below (size-8) and center that in
         // the rail, instead of a block-level Link stretching to the full
@@ -175,17 +175,17 @@ function NavItem({
             // a bare `bg-brand` here (no `before:` prefix) would paint the
             // whole link solid instead of just the 4px bar, which is
             // exactly the bug that made the active icon disappear.
-            "bg-brand/10 text-ink before:absolute before:top-1/2 before:left-0 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-brand"
-          : "text-muted hover:bg-ink/5 hover:text-ink-soft",
+            "bg-brand font-semibold text-on-brand"
+          : "text-muted hover:bg-ink/[0.06] hover:text-ink",
       )}
     >
       <span
         className={cn(
           "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-          active ? "bg-brand/15" : "bg-ink/5",
+          active ? "bg-on-brand/10" : "bg-ink/[0.04]",
         )}
       >
-        <item.icon className={cn("size-4", active ? "text-brand-ink" : "text-muted")} aria-hidden="true" />
+        <item.icon className={cn("size-4", active ? "text-on-brand" : "text-muted")} aria-hidden="true" />
       </span>
       {!collapsed && item.label}
       {!collapsed && locked && (
@@ -221,7 +221,7 @@ function NavLinks({ onNavigate, collapsed = false }: { onNavigate?: () => void; 
       {NAV_SECTIONS.map((section) => (
         <div key={section.label}>
           {!collapsed && (
-            <p className="px-2 pb-2 text-caption font-medium tracking-wide text-text-tertiary uppercase">
+            <p className="px-2 pb-2 text-[11px] font-bold tracking-[0.08em] text-text-tertiary uppercase">
               {section.label}
             </p>
           )}
@@ -319,7 +319,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="relative z-20 hidden shrink-0 lg:sticky lg:top-3 lg:my-3 lg:ml-3 lg:block lg:h-[calc(100vh-1.5rem)]">
         <aside
           className={cn(
-            "flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface-sidebar shadow-floating transition-[width] duration-300",
+            "flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface-sidebar transition-[width] duration-300",
             collapsed ? "w-16" : "w-60",
           )}
         >
@@ -404,9 +404,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <DropdownTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2.5 rounded-full border border-line bg-surface-2 py-1.5 pr-3 pl-1.5 transition-colors hover:border-border-strong hover:bg-surface-3"
+                  className="flex items-center gap-2.5 rounded-lg border border-line bg-ink/[0.04] py-1.5 pr-3 pl-1.5 transition-colors hover:border-border-strong hover:bg-ink/[0.08]"
                 >
-                  <span className="flex size-7 items-center justify-center rounded-full bg-brand text-caption font-semibold text-on-brand">
+                  <span className="flex size-7 items-center justify-center rounded-md bg-brand text-caption font-bold text-on-brand">
                     {initial}
                   </span>
                   <span className="hidden text-label text-ink-soft sm:inline">{user?.name}</span>

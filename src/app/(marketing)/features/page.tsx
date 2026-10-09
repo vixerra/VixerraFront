@@ -27,7 +27,7 @@ export default function FeaturesPage() {
   return (
     <div>
       <div className="container-page py-20 text-center sm:py-28">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
+        <h1 className="text-heading font-light text-ink sm:text-display">
           Built for every kind of <span className="text-gradient">creator</span>
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-body text-muted">

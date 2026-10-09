@@ -142,7 +142,7 @@ export default function AdminOverviewPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-heading font-bold tracking-tight text-ink">Overview</h1>
+          <h1 className="text-heading font-light text-ink">Overview</h1>
           <p className="mt-2 text-body-sm text-muted">
             Live counts straight from the database — no sampling, no cache.
           </p>
@@ -310,11 +310,11 @@ export default function AdminOverviewPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title="Signups" hint={`New accounts per day, last ${days} days`}>
-          <TrendChart data={data.signupSeries} color="#1d5f99" height={200} />
+          <TrendChart data={data.signupSeries} color="#7cb7ff" height={200} />
         </ChartCard>
 
         <ChartCard title="Credit burn" hint="Credits spent per day on successful generations">
-          <TrendChart data={data.creditSeries} color="#a07800" height={200} />
+          <TrendChart data={data.creditSeries} color="#fabc25" height={200} />
         </ChartCard>
       </div>
 
@@ -330,7 +330,7 @@ export default function AdminOverviewPage() {
         <ChartCard title="Accounts by plan" hint="Where the user base actually sits — click a plan to list it">
           <RankedBars
             data={tiers.map((t) => ({ label: t.tier, value: t.count }))}
-            color="#5a7400"
+            color="#f2ff59"
             height={200}
             onSelect={(i) => tiers[i] && router.push(`/admin/users?tier=${tiers[i].tier}`)}
           />

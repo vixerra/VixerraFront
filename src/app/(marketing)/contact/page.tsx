@@ -19,7 +19,7 @@ export default function ContactPage() {
   return (
     <div className="container-page py-20 sm:py-28">
       <div className="mx-auto max-w-xl">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
+        <h1 className="text-heading font-light text-ink sm:text-display">
           Contact <span className="text-gradient">us</span>
         </h1>
         <p className="mt-4 text-body text-muted">

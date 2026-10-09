@@ -44,7 +44,7 @@ export default async function PromptsPage() {
   return (
     <div className="container-page py-20 sm:py-28">
       <div className="mx-auto max-w-2xl text-center">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">
+        <h1 className="text-heading font-light text-ink sm:text-display">
           Viral <span className="text-gradient">video presets</span>
         </h1>
         <p className="mt-4 text-body text-muted">

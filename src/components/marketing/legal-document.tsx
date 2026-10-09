@@ -49,7 +49,7 @@ export function LegalDocument({
   return (
     <div className="container-page py-20 sm:py-28">
       <article className="mx-auto max-w-3xl">
-        <h1 className="text-heading font-bold tracking-tight text-ink sm:text-display">{title}</h1>
+        <h1 className="text-heading font-light text-ink sm:text-display">{title}</h1>
         <p className="mt-3 text-body-sm text-muted">Last updated: {updated}</p>
 
    

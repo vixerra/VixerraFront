@@ -12,7 +12,7 @@ export default function PresetsPage() {
   return (
     <div className="space-y-8">
       <div className="max-w-2xl">
-        <h1 className="font-display text-heading font-bold tracking-tight text-ink">
+        <h1 className="text-heading font-light text-ink">
           Viral <span className="text-brand-ink">presets</span>
         </h1>
         <p className="mt-3 text-body text-muted">

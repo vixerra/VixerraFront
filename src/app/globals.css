@@ -5,164 +5,103 @@
 @custom-variant short (@media (max-height: 820px));
 
 /*
- * Design tokens for Vixlens' own identity — deliberately moved off the
- * violet→pink "AI SaaS" gradient (what this file used to be, modeled on
- * leonardo.ai) toward a palette that actually means something for a video
- * tool: a light silver/ink base (the ground is the logo's own silver, not
- * white) broken by four saturated signal colors (lime, amber, orange, hot
- * magenta), each with a deep "-ink" twin for text/borders on that light
- * ground. The base carries every structural
- * surface; the four are confined to things that DO something or MEAN
- * something — actions, credits, categories, announcements. Read the
- * "signal set" note below before reaching for one, and before adding a
- * fifth.
+ * Design tokens — the "ink & electric" system, modeled on comfy.org's
+ * visual language: a deep plum-black ink ground, warm off-white type in two
+ * strengths (warm white for emphasis, stone "canvas" for running copy), and
+ * ONE electric yellow that marks everything you can act on. Surfaces step up
+ * in value with translucent white, never with shadows; hairlines are white at
+ * 8%. Buttons are small, bold, uppercase and 16px-rounded; headlines are big
+ * and LIGHT (300), with narrow uppercase titles sitting on slanted yellow
+ * tags (.tag-slant) for the loudest moments.
  *
  * Single source of truth for color/type/radius/shadow values — components
  * should always reach for a Tailwind utility generated from one of these
- * tokens (bg-surface, text-muted, rounded-2xl, shadow-glow-md, text-body,
- * ...) rather than hardcoding a hex value or pixel size.
+ * tokens (bg-surface, text-muted, rounded-2xl, ...) rather than hardcoding a
+ * hex value. Token NAMES are unchanged from the previous light system, so
+ * every call site picks up the new theme without edits.
  *
  * Tailwind v4 is CSS-first: every key below auto-generates a matching
- * utility class (no tailwind.config.ts needed). The default numeric
- * spacing scale (p-1..p-32 at a 4px step) already matches a 4px grid
- * exactly, so it isn't redeclared here. Breakpoints use Tailwind's stock
- * sm(640)/md(768)/lg(1024).
+ * utility class. Breakpoints are Tailwind's stock sm(640)/md(768)/lg(1024).
  */
 @theme {
-  /* Surfaces — light silver-grey, taken from the logo tile (#bfc7d2)
-     rather than white: the page sits on the same cool metal as the mark,
-     and hierarchy comes from VALUE — cards and elevated panels step
-     lighter, the sidebar and recessed areas step darker. No warm or
-     violet undertone anywhere. */
-  --color-surface: #bfc7d2; /* Background Primary */
-  --color-surface-2: #dde1e7; /* Background Secondary (cards) */
-  --color-surface-3: #e8ebef; /* Background Tertiary (elevated / card hover) */
-  --color-surface-dark: #f1f3f5; /* Input fields */
-  /* Modal scrims (bg-overlay/80): a dark slate, not the page grey, so a
-     dialog still separates from what it covers. */
-  --color-overlay: #2a2f37;
-  --color-dropdown-hover: #dde1e7; /* Hover states, dropdowns */
+  /* Surfaces — ink ground; each step up is the ground plus a little white,
+     the way comfy.org layers white/4% and white/8% panels. */
+  --color-surface: #211927; /* page ground (comfy ink) */
+  --color-surface-2: #2a2330; /* cards */
+  --color-surface-3: #332b38; /* elevated / card hover / dropdowns */
+  --color-surface-dark: #1d1622; /* inputs — recessed below the ground */
+  --color-overlay: #0d0910; /* modal scrims (bg-overlay/80) */
+  --color-dropdown-hover: #3b3341;
 
-  /* App-shell background — the authenticated app (dashboard/generate/
-     gallery/settings, see AppShell) sits on the same silver, with the
-     sidebar one step deeper so body and rail read as distinct planes. */
-  --color-surface-app: #bfc7d2;
-  --color-surface-sidebar: #b4bcc8;
+  /* App shell — the sidebar sits one step deeper than the body. */
+  --color-surface-app: #211927;
+  --color-surface-sidebar: #1b1420;
 
-  /* Stage — the dark plane media is judged on (editor preview, generation
-     result, gallery lightbox). Grading software keeps footage on near-black
-     for a reason: colour and contrast read true there, and the light chrome
-     around it frames the work instead of competing with it. Used through
-     the .stage utility below, which also flips the text/line tokens. */
-  --color-stage: #14161a;
+  /* Stage — the near-black plane media is judged on (editor preview,
+     generation result, lightbox), a step below the ink ground. */
+  --color-stage: #120d15;
 
-  /* Text — near-black ink with a cool cast. Primary, secondary and
-     tertiary are pulled well apart since there's no hue to separate them;
-     secondary clears 4.5:1 on the page silver, tertiary is captions only. */
-  --color-ink: #0e1014; /* Text Primary */
-  --color-ink-soft: #0e1014;
-  --color-ink-softer: #0e1014;
-  --color-muted: #434953; /* Text Secondary */
-  --color-text-tertiary: #5a606b; /* Labels, captions */
+  /* Text — warm white for headings/emphasis, stone for running copy,
+     warm grey for captions (still 4.9:1 on the ground). */
+  --color-ink: #f0efed;
+  --color-ink-soft: #f0efed;
+  --color-ink-softer: #f0efed;
+  --color-muted: #c2bfb9;
+  --color-text-tertiary: #8f8c87;
 
-  /* Borders — translucent ink, not opaque gray */
-  --color-line: rgb(14 16 20 / 0.12); /* Default border */
-  --color-border-subtle: rgb(14 16 20 / 0.07); /* Subtle dividers */
-  --color-border-strong: rgb(14 16 20 / 0.24); /* Focus rings, active borders */
+  /* Borders — translucent white. */
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-border-subtle: rgb(255 255 255 / 0.05);
+  --color-border-strong: rgb(255 255 255 / 0.18);
 
-  /* Silver — the base metal. Everything structural (surfaces, type,
-     borders) is black/white/grey, and this is the neutral accent that
-     belongs to that base rather than to the signal set below: identity
-     marks and any chrome that should read as material, not as an action.
-     Pitched below pure white on purpose — an accent sitting at the same
-     value as body text (#f7f8fa) stops being an accent. */
-  --color-silver: #bfc7d2;
-  /* Silver is now the ground itself, so the logo tile inverts to ink with
-     a silver glyph (see layout/logo.tsx). */
+  /* Stone — the neutral "material" accent (identity marks, inactive bars). */
+  --color-silver: #c2bfb9;
 
-  /* ---- The signal set ------------------------------------------------
-     Four saturated colors that break the monochrome. The base stays black
-     and white; these are the interruptions, and they earn their loudness
-     by being confined to things that DO something or mean something —
-     actions, value, categories, one-off announcements. Nothing structural
-     ever takes one.
-     Each is assigned a job below rather than being used interchangeably:
-     a screen where every accent is a different color for no reason reads
-     as chaos, not as energy. All four are bright enough to carry black
-     glyphs (13.4:1 lime, 14.7:1 amber, 9.2:1 orange, 5.4:1 hot), and all
-     four clear 5:1 as text on the ground, so any of them can be a label
-     or a fill without a contrast exception. */
+  /* ---- Signal colors ------------------------------------------------
+     Electric yellow is THE action color: buttons, active states, focus,
+     links, eyebrows, the slanted title tags. On this ground it is legible
+     as text too, so -ink resolves to the yellow itself. The other three
+     keep their jobs: amber = credits/value, orange = third categorical
+     slot, hot (lilac/plum) = announcements. */
+  --color-brand: #f2ff59;
+  --color-brand-hover: #f6ff8a;
+  --color-brand-active: #dde94a;
+  --color-brand-ink: #f2ff59;
 
-  /* Lime — primary action. The default accent: buttons, active states,
-     focus rings, sliders, links, accent text. It is the loudest thing on
-     a black screen and the one color the eye should follow to find "what
-     do I press". */
-  --color-brand: #c6f019;
-  --color-brand-hover: #d2f548;
-  --color-brand-active: #b2d915;
-  /* Lime never sets type or hairlines on this ground: on silver it sits at
-     almost the same value (~1.1:1) and a darkened lime turns khaki. So
-     every non-fill use of brand (text-*, border-*, ring-*, fill-*) resolves
-     to ink — a near-black with the faintest green cast — and lime survives
-     as what it's good at: fills, markers (.mark-lime) and dots. The three
-     other signal colors keep a deep -ink twin, since amber/orange/hot still
-     read as themselves when darkened. */
-  --color-brand-ink: #161c08;
+  /* Glyphs sitting ON a light accent fill (yellow, amber, lilac). */
+  --color-on-brand: #211927;
 
-  /* Ink for glyphs and labels sitting ON any light accent fill — all four
-     signal colors and silver. Every one of them is a LIGHT color, so
-     white-on-accent is unreadable (as low as 1.4:1); black is between 5:1
-     and 15:1 on all of them, and on a saturated fill it is also the only
-     choice that looks deliberate rather than washed. */
-  --color-on-brand: #0e1014;
+  --color-accent-amber: #fabc25;
+  --color-accent-amber-ink: #fabc25;
 
-  /* Amber — value. Reserved for credits: the balance chips, the Zap
-     glyphs, the cost on the generate button. Money-adjacent UI reads
-     faster with a color of its own, and keeping it off the action color
-     means "what this costs" never gets confused with "what to press". */
-  --color-accent-amber: #ffd400;
-  --color-accent-amber-ink: #6a4f00;
+  --color-accent-orange: #ff8a4c;
+  --color-accent-orange-ink: #ff9d66;
 
-  /* Orange — the third categorical slot (per-section icons, chip
-     rotations). Sits between lime and hot in temperature, so a row of all
-     four still reads as a deliberate sequence. */
-  --color-accent-orange: #ff8f00;
-  --color-accent-orange-ink: #7c3e00;
+  /* Lilac — comfy's node-selection color, for announcements/"new". The
+     -strong plum carries small white text (5.8:1). */
+  --color-accent-hot: #a894ef;
+  --color-accent-hot-strong: #6b4fd8;
+  --color-accent-hot-ink: #c3b5ff;
 
-  /* Hot magenta — announcements. The loudest of the four and the most
-     rationed: exclusives, "new", the promo banner, the section beam.
-     Against an otherwise black-and-white page a single hot panel lands
-     without needing any extra size or weight. */
-  --color-accent-hot: #ff0052;
-  /* The hot as a fill under small white text: #ff0052 only reaches 3.9:1
-     against white, short of WCAG AA's 4.5:1 for caption-size labels. */
-  --color-accent-hot-strong: #e0004a;
-  --color-accent-hot-ink: #a10035;
+  /* Status — fixed meanings, tuned for a dark ground. */
+  --color-success: #5fd68f;
+  --color-warning: #f0a43a;
+  --color-accent: #ff6b5e; /* error */
+  --color-info: #7cb7ff;
 
-  /* Status — separate from the signal set above, and deliberately so:
-     these mean something fixed, and must never be mistaken for
-     decoration. Warning is the one to watch — it sits closest to amber,
-     so it is kept clearly deeper and less acid than the credits color. */
-  --color-success: #17703f;
-  --color-warning: #8a5a00; /* deeper + duller than accent-amber/-orange */
-  --color-accent: #b4212f; /* error — a true red, not the hot's magenta */
-  --color-info: #1d5f99;
-
-  /* Fonts (next/font variables set on <html> in layout.tsx). Three roles
-     instead of one: a geometric grotesk carries display/heading weight
-     (character, not another Inter headline), an italic serif is reserved
-     for editorial accent phrases (see .text-accent-script), and Inter
-     stays for body/UI copy where plain legibility wins over personality. */
+  /* Fonts (next/font variables set on <html> in layout.tsx). One variable
+     grotesk (Archivo, wdth 62–125) plays every role: regular width for UI
+     and copy, light weight for big headlines, and condensed + uppercase via
+     the font-narrow utility below for display tags — the free stand-in for
+     comfy.org's PP Formula / PP Formula Narrow pairing. */
   --font-sans: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-display-face), var(--font-sans);
-  --font-accent: var(--font-accent-face), "Times New Roman", Georgia, serif;
+  --font-display: var(--font-sans);
+  --font-accent: var(--font-sans);
   --font-mono: var(--font-mono-face), "SF Mono", Monaco, "Cascadia Code",
     "Roboto Mono", Consolas, "Courier New", monospace;
 
-  /* Radius scale — buttons/badges stay fully pill via radius-full; inputs
-     and gallery tiles at 24px; cards at 32px (dialed down slightly at
-     specific call sites where a softer, less "bubble" feel reads better). */
+  /* Radius scale — buttons 16px (rounded-lg), inputs 12–16px, cards 24–32px. */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 12px;
@@ -171,150 +110,93 @@
   --radius-2xl: 32px;
   --radius-full: 9999px;
 
-  /* Shadows — short, crisp, cool-tinted depth. The old "glow" tokens were
-     coloured halos that read as light on black; on silver they turn into
-     grey fog, so they now resolve to tight lift shadows (names kept so
-     call sites don't churn). The 1px white inset top edge is the
-     machined-metal highlight that makes a lighter card read as raised. */
-  --shadow-raised: 0 1px 2px 0 rgb(20 26 36 / 0.12);
-  --shadow-floating: 0 10px 28px -8px rgb(20 26 36 / 0.28);
-  --shadow-modal: 0 24px 60px -16px rgb(20 26 36 / 0.4);
-  --shadow-inset: inset 0 1px 0 0 rgb(255 255 255 / 0.7);
-  --shadow-card: 0 1px 2px rgb(20 26 36 / 0.08), 0 4px 12px -4px rgb(20 26 36 / 0.12), inset 0 1px 0 0 rgb(255 255 255 / 0.7);
-  --shadow-glow-sm: 0 2px 6px -1px rgb(20 26 36 / 0.16), inset 0 1px 0 0 rgb(255 255 255 / 0.5);
-  --shadow-glow-md: 0 4px 14px -4px rgb(20 26 36 / 0.26);
-  --shadow-glow-lg: 0 10px 28px -8px rgb(20 26 36 / 0.32);
-  --shadow-glow-hot-sm: 0 2px 8px -2px rgb(161 0 53 / 0.25);
-  --shadow-glow-hot-md: 0 6px 18px -6px rgb(161 0 53 / 0.32);
-  --shadow-glow-white: 0 0 30px rgb(255 255 255 / 0.35);
+  /* Shadows — on ink, depth comes from value steps, so these are mostly
+     plain black falloff. The "glow" names now resolve to a faint yellow halo
+     (lilac for -hot) — the one place light still reads as light. */
+  --shadow-raised: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+  --shadow-floating: 0 18px 40px -14px rgb(0 0 0 / 0.65);
+  --shadow-modal: 0 30px 80px -20px rgb(0 0 0 / 0.75);
+  --shadow-inset: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+  --shadow-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+  --shadow-glow-sm: 0 0 12px -2px rgb(242 255 89 / 0.35);
+  --shadow-glow-md: 0 6px 24px -6px rgb(242 255 89 / 0.4);
+  --shadow-glow-lg: 0 10px 40px -8px rgb(242 255 89 / 0.45);
+  --shadow-glow-hot-sm: 0 2px 12px -2px rgb(168 148 239 / 0.45);
+  --shadow-glow-hot-md: 0 6px 22px -6px rgb(168 148 239 / 0.5);
+  --shadow-glow-white: 0 0 30px rgb(255 255 255 / 0.12);
 
-  /* No gradient() fills anywhere in this system, full stop — a two-hue
-     blend used to fill buttons/badges/icon chips/decor blobs app-wide, and
-     even the single-hue radial glow this token used to hold, read as
-     exactly the generic-AI-SaaS tell this palette was rebuilt to move away
-     from. Every surface below picks ONE flat, solid color from the palette
-     instead (--color-brand / -accent-amber / -accent-orange / -accent-hot) —
-     see buttonVariants' "accent" variant (was "gradient"), app-shell's
-     per-section nav colors, and the dashboard's icon chips.
-     --gradient-hero-glow is now a flat solid tint too (kept the old name
-     since call sites still consume it as a plain `background` value). */
-  --gradient-hero-glow: rgb(255 255 255 / 0.25);
+  /* No gradient fills. Kept as a token (consumed as a plain `background`). */
+  --gradient-hero-glow: rgb(242 255 89 / 0.06);
 
-  /* Type scale: each pairs font-size with its line-height (and, where
-     useful, letter-spacing) in a single utility. Font-family is NOT
-     bundled here (apply font-display/font-accent/font-sans explicitly per
-     call site) and neither is font-weight — apply font-normal/medium/
-     semibold/bold alongside these. display=hero only. heading=section
-     title. subheading=card/app-page header. feature-title=card/step title. */
-  --text-display: 72px;
-  --text-display--line-height: 1;
+  /* Type scale — fluid where it matters, so headings size themselves across
+     phone → desktop without per-call-site breakpoints. Font-family and weight
+     are NOT bundled; marketing h1/h2 get weight 300 from .marketing-headings. */
+  --text-display: clamp(2.75rem, 1.6rem + 4.8vw, 5.5rem);
+  --text-display--line-height: 0.95;
   --text-display--letter-spacing: -0.03em;
 
-  --text-heading: 36px;
-  --text-heading--line-height: 1.15;
-  --text-heading--letter-spacing: -0.01em;
+  --text-heading: clamp(2rem, 1.45rem + 2.3vw, 3.25rem);
+  --text-heading--line-height: 1.06;
+  --text-heading--letter-spacing: -0.03em;
 
-  --text-subheading: 28px;
-  --text-subheading--line-height: 1.2;
-  --text-subheading--letter-spacing: -0.01em;
+  --text-subheading: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+  --text-subheading--line-height: 1.15;
+  --text-subheading--letter-spacing: -0.02em;
 
   --text-feature-title: 22px;
-  --text-feature-title--line-height: 1.3;
+  --text-feature-title--line-height: 1.25;
+  --text-feature-title--letter-spacing: -0.01em;
 
   --text-body-lg: 18px;
-  --text-body-lg--line-height: 1.7;
+  --text-body-lg--line-height: 1.6;
 
   --text-body: 16px;
-  --text-body--line-height: 1.65;
+  --text-body--line-height: 1.6;
 
   --text-body-sm: 14px;
-  --text-body-sm--line-height: 1.6;
+  --text-body-sm--line-height: 1.55;
 
   --text-label: 14px;
   --text-label--line-height: 20px;
 
   --text-caption: 12px;
   --text-caption--line-height: 1.5;
-  --text-caption--letter-spacing: 0.02em;
+  --text-caption--letter-spacing: 0.01em;
 
   --text-input: 14px;
   --text-input--line-height: 20px;
 
-  /* Motion — landing-page-only decorative animation. Every utility built
-     from these is applied with a motion-safe:/motion-reduce: variant at
-     the call site, never bare, so prefers-reduced-motion always wins.
-     Scroll/viewport/spring animation lives in Framer Motion components
-     instead (see src/lib/animations.ts) — these keyframes are only for
-     effects that don't need JS. blob-float/blob-morph replace the old
-     plain-circle glow-float: same GPU-cheap transform-only technique, but
-     the shape's border-radius corners drift too, so ambient glows read as
-     organic/liquid instead of a static blurred disc — the literal "more
-     fluid" ask, not just a figure of speech. */
+  /* Motion — see the per-keyframe notes below. Every looping utility is
+     applied with motion-safe: at the call site. */
   --animate-blob-float: blob-float 14s ease-in-out infinite;
   --animate-marquee: marquee 32s linear infinite;
-  /* Vertical counterpart — the hero's film-reel strip (see hero.tsx) scrolls
-     up instead of sideways, same seamless-loop technique (track rendered
-     twice, translated exactly -50%). */
   --animate-marquee-vertical: marquee-vertical 28s linear infinite;
   --animate-fade-up: fade-up 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  /* Mobile bottom-sheet entrance (see ui/bottom-sheet.tsx) — unlike the
-     above, this runs on every app page, not just the landing page, so it's
-     intentionally short and has no motion-reduce guard needed at the call
-     site: a 200ms translate is well under the threshold that triggers
-     vestibular discomfort, unlike the looping/parallax effects above. */
   --animate-sheet-up: sheet-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  /* AppShell's floating mobile nav panel (see layout/app-shell.tsx) — same
-     reasoning/timing as sheet-up above, just sliding in from the edge the
-     panel is anchored to instead of the bottom. */
   --animate-sheet-left: sheet-left 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  /* The admin panel's detail drawers (see admin/generation-drawer.tsx),
-     which open from the right edge. Same timing as the two above. */
   --animate-sheet-right: sheet-right 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  /* Generation loader (see generate/generation-loader.tsx) — the generate
-     page's "working on it" state is an animated line icon of the thing
-     being made (a film frame for video, a photo for image), not a spinner
-     over a percentage bar: the provider reports progress in coarse jumps
-     and parks at 0 for most of a render, so the number was either frozen
-     or misleading.
-       icon-trace     — wipes a stroke on and back off along its own path,
-                        so the icon looks like it's being drawn. Needs a
-                        --dash var at the call site holding that path's
-                        length (see the SVGs).
-       icon-pulse     — the filled bits (play triangle, sun) breathing.
-       sparkle-twinkle — the little AI sparks popping in and out.
-       status-pulse   — the dot next to the status label.
-     icon-trace animates stroke-dashoffset, which isn't a compositor-only
-     property like the rest — fine here because it's two short paths in a
-     72px icon, not a full-screen effect. All are applied with motion-safe:
-     at the call site. */
+  /* Generation loader (generate/generation-loader.tsx). icon-trace needs a
+     --dash var at the call site holding the path's length. */
   --animate-icon-trace: icon-trace 2.4s ease-in-out infinite;
   --animate-icon-pulse: icon-pulse 2s ease-in-out infinite;
   --animate-sparkle-twinkle: sparkle-twinkle 2.2s ease-in-out infinite;
   --animate-status-pulse: status-pulse 1.8s ease-in-out infinite;
-
-  /* The three /presets "How it works" step marks (see presets/step-icons.tsx).
-     Each one acts out its step rather than illustrating it — a card being
-     chosen out of a row, a photo dropping into an empty frame, a finished
-     clip being pulled down. Same rules as the icon-* set above: transform/
-     opacity only, long enough cycles (2.4-3.2s) to read as demonstration
-     rather than fidgeting, and applied with motion-safe: at the call site.
-     They share one duration family so three marks sitting in a carousel
-     never look like they're racing each other. */
+  /* /presets "How it works" step marks (presets/step-icons.tsx). */
   --animate-preset-select: preset-select 3.2s ease-in-out infinite;
   --animate-drop-into-frame: drop-into-frame 3.2s ease-in-out infinite;
   --animate-arrow-dip: arrow-dip 2.4s ease-in-out infinite;
-
-  /* Launch-offer CTAs (see landing/launch-offer.tsx): a flat translucent-white
-     band that sweeps across the button, then rests for most of the cycle so
-     it reads as a glint rather than a loading bar. A solid band, not a
-     gradient, per the rule above. The call site gives the band its width and
-     the button relative + overflow-hidden. */
+  /* Launch-offer CTA glint (landing/launch-offer.tsx). */
   --animate-shine: shine 3.6s ease-in-out infinite;
-
-  /* AI Influencer banner (landing/ai-influencer-banner.tsx): the tilted cast
-     still slowly pans, so one image reads as a living wall of characters.
-     Transform-only, so it stays on the compositor. */
+  /* AI Influencer banner cast pan (landing/ai-influencer-banner.tsx). */
   --animate-cast-drift: cast-drift 22s ease-in-out infinite alternate;
+  /* Hero node-graph wires: a dash travelling along each connector. */
+  --animate-wire-flow: wire-flow 1.6s linear infinite;
+}
+
+@keyframes wire-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
 }
 
 @keyframes cast-drift {
@@ -521,9 +403,10 @@
   }
 }
 
+
 @layer base {
   :root {
-    color-scheme: light;
+    color-scheme: dark;
   }
 
   * {
@@ -534,24 +417,23 @@
     background: var(--color-surface);
   }
 
-  /* Flat surface color — no ambient gradient washes. Layered on top: a
-     fixed film-grain texture (see body::before below) — the kind of
-     tactile, slightly-imperfect detail generic AI-template gradients never
-     bother with, and a deliberate nod to this being a *video* tool. */
   body {
     background: var(--color-surface);
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Fixed film-grain texture over everything — a nod to this being a video
+     tool, and it keeps the flat ink from reading as a dead fill. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 9999;
     pointer-events: none;
-    opacity: 0.035;
+    opacity: 0.05;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -561,22 +443,11 @@
     color: var(--color-on-brand);
   }
 
-  /* Custom scrollbar — the default OS scrollbar (light gray, ~15-17px) reads
-     as unstyled chrome against this app's near-black surfaces. Thin,
-     translucent-white by default (echoes --color-line's translucent-white
-     border treatment rather than an opaque gray), brand-lime on hover —
-     the same "brand reserved for focus/active states" rule already used for
-     :focus-visible above. Applied to `*` (not just html/body) since
-     ::-webkit-scrollbar doesn't inherit — every internal scroll container
-     (dropdowns, modals, overflow panels) should look the same, not just the
-     page scrollbar. Firefox only supports the flat scrollbar-color pair (no
-     hover state); WebKit browsers get the full treatment below.
-     `background-clip: padding-box` on the thumb's transparent border insets
-     it slightly from the track edges instead of running flush; the track
-     itself stays transparent so it blends into whatever surface it sits on. */
+  /* Thin translucent scrollbars on every scroll container (::-webkit-scrollbar
+     doesn't inherit, hence `*`), yellow on hover. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(14 16 20 / 0.22) transparent;
+    scrollbar-color: rgb(255 255 255 / 0.16) transparent;
   }
 
   ::-webkit-scrollbar {
@@ -589,24 +460,20 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: rgb(14 16 20 / 0.22);
+    background-color: rgb(255 255 255 / 0.16);
     border-radius: var(--radius-full);
     border: 2px solid transparent;
     background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(14 16 20 / 0.45);
+    background-color: rgb(242 255 89 / 0.6);
   }
 
   ::-webkit-scrollbar-corner {
     background: transparent;
   }
 
-  /* Belt-and-suspenders on top of the per-component motion-safe:/
-     motion-reduce: variants used everywhere above: forces any animation or
-     transition (ours or a future one) to be effectively instant when the
-     user has asked the OS for reduced motion. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -619,14 +486,27 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand-ink);
+    outline: 2px solid var(--color-brand);
     outline-offset: 2px;
+  }
+
+  /* Native date/time pickers and selects follow the dark scheme. */
+  input,
+  select,
+  textarea {
+    color-scheme: dark;
   }
 }
 
+/* Condensed display face — Archivo at 72% width. Pair with uppercase and
+   font-semibold for titles and slanted tags. */
+@utility font-narrow {
+  font-family: var(--font-display);
+  font-stretch: 72%;
+}
+
 @layer utilities {
-  /* Shared page container: max-width 1440px, 32/20/16px padding across
-     desktop/tablet/mobile. */
+  /* Shared page container: max-width 1440px, 16/20/32px gutters. */
   .container-page {
     width: 100%;
     max-width: 1440px;
@@ -635,102 +515,101 @@
   }
   @media (min-width: 640px) {
     .container-page {
-      padding-inline: 20px;
+      padding-inline: 24px;
     }
   }
   @media (min-width: 1024px) {
     .container-page {
-      padding-inline: 32px;
+      padding-inline: 40px;
     }
   }
 
-  /* Accent text — used for hero accent words, stat numbers, wordmarks.
-     Solid lime, never gradient-clipped — this app doesn't use blended
-     gradient fills anywhere (see the note above --gradient-hero-glow). */
+  /* Formerly an italic serif; now the quieter light-weight second beat of a
+     two-beat headline, in stone. Declared before .mark-lime so a phrase
+     carrying both still gets the tag's ink color. */
+  .text-accent-script {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    color: var(--color-muted);
+  }
+
+  /* Accent text — stat numbers, accent words, wordmarks: plain yellow. */
   .text-gradient {
-    color: var(--color-ink);
-    background: linear-gradient(transparent 58%, var(--color-brand) 58% 92%, transparent 92%);
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
+    color: var(--color-brand);
   }
 
-  /* Highlighter marker — how lime carries emphasis on type now that it
-     can't be the type colour itself (see --color-brand-ink). A hard-stop
-     band under the lower part of the glyphs, not a blend: reads as a
-     felt-tip swipe, keeps the word in full-contrast ink, and lets the lime
-     stay at full chroma. */
+  /* Inline yellow tag behind a word or phrase — wraps cleanly across lines
+     (box-decoration-break), for emphasis inside running headlines. */
   .mark-lime {
-    color: var(--color-ink);
-    background: linear-gradient(transparent 58%, var(--color-brand) 58% 92%, transparent 92%);
+    color: var(--color-on-brand);
+    background: var(--color-brand);
+    border-radius: 0.14em;
+    padding: 0 0.16em;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
-    padding-inline: 0.06em;
   }
 
-  /* Dark stage for media (see --color-stage). Re-points the theme tokens
-     locally, so every bg-surface-N, text-ink, text-muted, border-line inside
-     resolves to its dark-theme value with no per-child overrides. Lime is
-     legible again on this ground, so brand-ink goes back to lime too. */
+  /* Slanted title tag — comfy.org's signature: narrow uppercase type on a
+     skewed, softly rounded yellow parallelogram. The skew lives on a
+     pseudo-element so the glyphs stay upright. One line per tag; stack
+     several for multi-line titles. */
+  .tag-slant {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1em 0.42em 0.04em;
+    color: var(--color-on-brand);
+    white-space: nowrap;
+  }
+  .tag-slant::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-brand);
+    border-radius: 0.14em;
+    transform: skewX(-12deg);
+  }
+
+  /* Small uppercase section label in yellow, above section titles. */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-brand);
+  }
+
+  /* Dark stage for media — re-points tokens a step deeper so everything
+     inside resolves against near-black. */
   .stage {
     color-scheme: dark;
-    --color-surface: #0e1013;
-    --color-surface-2: #1a1d22;
-    --color-surface-3: #23272d;
-    --color-surface-dark: #0e1013;
-    --color-dropdown-hover: #2a2e35;
-    --color-ink: #f2f4f7;
-    --color-ink-soft: #f2f4f7;
-    --color-ink-softer: #f2f4f7;
-    --color-muted: #9aa0aa;
-    --color-text-tertiary: #6d727c;
-    --color-line: rgb(255 255 255 / 0.1);
-    --color-border-subtle: rgb(255 255 255 / 0.06);
-    --color-border-strong: rgb(255 255 255 / 0.18);
-    --color-brand-ink: var(--color-brand);
-    --color-accent-amber-ink: var(--color-accent-amber);
-    --color-accent-orange-ink: var(--color-accent-orange);
-    --color-accent-hot-ink: var(--color-accent-hot);
+    --color-surface: #120d15;
+    --color-surface-2: #1d1622;
+    --color-surface-3: #2a2330;
+    --color-surface-dark: #120d15;
+    --color-dropdown-hover: #332b38;
     color: var(--color-ink);
   }
 
-  /* Editorial italic accent — the "for artists." trick: one phrase per
-     hero/section set in a serif italic against the surrounding grotesk,
-     purely typographic emphasis (no color/weight change needed). Used
-     sparingly — one phrase per screen, never body copy. */
-  .text-accent-script {
-    font-family: var(--font-accent);
-    font-style: italic;
-    font-weight: 400;
-  }
-
-  /* Glassmorphism surface — floating toolbars, demo widgets, overlays. */
+  /* Frosted ink surface — floating toolbars, overlays on media. */
   .glass {
-    background: rgb(217 222 228 / 0.72);
+    background: rgb(42 35 48 / 0.72);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgb(14 16 20 / 0.08);
+    border: 1px solid rgb(255 255 255 / 0.08);
   }
 
-  /* "Liquid glass" button — frosted pill with a thin gradient-reflection
-     border instead of a flat 1px line, the signature CTA treatment from the
-     migration brief. Built as a single-element ::before overlay (padding +
-     mask-exclude trick) rather than the source's 3-nested-div structure —
-     same visual result, no extra wrapper markup needed at each call site.
-     The reflection gradient stays plain white (it's reading as *glass
-     material*, not a brand accent) so it drops straight into buttonVariants'
-     "glass" variant without touching color tokens.
-     No `position` here on purpose: this is applied alongside a Tailwind
-     position utility at each call site (relative/absolute/fixed), and
-     since both live in the same `utilities` layer, a `position` set here
-     would win over that utility by source order regardless of which one
-     the call site actually needs — broke BackToTop's `fixed` positioning
-     this way (silently fell back to `relative`, collapsing its containing
-     block to the button's own size). `isolation: isolate` alone still
-     creates the new stacking context the ::before overlay needs, with no
-     position requirement. */
+  /* Frosted pill for CTAs sitting on media. No `position` here on purpose
+     (it would override the call site's relative/absolute/fixed utility). */
   .btn-glass {
     isolation: isolate;
-    background: rgb(255 255 255 / 0.3);
+    background: rgb(33 25 39 / 0.55);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
@@ -739,31 +618,14 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      -15deg,
-      rgb(255 255 255 / 0.9) 3%,
-      rgb(255 255 255 / 0.12) 40%,
-      rgb(255 255 255 / 0.12) 60%,
-      rgb(255 255 255 / 0.9) 99%
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box exclude,
-      linear-gradient(#fff 0 0);
-    mask:
-      linear-gradient(#fff 0 0) content-box exclude,
-      linear-gradient(#fff 0 0);
+    border: 1px solid rgb(242 255 89 / 0.85);
     pointer-events: none;
   }
 
-  /* Light-beam section divider — a blurred, multi-stop horizontal band used
-     as a dramatic separator (migration brief §3, step 5). Recolored to
-     Vixlens' own silver→accent pair instead of the source's blue→violet→red,
-     consistent with "no unrelated hues" (see --color-brand's own comment
-     above). Two layers: a soft wide glow plus a crisp thin line on top. */
+  /* Section divider — a thin yellow→lilac line with a soft bloom. */
   .light-beam {
     position: relative;
-    height: 2px;
+    height: 1px;
     background: linear-gradient(
       to right,
       transparent,
@@ -771,40 +633,49 @@
       var(--color-accent-hot) 65%,
       transparent
     );
-    opacity: 0.8;
+    opacity: 0.6;
   }
   .light-beam::before {
     content: "";
     position: absolute;
-    inset: -40px 0;
+    inset: -30px 0;
     background: inherit;
-    filter: blur(32px);
-    opacity: 0.6;
+    filter: blur(30px);
+    opacity: 0.35;
   }
 
-  /* Faint diagonal hairline grid — an ArtCraft-style texture for hero/
-     section backgrounds that want more surface interest than flat black
-     without reaching for another gradient blob. Opt-in per section. */
+  /* Dot grid — the node-canvas texture behind hero/section backgrounds. */
   .grid-texture {
-    background-image:
-      linear-gradient(135deg, rgb(14 16 20 / 0.06) 1px, transparent 1px),
-      linear-gradient(45deg, rgb(14 16 20 / 0.06) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
+    background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent);
   }
 
-  /* Marketing-only heading treatment — set in the display grotesk, still
-     uppercase/heavy for punch. Scoped to a wrapper class applied in
-     (marketing)/layout.tsx rather than a global h1..h4 base rule that
-     would also hit the dashboard/generate/settings shell (which stays
-     normal-case, smaller, functional type). */
-  .marketing-headings h1,
-  .marketing-headings h2,
-  .marketing-headings h3,
-  .marketing-headings h4 {
+  /* Node card — a comfy-style graph node: dark panel, hairline border,
+     yellow port dots on its header row. */
+  .node-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: #2a2330;
+    box-shadow: var(--shadow-floating);
+  }
+
+  /* Marketing headings — big, LIGHT and mixed case, like comfy.org's
+     section titles; card titles (h3/h4) at a medium weight. Scoped to the
+     marketing layout so app chrome keeps its functional type. Opt out with
+     .font-narrow (display tags) — those keep whatever the call site sets. */
+  .marketing-headings h1:not(.font-narrow),
+  .marketing-headings h2:not(.font-narrow) {
     font-family: var(--font-display);
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    text-transform: none;
+  }
+  .marketing-headings h3:not(.font-narrow),
+  .marketing-headings h4:not(.font-narrow) {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-transform: none;
   }
 }

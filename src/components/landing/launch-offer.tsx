@@ -165,7 +165,7 @@ export function LaunchOfferBanner() {
           <div
             className="pointer-events-none absolute inset-0 opacity-40"
             style={{
-              backgroundImage: "radial-gradient(rgb(255 0 82 / 0.5) 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(rgb(168 148 239 / 0.45) 1px, transparent 1px)",
               backgroundSize: "14px 14px",
               maskImage: "radial-gradient(ellipse 60% 100% at 100% 50%, black, transparent)",
             }}
@@ -175,7 +175,7 @@ export function LaunchOfferBanner() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse 50% 80% at 95% 40%, rgb(255 0 82 / 0.18), transparent 70%)",
+                "radial-gradient(ellipse 50% 80% at 95% 40%, rgb(168 148 239 / 0.16), transparent 70%)",
             }}
             aria-hidden="true"
           />
@@ -209,7 +209,8 @@ export function LaunchOfferBanner() {
                 prefetch={false}
                 className={buttonVariants({
                   variant: "accent",
-                  className: "relative mt-7 w-full overflow-hidden px-8 py-4 text-body sm:w-auto",
+                  size: "lg",
+                  className: "relative mt-7 w-full overflow-hidden sm:w-auto",
                 })}
               >
                 <LaunchOfferShine />
@@ -311,7 +312,7 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
-            backgroundImage: "radial-gradient(rgb(255 0 82 / 0.5) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(rgb(168 148 239 / 0.45) 1px, transparent 1px)",
             backgroundSize: "14px 14px",
             maskImage: "radial-gradient(ellipse 50% 100% at 0% 50%, black, transparent)",
           }}
@@ -321,7 +322,7 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 45% 90% at 5% 50%, rgb(255 0 82 / 0.18), transparent 70%)",
+              "radial-gradient(ellipse 45% 90% at 5% 50%, rgb(168 148 239 / 0.16), transparent 70%)",
           }}
           aria-hidden="true"
         />

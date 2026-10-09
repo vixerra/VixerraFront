@@ -361,7 +361,7 @@ function Publish({ step, still }: SceneProps) {
             <motion.span
               key={p}
               className="flex h-6 flex-1 items-center justify-center rounded-md border border-brand-ink/50 text-[8px] text-brand-ink"
-              animate={{ borderColor: ["rgb(14 16 20 / 0.2)", "rgb(14 16 20 / 0.85)", "rgb(14 16 20 / 0.2)"] }}
+              animate={{ borderColor: ["rgb(255 255 255 / 0.15)", "rgb(242 255 89 / 0.85)", "rgb(255 255 255 / 0.15)"] }}
               transition={{ duration: 2.2, repeat: Infinity, ease: easing.smooth, delay: i * 0.3 }}
             >
               {p}
@@ -495,7 +495,7 @@ function Team({ step, still }: SceneProps) {
           {i === 2 && !still ? (
             <motion.span
               className="flex size-5 shrink-0 items-center justify-center rounded-full bg-ink/10 text-[9px] font-semibold text-muted"
-              animate={{ scale: [1, 1.15, 1], backgroundColor: ["rgb(14 16 20 / 0.1)", "rgb(187 220 18 / 0.45)", "rgb(14 16 20 / 0.1)"] }}
+              animate={{ scale: [1, 1.15, 1], backgroundColor: ["rgb(255 255 255 / 0.08)", "rgb(242 255 89 / 0.45)", "rgb(255 255 255 / 0.08)"] }}
               transition={{ duration: 2.4, repeat: Infinity, ease: easing.smooth }}
             >
               +

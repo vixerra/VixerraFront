@@ -17,21 +17,19 @@ const NAV_LINKS = [
   { href: "/gallery", label: "Gallery" },
 ];
 
-// Always-solid, compact bar — matches --color-surface everywhere on the
-// site (there's no light-mode page for a transparent-over-hero header to
-// earn its keep against), so a static hairline border reads cleaner than
-// the old scroll-triggered transparent-to-blurred crossfade.
+// Solid ink bar: logo left, small uppercase nav centered, the CTA trio on
+// the right (quiet sign-in, yellow-outline secondary, yellow-fill primary).
 export function Header() {
   const { data: user } = useMe();
   const isAuthed = Boolean(user);
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur-lg">
-      <div className="container-page flex h-14 items-center justify-between">
+    <header className="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur-lg">
+      <div className="container-page grid h-16 grid-cols-[1fr_auto] items-center gap-6 lg:grid-cols-[1fr_auto_1fr]">
         <Logo />
 
-        <nav className="hidden items-center gap-6 lg:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {NAV_LINKS.map((link) => {
             const active = pathname === link.href;
             return (
@@ -39,20 +37,17 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "font-display relative py-2 text-body-sm font-medium transition-colors",
-                  active ? "text-ink" : "text-muted hover:text-ink",
+                  "rounded-lg px-3 py-2 text-[12px] font-bold tracking-[0.06em] uppercase transition-colors",
+                  active ? "text-brand" : "text-muted hover:text-ink",
                 )}
               >
                 {link.label}
-                {active && (
-                  <span className="absolute inset-x-0 -bottom-px h-px bg-brand" aria-hidden="true" />
-                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden items-center justify-end gap-2 lg:flex">
           {isAuthed ? (
             <Link href={appHref("/dashboard")} prefetch={false} className={buttonVariants({ size: "sm" })}>
               Dashboard
@@ -62,18 +57,32 @@ export function Header() {
               <Link
                 href={appHref("/login")}
                 prefetch={false}
-                className="text-body-sm font-medium text-muted transition-colors hover:text-ink"
+                className={buttonVariants({ variant: "secondary", size: "sm" })}
               >
                 Log in
               </Link>
+              <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                Pricing
+              </Link>
               <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ size: "sm" })}>
-                Start for Free
+                Start free
               </Link>
             </>
           )}
         </div>
 
-        <MobileNav isAuthed={isAuthed} />
+        <div className="flex items-center justify-end gap-2 lg:hidden">
+          {!isAuthed && (
+            <Link
+              href={appHref("/signup")}
+              prefetch={false}
+              className={buttonVariants({ size: "sm", className: "hidden min-[400px]:inline-flex" })}
+            >
+              Start free
+            </Link>
+          )}
+          <MobileNav isAuthed={isAuthed} />
+        </div>
       </div>
     </header>
   );
