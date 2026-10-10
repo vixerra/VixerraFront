@@ -7,6 +7,7 @@ import {
   Plus,
   Settings2,
   Sliders,
+  Sparkles,
   Trash2,
   Type,
   Upload,
@@ -18,9 +19,12 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/toast";
 import { clipDuration, formatTimecode } from "@/lib/editor/project";
 import { probeAudioDuration } from "@/lib/editor/audio";
+import { canAiEdit } from "@/lib/editor/ai-edit";
 import { readLogoFile, ACCEPTED_LOGO_TYPES } from "@/lib/editor/image";
 import { deleteAsset, putAsset, saveBrandKit } from "@/lib/editor/storage";
 import {
+  AI_EDIT_MAX_SECONDS,
+  AI_EDIT_MIN_SECONDS,
   ASPECT_PRESETS,
   EXPORT_FPS,
   EXPORT_QUALITIES,
@@ -72,6 +76,7 @@ export function Inspector({
   onAddOverlay,
   onRemoveOverlay,
   onDeleteClip,
+  onAiEdit,
 }: {
   project: Project;
   /** Timeline length. Text overlays are bounded by it rather than by any one
@@ -87,6 +92,8 @@ export function Inspector({
   onAddOverlay: () => void;
   onRemoveOverlay: (overlayId: string) => void;
   onDeleteClip: (clipId: string) => void;
+  /** Opens the AI edit dialog for the selected clip. */
+  onAiEdit: () => void;
 }) {
   const selectedClip =
     selection?.kind === "clip" ? project.clips.find((c) => c.id === selection.id) : undefined;
@@ -125,6 +132,7 @@ export function Inspector({
               isFirst={project.clips[0]?.id === selectedClip.id}
               onPatch={(patch) => onPatchClip(selectedClip.id, patch)}
               onDelete={() => onDeleteClip(selectedClip.id)}
+              onAiEdit={onAiEdit}
             />
           ) : (
             <EmptyPanel>Select a clip on the timeline to edit it.</EmptyPanel>
@@ -172,11 +180,13 @@ function ClipPanel({
   isFirst,
   onPatch,
   onDelete,
+  onAiEdit,
 }: {
   clip: Clip;
   isFirst: boolean;
   onPatch: (patch: Partial<Clip>) => void;
   onDelete: () => void;
+  onAiEdit: () => void;
 }) {
   const [fineTune, setFineTune] = useState(false);
   const activePreset = FILTER_PRESETS.find(
@@ -204,6 +214,30 @@ function ClipPanel({
           on the timeline
         </p>
       </PanelSection>
+
+      {/* A still has no seconds to regenerate. */}
+      {clip.kind !== "image" && (
+        <PanelSection title="AI edit">
+          <p className="text-caption text-muted">
+            Regenerate up to {AI_EDIT_MAX_SECONDS} seconds from a prompt — the whole frame, or only
+            a box you draw on it.
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full"
+            onClick={onAiEdit}
+            disabled={!canAiEdit(clip.in, clip.out)}
+          >
+            <Sparkles className="size-3.5" /> Edit with AI
+          </Button>
+          {!canAiEdit(clip.in, clip.out) && (
+            <p className="text-[10px] text-text-tertiary">
+              The clip needs at least {AI_EDIT_MIN_SECONDS} seconds left after its trim.
+            </p>
+          )}
+        </PanelSection>
+      )}
 
       <PanelSection title="Trim">
         <SliderRow

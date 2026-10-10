@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertCircle, Copy, Scissors, Trash2, Type, ZoomIn, ZoomOut } from "lucide-react";
+import { AlertCircle, Copy, Scissors, Sparkles, Trash2, Type, ZoomIn, ZoomOut } from "lucide-react";
 
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip } from "@/components/ui/tooltip";
+import type { AiEditJob } from "@/lib/editor/ai-edit";
 import { MIN_CLIP_SECONDS, formatTimecode, type TimelineLayout } from "@/lib/editor/project";
 import type { Clip, Project, TextOverlay } from "@/lib/editor/types";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,9 @@ export function Timeline({
   onDeleteClip,
   onMoveOverlay,
   onAddOverlay,
+  aiJobs,
+  canAiEdit,
+  onAiEdit,
 }: {
   project: Project;
   layout: TimelineLayout;
@@ -61,6 +65,11 @@ export function Timeline({
   onDeleteClip: (clipId: string) => void;
   onMoveOverlay: (overlayId: string, patch: Partial<TextOverlay>) => void;
   onAddOverlay: () => void;
+  /** AI edits still running, drawn over the seconds they will replace. */
+  aiJobs: AiEditJob[];
+  /** Whether the selection is a video clip long enough for an AI edit. */
+  canAiEdit: boolean;
+  onAiEdit: () => void;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [pps, setPps] = useState(60);
@@ -113,6 +122,13 @@ export function Timeline({
           icon={Type}
           onClick={onAddOverlay}
           disabled={layout.duration <= 0}
+        />
+        <ToolbarButton
+          label="Edit with AI"
+          shortcut="G"
+          icon={Sparkles}
+          onClick={onAiEdit}
+          disabled={!canAiEdit}
         />
         <div className="mx-1 h-5 w-px bg-line" />
         <ToolbarButton
@@ -168,6 +184,7 @@ export function Timeline({
             onTrim={onTrim}
             onDropIndexChange={setDropIndex}
             onReorder={onReorder}
+            aiJobs={aiJobs}
           />
 
           <OverlayLane
@@ -255,6 +272,7 @@ function ClipLane({
   onTrim,
   onDropIndexChange,
   onReorder,
+  aiJobs,
 }: {
   project: Project;
   layout: TimelineLayout;
@@ -267,6 +285,7 @@ function ClipLane({
   onTrim: (clipId: string, patch: Partial<Clip>) => void;
   onDropIndexChange: (index: number | null) => void;
   onReorder: (from: number, to: number) => void;
+  aiJobs: AiEditJob[];
 }) {
   const dragRef = useRef<{ from: number; startX: number } | null>(null);
 
@@ -386,7 +405,10 @@ function ClipLane({
             ) : null}
 
             <div className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-gradient-to-b from-black/50 to-black/70 p-1.5">
-              <span className="truncate text-[11px] font-medium text-white/90">{clip.label}</span>
+              <span className="flex min-w-0 items-center gap-1 text-[11px] font-medium text-white/90">
+                {clip.ai && <Sparkles className="size-2.5 shrink-0 text-brand-ink" aria-label="Made with AI" />}
+                <span className="truncate">{clip.label}</span>
+              </span>
               <span className="flex items-center gap-1 font-mono text-[10px] text-white/70">
                 {placed.duration.toFixed(1)}s
                 {clip.speed !== 1 && <span className="text-brand-ink">{clip.speed}x</span>}
@@ -403,6 +425,32 @@ function ClipLane({
                 style={{ width: placed.transitionDuration * pps }}
               />
             )}
+
+            {/* The seconds an AI edit is redrawing, so it is plain which part
+                of the clip will be swapped when it lands. In SOURCE seconds,
+                hence the trim and speed. A stretch the clip has since been
+                trimmed away from simply isn't drawn. */}
+            {aiJobs
+              .filter((job) => job.clipId === clip.id && job.end > clip.in && job.start < clip.out)
+              .map((job) => {
+                const from = (Math.max(job.start, clip.in) - clip.in) / clip.speed;
+                const to = (Math.min(job.end, clip.out) - clip.in) / clip.speed;
+                return (
+                  <div
+                    key={job.id}
+                    className={cn(
+                      "pointer-events-none absolute inset-y-0 flex items-end justify-center border-x-2 pb-0.5",
+                      job.status === "failed"
+                        ? "border-accent/70 bg-accent/15"
+                        : "animate-pulse border-brand-ink/80 bg-brand/25",
+                    )}
+                    style={{ left: from * pps, width: Math.max(4, (to - from) * pps) }}
+                    title={job.prompt}
+                  >
+                    <Sparkles className="size-2.5 text-brand-ink" aria-hidden="true" />
+                  </div>
+                );
+              })}
 
             <TrimHandle side="left" onPointerDown={(e) => beginTrim(e, clip, "in")} />
             <TrimHandle side="right" onPointerDown={(e) => beginTrim(e, clip, "out")} />

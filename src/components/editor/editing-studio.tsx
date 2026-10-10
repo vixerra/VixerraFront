@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Check,
   ChevronLeft,
@@ -11,13 +12,23 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
+  RotateCcw,
   SlidersHorizontal,
+  Sparkles,
   Redo2,
   Trash2,
   Undo2,
+  X,
 } from "lucide-react";
 
 import { apiFetch } from "@/lib/api-client";
+import type { GenerationResult } from "@/hooks/use-generation";
+import {
+  canAiEdit,
+  compositeRegion,
+  fileAiComposite,
+  type AiEditJob,
+} from "@/lib/editor/ai-edit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
@@ -25,7 +36,7 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { useConfirm } from "@/components/ui/confirm";
 import { useToast } from "@/components/ui/toast";
 import { Tooltip } from "@/components/ui/tooltip";
-import { loadSource, probeVideo, probeImage } from "@/lib/editor/media";
+import { loadSource, primeSource, probeVideo, probeImage } from "@/lib/editor/media";
 import {
   addOverlay,
   duplicateClip,
@@ -34,6 +45,8 @@ import {
   removeClip,
   removeOverlay,
   reorderClips,
+  replaceClipSection,
+  sourceTimeFor,
   splitClipAt,
   trimToPlayhead,
   updateClip,
@@ -58,12 +71,14 @@ import {
   type ClipKind,
 } from "@/lib/editor/types";
 import { cn, formatRelativeTime, truncate } from "@/lib/utils";
+import { AiEditDialog } from "./ai-edit-dialog";
 import { ExportDialog } from "./export-dialog";
 import { Inspector, type InspectorTab } from "./inspector";
 import { MediaLibrary, LibraryHeader, type LibraryItem } from "./media-library";
 import { PreviewStage } from "./preview-stage";
 import { Timeline, type Selection } from "./timeline";
 import { PREVIEW_RATES, useStudioEngine } from "./use-studio-engine";
+import { useAiEditJobs } from "./use-ai-edit-jobs";
 
 /** How long after the last keystroke or drag the project is written to
  *  localStorage. Long enough that dragging a slider doesn't serialise the
@@ -125,6 +140,8 @@ export function EditingStudio() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [aiOpen, setAiOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const engine = useStudioEngine(project);
   const { duration, layout, seek, pause, time } = engine;
@@ -374,6 +391,125 @@ export function EditingStudio() {
     return () => clearTimeout(timer);
   }, [project, hydrated]);
 
+  /* ------------------------------------------------------------ AI edits */
+
+  // Read when an edit lands, minutes after it was started: by then the
+  // project the dialog saw is long gone, and only the current one matters.
+  const projectRef = useRef(project);
+  useEffect(() => {
+    projectRef.current = project;
+  }, [project]);
+
+  /**
+   * Puts a finished AI edit into the timeline in place of the seconds it
+   * redrew. A region edit is first pasted back over the original and filed
+   * as a studio edit (see compositeRegion); a segment result is used as is.
+   *
+   * When the stretch is no longer in the edit — the clip was deleted or
+   * trimmed past it while the model ran — the result is NOT forced in
+   * somewhere arbitrary. It is already in the library (the model's run, or
+   * the filed composite), and the user is told so.
+   */
+  const applyAiResult = useCallback(
+    async (job: AiEditJob, result: GenerationResult) => {
+      let replacement: { sourceId: string; sourceUrl: string; posterUrl: string | null; sourceDuration: number };
+
+      if (job.mode === "region") {
+        if (!job.region || !job.crop) throw new Error("This area edit lost the box it was drawn with.");
+        const clip = projectRef.current.clips.find((c) => c.id === job.clipId);
+        let originalSigned = clip?.sourceId === job.sourceId ? clip.sourceUrl : "";
+        if (!originalSigned) {
+          const res = await apiFetch(`/api/generations/${job.sourceId}`);
+          const item = res.ok ? ((await res.json()) as { resultUrl: string | null }) : null;
+          if (!item?.resultUrl) throw new Error("The original clip is no longer in your gallery.");
+          originalSigned = item.resultUrl;
+        }
+        const [originalUrl, resultUrl] = await Promise.all([
+          loadSource(job.sourceId, originalSigned),
+          loadSource(job.id, result.resultUrl),
+        ]);
+        const { video, poster } = await compositeRegion({
+          originalUrl,
+          resultUrl,
+          start: job.start,
+          end: job.end,
+          region: job.region,
+          crop: job.crop,
+        });
+        const filed = await fileAiComposite({ video, poster, job });
+        const probe = await probeVideo(primeSource(filed.id, video));
+        replacement = {
+          sourceId: filed.id,
+          sourceUrl: filed.resultUrl,
+          posterUrl: filed.thumbnailUrl,
+          sourceDuration: probe.duration,
+        };
+      } else {
+        const probe = await probeVideo(await loadSource(job.id, result.resultUrl));
+        replacement = {
+          sourceId: job.id,
+          sourceUrl: result.resultUrl,
+          posterUrl: result.thumbnailUrl,
+          sourceDuration: probe.duration,
+        };
+      }
+
+      const fields = {
+        ...replacement,
+        label: truncate(`AI · ${job.prompt}`, 40),
+        ai: { jobId: job.id, mode: job.mode, prompt: job.prompt },
+      };
+      // Checked against the current project first, so the toast below tells
+      // the truth. The updater checks again at apply time and leaves the
+      // project alone if an edit in between made the stretch disappear.
+      const placeable = replaceClipSection(projectRef.current, job.clipId, job.start, job.end, fields) !== null;
+      if (placeable) {
+        setState((current) => {
+          const next = replaceClipSection(current.project, job.clipId, job.start, job.end, fields);
+          if (!next) return current;
+          return {
+            project: next,
+            past: [...current.past, current.project].slice(-HISTORY_LIMIT),
+            future: [],
+            lastCommitAt: Date.now(),
+            lastTransient: false,
+          };
+        });
+      }
+      void queryClient.invalidateQueries({ queryKey: ["studio-library"] });
+      toast(
+        placeable
+          ? { title: "AI edit is in your timeline", description: job.prompt, variant: "success" }
+          : {
+              title: "Your AI edit is ready",
+              description: "That clip changed while it was running, so the result is in your library instead.",
+            },
+      );
+    },
+    [queryClient, toast],
+  );
+
+  const aiJobs = useAiEditJobs(hydrated ? project.id : null, applyAiResult);
+
+  const selectedClip =
+    selection?.kind === "clip" ? project.clips.find((c) => c.id === selection.id) : undefined;
+  const aiClip =
+    selectedClip && selectedClip.kind !== "image" && canAiEdit(selectedClip.in, selectedClip.out)
+      ? selectedClip
+      : undefined;
+  // The dialog opens at the playhead when it is over the clip, and at the
+  // clip's first frame otherwise. Captured on open, so scrubbing behind the
+  // dialog doesn't move a stretch the user is setting up.
+  const [aiStartAt, setAiStartAt] = useState(0);
+
+  const openAiEdit = useCallback(() => {
+    if (!aiClip) return;
+    pause();
+    const placed = layout.placed.find((p) => p.clip.id === aiClip.id);
+    setAiStartAt(placed && time >= placed.start && time < placed.end ? sourceTimeFor(placed, time) : aiClip.in);
+    setAiOpen(true);
+  }, [aiClip, layout, pause, time]);
+
   /* ----------------------------------------------------------- shortcuts */
 
   /**
@@ -409,6 +545,9 @@ export function EditingStudio() {
       ) {
         return;
       }
+      // Nor from an open dialog: Space there presses the focused button, and
+      // Delete must not remove the clip the AI edit dialog is set up on.
+      if (target?.closest?.('[role="dialog"]')) return;
 
       const mod = event.metaKey || event.ctrlKey;
       if (mod && event.key.toLowerCase() === "z") {
@@ -472,6 +611,10 @@ export function EditingStudio() {
         case "?":
           setShortcutsOpen(true);
           break;
+        case "g":
+        case "G":
+          openAiEdit();
+          break;
         case "t":
         case "T": {
           const overlay = defaultOverlay(time, Math.min(duration, time + 3));
@@ -512,7 +655,7 @@ export function EditingStudio() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [commit, duration, engine, project, redo, seek, selection, shuttle, time, undo]);
+  }, [commit, duration, engine, openAiEdit, project, redo, seek, selection, shuttle, time, undo]);
 
   /* ------------------------------------------------------------ handlers */
 
@@ -592,6 +735,11 @@ export function EditingStudio() {
       onDeleteClip={(clipId) => {
         commit(removeClip(project, clipId));
         setSelection(null);
+      }}
+      onAiEdit={() => {
+        // The sheet would sit over the dialog on a phone.
+        setMobilePanel(null);
+        openAiEdit();
       }}
     />
   );
@@ -753,6 +901,12 @@ export function EditingStudio() {
             }
           />
 
+          <AiJobsBar
+            jobs={aiJobs.jobs}
+            onRetry={aiJobs.retryJob}
+            onDismiss={aiJobs.dismissJob}
+          />
+
           <Timeline
             project={project}
             layout={layout}
@@ -782,6 +936,9 @@ export function EditingStudio() {
               setSelection({ kind: "overlay", id: overlay.id });
               setTab("text");
             }}
+            aiJobs={aiJobs.jobs}
+            canAiEdit={Boolean(aiClip)}
+            onAiEdit={openAiEdit}
           />
         </div>
 
@@ -819,6 +976,14 @@ export function EditingStudio() {
         onBeforeRender={pause}
       />
 
+      <AiEditDialog
+        open={aiOpen}
+        onOpenChange={setAiOpen}
+        clip={aiClip ?? null}
+        initialTime={aiStartAt}
+        onSubmitted={aiJobs.addJob}
+      />
+
       <ShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
 
       <ProjectsModal
@@ -839,6 +1004,72 @@ export function EditingStudio() {
           return ok;
         }}
       />
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------- AI edits UI */
+
+/**
+ * The AI edits this project is waiting on, between the preview and the
+ * timeline. Running ones show their progress; failed ones say why, and offer
+ * a retry when only the last step failed (the paid-for result exists).
+ */
+function AiJobsBar({
+  jobs,
+  onRetry,
+  onDismiss,
+}: {
+  jobs: AiEditJob[];
+  onRetry: (id: string) => void;
+  onDismiss: (id: string) => void;
+}) {
+  if (jobs.length === 0) return null;
+  return (
+    <div className="flex shrink-0 gap-2 overflow-x-auto border-t border-border-subtle px-3 py-2" role="status">
+      {jobs.map((job) => (
+        <div
+          key={job.id}
+          className={cn(
+            "flex max-w-xs shrink-0 items-center gap-2 rounded-lg border px-2.5 py-1.5 text-caption",
+            job.status === "failed" ? "border-accent/40 bg-accent/5" : "border-brand-ink/30 bg-brand/5",
+          )}
+          title={job.error ?? job.prompt}
+        >
+          <Sparkles
+            className={cn("size-3.5 shrink-0", job.status === "failed" ? "text-accent" : "animate-pulse text-brand-ink")}
+            aria-hidden="true"
+          />
+          <span className="min-w-0 truncate text-ink-soft">
+            {job.status === "failed" ? job.error ?? "The AI edit failed." : job.prompt}
+          </span>
+          <span className="shrink-0 font-mono text-[10px] text-muted tabular-nums">
+            {job.status === "running" && `${Math.round(job.progress)}%`}
+            {job.status === "applying" && (job.mode === "region" ? "Blending…" : "Adding…")}
+          </span>
+          {job.status === "failed" && job.failedAfterModel && (
+            <button
+              type="button"
+              onClick={() => onRetry(job.id)}
+              aria-label="Try adding it again"
+              className="shrink-0 rounded p-0.5 text-muted transition-colors hover:text-ink"
+            >
+              <RotateCcw className="size-3" />
+            </button>
+          )}
+          {job.status !== "applying" && (
+            <button
+              type="button"
+              onClick={() => onDismiss(job.id)}
+              aria-label={job.status === "failed" ? "Dismiss" : "Stop waiting for this edit"}
+              title={job.status === "running" ? "Stops waiting here. The result still lands in your library." : undefined}
+              className="shrink-0 rounded p-0.5 text-muted transition-colors hover:text-ink"
+            >
+              <X className="size-3" />
+            </button>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
@@ -873,6 +1104,7 @@ const SHORTCUT_GROUPS: { title: string; items: [string, string][] }[] = [
       ["I · O", "Trim the selected clip to the playhead"],
       ["[ · ]", "Move the clip earlier · later"],
       ["T", "Add text at the playhead"],
+      ["G", "Edit the selected clip with AI"],
       ["Delete", "Remove what's selected"],
     ],
   },

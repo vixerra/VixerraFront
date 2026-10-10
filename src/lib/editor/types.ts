@@ -208,7 +208,27 @@ export type Clip = {
   audioFadeOut?: number;
 
   transition: { type: TransitionId; duration: number };
+
+  /** Set on a clip an AI edit produced (see lib/editor/ai-edit.ts), so the
+   *  timeline can mark it. Optional for the same reason as `kind`. */
+  ai?: ClipAiOrigin;
 };
+
+/** What the timeline needs to know about a clip an AI edit wrote. */
+export type ClipAiOrigin = {
+  /** The video-edit generation behind it. */
+  jobId: string;
+  mode: "segment" | "region";
+  prompt: string;
+};
+
+/**
+ * The stretch an AI edit may cover, in SOURCE seconds: Wan 2.7 Video Edit's
+ * own 2-10s, mirrored by VIDEO_EDIT_MIN/MAX_SECONDS in the API's
+ * lib/video-edit.ts — keep the two in sync.
+ */
+export const AI_EDIT_MIN_SECONDS = 2;
+export const AI_EDIT_MAX_SECONDS = 10;
 
 export const TEXT_FONTS = [
   { id: "display", label: "Display", cssVar: "--font-display", weight: 700 },

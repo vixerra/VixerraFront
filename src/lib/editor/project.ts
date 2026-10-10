@@ -184,6 +184,59 @@ export function splitClipAt(project: Project, time: number): Project {
 }
 
 /**
+ * Puts `replacement` in place of the stretch `from`..`to` (SOURCE seconds) of
+ * a clip — where an AI edit's result lands. The clip is cut around the
+ * stretch exactly as two splits would cut it, and the replacement inherits
+ * its look, framing, speed and sound so the seam doesn't show anywhere but in
+ * the picture that was asked to change.
+ *
+ * Returns null when the stretch is no longer inside the clip — it was
+ * deleted, or trimmed past it while the edit was running — since there is
+ * then no honest place to put the result.
+ */
+export function replaceClipSection(
+  project: Project,
+  clipId: string,
+  from: number,
+  to: number,
+  replacement: Pick<Clip, "sourceId" | "sourceUrl" | "posterUrl" | "label" | "sourceDuration" | "ai">,
+): Project | null {
+  const index = project.clips.findIndex((c) => c.id === clipId);
+  const clip = project.clips[index];
+  // A few frames of slack: the stretch was cut at 24fps and the trim handles
+  // move in 0.05s steps, so an untouched clip can disagree by a hair.
+  const SLACK = 0.06;
+  if (!clip || from < clip.in - SLACK || to > clip.out + SLACK) return null;
+
+  const minimum = MIN_CLIP_SECONDS * clip.speed;
+  const left: Clip | null = from - clip.in >= minimum ? { ...clip, out: from } : null;
+  const right: Clip | null =
+    clip.out - to >= minimum
+      ? {
+          ...clip,
+          id: crypto.randomUUID(),
+          in: to,
+          transition: { type: "none", duration: clip.transition.duration },
+        }
+      : null;
+  const middle: Clip = {
+    ...clip,
+    ...replacement,
+    id: crypto.randomUUID(),
+    kind: "video",
+    in: 0,
+    out: replacement.sourceDuration,
+    // Only the first piece keeps the clip's way in. Everything after it is a
+    // cut inside what used to be one shot.
+    transition: left ? { type: "none", duration: clip.transition.duration } : clip.transition,
+  };
+
+  const clips = [...project.clips];
+  clips.splice(index, 1, ...[left, middle, right].filter((c): c is Clip => c !== null));
+  return withClips(project, clips);
+}
+
+/**
  * Pulls one of a clip's trim handles to the playhead (the I and O keys).
  *
  * The fastest edit in any cutting room: park the playhead where the shot

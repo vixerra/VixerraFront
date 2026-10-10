@@ -263,6 +263,14 @@ const VIDEO_COST_USD: Record<
     perSecond: { "480p": 0.04, "720p": 0.08, "1080p": 0.16 },
     minSeconds: 2,
   },
+  // The Editing Studio's AI edit, Wan 2.7 Video Edit on kie.ai
+  // (wan/2-7-videoedit, see VIDEO_EDIT_MODEL_ID below for how it bills). kie's
+  // Wan 2.7 table, read 2026-10-11: 16 kie credits ($0.08) a second at 720p,
+  // 24 ($0.12) at 1080p. The provider's shortest input is 2s.
+  "wan/2.7-videoedit": {
+    perSecond: { "720p": 0.08, "1080p": 0.12 },
+    minSeconds: 2,
+  },
   // kie.ai's HappyHorse-1.1 image-to-video line.
   "alibaba/hh1.1-i2v": {
     perSecond: { "720p": 0.1125, "1080p": 0.145 },
@@ -548,6 +556,14 @@ const SEEDANCE20_WITH_VIDEO_COST_USD: Record<string, number> = {
 // rates, and the output is as long as the clip.
 const WAN3_REPLACE_MODEL_ID = "wan/3.0-replace";
 
+// The Editing Studio's AI edit (lib/video-edit.ts in aiVideo-backend). Billed
+// on the input stretch AND the output, which is as long as the input: kie's
+// page doesn't say how it meters the edit line, while every reseller of the
+// same Alibaba model documents "input video duration + output video duration"
+// (2026-10-11). The reading that can't undercharge wins until a bill says
+// otherwise. Standard margin: this is an ordinary generation.
+export const VIDEO_EDIT_MODEL_ID = "wan/2.7-videoedit";
+
 function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
 }
@@ -590,6 +606,14 @@ export function estimateVideoCredits(
     const rate = rates[resolution] ?? Math.max(...Object.values(rates));
     const referenceSeconds = options.referenceVideoSeconds ?? effectiveDuration;
     return creditsForUsd((effectiveDuration + referenceSeconds) * rate, INFLUENCER_REPLACE_USD_PER_CREDIT);
+  }
+
+  // The input stretch is the output's length too (duration 0 on the wire).
+  if (model === VIDEO_EDIT_MODEL_ID) {
+    const entry = VIDEO_COST_USD[VIDEO_EDIT_MODEL_ID];
+    const rate = entry.perSecond[resolution] ?? Math.max(...Object.values(entry.perSecond));
+    const inputSeconds = Math.max(entry.minSeconds, options.referenceVideoSeconds ?? effectiveDuration);
+    return creditsForUsd(inputSeconds * 2 * rate, COST_USD_PER_CREDIT);
   }
 
   // Seedance 2.0 with its reference clip: kie bills the clip's seconds on top

@@ -48,6 +48,17 @@ export function loadSource(sourceId: string, signedUrl: string): Promise<string>
   return promise;
 }
 
+/**
+ * Seeds the cache with bytes the tab already holds — an AI region edit's
+ * composite, rendered here and then uploaded — so adding it to the timeline
+ * doesn't download straight back what was just sent up.
+ */
+export function primeSource(sourceId: string, blob: Blob): string {
+  const objectUrl = URL.createObjectURL(blob);
+  sources.set(sourceId, Promise.resolve(objectUrl));
+  return objectUrl;
+}
+
 /** The downloaded bytes again, for the audio mixdown — `decodeAudioData`
  *  wants an ArrayBuffer, and re-fetching would double the traffic. */
 export async function sourceArrayBuffer(objectUrl: string): Promise<ArrayBuffer> {

@@ -50,7 +50,7 @@ export function targetSize(width: number, height: number, bounds: PixelBounds): 
   return { width: round(width * scale), height: round(height * scale) };
 }
 
-async function decodeSoundtrack(source: Blob): Promise<AudioBuffer | null> {
+export async function decodeSoundtrack(source: Blob): Promise<AudioBuffer | null> {
   try {
     const ctx = new OfflineAudioContext(MIX_CHANNELS, 1, MIX_SAMPLE_RATE);
     return await ctx.decodeAudioData(await source.arrayBuffer());
@@ -59,14 +59,14 @@ async function decodeSoundtrack(source: Blob): Promise<AudioBuffer | null> {
   }
 }
 
-const AUDIO_CONFIG: AudioEncoderConfig = {
+export const AUDIO_CONFIG: AudioEncoderConfig = {
   codec: "mp4a.40.2",
   sampleRate: MIX_SAMPLE_RATE,
   numberOfChannels: MIX_CHANNELS,
   bitrate: 128_000,
 };
 
-async function canEncodeAudio(): Promise<boolean> {
+export async function canEncodeAudio(): Promise<boolean> {
   return (
     typeof window.AudioEncoder !== "undefined" &&
     (await AudioEncoder.isConfigSupported(AUDIO_CONFIG)
@@ -100,7 +100,7 @@ export async function extractSoundtrack(file: File): Promise<File | null> {
 }
 
 /** `duration` seconds of `buffer` from `start`, as a buffer of its own. */
-function sliceAudio(buffer: AudioBuffer, start: number, duration: number): AudioBuffer | null {
+export function sliceAudio(buffer: AudioBuffer, start: number, duration: number): AudioBuffer | null {
   const from = Math.min(buffer.length, Math.round(start * buffer.sampleRate));
   const length = Math.min(buffer.length - from, Math.round(duration * buffer.sampleRate));
   if (length <= 0) return null;
@@ -213,7 +213,12 @@ export async function fitVideoToPixels(
     try {
       for (let frame = 0; frame < totalFrames; frame++) {
         if (encodeError) throw encodeError;
-        await seekTo(video, start + frame / FPS);
+        // The middle of the frame's interval, not its start. A frame's
+        // timestamp is rounded to the microsecond, so for two frames in three
+        // n/24 lands a hair BEFORE frame n and the decoder hands back n-1 —
+        // the re-encode then shows one frame twice and skips the next, a
+        // stutter on every 24fps source (measured 2026-10-11).
+        await seekTo(video, start + (frame + 0.5) / FPS);
         ctx.drawImage(video, source.x, source.y, source.width, source.height, 0, 0, width, height);
         const videoFrame = new VideoFrame(canvas, {
           timestamp: Math.round(frame * frameDuration),
