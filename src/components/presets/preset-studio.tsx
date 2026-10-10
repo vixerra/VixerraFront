@@ -341,7 +341,7 @@ const STEPS = {
     {
       Mark: UploadImageMark,
       title: "Upload a photo of you",
-      body: "One person, face clearly visible. You take the place of the person in the clip, so the more of you the photo shows, the more of you ends up in it.",
+      body: "One person, face clearly visible. You take the place of the person in the clip: your face, hair and look, in the clip's outfit and doing its moves.",
     },
     DOWNLOAD_STEP,
   ],

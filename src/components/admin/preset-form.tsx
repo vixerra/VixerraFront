@@ -404,7 +404,7 @@ export function PresetForm({
             onChange={(e) => set("prompt", e.target.value)}
             rows={4}
             className="font-mono text-caption"
-            placeholder="Keep the outfit from the clip. She is holding the trophy in her right hand."
+            placeholder="Video 1 shows the same person twice — replace both. / Dress them in the outfit from Image 1 instead."
           />
         </Field>
       ) : (
@@ -522,7 +522,7 @@ const PROMPT_SCAFFOLD_LENGTH = 285;
 /** The same for a replace preset: buildReplacePrompt's "photo" instruction
  *  (backend lib/influencer-motion.ts), and the " Additional direction: "
  *  it puts before an operator's direction. Keep in step with it. */
-const REPLACE_SCAFFOLD_LENGTH = 738;
+const REPLACE_SCAFFOLD_LENGTH = 756;
 const REPLACE_DIRECTION_PREFIX_LENGTH = 23;
 
 function Field({
