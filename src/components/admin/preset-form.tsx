@@ -17,7 +17,11 @@ import {
   SEEDANCE2_RESOLUTIONS,
   SEEDANCE2_ASPECT_RATIOS,
 } from "@/lib/constants";
-import { PRESET_CATEGORIES } from "@/lib/viral-presets";
+import {
+  PRESET_CATEGORIES,
+  PRESET_REPLACE_MODEL_ID,
+  PRESET_REPLACE_RESOLUTIONS,
+} from "@/lib/viral-presets";
 import type { AdminPresetInput, AdminPresetRow } from "@/hooks/use-admin-data";
 
 /**
@@ -62,10 +66,19 @@ const SEEDANCE_FIELDS: Record<string, DynamicField[]> = {
   ],
 };
 
-/** Every model a preset may name: the two Seedance ids plus every video
- *  model in the registry. Image models are excluded — the studio renders a
- *  video player, and the backend refuses them for the same reason. */
+/** A replace preset's only setting. Duration isn't one: the output runs as
+ *  long as the reference clip, which the server measures on save. Mirrors
+ *  replaceParametersSchema in the backend's lib/presets.ts. */
+const REPLACE_FIELDS: DynamicField[] = [
+  { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: [...PRESET_REPLACE_RESOLUTIONS], defaultValue: "720p" },
+];
+
+/** Every model a preset may name: the replace model, the two Seedance ids
+ *  plus every video model in the registry. Image models are excluded — the
+ *  studio renders a video player, and the backend refuses them for the same
+ *  reason. */
 const MODEL_OPTIONS = [
+  { id: PRESET_REPLACE_MODEL_ID, label: "Wan 3.0 — put the user into a clip (Alibaba)" },
   { id: SEEDANCE2_MODEL_ID, label: "Seedance 2.0 (ByteDance)" },
   { id: SEEDANCE_MODEL_ID, label: "Seedance 2.5 (ByteDance)" },
   ...CLOUDFLARE_MODELS.filter(
@@ -78,6 +91,7 @@ const STYLE_MODEL_OPTIONS = CLOUDFLARE_MODELS.filter(
 ).map((m) => ({ id: m.id, label: `${m.label} (${m.provider})` }));
 
 function fieldsForModel(modelId: string): DynamicField[] {
+  if (modelId === PRESET_REPLACE_MODEL_ID) return REPLACE_FIELDS;
   return SEEDANCE_FIELDS[modelId] ?? getCloudflareModel(modelId)?.fields ?? [];
 }
 
@@ -98,11 +112,14 @@ const EMPTY: AdminPresetInput = {
   badge: null,
   referenceSubject: "",
   prompt: "",
-  model: SEEDANCE2_MODEL_ID,
-  parameters: defaultParameters(SEEDANCE2_MODEL_ID),
+  // New presets start as replace presets, the way the catalogue is meant to
+  // go: the user's photo put into a clip rather than a photo brought to life.
+  model: PRESET_REPLACE_MODEL_ID,
+  parameters: defaultParameters(PRESET_REPLACE_MODEL_ID),
   styleModel: null,
   stylePrompt: null,
   styleParameters: {},
+  referenceVideoUrl: null,
   requiresImage: true,
   published: false,
   sortOrder: 0,
@@ -139,6 +156,7 @@ export function PresetForm({
           styleModel: initial.styleModel,
           stylePrompt: initial.stylePrompt,
           styleParameters: initial.styleParameters ?? {},
+          referenceVideoUrl: initial.referenceVideoUrl ?? null,
           requiresImage: initial.requiresImage,
           published: initial.published,
           sortOrder: initial.sortOrder,
@@ -153,10 +171,14 @@ export function PresetForm({
   const [previewPlaybackUrl, setPreviewPlaybackUrl] = useState<string | null>(
     initial?.previewPlaybackUrl ?? null,
   );
+  const [referencePlaybackUrl, setReferencePlaybackUrl] = useState<string | null>(
+    initial?.referenceVideoPlaybackUrl ?? null,
+  );
 
   const set = <K extends keyof AdminPresetInput>(key: K, next: AdminPresetInput[K]) =>
     setValue((v) => ({ ...v, [key]: next }));
 
+  const replace = value.model === PRESET_REPLACE_MODEL_ID;
   const fields = useMemo(() => fieldsForModel(value.model), [value.model]);
 
   // Rebuild the parameter blob when the model changes: keep values the new
@@ -179,7 +201,9 @@ export function PresetForm({
         if (field.type === "switch" && typeof carried !== "boolean") continue;
         next[field.key] = carried;
       }
-      return { ...v, parameters: next };
+      // A replace preset has nothing to swap in without the user's photo.
+      const requiresImage = v.model === PRESET_REPLACE_MODEL_ID ? true : v.requiresImage;
+      return { ...v, parameters: next, requiresImage };
     });
   }, [value.model]);
 
@@ -198,15 +222,20 @@ export function PresetForm({
     }));
   }, [value.styleModel]);
 
-  const composedPromptLength =
-    value.prompt.length + value.referenceSubject.length + PROMPT_SCAFFOLD_LENGTH;
+  const direction = value.prompt.trim();
+  const composedPromptLength = replace
+    ? REPLACE_SCAFFOLD_LENGTH + (direction ? REPLACE_DIRECTION_PREFIX_LENGTH + direction.length : 0)
+    : value.prompt.length + value.referenceSubject.length + PROMPT_SCAFFOLD_LENGTH;
 
   return (
     <form
       className="space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(value);
+        // Kept in state across a model switch so switching back doesn't lose
+        // the upload, but only a replace preset sends one (the server would
+        // drop it anyway).
+        onSubmit({ ...value, referenceVideoUrl: replace ? value.referenceVideoUrl : null });
       }}
     >
       <div className="grid gap-4 sm:grid-cols-2">
@@ -266,16 +295,31 @@ export function PresetForm({
         </Field>
       </div>
 
-      <PreviewUrlField
+      <VideoUrlField
+        label="Preview video"
         value={value.previewUrl}
         playbackUrl={previewPlaybackUrl}
         onChange={(next) => {
           set("previewUrl", next.url);
           setPreviewPlaybackUrl(next.playbackUrl);
         }}
+        hint={
+          <>
+            Upload an MP4/MOV (max 50MB) to store it in the bucket, or paste a URL you host
+            elsewhere. The clip shows the kind of shot the preset aims for — the gallery says so,
+            so it does not have to be this preset&apos;s own output.
+          </>
+        }
       />
 
-      <Field label="Model" hint="Any video model in the catalogue. Changing it rebuilds the parameters below.">
+      <Field
+        label="Model"
+        hint={
+          replace
+            ? "Wan 3.0 swaps the person in the user's photo into the reference video below, keeping the clip's scene, camera and movement."
+            : "Any video model in the catalogue. Changing it rebuilds the parameters below."
+        }
+      >
         <Select value={value.model} onChange={(e) => set("model", e.target.value)}>
           {MODEL_OPTIONS.map((m) => (
             <option key={m.id} value={m.id}>
@@ -284,6 +328,33 @@ export function PresetForm({
           ))}
         </Select>
       </Field>
+
+      {replace && (
+        <VideoUrlField
+          label="Reference video"
+          value={value.referenceVideoUrl ?? ""}
+          playbackUrl={referencePlaybackUrl}
+          onChange={(next) => {
+            set("referenceVideoUrl", next.url || null);
+            setReferencePlaybackUrl(next.playbackUrl);
+          }}
+          // The usual case: the clip on the card is the clip people want to
+          // be in. Only a stored or absolute URL can be reused — kie.ai
+          // fetches this one, and a path on our own site means nothing to it.
+          copyFrom={
+            value.previewUrl.startsWith(R2_KEY_SCHEME) || /^https?:\/\//i.test(value.previewUrl)
+              ? { label: "Use preview video", url: value.previewUrl, playbackUrl: previewPlaybackUrl }
+              : undefined
+          }
+          hint={
+            <>
+              The clip whose person is replaced by the user&apos;s photo. MP4/MOV, 3–15s, max
+              50MB. It is measured when you save: its length is the output&apos;s length and sets
+              the price. Its sound is kept on the result.
+            </>
+          }
+        />
+      )}
 
       <div className="rounded-xl border border-line bg-surface-3 p-4">
         <p className="mb-3 text-label font-medium text-ink-soft">
@@ -307,30 +378,49 @@ export function PresetForm({
         )}
       </div>
 
-      <Field
-        label="Reference subject"
-        hint="What the uploaded image IS, phrased for the model. Completes “@image = ___”."
-      >
-        <Input
-          value={value.referenceSubject}
-          onChange={(e) => set("referenceSubject", e.target.value)}
-          placeholder="the person this video is of"
-          required
-        />
-      </Field>
+      {/* A replace preset's photo is always "the person going in", which
+          the swap instruction already says. */}
+      {!replace && (
+        <Field
+          label="Reference subject"
+          hint="What the uploaded image IS, phrased for the model. Completes “@image = ___”."
+        >
+          <Input
+            value={value.referenceSubject}
+            onChange={(e) => set("referenceSubject", e.target.value)}
+            placeholder="the person this video is of"
+            required
+          />
+        </Field>
+      )}
 
-      <Field
-        label="Recipe"
-        hint={`The locked prompt. Never shown to users. With the @image line prepended this will send ${composedPromptLength} of ${PROMPT_MAX_LENGTH} characters.`}
-      >
-        <Textarea
-          value={value.prompt}
-          onChange={(e) => set("prompt", e.target.value)}
-          rows={10}
-          className="font-mono text-caption"
-          required
-        />
-      </Field>
+      {replace ? (
+        <Field
+          label="Extra direction (optional)"
+          hint={`Added after the built-in swap instruction ("replace the person in the clip with the person in the photo, keep everything else"). Never shown to users. This will send ${composedPromptLength} of ${PROMPT_MAX_LENGTH} characters.`}
+        >
+          <Textarea
+            value={value.prompt}
+            onChange={(e) => set("prompt", e.target.value)}
+            rows={4}
+            className="font-mono text-caption"
+            placeholder="Keep the outfit from the clip. She is holding the trophy in her right hand."
+          />
+        </Field>
+      ) : (
+        <Field
+          label="Recipe"
+          hint={`The locked prompt. Never shown to users. With the @image line prepended this will send ${composedPromptLength} of ${PROMPT_MAX_LENGTH} characters.`}
+        >
+          <Textarea
+            value={value.prompt}
+            onChange={(e) => set("prompt", e.target.value)}
+            rows={10}
+            className="font-mono text-caption"
+            required
+          />
+        </Field>
+      )}
 
       <div className="rounded-xl border border-line bg-surface-3 p-4">
         <p className="text-label font-medium text-ink-soft">Character stage (optional)</p>
@@ -392,12 +482,14 @@ export function PresetForm({
       </div>
 
       <div className="flex flex-wrap gap-6">
-        <ToggleField
-          label="Requires an image"
-          hint="Off only for a recipe that works from the prompt alone."
-          checked={value.requiresImage}
-          onChange={(next) => set("requiresImage", next)}
-        />
+        {!replace && (
+          <ToggleField
+            label="Requires an image"
+            hint="Off only for a recipe that works from the prompt alone."
+            checked={value.requiresImage}
+            onChange={(next) => set("requiresImage", next)}
+          />
+        )}
         <ToggleField
           label="Published"
           hint="Unpublished presets stay editable here but invisible to users."
@@ -426,6 +518,12 @@ export function PresetForm({
  *  counter above reflects what actually goes on the wire. Keep in step with
  *  buildPresetPrompt in the backend's lib/presets.ts. */
 const PROMPT_SCAFFOLD_LENGTH = 285;
+
+/** The same for a replace preset: buildReplacePrompt's "photo" instruction
+ *  (backend lib/influencer-motion.ts), and the " Additional direction: "
+ *  it puts before an operator's direction. Keep in step with it. */
+const REPLACE_SCAFFOLD_LENGTH = 738;
+const REPLACE_DIRECTION_PREFIX_LENGTH = 23;
 
 function Field({
   label,
@@ -530,8 +628,8 @@ function ParameterField({
 const R2_KEY_SCHEME = "r2://";
 
 /**
- * The preview clip: upload one into the bucket, or paste a URL you host
- * elsewhere.
+ * A preset clip — the preview, or a replace preset's reference video:
+ * upload one into the bucket, or paste a URL you host elsewhere.
  *
  * Upload goes through the same /api/upload endpoint the app uses for
  * reference images — it accepts MP4/MOV up to 50MB and accepts an admin
@@ -546,15 +644,24 @@ const R2_KEY_SCHEME = "r2://";
  *
  * That reference can't be played by a `<video>`, so the signed URL rides
  * alongside it for the thumbnail below and travels no further.
+ *
+ * `copyFrom` adds a button that fills the field from another clip already
+ * in the form (the reference video from the preview).
  */
-function PreviewUrlField({
+function VideoUrlField({
+  label,
+  hint,
   value,
   playbackUrl,
   onChange,
+  copyFrom,
 }: {
+  label: string;
+  hint: React.ReactNode;
   value: string;
   playbackUrl: string | null;
   onChange: (next: { url: string; playbackUrl: string | null }) => void;
+  copyFrom?: { label: string; url: string; playbackUrl: string | null };
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -583,8 +690,8 @@ function PreviewUrlField({
 
   return (
     <div className="space-y-1.5">
-      <Label>Preview video</Label>
-      <div className="flex gap-2">
+      <Label>{label}</Label>
+      <div className="flex flex-wrap gap-2 sm:flex-nowrap">
         <Input
           value={value}
           onChange={(e) => onChange({ url: e.target.value, playbackUrl: null })}
@@ -615,12 +722,18 @@ function PreviewUrlField({
           )}
           Upload
         </Button>
+        {copyFrom && copyFrom.url !== value && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onChange({ url: copyFrom.url, playbackUrl: copyFrom.playbackUrl })}
+            disabled={uploading}
+          >
+            {copyFrom.label}
+          </Button>
+        )}
       </div>
-      <p className="text-caption text-muted">
-        Upload an MP4/MOV (max 50MB) to store it in the bucket, or paste a URL you host elsewhere.
-        The clip shows the kind of shot the preset aims for — the gallery says so, so it does not
-        have to be this preset&apos;s own output.
-      </p>
+      <p className="text-caption text-muted">{hint}</p>
       {storedInBucket && (
         <p className="text-caption text-muted">
           Stored in the bucket. The gallery streams it from there through a signed link, so this

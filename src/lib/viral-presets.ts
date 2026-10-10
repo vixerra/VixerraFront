@@ -17,6 +17,11 @@
 // not in the public payload at all. The recipe is the thing a preset sells,
 // and the browser has no reason to hold it — the generation request sends a
 // slug and the server reads the row.
+//
+// Two kinds since 2026-10-10 (`kind`): "animate" brings the user's photo to
+// life with the recipe, "replace" puts the person in the photo in place of
+// the person in the preset's own clip, on Wan 3.0. That clip stays
+// server-side too.
 
 import {
   SEEDANCE_MODEL_ID,
@@ -36,6 +41,14 @@ import { estimateVideoCredits, estimateImageCredits } from "@/lib/credit-estimat
 export const PRESET_CATEGORIES = ["Trending", "Portrait", "Product", "Motion", "Playful"] as const;
 export type PresetCategory = (typeof PRESET_CATEGORIES)[number];
 
+/** The replace preset's model: Wan 3.0, the preset's clip as the reference
+ *  video and the user's photo as the reference image. Mirrors
+ *  PRESET_REPLACE_MODEL_ID in the backend's lib/presets.ts. */
+export const PRESET_REPLACE_MODEL_ID = "wan/3.0-replace";
+export const PRESET_REPLACE_RESOLUTIONS = ["480p", "720p", "1080p"] as const;
+
+export type PresetKind = "animate" | "replace";
+
 /** A published preset, as GET /api/presets serves it. */
 export type Preset = {
   slug: string;
@@ -50,10 +63,14 @@ export type Preset = {
    * framing it that way; it is not this preset's own output. */
   previewUrl: string;
   badge: string | null;
+  /** "replace" swaps the user into the preset's clip; "animate" brings the
+   * photo itself to life. */
+  kind: PresetKind;
   /** Any video model in the catalogue — no longer always Seedance. */
   model: string;
   /** That model's own wire parameters. Keys and value spellings differ per
-   * model, which is why nothing here reads `parameters.duration` directly. */
+   * model, which is why nothing here reads `parameters.duration` directly.
+   * On a replace preset `duration` is the clip's measured length. */
   parameters: Record<string, unknown>;
   /** The image model that redraws the upload into a character before the
    * video model runs, or null when the photo is animated directly. Its
@@ -79,6 +96,7 @@ export function presetResolution(parameters: Record<string, unknown>): string | 
 
 /** The resolution values THIS model offers. */
 export function presetResolutionOptions(modelId: string): readonly string[] | undefined {
+  if (modelId === PRESET_REPLACE_MODEL_ID) return PRESET_REPLACE_RESOLUTIONS;
   if (modelId === SEEDANCE_MODEL_ID) return SEEDANCE_RESOLUTIONS;
   if (modelId === SEEDANCE2_MODEL_ID) return SEEDANCE2_RESOLUTIONS;
   const field = getCloudflareModel(modelId)?.fields.find((f) => f.key === "resolution");
@@ -89,13 +107,16 @@ export function presetResolutionOptions(modelId: string): readonly string[] | un
  * How this model expresses duration. Not one shape across the catalogue: a
  * number of seconds for most, but a fixed list of strings for Veo ("4s",
  * "6s", "8s") and Hailuo ("6", "10"). A step-down has to land on a value the
- * model will accept, not just a smaller number.
+ * model will accept, not just a smaller number. "fixed" is a replace
+ * preset's: the output follows the clip, so there is nothing to trim to.
  */
 export type PresetDurationRule =
   | { kind: "range"; min: number; max: number }
-  | { kind: "options"; values: readonly string[] };
+  | { kind: "options"; values: readonly string[] }
+  | { kind: "fixed" };
 
 export function presetDurationRule(modelId: string): PresetDurationRule | undefined {
+  if (modelId === PRESET_REPLACE_MODEL_ID) return { kind: "fixed" };
   if (modelId === SEEDANCE_MODEL_ID) {
     return { kind: "range", min: SEEDANCE_DURATION_MIN, max: SEEDANCE_DURATION_MAX };
   }
@@ -213,6 +234,11 @@ export function resolvePresetSettings(
       }
       notes.push(`Trimmed to ${allowed} on your plan — upgrade for the full ${wantedSeconds}s.`);
       fitted.duration = allowed;
+    } else if (rule?.kind === "fixed") {
+      return {
+        ...done(),
+        blockedReason: `This preset's clip runs ${wantedSeconds}s, and your plan caps clips at ${tierInfo.maxDurationSeconds}s. Upgrade to run it.`,
+      };
     }
   }
 
@@ -234,10 +260,16 @@ export function presetCredits(
   preset: Pick<Preset, "model" | "styleModel" | "styleParameters">,
   settings: { durationSeconds: number | undefined; resolution: string | undefined },
 ): number {
+  // A replace run bills the clip twice over, as reference and as output —
+  // kie charges for both, and the output runs as long as the clip.
+  const replace = preset.model === PRESET_REPLACE_MODEL_ID;
   const video = estimateVideoCredits(
     preset.model,
     settings.durationSeconds ?? 5,
     settings.resolution ?? "720p",
+    replace
+      ? { hasReferenceVideo: true, referenceVideoSeconds: settings.durationSeconds }
+      : undefined,
   );
   if (!preset.styleModel) return video;
 

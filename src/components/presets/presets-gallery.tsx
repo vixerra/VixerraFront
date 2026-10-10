@@ -2,7 +2,7 @@
 
 import { useState, type RefObject } from "react";
 import Link from "next/link";
-import { Clock, ImagePlus, Monitor, Sparkles, Wand2 } from "lucide-react";
+import { ArrowLeftRight, Clock, ImagePlus, Monitor, Sparkles, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLazyVideo } from "@/hooks/use-lazy-video";
 import {
@@ -145,6 +145,9 @@ function PresetCard({ preset, isAuthed }: { preset: Preset; isAuthed: boolean })
           <MetaChip icon={Clock} label={presetDurationLabel(preset.parameters)} />
           {resolution && <MetaChip icon={Monitor} label={resolution} />}
           {preset.requiresImage && <MetaChip icon={ImagePlus} label="1 photo" />}
+          {/* A replace preset puts the user into this very clip, which is a
+              different promise from bringing their photo to life. */}
+          {preset.kind === "replace" && <MetaChip icon={ArrowLeftRight} label="Face swap" />}
           {/* Says up front that the upload is redrawn — the output is a
               character, not the photo animated, and that is a different
               product than the card would otherwise promise. */}

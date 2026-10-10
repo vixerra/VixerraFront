@@ -4,7 +4,7 @@ import { workspaceQuery } from "@/components/providers/workspace-provider";
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Info, Pencil, Sparkles, Wand2 } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, Info, Pencil, Sparkles, Wand2 } from "lucide-react";
 import {
   PickPresetMark,
   UploadImageMark,
@@ -57,6 +57,9 @@ export function PresetStudio({ preset }: { preset: Preset }) {
   const settings = resolvePresetSettings(preset, usageQuery.data?.tier_info);
   // Both stages, when the recipe has two — the server bills for both.
   const credits = presetCredits(preset, settings);
+  // The user goes into the preset's clip rather than their photo being
+  // animated. Same single upload either way; only what it means changes.
+  const replace = preset.kind === "replace";
 
   const busy = generation.status === "queued" || generation.status === "processing";
 
@@ -142,15 +145,21 @@ export function PresetStudio({ preset }: { preset: Preset }) {
             button below, the way it did before. */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-line bg-surface-2 shadow-floating">
           <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-4 sm:px-5 sm:pt-5">
-            <span className="text-label font-medium text-ink-soft">Your image</span>
+            <span className="text-label font-medium text-ink-soft">
+              {replace ? "Your photo" : "Your image"}
+            </span>
             <span className="text-caption text-muted">Required</span>
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 sm:p-5">
             <PanelDropzone
               className="min-h-52 flex-1"
-              label="Upload image"
-              sublabel="Select a PNG or JPG from your device"
+              label={replace ? "Upload a photo of you" : "Upload image"}
+              sublabel={
+                replace
+                  ? "One person, face clearly visible — PNG or JPG"
+                  : "Select a PNG or JPG from your device"
+              }
               previewUrl={preview}
               uploading={uploading}
               onFile={handleFile}
@@ -171,6 +180,14 @@ export function PresetStudio({ preset }: { preset: Preset }) {
                   className="h-28 w-auto rounded-lg border border-line object-cover"
                 />
               </div>
+            )}
+
+            {replace && (
+              <p className="flex shrink-0 items-start gap-1.5 text-caption text-muted">
+                <ArrowLeftRight className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
+                You take the place of the person in this clip — same scene, same moves, same
+                sound, with you in it.
+              </p>
             )}
 
             {preset.styleModel && (
@@ -224,7 +241,7 @@ export function PresetStudio({ preset }: { preset: Preset }) {
           </TabsList>
 
           <TabsContent value="how" className="min-h-0 flex-1 focus:outline-none">
-            <HowItWorks />
+            <HowItWorks kind={replace ? "replace" : "animate"} />
           </TabsContent>
 
           <TabsContent value="result" className="min-h-0 flex-1 focus:outline-none">
@@ -295,30 +312,48 @@ function PresetHeaderCard({ preset }: { preset: Preset }) {
   );
 }
 
-const STEPS = [
-  {
-    Mark: PickPresetMark,
-    title: "Pick a preset",
-    body: "Every preset is a finished recipe — the prompt, the camera move, the length and the audio are already written. You never have to describe anything.",
-  },
-  {
-    Mark: UploadImageMark,
-    title: "Upload one image",
-    body: "Drop in a JPG, PNG or WEBP. That photo becomes the reference the whole clip is built from, so your subject stays your subject.",
-  },
-  {
-    Mark: DownloadResultMark,
-    title: "Generate and download",
-    body: "One tap, usually under a minute. Download the result straight from the canvas — it's also saved to your gallery.",
-  },
-];
+const DOWNLOAD_STEP = {
+  Mark: DownloadResultMark,
+  title: "Generate and download",
+  body: "One tap, usually under a minute. Download the result straight from the canvas — it's also saved to your gallery.",
+};
+
+const STEPS = {
+  animate: [
+    {
+      Mark: PickPresetMark,
+      title: "Pick a preset",
+      body: "Every preset is a finished recipe — the prompt, the camera move, the length and the audio are already written. You never have to describe anything.",
+    },
+    {
+      Mark: UploadImageMark,
+      title: "Upload one image",
+      body: "Drop in a JPG, PNG or WEBP. That photo becomes the reference the whole clip is built from, so your subject stays your subject.",
+    },
+    DOWNLOAD_STEP,
+  ],
+  replace: [
+    {
+      Mark: PickPresetMark,
+      title: "Pick a clip",
+      body: "Every preset is a finished clip — the scene, the moves, the camera and the sound are already there. You never have to describe anything.",
+    },
+    {
+      Mark: UploadImageMark,
+      title: "Upload a photo of you",
+      body: "One person, face clearly visible. You take the place of the person in the clip, so the more of you the photo shows, the more of you ends up in it.",
+    },
+    DOWNLOAD_STEP,
+  ],
+};
 
 /** Three-card walkthrough with arrows and dots, matching the reference
  * layout. Local index rather than a routed/parameterised carousel: nothing
  * else on the page cares which step is on screen. */
-function HowItWorks() {
+function HowItWorks({ kind }: { kind: keyof typeof STEPS }) {
+  const steps = STEPS[kind];
   const [index, setIndex] = useState(0);
-  const step = STEPS[index];
+  const step = steps[index];
   const Mark = step.Mark;
 
   return (
@@ -340,7 +375,7 @@ function HowItWorks() {
           onClick={() => setIndex((i) => Math.max(0, i - 1))}
         />
         <div className="flex items-center gap-2">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <button
               key={s.title}
               type="button"
@@ -356,8 +391,8 @@ function HowItWorks() {
         </div>
         <CarouselArrow
           direction="next"
-          disabled={index === STEPS.length - 1}
-          onClick={() => setIndex((i) => Math.min(STEPS.length - 1, i + 1))}
+          disabled={index === steps.length - 1}
+          onClick={() => setIndex((i) => Math.min(steps.length - 1, i + 1))}
         />
       </div>
 

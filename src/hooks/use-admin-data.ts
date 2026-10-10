@@ -598,6 +598,10 @@ export type AdminPresetRow = {
   styleModel: string | null;
   stylePrompt: string | null;
   styleParameters: Record<string, unknown>;
+  /** A replace preset's clip, as stored — same convention as previewUrl. */
+  referenceVideoUrl: string | null;
+  /** That clip signed for playback. Display only. */
+  referenceVideoPlaybackUrl: string | null;
   requiresImage: boolean;
   published: boolean;
   sortOrder: number;
@@ -625,6 +629,7 @@ export type AdminPresetInput = {
   styleModel: string | null;
   stylePrompt: string | null;
   styleParameters: Record<string, unknown>;
+  referenceVideoUrl: string | null;
   requiresImage: boolean;
   published: boolean;
   sortOrder: number;
