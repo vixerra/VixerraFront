@@ -17,6 +17,8 @@ import { estimateVideoCredits } from "@/lib/credit-estimate";
 import { measureMediaDuration, formatMediaDuration } from "@/lib/media-duration";
 import { seedanceVideoSchema, type SeedanceVideoInput } from "@/lib/validation";
 import { apiFetch } from "@/lib/api-client";
+import { uploadVideoToLibrary, type PickedVideo } from "@/lib/video-library";
+import { VideoSourceField } from "@/components/video-library/video-source-field";
 import {
   isResolutionLocked,
   isDurationLocked,
@@ -263,7 +265,9 @@ export function SeedanceVideoForm({
     });
   }
 
-  async function handleListFile(key: ReferenceListKey, file: File) {
+  /** `picked` carries what the reference-video slot already knows about a
+   *  clip: its length, and its upload when it came from "My videos". */
+  async function handleListFile(key: ReferenceListKey, file: File, picked?: Omit<PickedVideo, "file">) {
     const { max, timed } = REFERENCE_LISTS[key];
     const current = attachments[key];
     if (current.length >= max) return;
@@ -276,7 +280,7 @@ export function SeedanceVideoForm({
     // merely could not measure would be the worse failure.
     let seconds: number | undefined;
     if (timed) {
-      seconds = await measureMediaDuration(file);
+      seconds = picked?.seconds ?? (await measureMediaDuration(file));
       const total = totalSeconds(current) + (seconds ?? 0);
       if (seconds !== undefined && total > SEEDANCE_REFERENCE_MEDIA_MAX_SECONDS) {
         toast({
@@ -294,7 +298,10 @@ export function SeedanceVideoForm({
 
     setUploadingList(key);
     try {
-      const url = await uploadFile(file);
+      // Clips go through the library, so the next run can reuse them.
+      const url =
+        picked?.url ??
+        (key === "referenceVideos" ? await uploadVideoToLibrary(file, { seconds }) : await uploadFile(file));
       commitList(key, [...current, { url, preview: URL.createObjectURL(file), seconds }]);
     } catch (err) {
       reportUploadFailure(err);
@@ -385,17 +392,30 @@ export function SeedanceVideoForm({
               onRemove={() => removeListItem(key, index)}
             />
           ))}
-          {items.length < max && (
-            <PanelDropzone
-              compact
-              className="h-20"
-              mediaKind={mediaKind}
-              label="Add"
-              uploading={uploadingList === key}
-              onFile={(file) => handleListFile(key, file)}
-              onRemove={() => {}}
-            />
-          )}
+          {items.length < max &&
+            (key === "referenceVideos" ? (
+              // The trimmer is capped at what's left of the 30s budget, so a
+              // clip that wouldn't fit can be cut down instead of refused.
+              <VideoSourceField
+                compact
+                className="h-20"
+                label="Add"
+                uploading={uploadingList === key}
+                maxSeconds={Math.max(1, SEEDANCE_REFERENCE_MEDIA_MAX_SECONDS - totalSeconds(items))}
+                onPick={({ file, ...picked }) => void handleListFile(key, file, picked)}
+                onRemove={() => {}}
+              />
+            ) : (
+              <PanelDropzone
+                compact
+                className="h-20"
+                mediaKind={mediaKind}
+                label="Add"
+                uploading={uploadingList === key}
+                onFile={(file) => handleListFile(key, file)}
+                onRemove={() => {}}
+              />
+            ))}
         </div>
         <FieldError>{errors[key]?.message}</FieldError>
       </>

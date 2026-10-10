@@ -24,6 +24,9 @@ import { createDecodeVideo, probeVideo, seekTo, waitForReady } from "@/lib/edito
 
 export type PixelBounds = { min: number; max: number };
 
+/** A part of the frame, each side a fraction (0-1) of the frame's size. */
+export type CropRect = { x: number; y: number; width: number; height: number };
+
 const FPS = 24;
 const KEYFRAME_SECONDS = 2;
 
@@ -96,6 +99,18 @@ export async function extractSoundtrack(file: File): Promise<File | null> {
   return new File([muxer.target.buffer], `${name}-soundtrack.m4a`, { type: "audio/mp4" });
 }
 
+/** `duration` seconds of `buffer` from `start`, as a buffer of its own. */
+function sliceAudio(buffer: AudioBuffer, start: number, duration: number): AudioBuffer | null {
+  const from = Math.min(buffer.length, Math.round(start * buffer.sampleRate));
+  const length = Math.min(buffer.length - from, Math.round(duration * buffer.sampleRate));
+  if (length <= 0) return null;
+  const slice = new AudioBuffer({ length, numberOfChannels: buffer.numberOfChannels, sampleRate: buffer.sampleRate });
+  for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+    slice.copyToChannel(buffer.getChannelData(channel).subarray(from, from + length), channel);
+  }
+  return slice;
+}
+
 /**
  * Returns `file` re-encoded to fit `bounds`, or `file` itself when it
  * already does and there's nothing else to change. Throws
@@ -110,20 +125,41 @@ export async function extractSoundtrack(file: File): Promise<File | null> {
  *
  * `maxBytes` re-encodes a clip over that size too, at a bitrate chosen to
  * land under it — for a provider that caps the file rather than the frame.
+ *
+ * `range` keeps only that stretch of the clip, in seconds, and `crop` only
+ * that part of the frame, as fractions of its width and height (see
+ * editVideo).
  */
 export async function fitVideoToPixels(
   file: File,
   bounds: PixelBounds,
   onProgress?: (fraction: number) => void,
-  { dropAudio = false, maxBytes }: { dropAudio?: boolean; maxBytes?: number } = {},
+  {
+    dropAudio = false,
+    maxBytes,
+    range,
+    crop,
+  }: { dropAudio?: boolean; maxBytes?: number; range?: { start: number; end: number }; crop?: CropRect } = {},
 ): Promise<File> {
   const objectUrl = URL.createObjectURL(file);
   const video = createDecodeVideo(objectUrl);
   try {
     const probe = await probeVideo(objectUrl);
-    const resized = targetSize(probe.width, probe.height, bounds);
+    // The source rectangle every frame is drawn from: the whole frame, or the
+    // crop in pixels.
+    const source = crop
+      ? {
+          x: Math.round(crop.x * probe.width),
+          y: Math.round(crop.y * probe.height),
+          width: Math.max(2, Math.round(crop.width * probe.width)),
+          height: Math.max(2, Math.round(crop.height * probe.height)),
+        }
+      : { x: 0, y: 0, width: probe.width, height: probe.height };
+    const resized = targetSize(source.width, source.height, bounds);
     const tooLarge = maxBytes !== undefined && file.size > maxBytes;
-    if (!resized && !dropAudio && !tooLarge) return file;
+    if (!resized && !dropAudio && !tooLarge && !range && !crop) return file;
+    const start = range ? Math.max(0, range.start) : 0;
+    const duration = range ? Math.max(1 / FPS, Math.min(probe.duration, range.end) - start) : probe.duration;
     if (!isExportSupported()) {
       throw new ExportUnsupportedError(
         "This browser can't prepare your clip. Use Chrome, Edge, Firefox 130+ or Safari 17+.",
@@ -133,17 +169,18 @@ export async function fitVideoToPixels(
     await waitForReady(video);
     video.pause();
     // H.264 wants even sides; a clip that fits keeps its own size.
-    const size = resized ?? { width: evenDown(probe.width), height: evenDown(probe.height) };
+    const size = resized ?? { width: evenDown(source.width), height: evenDown(source.height) };
     const { width, height } = size;
-    const totalFrames = Math.max(1, Math.round(probe.duration * FPS));
+    const totalFrames = Math.max(1, Math.round(duration * FPS));
     // Plenty for 720p; the provider re-encodes anyway. Under `maxBytes`
     // (Wan 2.2 Animate takes 10MB) it is lowered to fit, with 10% headroom
     // for the container and 128 kb/s set aside for the soundtrack.
     const bitrate = maxBytes
-      ? Math.max(500_000, Math.min(4_000_000, Math.floor((maxBytes * 0.9 * 8) / Math.max(1, probe.duration)) - 128_000))
+      ? Math.max(500_000, Math.min(4_000_000, Math.floor((maxBytes * 0.9 * 8) / Math.max(1, duration)) - 128_000))
       : 4_000_000;
 
-    const soundtrack = dropAudio ? null : await decodeSoundtrack(file);
+    const fullSoundtrack = dropAudio ? null : await decodeSoundtrack(file);
+    const soundtrack = fullSoundtrack && range ? sliceAudio(fullSoundtrack, start, duration) : fullSoundtrack;
     const withAudio = soundtrack !== null && (await canEncodeAudio());
 
     const muxer = new Muxer({
@@ -176,8 +213,8 @@ export async function fitVideoToPixels(
     try {
       for (let frame = 0; frame < totalFrames; frame++) {
         if (encodeError) throw encodeError;
-        await seekTo(video, frame / FPS);
-        ctx.drawImage(video, 0, 0, width, height);
+        await seekTo(video, start + frame / FPS);
+        ctx.drawImage(video, source.x, source.y, source.width, source.height, 0, 0, width, height);
         const videoFrame = new VideoFrame(canvas, {
           timestamp: Math.round(frame * frameDuration),
           duration: Math.round(frameDuration),
@@ -203,4 +240,26 @@ export async function fitVideoToPixels(
     video.load();
     URL.revokeObjectURL(objectUrl);
   }
+}
+
+/** An edited clip keeps its own frame size, down to 1080p at most: every
+ *  provider here takes 1080p, and a 4K phone clip would only make the encode
+ *  slower and the upload heavier. */
+const EDIT_PIXELS: PixelBounds = { min: 1, max: 1920 * 1080 };
+
+/**
+ * `file` cut to the stretch from `start` to `end` seconds and, with `crop`,
+ * to that part of the frame, re-encoded as an MP4 with its sound. Used by the
+ * reference editor (components/video-library/video-edit-modal.tsx). Throws
+ * ExportUnsupportedError in a browser without WebCodecs.
+ */
+export async function editVideo(
+  file: File,
+  { start, end, crop }: { start: number; end: number; crop?: CropRect },
+  onProgress?: (fraction: number) => void,
+): Promise<File> {
+  const edited = await fitVideoToPixels(file, EDIT_PIXELS, onProgress, { range: { start, end }, crop });
+  const name = file.name.replace(/\.[^.]+$/, "") || "clip";
+  const at = (s: number) => `${Math.round(s * 10) / 10}`;
+  return new File([edited], `${name} (${at(start)}-${at(end)}s${crop ? ", cropped" : ""}).mp4`, { type: "video/mp4" });
 }

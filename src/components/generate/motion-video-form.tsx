@@ -23,6 +23,8 @@ import {
   upgradeHint,
 } from "@/lib/tier-limits";
 import type { TierInfo, VideoModelId } from "@/lib/constants";
+import { uploadVideoToLibrary, type PickedVideo } from "@/lib/video-library";
+import { VideoSourceField } from "@/components/video-library/video-source-field";
 import {
   PanelSection,
   SegmentedTabs,
@@ -133,7 +135,7 @@ export function MotionVideoForm({
     }
   }
 
-  async function pickClip(file: File) {
+  async function pickClip({ file, url: uploadedUrl, seconds: pickedSeconds }: PickedVideo) {
     const preview = URL.createObjectURL(file);
     setClip({ preview, bytes: file.size, uploading: true });
     try {
@@ -145,8 +147,11 @@ export function MotionVideoForm({
         const { fitVideoToPixels } = await import("@/lib/downscale-video");
         upload = await fitVideoToPixels(file, WAN_PIXELS, undefined, { maxBytes: config.maxBytes });
       }
-      const seconds = await measureMediaDuration(upload);
-      const url = await uploadFile(upload);
+      // A clip from "My videos" that needed no re-encoding is already up.
+      const unchanged = upload === file;
+      const seconds = (unchanged ? pickedSeconds : undefined) ?? (await measureMediaDuration(upload));
+      const url =
+        (unchanged ? uploadedUrl : undefined) ?? (await uploadVideoToLibrary(upload, { name: file.name, seconds }));
       setClip({ preview, url, seconds, bytes: upload.size, uploading: false });
     } catch (err) {
       toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
@@ -244,15 +249,16 @@ export function MotionVideoForm({
           label="Reference video"
           hint={`${MOTION_MIN_SECONDS}-${maxSeconds}s, MP4 or MOV. Your character copies the movement; the result is as long as the clip.`}
         >
-          <PanelDropzone
+          <VideoSourceField
             className="h-40"
-            mediaKind="video"
             label="Upload a motion clip"
             sublabel="A dance, a walk, a gesture"
             previewUrl={clip?.preview}
             uploading={clip?.uploading}
             badge={clip?.seconds !== undefined ? formatMediaDuration(clip.seconds) : undefined}
-            onFile={pickClip}
+            minSeconds={MOTION_MIN_SECONDS}
+            maxSeconds={maxSeconds}
+            onPick={(picked) => void pickClip(picked)}
             onRemove={() => setClip(null)}
           />
         </PanelSection>

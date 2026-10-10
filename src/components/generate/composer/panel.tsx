@@ -290,6 +290,7 @@ export function PanelDropzone({
   mediaKind = "image",
   badge,
   previewMode = "cover",
+  onBrowse,
   className,
 }: {
   label: string;
@@ -326,6 +327,10 @@ export function PanelDropzone({
    * a deliberate fit.
    */
   previewMode?: "cover" | "showcase";
+  /** Replaces the file dialog a click opens, for a slot that offers more
+   *  than the disk (the reference-video picker). Dropping a file still
+   *  calls `onFile`. */
+  onBrowse?: () => void;
   className?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -347,7 +352,9 @@ export function PanelDropzone({
         className,
       )}
       onClick={() => {
-        if (clickable) inputRef.current?.click();
+        if (!clickable) return;
+        if (onBrowse) onBrowse();
+        else inputRef.current?.click();
       }}
       onDragOver={(e) => {
         if (!clickable) return;

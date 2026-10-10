@@ -19,9 +19,11 @@ import {
 import { apiFetch } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { estimateCreditsForRequest } from "@/lib/credit-estimate";
-import { measureMediaDuration, formatMediaDuration } from "@/lib/media-duration";
+import { formatMediaDuration } from "@/lib/media-duration";
 import { isDurationLocked, isResolutionLocked, minTierForDuration, minTierForResolution, upgradeHint } from "@/lib/tier-limits";
 import { cropFullBodyPanel } from "@/lib/influencer-crop";
+import { uploadVideoToLibrary, type PickedVideo } from "@/lib/video-library";
+import { VideoSourceField } from "@/components/video-library/video-source-field";
 import {
   isActive,
   isCharacterSheet,
@@ -480,9 +482,8 @@ function MotionPanel({
     setModel(motion.models.find((m) => kindOf(m) === next)?.id ?? model);
   }
 
-  async function pickVideo(file: File) {
+  async function pickVideo({ file, url: uploadedUrl, seconds }: PickedVideo) {
     const preview = URL.createObjectURL(file);
-    const seconds = await measureMediaDuration(file);
     if (seconds !== undefined && seconds < motion.minSeconds - 0.05) {
       toast({ title: "Clip too short", description: `Use a clip of at least ${motion.minSeconds}s.`, variant: "error" });
       return;
@@ -493,9 +494,11 @@ function MotionPanel({
     }
     // Not refused here when over a model's size cap: the clip still fits the
     // other mode, so the cap is flagged under the button instead.
-    setVideo({ preview, url: null, uploading: true, seconds, bytes: file.size, file });
+    // A clip from "My videos" is already uploaded and goes straight in.
+    setVideo({ preview, url: uploadedUrl ?? null, uploading: !uploadedUrl, seconds, bytes: file.size, file });
+    if (uploadedUrl) return;
     try {
-      const url = await uploadFile(file);
+      const url = await uploadVideoToLibrary(file, { seconds });
       setVideo({ preview, url, uploading: false, seconds, bytes: file.size, file });
     } catch (err) {
       toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
@@ -667,15 +670,16 @@ function MotionPanel({
               {minSeconds}-{maxSeconds}s, MP4 or MOV{maxMb ? `, up to ${maxMb}MB` : ""}
             </span>
           </div>
-          <PanelDropzone
+          <VideoSourceField
             className="h-40"
-            mediaKind="video"
             label="Upload a motion clip"
             sublabel="A dance, a walk, a gesture: your influencer copies it"
             previewUrl={video?.preview}
             uploading={video?.uploading}
             badge={video?.seconds !== undefined ? formatMediaDuration(video.seconds) : undefined}
-            onFile={pickVideo}
+            minSeconds={minSeconds}
+            maxSeconds={maxSeconds}
+            onPick={(picked) => void pickVideo(picked)}
             onRemove={() => setVideo(null)}
           />
         </section>

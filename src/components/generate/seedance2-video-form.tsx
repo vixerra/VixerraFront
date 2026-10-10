@@ -13,6 +13,8 @@ import { useToast } from "@/components/ui/toast";
 import { estimateVideoCredits } from "@/lib/credit-estimate";
 import { seedance2VideoSchema, type Seedance2VideoInput } from "@/lib/validation";
 import { apiFetch } from "@/lib/api-client";
+import { uploadVideoToLibrary, type PickedVideo } from "@/lib/video-library";
+import { VideoSourceField } from "@/components/video-library/video-source-field";
 import {
   isResolutionLocked,
   isDurationLocked,
@@ -214,7 +216,7 @@ export function Seedance2VideoForm({
     }
   }
 
-  async function handleRefVideoFile(file: File) {
+  async function handleRefVideoFile({ file, url: uploadedUrl }: PickedVideo) {
     setUploadingRefVideo(true);
     setRefVideoPreview(URL.createObjectURL(file));
     try {
@@ -228,16 +230,22 @@ export function Seedance2VideoForm({
       ]);
       const fitted = await fitVideoToPixels(file, SEEDANCE2_REFERENCE_VIDEO_PIXELS);
       const fittedUrl = URL.createObjectURL(fitted);
+      let measured: number | undefined;
       try {
-        // Rounded the way the API rounds its own reading of the file.
-        const { duration: seconds } = await probeVideo(fittedUrl);
-        setRefVideoSeconds(Number.isFinite(seconds) ? Math.ceil(seconds - 0.05) : undefined);
+        const { duration } = await probeVideo(fittedUrl);
+        measured = Number.isFinite(duration) ? duration : undefined;
       } catch {
-        setRefVideoSeconds(undefined);
+        measured = undefined;
       } finally {
         URL.revokeObjectURL(fittedUrl);
       }
-      setValue("referenceVideo", await uploadFile(fitted), { shouldValidate: true });
+      // Rounded the way the API rounds its own reading of the file.
+      setRefVideoSeconds(measured !== undefined ? Math.ceil(measured - 0.05) : undefined);
+      // A clip from "My videos" that needed no resizing is already up.
+      const url =
+        (fitted === file ? uploadedUrl : undefined) ??
+        (await uploadVideoToLibrary(fitted, { name: file.name, seconds: measured }));
+      setValue("referenceVideo", url, { shouldValidate: true });
     } catch (err) {
       reportUploadFailure(err);
       setRefVideoPreview(null);
@@ -411,13 +419,14 @@ export function Seedance2VideoForm({
             </div>
           ) : refMode === "video" ? (
             <>
-              <PanelDropzone
-                mediaKind="video"
+              <VideoSourceField
                 label="Click or drag to upload"
                 sublabel="MP4 or MOV"
                 previewUrl={refVideoPreview}
                 uploading={uploadingRefVideo}
-                onFile={handleRefVideoFile}
+                minSeconds={SEEDANCE2_REFERENCE_VIDEO_MIN_SECONDS}
+                maxSeconds={SEEDANCE2_REFERENCE_VIDEO_MAX_SECONDS}
+                onPick={(picked) => void handleRefVideoFile(picked)}
                 onRemove={clearRefVideo}
               />
               <FieldError>{errors.referenceVideo?.message}</FieldError>
