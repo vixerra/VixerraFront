@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/toast";
 import { useInvalidateCredits, useUsage } from "@/hooks/use-credits";
 import { estimateVideoCredits, VIDEO_EDIT_MODEL_ID } from "@/lib/credit-estimate";
 import {
-  contextCrop,
+  editWindow,
   prepareAiEditClip,
   submitAiEdit,
   type AiEditJob,
@@ -207,7 +207,7 @@ function AiEditForm({
         keepAudio: mode === "segment" ? keepAudio : true,
         region: mode === "region" && region ? region : undefined,
       };
-      const crop = request.region ? contextCrop(request.region, frame) : undefined;
+      const crop = request.region ? editWindow(request.region, frame) : undefined;
       const source = await (await fetch(objectUrl)).blob();
       const prepared = await prepareAiEditClip(source, request, crop?.crop, (progress) =>
         setBusy({ label: "Preparing the clip…", progress }),
@@ -310,7 +310,7 @@ function AiEditForm({
         <p className="text-caption text-muted">
           {mode === "segment"
             ? "Regenerates every pixel of these seconds from your prompt, using the original as a guide for motion and framing."
-            : "Drag a box on the video. Only what's inside it changes — everything outside stays exactly as filmed. The box holds still, so make it big enough for the subject as it moves."}
+            : "Drag a box on the video. The AI sees the whole frame with your box marked, so it knows the scene — but only what's inside the box changes, and everything outside stays exactly as filmed. The box holds still, so make it big enough for the subject as it moves."}
         </p>
         {mode === "region" && region && (
           <button

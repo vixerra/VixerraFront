@@ -129,6 +129,9 @@ export function sliceAudio(buffer: AudioBuffer, start: number, duration: number)
  * `range` keeps only that stretch of the clip, in seconds, and `crop` only
  * that part of the frame, as fractions of its width and height (see
  * editVideo).
+ *
+ * `overlay` draws on every frame after the picture, at the output size — the
+ * AI region edit's outline around the box it asks the model to change.
  */
 export async function fitVideoToPixels(
   file: File,
@@ -139,7 +142,14 @@ export async function fitVideoToPixels(
     maxBytes,
     range,
     crop,
-  }: { dropAudio?: boolean; maxBytes?: number; range?: { start: number; end: number }; crop?: CropRect } = {},
+    overlay,
+  }: {
+    dropAudio?: boolean;
+    maxBytes?: number;
+    range?: { start: number; end: number };
+    crop?: CropRect;
+    overlay?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
+  } = {},
 ): Promise<File> {
   const objectUrl = URL.createObjectURL(file);
   const video = createDecodeVideo(objectUrl);
@@ -157,7 +167,7 @@ export async function fitVideoToPixels(
       : { x: 0, y: 0, width: probe.width, height: probe.height };
     const resized = targetSize(source.width, source.height, bounds);
     const tooLarge = maxBytes !== undefined && file.size > maxBytes;
-    if (!resized && !dropAudio && !tooLarge && !range && !crop) return file;
+    if (!resized && !dropAudio && !tooLarge && !range && !crop && !overlay) return file;
     const start = range ? Math.max(0, range.start) : 0;
     const duration = range ? Math.max(1 / FPS, Math.min(probe.duration, range.end) - start) : probe.duration;
     if (!isExportSupported()) {
@@ -220,6 +230,7 @@ export async function fitVideoToPixels(
         // stutter on every 24fps source (measured 2026-10-11).
         await seekTo(video, start + (frame + 0.5) / FPS);
         ctx.drawImage(video, source.x, source.y, source.width, source.height, 0, 0, width, height);
+        overlay?.(ctx, width, height);
         const videoFrame = new VideoFrame(canvas, {
           timestamp: Math.round(frame * frameDuration),
           duration: Math.round(frameDuration),

@@ -8,16 +8,22 @@
  * around it happens in this tab, because that is where the frames are:
  *
  *  1. The stretch is cut out of the source and re-encoded with WebCodecs
- *     (fitVideoToPixels, the same pipeline the reference editor uses). For a
- *     region edit only a crop around the rectangle is sent — see contextCrop.
+ *     (fitVideoToPixels, the same pipeline the reference editor uses). A
+ *     region edit sends the WHOLE frame, so the model sees the scene the box
+ *     sits in, with the box marked on it by a red outline drawn just outside
+ *     it (see editWindow and drawRegionMarker). The API wraps the user's
+ *     prompt in an instruction to change only what is inside the outline and
+ *     to drop the outline itself (lib/video-edit.ts there).
  *  2. It is uploaded and the run is queued. That costs credits and takes
  *     minutes, so the editor tracks it in the background (use-ai-edit-jobs)
  *     and the user keeps working.
  *  3. When it finishes, a segment result drops straight into the timeline. A
  *     region result is first pasted back over the original inside the
- *     rectangle (compositeRegion) and filed as a studio edit, so pixels
- *     outside the box are the original's, bit for bit — no edit model kie.ai
- *     sells takes a mask, so that guarantee has to come from here.
+ *     rectangle (compositeRegion) and filed as a studio edit. The model
+ *     re-renders every pixel however well it is told not to, and no edit
+ *     model kie.ai sells takes a mask, so this paste is what actually keeps
+ *     the outside of the box the original's, bit for bit. It also discards
+ *     the outline if the model left it in: the outline lies outside the box.
  */
 
 import { apiFetch } from "@/lib/api-client";
@@ -52,7 +58,8 @@ export type AiEditRequest = {
 export type AiEditJob = AiEditRequest & {
   /** The video-edit generation's id. */
   id: string;
-  /** Region only: the part of the frame that was actually sent. */
+  /** Region only: the part of the frame that was actually sent — the whole
+   *  frame unless its shape is one the model can't be asked for. */
   crop?: CropRect;
   createdAt: string;
   /** `applying` is the composite and the timeline insert after the model is
@@ -71,10 +78,10 @@ export function canAiEdit(clipIn: number, clipOut: number): boolean {
   return clipOut - clipIn >= AI_EDIT_MIN_SECONDS - 0.001;
 }
 
-/* ------------------------------------------------------------ the crop */
+/* -------------------------------------------------- what the model sees */
 
-/** The aspect ratios Wan 2.7 Video Edit can be asked for. A region crop is
- *  cut to one of these exactly, so the result comes back the same shape and
+/** The aspect ratios Wan 2.7 Video Edit can be asked for. A region edit is
+ *  sent in one of these exactly, so the result comes back the same shape and
  *  pastes over the original without stretching. */
 const AI_EDIT_ASPECTS: { id: string; ratio: number }[] = [
   { id: "16:9", ratio: 16 / 9 },
@@ -84,62 +91,47 @@ const AI_EDIT_ASPECTS: { id: string; ratio: number }[] = [
   { id: "3:4", ratio: 3 / 4 },
 ];
 
-/** Context kept around the rectangle on each side, as a fraction of its own
- *  size. The model has to see what it is editing in its surroundings — a
- *  jacket cropped to its seams could be anything — but every extra pixel of
- *  context is one it may redraw for nothing. */
-const CROP_CONTEXT = 0.3;
-/** Smallest crop, as a fraction of the frame's short side, so a tiny box
- *  still arrives with enough around it to be recognisable. */
-const CROP_MIN_SHORT_SIDE = 0.25;
+/** How far a frame's shape may be off one of the five and still count as it:
+ *  1080x1920 is 9:16 exactly, 720x1278 (a model's odd crop) is close enough
+ *  for the model to hand it back unchanged. */
+const ASPECT_TOLERANCE = 0.01;
 
 /**
- * The part of the frame sent for a region edit, and the aspect ratio to ask
- * for: the rectangle plus context, grown to whichever supported ratio wastes
- * the least, shifted to stay inside the frame.
+ * The part of the frame a region edit sends, and the aspect ratio to ask for.
  *
- * A ratio that can't hold the rectangle inside the frame is skipped. When
- * none can (a box that is most of a frame whose shape is none of the five),
- * the whole frame goes, with no ratio, and the result follows the source.
+ * The whole frame, whenever its shape is one the model can be asked for —
+ * which nearly every generated clip's is. The model then edits the box with
+ * the full scene around it: the light, the other people, where the camera is.
+ *
+ * A frame of any other shape (4:5, 21:9) would come back reshaped, and the
+ * paste-back would no longer line up. Then the largest window of a supported
+ * shape that still holds the box goes instead, as near the box's centre as
+ * the frame allows. Failing even that, the whole frame goes with no ratio,
+ * and the result is trusted to follow the source.
  */
-export function contextCrop(
+export function editWindow(
   region: CropRect,
   frame: { width: number; height: number },
 ): { crop: CropRect; aspectRatio?: string } {
   const W = frame.width;
   const H = frame.height;
-  const r = {
-    x: region.x * W,
-    y: region.y * H,
-    w: region.width * W,
-    h: region.height * H,
-  };
-  const minSide = Math.min(W, H) * CROP_MIN_SHORT_SIDE;
-  const wantW = Math.max(r.w * (1 + 2 * CROP_CONTEXT), minSide);
-  const wantH = Math.max(r.h * (1 + 2 * CROP_CONTEXT), minSide);
+  const own = AI_EDIT_ASPECTS.find(({ ratio }) => Math.abs(W / H / ratio - 1) <= ASPECT_TOLERANCE);
+  if (own) return { crop: { x: 0, y: 0, width: 1, height: 1 }, aspectRatio: own.id };
+
+  const r = { x: region.x * W, y: region.y * H, w: region.width * W, h: region.height * H };
   const cx = r.x + r.w / 2;
   const cy = r.y + r.h / 2;
 
   let best: { crop: CropRect; aspectRatio: string; area: number } | null = null;
   for (const { id, ratio } of AI_EDIT_ASPECTS) {
-    let cw = Math.max(wantW, wantH * ratio);
-    let ch = cw / ratio;
-    // Too big for the frame: shrink, keeping the ratio, and give up on the
-    // context before giving up on the rectangle.
-    if (cw > W) {
-      cw = W;
-      ch = cw / ratio;
-    }
-    if (ch > H) {
-      ch = H;
-      cw = ch * ratio;
-    }
+    // The biggest window of this shape the frame has room for.
+    const cw = Math.min(W, H * ratio);
+    const ch = cw / ratio;
     if (cw < r.w - 0.5 || ch < r.h - 0.5) continue;
-
     const x = Math.max(0, Math.min(W - cw, cx - cw / 2));
     const y = Math.max(0, Math.min(H - ch, cy - ch / 2));
     const area = cw * ch;
-    if (!best || area < best.area) {
+    if (!best || area > best.area) {
       best = { crop: { x: x / W, y: y / H, width: cw / W, height: ch / H }, aspectRatio: id, area };
     }
   }
@@ -149,40 +141,75 @@ export function contextCrop(
     : { crop: { x: 0, y: 0, width: 1, height: 1 } };
 }
 
-/* ------------------------------------------------------- send it off */
+/** The box as a fraction of the window that is sent, which is where the
+ *  model will see it — the same as the box itself when the whole frame goes. */
+export function regionInWindow(region: CropRect, window: CropRect): CropRect {
+  return {
+    x: (region.x - window.x) / window.width,
+    y: (region.y - window.y) / window.height,
+    width: region.width / window.width,
+    height: region.height / window.height,
+  };
+}
 
-/** A whole-frame stretch keeps its own size, down to 1080p at most. */
-const SEGMENT_PIXELS = { min: 240 * 426, max: 1920 * 1080 };
-/** A crop is usually small. It is scaled UP to at least this many pixels
- *  (853x480 at 16:9): the provider wants 240px a side at the very least, and
- *  the model draws detail it can see. The paste-back scales it down again. */
-const REGION_PIXELS = { min: 640 * 640, max: 1920 * 1080 };
+/** The outline's colour. Pure red reads as an annotation to every model that
+ *  has seen "edit inside the red box"; the API's prompt names it the same. */
+const MARKER_COLOR = "#ff0000";
 
 /**
- * Cuts the stretch (and, for a region, the crop) out of the source file and
- * re-encodes it for upload. Throws ExportUnsupportedError in a browser
- * without WebCodecs.
+ * Draws the box the model is told to edit inside, as a red outline.
+ *
+ * The outline sits entirely OUTSIDE the box, with a small gap, so the model
+ * sees everything inside the box untouched by it — and so the paste-back,
+ * which only ever takes pixels from inside the box, can't carry the outline
+ * into the result even when the model leaves it in.
+ */
+function drawRegionMarker(box: CropRect) {
+  return (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    const thickness = Math.max(3, Math.round(Math.min(width, height) * 0.006));
+    const gap = Math.max(2, Math.round(thickness / 2));
+    const out = gap + thickness / 2;
+    ctx.save();
+    ctx.strokeStyle = MARKER_COLOR;
+    ctx.lineWidth = thickness;
+    ctx.strokeRect(
+      box.x * width - out,
+      box.y * height - out,
+      box.width * width + 2 * out,
+      box.height * height + 2 * out,
+    );
+    ctx.restore();
+  };
+}
+
+/* ------------------------------------------------------- send it off */
+
+/** What is sent keeps its own size, down to 1080p at most. */
+const EDIT_PIXELS = { min: 240 * 426, max: 1920 * 1080 };
+
+/**
+ * Cuts the stretch out of the source file and re-encodes it for upload — for
+ * a region edit, the window from editWindow with the box outlined on every
+ * frame. Throws ExportUnsupportedError in a browser without WebCodecs.
  */
 export async function prepareAiEditClip(
   source: Blob,
-  request: Pick<AiEditRequest, "mode" | "start" | "end">,
-  crop: CropRect | undefined,
+  request: Pick<AiEditRequest, "mode" | "start" | "end" | "region">,
+  sent: CropRect | undefined,
   onProgress?: (fraction: number) => void,
 ): Promise<File> {
   const { fitVideoToPixels } = await import("@/lib/downscale-video");
   const file = source instanceof File ? source : new File([source], "clip.mp4", { type: "video/mp4" });
-  return await fitVideoToPixels(
-    file,
-    request.mode === "region" ? REGION_PIXELS : SEGMENT_PIXELS,
-    onProgress,
-    {
-      range: { start: request.start, end: request.end },
-      crop,
-      // A crop goes up silent: its sound is the original's again after the
-      // composite, and the model has no use for it.
-      dropAudio: request.mode === "region",
-    },
-  );
+  const region = request.mode === "region" ? request.region : undefined;
+  const whole = !sent || (sent.x === 0 && sent.y === 0 && sent.width === 1 && sent.height === 1);
+  return await fitVideoToPixels(file, EDIT_PIXELS, onProgress, {
+    range: { start: request.start, end: request.end },
+    crop: whole ? undefined : sent,
+    overlay: region ? drawRegionMarker(sent ? regionInWindow(region, sent) : region) : undefined,
+    // A region edit goes up silent: its sound is the original's again after
+    // the composite, and the model has no use for it.
+    dropAudio: request.mode === "region",
+  });
 }
 
 type UploadResponse = { url?: string; ref?: string; error?: string };
