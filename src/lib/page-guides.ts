@@ -1037,6 +1037,32 @@ export const PAGE_GUIDES: PageGuide[] = [
     note: "A code adds credits — it never changes the price Stripe charges.",
   },
   {
+    path: "/admin/ip-blocks",
+    title: "IP blocks",
+    what: "Addresses refused by the app",
+    plan: "staff",
+    art: "admin",
+    steps: [
+      {
+        icon: "users",
+        title: "Start from the user",
+        detail: "Their page lists every address they used.",
+      },
+      {
+        icon: "lock",
+        title: "Block for a while",
+        detail: "Addresses change hands, so prefer a time limit.",
+      },
+      {
+        icon: "search",
+        title: "Check who else is in it",
+        detail: "Accounts links to everyone seen at the address.",
+      },
+    ],
+    note: "A VPN gets around a block. It slows abuse down; it doesn't stop a determined person.",
+    noteTone: "warn",
+  },
+  {
     path: "/admin/presets",
     title: "Presets",
     what: "The recipe catalogue",

@@ -2,7 +2,7 @@
 
 import { use, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Coins, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Coins, Mail, ShieldBan, ShieldCheck, ShieldOff } from "lucide-react";
 import {
   useAdminUser,
   useAdjustCredits,
@@ -11,6 +11,7 @@ import {
 import { TIERS } from "@/lib/constants";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { GenerationDrawer } from "@/components/admin/generation-drawer";
+import { BlockIpDialog, UnblockIpDialog } from "@/components/admin/ip-block-dialogs";
 import {
   PageHeader,
   Panel,
@@ -72,7 +73,7 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
   if (isLoading) return <LoadingBlock />;
   if (isError || !data) return <ErrorBlock message={(error as Error)?.message} />;
 
-  const { user, grants, generations, usage, audit } = data;
+  const { user, grants, generations, usage, audit, ips } = data;
   const verified = user.emailVerifiedAt;
 
   return (
@@ -313,6 +314,100 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
       </section>
 
       <GenerationDrawer id={openGeneration} onClose={() => setOpenGeneration(null)} />
+
+      {/* Absent on a backend that predates IP blocking. */}
+      {ips !== undefined && (
+        <section className="mt-8">
+          <SectionHeading title="IP addresses" href="/admin/ip-blocks" linkLabel="All IP blocks" />
+          <Panel>
+            <Table
+              head={
+                <>
+                  <Th>Address</Th>
+                  <Th>First seen</Th>
+                  <Th>Last seen</Th>
+                  <Th className="text-right">Other accounts</Th>
+                  <Th>Status</Th>
+                  <Th className="text-right">Actions</Th>
+                </>
+              }
+            >
+              {ips === null ? (
+                <EmptyRow colSpan={6}>Addresses aren&apos;t available yet: the IP tables haven&apos;t been migrated.</EmptyRow>
+              ) : ips.length === 0 ? (
+                <EmptyRow colSpan={6}>
+                  No addresses recorded. They&apos;re noted at sign-up, sign-in and when the app loads.
+                </EmptyRow>
+              ) : (
+                ips.map((ip) => (
+                  <tr key={ip.ip}>
+                    <Td>
+                      <span className="flex items-center gap-1">
+                        <Mono className="text-ink-soft">{ip.ip}</Mono>
+                        <CopyButton value={ip.ip} label="Copy address" />
+                      </span>
+                      {ip.network !== ip.ip && <Mono className="block opacity-60">in {ip.network}</Mono>}
+                    </Td>
+                    <Td>
+                      <When value={ip.firstSeenAt} />
+                    </Td>
+                    <Td>
+                      <When value={ip.lastSeenAt} />
+                    </Td>
+                    <Td className="text-right tabular-nums">
+                      {ip.otherAccounts > 0 ? (
+                        <Link
+                          href={`/admin/users?q=${encodeURIComponent(ip.network)}`}
+                          className="text-warning hover:underline"
+                          title="Other accounts seen at this address"
+                        >
+                          {ip.otherAccounts.toLocaleString()}
+                        </Link>
+                      ) : (
+                        <span className="text-muted">0</span>
+                      )}
+                    </Td>
+                    <Td>
+                      {ip.blockId ? (
+                        <span className="inline-flex rounded-full border border-accent/30 bg-accent/15 px-2 py-0.5 text-caption font-medium text-accent">
+                          Blocked{ip.blockedBy !== ip.ip && ` (${ip.blockedBy})`}
+                        </span>
+                      ) : (
+                        <Mono>—</Mono>
+                      )}
+                    </Td>
+                    <Td className="text-right whitespace-nowrap">
+                      {ip.blockId && ip.blockedBy ? (
+                        <UnblockIpDialog
+                          blockId={ip.blockId}
+                          address={ip.blockedBy}
+                          trigger={
+                            <Button size="sm" variant="ghost">
+                              <ShieldOff className="size-3.5" aria-hidden="true" />
+                              Unblock
+                            </Button>
+                          }
+                        />
+                      ) : (
+                        <BlockIpDialog
+                          defaultAddress={ip.network}
+                          userId={user.id}
+                          trigger={
+                            <Button size="sm" variant="ghost">
+                              <ShieldBan className="size-3.5" aria-hidden="true" />
+                              Block
+                            </Button>
+                          }
+                        />
+                      )}
+                    </Td>
+                  </tr>
+                ))
+              )}
+            </Table>
+          </Panel>
+        </section>
+      )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <section>

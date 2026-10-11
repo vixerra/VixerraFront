@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
         <SearchField
           value={filters.q}
           onChange={(q) => update({ q })}
-          placeholder="Email, name, pen name or account id"
+          placeholder="Email, name, pen name, account id or IP"
           label="Search users"
         />
         <FilterSelect
