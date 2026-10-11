@@ -59,7 +59,8 @@ import {
  * before that can be attributed, and no backfill can invent it.
  */
 
-const DEFAULTS = { q: "", category: "", published: "", sort: "sortOrder", dir: "asc" };
+// Newest first, the order the public catalogue shows them in.
+const DEFAULTS = { q: "", category: "", published: "", sort: "createdAt", dir: "desc" };
 const FILTER_KEYS = ["q", "category", "published"] as const;
 
 /** Orderings offered in the picker; each column header can set the same. */

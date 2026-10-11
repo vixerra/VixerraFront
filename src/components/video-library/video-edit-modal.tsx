@@ -540,12 +540,24 @@ function Editor({
                 </>
               )}
             </div>
-            <div className="mt-1.5 flex justify-between text-caption text-text-tertiary tabular-nums">
-              <span>{timecode(start)}</span>
+            {/* Exact seconds, for a cut the handles can't land on by eye.
+                Each goes through moveEdge, so the limits hold here too. */}
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-caption text-text-tertiary tabular-nums">
+              <SecondsInput
+                label="Start"
+                value={start}
+                disabled={encoding || duration === undefined}
+                onCommit={(t) => moveEdge("start", t)}
+              />
               <span>
                 {maxSeconds && maxSeconds !== Infinity ? `${minSeconds}-${maxSeconds}s` : ""}
               </span>
-              <span>{timecode(end)}</span>
+              <SecondsInput
+                label="End"
+                value={end}
+                disabled={encoding || duration === undefined}
+                onCommit={(t) => moveEdge("end", t)}
+              />
             </div>
           </div>
         </div>
@@ -571,5 +583,51 @@ function Editor({
         </button>
       </div>
     </div>
+  );
+}
+
+/** A trim edge typed in seconds. Holds its own text while it is being
+ *  typed ("3." is not a number yet) and commits on Enter or blur; the
+ *  editor's own limits then decide where the edge lands, which is shown
+ *  back here. */
+function SecondsInput({
+  label,
+  value,
+  disabled,
+  onCommit,
+}: {
+  label: string;
+  value: number;
+  disabled?: boolean;
+  onCommit: (seconds: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const commit = () => {
+    if (draft === null) return;
+    const seconds = Number(draft.replace(",", "."));
+    setDraft(null);
+    if (Number.isFinite(seconds)) onCommit(seconds);
+  };
+  return (
+    <label className="flex items-center gap-1.5">
+      <span>{label}</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        value={draft ?? value.toFixed(1)}
+        disabled={disabled}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          }
+        }}
+        className="h-8 w-16 rounded-lg border border-line bg-white/[0.05] px-2 text-right text-ink outline-none focus:border-brand disabled:opacity-40"
+        aria-label={`${label}, in seconds`}
+      />
+      <span>s</span>
+    </label>
   );
 }

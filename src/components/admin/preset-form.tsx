@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Package, Plus, Scissors, Trash2, Upload, User } from "lucide-react";
 import { Input, Textarea, Select, Label, FieldError } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,17 @@ import {
   SEEDANCE2_ASPECT_RATIOS,
 } from "@/lib/constants";
 import {
+  PRESET_CAST_MAX,
   PRESET_CATEGORIES,
   PRESET_REPLACE_MODEL_ID,
   PRESET_REPLACE_RESOLUTIONS,
+  presetCast,
+  type PresetCastKind,
+  type PresetCastSlot,
 } from "@/lib/viral-presets";
+import { fetchVideoFile } from "@/lib/video-library";
+import { measureMediaDuration } from "@/lib/media-duration";
+import { VideoEditModal } from "@/components/video-library/video-edit-modal";
 import type { AdminPresetInput, AdminPresetRow } from "@/hooks/use-admin-data";
 
 /**
@@ -201,6 +208,9 @@ export function PresetForm({
         if (field.type === "switch" && typeof carried !== "boolean") continue;
         next[field.key] = carried;
       }
+      // The cast isn't a model field, so it is carried by hand, and only to
+      // the model that reads it.
+      if (v.model === PRESET_REPLACE_MODEL_ID && v.parameters.cast) next.cast = v.parameters.cast;
       // A replace preset has nothing to swap in without the user's photo.
       const requiresImage = v.model === PRESET_REPLACE_MODEL_ID ? true : v.requiresImage;
       return { ...v, parameters: next, requiresImage };
@@ -222,9 +232,15 @@ export function PresetForm({
     }));
   }, [value.styleModel]);
 
+  const cast = presetCast(value.parameters);
+  const setCast = (next: PresetCastSlot[]) => set("parameters", { ...value.parameters, cast: next });
+  const plainCast = cast.length === 1 && cast[0].kind === "person" && !cast[0].target;
+
   const direction = value.prompt.trim();
   const composedPromptLength = replace
-    ? REPLACE_SCAFFOLD_LENGTH + (direction ? REPLACE_DIRECTION_PREFIX_LENGTH + direction.length : 0)
+    ? plainCast
+      ? REPLACE_SCAFFOLD_LENGTH + (direction ? REPLACE_DIRECTION_PREFIX_LENGTH + direction.length : 0)
+      : castPromptLength(cast, direction)
     : value.prompt.length + value.referenceSubject.length + PROMPT_SCAFFOLD_LENGTH;
 
   return (
@@ -285,7 +301,7 @@ export function PresetForm({
             <option value="New">New</option>
           </Select>
         </Field>
-        <Field label="Sort order" hint="Ascending. Ties fall back to creation date.">
+        <Field label="Sort order" hint="No longer used: the gallery shows the newest presets first.">
           <Input
             type="number"
             value={value.sortOrder}
@@ -303,6 +319,7 @@ export function PresetForm({
           set("previewUrl", next.url);
           setPreviewPlaybackUrl(next.playbackUrl);
         }}
+        trimmable
         hint={
           <>
             Upload an MP4/MOV (max 50MB) to store it in the bucket, or paste a URL you host
@@ -346,14 +363,22 @@ export function PresetForm({
               ? { label: "Use preview video", url: value.previewUrl, playbackUrl: previewPlaybackUrl }
               : undefined
           }
+          trimmable
+          minSeconds={REPLACE_MIN_SECONDS}
+          maxSeconds={REPLACE_MAX_SECONDS}
           hint={
             <>
-              The clip whose person is replaced by the user&apos;s photo. MP4/MOV, 3–15s, max
-              50MB. It is measured when you save: its length is the output&apos;s length and sets
-              the price. Its sound is kept on the result.
+              The clip whose people or products are replaced by the user&apos;s uploads.
+              MP4/MOV, {REPLACE_MIN_SECONDS}–{REPLACE_MAX_SECONDS}s, max 50MB. A longer clip opens
+              the trimmer: keep the stretch you want. It is measured when you save: its length is
+              the output&apos;s length and sets the price. Its sound is kept on the result.
             </>
           }
         />
+      )}
+
+      {replace && (
+        <CastEditor cast={cast} onChange={setCast} />
       )}
 
       <div className="rounded-xl border border-line bg-surface-3 p-4">
@@ -424,6 +449,12 @@ export function PresetForm({
 
       <div className="rounded-xl border border-line bg-surface-3 p-4">
         <p className="text-label font-medium text-ink-soft">Character stage (optional)</p>
+        {replace && cast.length > 1 && (
+          <p className="mt-1 text-caption text-warning">
+            Not available with a cast of several: the stage redraws one photo. Saving with both
+            is refused.
+          </p>
+        )}
         <p className="mt-1 mb-3 text-caption text-muted">
           Runs an image model over the upload before the video model sees it. Use it when the
           recipe should produce a drawn, rendered or otherwise synthetic character — that is
@@ -524,6 +555,155 @@ const PROMPT_SCAFFOLD_LENGTH = 285;
  *  it puts before an operator's direction. Keep in step with it. */
 const REPLACE_SCAFFOLD_LENGTH = 756;
 const REPLACE_DIRECTION_PREFIX_LENGTH = 23;
+
+/** Wan 3.0's clip limits for a replace preset (backend lib/presets.ts,
+ *  measurePresetReferenceClip). */
+const REPLACE_MIN_SECONDS = 3;
+const REPLACE_MAX_SECONDS = 15;
+
+/** The prompt a cast of several (or a product) sends, measured for the
+ *  counter. A copy of buildCastReplacePrompt in the backend's
+ *  lib/presets.ts: keep the sentences in step with it. */
+function castPromptLength(cast: PresetCastSlot[], direction: string): number {
+  const ordinals = ["first", "second", "third", "fourth"];
+  const people = cast.filter((s) => s.kind === "person").length;
+  const products = cast.length - people;
+  let person = 0;
+  let product = 0;
+  const lines = cast.map((slot, i) => {
+    const image = `@Image${i + 1} (Image ${i + 1})`;
+    if (slot.kind === "person") {
+      const nth = ordinals[person++] ?? "next";
+      const target =
+        slot.target ||
+        (people > 1 ? `the ${nth} person (counting from the left at the start of the clip)` : "the main person");
+      return `${image} replaces ${target}. It is a photo of one person: take their face, facial features, hair, skin tone and body shape exactly as shown, identical in every frame, and keep the outfit and accessories that person wears in Video 1.`;
+    }
+    const nth = ordinals[product++] ?? "next";
+    const target = slot.target || (products > 1 ? `the ${nth} product shown` : "the product shown");
+    return `${image} replaces ${target}. It is a product: reproduce it exactly, its shape, proportions, colors, materials, label, logo and printed text, at the size, position and angle the original has in every frame, held and handled exactly the same way.`;
+  });
+  const base = [
+    "Video editing: in @Video1 (Video 1), replace each of the following with its reference image, one for one.",
+    ...lines,
+    "Keep everything else from Video 1 unchanged: the background, location, props, lighting, camera angle, framing and camera movement, and every person's body movement, gestures, head turns, expressions and timing.",
+    "Each replacement sits naturally in the scene, lit by its light, with realistic shadows and contact. Anyone and anything not listed above stays exactly as it is. Photorealistic, no flicker, no face morphing, text and logos stay sharp and legible.",
+  ].join(" ");
+  return direction ? base.length + REPLACE_DIRECTION_PREFIX_LENGTH + direction.length : base.length;
+}
+
+const PERSON_TARGET_EXAMPLES = ["the woman on the left", "the man on the right", "the person in the back"];
+
+/** One-click starting points for the common casts. */
+const CAST_TEMPLATES: { label: string; cast: PresetCastSlot[] }[] = [
+  { label: "1 person", cast: [{ kind: "person", label: "You", target: "" }] },
+  {
+    label: "Person + product",
+    cast: [
+      { kind: "person", label: "You", target: "" },
+      { kind: "product", label: "Your product", target: "" },
+    ],
+  },
+  { label: "Product only", cast: [{ kind: "product", label: "Your product", target: "" }] },
+  {
+    label: "2 people",
+    cast: [
+      { kind: "person", label: "Person 1", target: "the person on the left" },
+      { kind: "person", label: "Person 2", target: "the person on the right" },
+    ],
+  },
+];
+
+/**
+ * What a replace preset asks the user to upload, one slot per person or
+ * product it replaces in the clip. Saved as `parameters.cast`; the uploads
+ * reach the model as Image 1, Image 2... in this order.
+ */
+function CastEditor({ cast, onChange }: { cast: PresetCastSlot[]; onChange: (next: PresetCastSlot[]) => void }) {
+  const update = (i: number, patch: Partial<PresetCastSlot>) =>
+    onChange(cast.map((slot, j) => (j === i ? { ...slot, ...patch } : slot)));
+
+  return (
+    <div className="rounded-xl border border-line bg-surface-3 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-label font-medium text-ink-soft">Cast: what the user uploads</p>
+          <p className="mt-1 max-w-prose text-caption text-muted">
+            One slot per person or product to replace in the reference video. A product ad is a
+            person and a product; a duo clip is two people. The label is what the user sees; the
+            target tells the model what in the clip that upload replaces and is never shown.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {CAST_TEMPLATES.map((t) => (
+            <Button key={t.label} type="button" variant="secondary" size="sm" onClick={() => onChange(t.cast)}>
+              {t.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <ol className="mt-4 space-y-3">
+        {cast.map((slot, i) => (
+          <li key={i} className="grid gap-3 rounded-lg border border-line bg-surface-2 p-3 sm:grid-cols-[auto_9rem_1fr_1.4fr_auto] sm:items-end">
+            <span className="flex size-9 items-center justify-center rounded-full bg-brand/15 text-caption font-bold text-brand-ink" title={`Image ${i + 1}`}>
+              {slot.kind === "product" ? <Package className="size-4" aria-hidden="true" /> : <User className="size-4" aria-hidden="true" />}
+              <span className="sr-only">Image {i + 1}</span>
+            </span>
+            <Field label={`Image ${i + 1} is a`}>
+              <Select
+                value={slot.kind}
+                onChange={(e) => update(i, { kind: e.target.value as PresetCastKind })}
+              >
+                <option value="person">Person</option>
+                <option value="product">Product</option>
+              </Select>
+            </Field>
+            <Field label="Label for users">
+              <Input
+                value={slot.label}
+                maxLength={40}
+                onChange={(e) => update(i, { label: e.target.value })}
+                placeholder={slot.kind === "product" ? "Your product" : "You"}
+              />
+            </Field>
+            <Field label="Replaces (optional)">
+              <Input
+                value={slot.target ?? ""}
+                maxLength={200}
+                onChange={(e) => update(i, { target: e.target.value })}
+                placeholder={slot.kind === "product" ? "the perfume bottle she holds" : PERSON_TARGET_EXAMPLES[i] ?? "the person in the back"}
+              />
+            </Field>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={`Remove image ${i + 1}`}
+              disabled={cast.length === 1}
+              onClick={() => onChange(cast.filter((_, j) => j !== i))}
+            >
+              <Trash2 className="size-4" aria-hidden="true" />
+            </Button>
+          </li>
+        ))}
+      </ol>
+
+      {cast.length < PRESET_CAST_MAX && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-3"
+          onClick={() => onChange([...cast, { kind: "person", label: `Person ${cast.length + 1}`, target: "" }])}
+        >
+          <Plus className="size-4" aria-hidden="true" />
+          Add a slot
+        </Button>
+      )}
+    </div>
+  );
+}
 
 function Field({
   label,
@@ -655,6 +835,9 @@ function VideoUrlField({
   playbackUrl,
   onChange,
   copyFrom,
+  trimmable,
+  minSeconds,
+  maxSeconds,
 }: {
   label: string;
   hint: React.ReactNode;
@@ -662,10 +845,41 @@ function VideoUrlField({
   playbackUrl: string | null;
   onChange: (next: { url: string; playbackUrl: string | null }) => void;
   copyFrom?: { label: string; url: string; playbackUrl: string | null };
+  /** Offers the crop-and-trim editor, on upload and on the stored clip. */
+  trimmable?: boolean;
+  minSeconds?: number;
+  maxSeconds?: number;
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // The clip open in the editor, and whether it is a new pick (cancelling
+  // drops it) or the stored one (cancelling keeps it).
+  const [editing, setEditing] = useState<{ file: File; seconds?: number; stored?: boolean } | null>(null);
+  const [loadingClip, setLoadingClip] = useState(false);
+
+  /** A picked file goes through the editor when the field trims; one past
+   *  the slot's limit has to. */
+  async function pick(file: File) {
+    if (!trimmable) return void upload(file);
+    const seconds = await measureMediaDuration(file);
+    setEditing({ file, seconds });
+  }
+
+  /** The stored clip, downloaded into the editor. */
+  async function trimStored() {
+    if (!playbackUrl && !value) return;
+    setLoadingClip(true);
+    setUploadError(null);
+    try {
+      const file = await fetchVideoFile(playbackUrl ?? value, "clip.mp4");
+      setEditing({ file, seconds: await measureMediaDuration(file), stored: true });
+    } catch (err) {
+      setUploadError((err as Error).message);
+    } finally {
+      setLoadingClip(false);
+    }
+  }
 
   async function upload(file: File) {
     setUploading(true);
@@ -705,7 +919,7 @@ function VideoUrlField({
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) void upload(file);
+            if (file) void pick(file);
             e.target.value = "";
           }}
         />
@@ -722,6 +936,21 @@ function VideoUrlField({
           )}
           Upload
         </Button>
+        {trimmable && (playbackUrl || value) && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => void trimStored()}
+            disabled={uploading || loadingClip}
+          >
+            {loadingClip ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Scissors className="size-4" aria-hidden="true" />
+            )}
+            Trim
+          </Button>
+        )}
         {copyFrom && copyFrom.url !== value && (
           <Button
             type="button"
@@ -750,6 +979,24 @@ function VideoUrlField({
           loop
           playsInline
           autoPlay
+        />
+      )}
+      {trimmable && (
+        <VideoEditModal
+          source={editing}
+          minSeconds={minSeconds}
+          maxSeconds={maxSeconds}
+          onCancel={() => setEditing(null)}
+          onSkip={() => {
+            const source = editing;
+            setEditing(null);
+            // The stored clip as it is needs no new upload.
+            if (source && !source.stored) void upload(source.file);
+          }}
+          onConfirm={(file) => {
+            setEditing(null);
+            void upload(file);
+          }}
         />
       )}
     </div>

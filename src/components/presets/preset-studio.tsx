@@ -4,7 +4,7 @@ import { workspaceQuery } from "@/components/providers/workspace-provider";
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeftRight, ChevronLeft, ChevronRight, Info, Pencil, Sparkles, Wand2 } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight, Info, Package, Pencil, Sparkles, User, Wand2 } from "lucide-react";
 import {
   PickPresetMark,
   UploadImageMark,
@@ -20,10 +20,17 @@ import { useGeneration } from "@/hooks/use-generation";
 import { useInvalidateCredits, useUsage } from "@/hooks/use-credits";
 import { useLazyVideo } from "@/hooks/use-lazy-video";
 import {
+  presetCast,
   presetCredits,
   resolvePresetSettings,
   type Preset,
+  type PresetCastSlot,
 } from "@/lib/viral-presets";
+
+/** One upload slot: the local preview while it goes up, the API's url once
+ *  it has. */
+type SlotUpload = { preview: string | null; url: string | null; uploading: boolean };
+const EMPTY_SLOT: SlotUpload = { preview: null, url: null, uploading: false };
 
 /**
  * The one-image preset runner: a locked recipe on the left with a single
@@ -39,9 +46,17 @@ export function PresetStudio({ preset }: { preset: Preset }) {
   const invalidateCredits = useInvalidateCredits();
   const usageQuery = useUsage();
 
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+  // The user goes into the preset's clip rather than their photo being
+  // animated. A replace preset may ask for several uploads (its cast: two
+  // people, a person and a product), one slot each, sent in this order.
+  const replace = preset.kind === "replace";
+  const cast: PresetCastSlot[] = replace ? presetCast(preset.parameters) : [{ kind: "person", label: "" }];
+  const multi = cast.length > 1;
+  const [uploads, setUploads] = useState<SlotUpload[]>(() => cast.map(() => EMPTY_SLOT));
+  const slotState = (i: number) => uploads[i] ?? EMPTY_SLOT;
+  const setSlot = (i: number, next: SlotUpload) =>
+    setUploads((prev) => cast.map((_, j) => (j === i ? next : (prev[j] ?? EMPTY_SLOT))));
+  const uploading = uploads.some((u) => u.uploading);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const generation = useGeneration(activeJobId);
   // Opens on the walkthrough rather than an empty result canvas — until a
@@ -57,33 +72,23 @@ export function PresetStudio({ preset }: { preset: Preset }) {
   const settings = resolvePresetSettings(preset, usageQuery.data?.tier_info);
   // Both stages, when the recipe has two — the server bills for both.
   const credits = presetCredits(preset, settings);
-  // The user goes into the preset's clip rather than their photo being
-  // animated. Same single upload either way; only what it means changes.
-  const replace = preset.kind === "replace";
 
   const busy = generation.status === "queued" || generation.status === "processing";
 
-  async function handleFile(file: File) {
-    setUploading(true);
-    setPreview(URL.createObjectURL(file));
+  async function handleFile(index: number, file: File) {
+    const preview = URL.createObjectURL(file);
+    setSlot(index, { preview, url: null, uploading: true });
     try {
       const formData = new FormData();
       formData.append("file", file);
       const res = await apiFetch("/api/upload", { method: "POST", body: formData });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Upload failed.");
-      setImageUrl(json.url);
+      setSlot(index, { preview, url: json.url, uploading: false });
     } catch (err) {
       toast({ title: "Upload failed", description: (err as Error).message, variant: "error" });
-      setPreview(null);
-    } finally {
-      setUploading(false);
+      setSlot(index, EMPTY_SLOT);
     }
-  }
-
-  function clearImage() {
-    setPreview(null);
-    setImageUrl(null);
   }
 
   const mutation = useMutation({
@@ -96,7 +101,13 @@ export function PresetStudio({ preset }: { preset: Preset }) {
       const res = await apiFetch(`/api/generations/preset${workspaceQuery()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: preset.slug, image: imageUrl }),
+        // A cast of several goes as `images`, in slot order; one upload
+        // stays `image`, which every API version understands.
+        body: JSON.stringify(
+          multi
+            ? { slug: preset.slug, images: uploads.map((u) => u.url) }
+            : { slug: preset.slug, image: slotState(0).url },
+        ),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Something went wrong.");
@@ -114,7 +125,13 @@ export function PresetStudio({ preset }: { preset: Preset }) {
 
   // Kept apart: only the plan limit sends the button to billing.
   const blockedReason = settings.blockedReason;
-  const incompleteReason = imageUrl ? undefined : "Upload an image first.";
+  const missing = cast.filter((_, i) => !slotState(i).url);
+  const incompleteReason =
+    missing.length === 0
+      ? undefined
+      : multi
+        ? `Still needed: ${missing.map((s) => s.label).join(", ")}.`
+        : "Upload an image first.";
   const reason = blockedReason ?? incompleteReason;
 
   return (
@@ -146,26 +163,81 @@ export function PresetStudio({ preset }: { preset: Preset }) {
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-line bg-surface-2 shadow-floating">
           <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-4 sm:px-5 sm:pt-5">
             <span className="text-label font-medium text-ink-soft">
-              {replace ? "Your photo" : "Your image"}
+              {multi ? "Your photos" : replace ? "Your photo" : "Your image"}
             </span>
-            <span className="text-caption text-muted">Required</span>
+            <span className="text-caption text-muted">{multi ? `${cast.length} required` : "Required"}</span>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 sm:p-5">
-            <PanelDropzone
-              className="min-h-52 flex-1"
-              label={replace ? "Upload a photo of you" : "Upload image"}
-              sublabel={
-                replace
-                  ? "One person, face clearly visible — PNG or JPG"
-                  : "Select a PNG or JPG from your device"
-              }
-              previewUrl={preview}
-              uploading={uploading}
-              onFile={handleFile}
-              onRemove={clearImage}
-              previewMode="showcase"
-            />
+          {/* A cast of three or four needs more height than the column may
+              have on desktop: there the slots keep their size and this body
+              scrolls instead of squeezing them into each other. */}
+          <div className={cn("flex min-h-0 flex-1 flex-col gap-3 p-4 sm:p-5", multi && "overflow-y-auto")}>
+            {multi ? (
+              // Side by side for two, two by two past that. Each slot says
+              // what it is for, since its position is what pairs it with
+              // its match in the clip.
+              <div
+                // Rows with a floor of their own: `grid-rows-2` is
+                // minmax(0, 1fr), and on the stacked layout nothing gives the
+                // grid a height, so the rows collapsed to nothing and the
+                // slots drew over each other and the hint below.
+                className="grid flex-1 auto-rows-[minmax(8rem,1fr)] grid-cols-2 gap-3"
+              >
+                {cast.map((slot, i) => (
+                  <div
+                    key={i}
+                    // An odd last slot (the product after two people) takes
+                    // the full width rather than leaving a hole beside it.
+                    className={cn(
+                      "flex min-h-0 flex-col gap-1.5",
+                      cast.length % 2 === 1 && i === cast.length - 1 && "col-span-2",
+                    )}
+                  >
+                    <span className="flex shrink-0 items-center gap-1.5 text-caption font-medium text-ink-soft">
+                      {slot.kind === "product" ? (
+                        <Package className="size-3.5 text-brand-ink" aria-hidden="true" />
+                      ) : (
+                        <User className="size-3.5 text-brand-ink" aria-hidden="true" />
+                      )}
+                      <span className="truncate">{slot.label}</span>
+                    </span>
+                    <PanelDropzone
+                      className="h-auto min-h-24 flex-1"
+                      compact
+                      label={slot.kind === "product" ? "Upload the product" : "Upload a photo"}
+                      previewUrl={slotState(i).preview}
+                      uploading={slotState(i).uploading}
+                      onFile={(file) => void handleFile(i, file)}
+                      onRemove={() => setSlot(i, EMPTY_SLOT)}
+                      previewMode="showcase"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <PanelDropzone
+                className="min-h-52 flex-1"
+                label={
+                  cast[0].kind === "product"
+                    ? "Upload your product"
+                    : replace
+                      ? "Upload a photo of you"
+                      : "Upload image"
+                }
+                sublabel={
+                  cast[0].kind === "product"
+                    ? "The product on its own, clear and well lit — PNG or JPG"
+                    : replace
+                      ? "One person, face clearly visible — PNG or JPG"
+                      : "Select a PNG or JPG from your device"
+                }
+                previewUrl={slotState(0).preview}
+                uploading={slotState(0).uploading}
+                onFile={(file) => void handleFile(0, file)}
+                onRemove={() => setSlot(0, EMPTY_SLOT)}
+                previewMode="showcase"
+              />
+            )}
 
             {/* The character the video is actually being built from. Only
                 exists once the first stage finishes, which is also the
@@ -185,8 +257,11 @@ export function PresetStudio({ preset }: { preset: Preset }) {
             {replace && (
               <p className="flex shrink-0 items-start gap-1.5 text-caption text-muted">
                 <ArrowLeftRight className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-                You take the place of the person in this clip — same scene, same moves, same
-                sound, with you in it.
+                {multi
+                  ? "Each upload takes the place of its match in this clip — same scene, same moves, same sound."
+                  : cast[0].kind === "product"
+                    ? "Your product takes the place of the one in this clip — same scene, same moves, same sound."
+                    : "You take the place of the person in this clip — same scene, same moves, same sound, with you in it."}
               </p>
             )}
 
@@ -241,7 +316,7 @@ export function PresetStudio({ preset }: { preset: Preset }) {
           </TabsList>
 
           <TabsContent value="how" className="min-h-0 flex-1 focus:outline-none">
-            <HowItWorks kind={replace ? "replace" : "animate"} />
+            <HowItWorks kind={multi ? "cast" : replace ? "replace" : "animate"} />
           </TabsContent>
 
           <TabsContent value="result" className="min-h-0 flex-1 focus:outline-none">
@@ -342,6 +417,19 @@ const STEPS = {
       Mark: UploadImageMark,
       title: "Upload a photo of you",
       body: "One person, face clearly visible. You take the place of the person in the clip: your face, hair and look, in the clip's outfit and doing its moves.",
+    },
+    DOWNLOAD_STEP,
+  ],
+  cast: [
+    {
+      Mark: PickPresetMark,
+      title: "Pick a clip",
+      body: "Every preset is a finished clip — the scene, the moves, the camera and the sound are already there. You never have to describe anything.",
+    },
+    {
+      Mark: UploadImageMark,
+      title: "Upload one photo per slot",
+      body: "Each slot says who or what it replaces: a person (face clearly visible) or a product (on its own, well lit). Each one takes the place of its match in the clip.",
     },
     DOWNLOAD_STEP,
   ],

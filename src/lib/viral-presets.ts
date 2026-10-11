@@ -49,6 +49,30 @@ export const PRESET_REPLACE_RESOLUTIONS = ["480p", "720p", "1080p"] as const;
 
 export type PresetKind = "animate" | "replace";
 
+/** One upload a replace preset asks for, and what it replaces in the clip:
+ *  a person, or a product (a product ad). Mirrors the cast in the backend's
+ *  lib/presets.ts. Users see `kind` and `label`; `target` (what in the
+ *  clip it replaces, for the model) is part of the recipe and only reaches
+ *  the admin panel. */
+export type PresetCastKind = "person" | "product";
+export type PresetCastSlot = { kind: PresetCastKind; label: string; target?: string };
+export const PRESET_CAST_MAX = 4;
+
+/** A replace preset's slots in upload order. A preset saved before casts
+ *  existed has none and means one person. */
+export function presetCast(parameters: Record<string, unknown>): PresetCastSlot[] {
+  const raw = parameters.cast;
+  if (!Array.isArray(raw) || raw.length === 0) return [{ kind: "person", label: "You" }];
+  return raw.map((slot) => {
+    const s = (slot ?? {}) as Record<string, unknown>;
+    return {
+      kind: s.kind === "product" ? "product" : "person",
+      label: typeof s.label === "string" && s.label ? s.label : "Photo",
+      ...(typeof s.target === "string" ? { target: s.target } : {}),
+    };
+  });
+}
+
 /** A published preset, as GET /api/presets serves it. */
 export type Preset = {
   slug: string;
