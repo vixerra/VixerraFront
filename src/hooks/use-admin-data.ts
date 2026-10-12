@@ -189,6 +189,23 @@ export type AdminUserDetail = {
     storageUsedBytes: number;
   }[];
   audit: AuditEntry[];
+  /** Where the account has been seen from, newest first. Null when the
+   *  backend's IP tables aren't migrated yet. */
+  ips?: AdminUserIp[] | null;
+};
+
+export type AdminUserIp = {
+  ip: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  /** What to block: the address itself, or its /64 for IPv6 (one
+   *  connection holds the whole /64 and can move around in it). */
+  network: string;
+  /** The live block covering this address, if any. */
+  blockId: string | null;
+  blockedBy: string | null;
+  /** Other accounts seen at the same address (the same /64 for IPv6). */
+  otherAccounts: number;
 };
 
 export function useAdminUser(id: string) {
@@ -772,4 +789,70 @@ export function useUpdatePromoCode() {
     },
     { code: AdminPromoCode }
   >((vars) => post(`/api/admin/promo-codes/${vars.id}`, vars.patch, "PATCH"));
+}
+
+// ── IP blocks ────────────────────────────────────────────────────────────
+
+export type AdminIpBlock = {
+  id: string;
+  /** "203.0.113.7" for one address, "203.0.113.0/24" for a range. */
+  address: string;
+  reason: string;
+  /** Null for a block that lasts until it's lifted. */
+  expiresAt: string | null;
+  createdAt: string;
+  blockedByEmail: string;
+  /** The account it was blocked from, when it came from a user's page. */
+  userId: string | null;
+  userEmail: string | null;
+  active: boolean;
+  /** Accounts seen inside the block. */
+  accounts: number;
+};
+
+export type AdminIpBlocksParams = {
+  q?: string;
+  status?: string;
+  limit: number;
+  offset: number;
+};
+
+export type AdminIpBlocksResponse = {
+  blocks: AdminIpBlock[];
+  total: number;
+  /** The operator's own address, as the API sees it. */
+  yourIp: string | null;
+};
+
+/** Mirrors DURATIONS in the API's routes/admin-ip-blocks.ts. */
+export const IP_BLOCK_DURATIONS = [
+  { value: "1h", label: "1 hour" },
+  { value: "24h", label: "24 hours" },
+  { value: "7d", label: "7 days" },
+  { value: "30d", label: "30 days" },
+  { value: "permanent", label: "Until lifted" },
+] as const;
+
+export type IpBlockDuration = (typeof IP_BLOCK_DURATIONS)[number]["value"];
+
+export function useAdminIpBlocks(params: AdminIpBlocksParams) {
+  return useQuery({
+    queryKey: ["admin-ip-blocks", params],
+    queryFn: () => get<AdminIpBlocksResponse>(`/api/admin/ip-blocks${qs(params)}`),
+    retry: false,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useBlockIp() {
+  return useAdminMutation<
+    { address: string; duration: IpBlockDuration; userId?: string; reason: string },
+    { block: { id: string; address: string; expiresAt: string | null } }
+  >((vars) => post("/api/admin/ip-blocks", vars));
+}
+
+export function useUnblockIp() {
+  return useAdminMutation((vars: { id: string; reason: string }) =>
+    post(`/api/admin/ip-blocks/${vars.id}/unblock`, { reason: vars.reason }),
+  );
 }

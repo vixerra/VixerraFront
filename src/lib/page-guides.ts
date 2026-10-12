@@ -22,6 +22,8 @@
 // studios and publishing, apiAccess/seats for keys and teams). A guide
 // that promises a locked screen is worse than no guide.
 
+import { GROK_OFF_ON_FREE } from "@/lib/constants";
+
 /** Which plan unlocks the screen a guide describes. */
 export type GuidePlan = "any" | "creator" | "studio" | "staff";
 
@@ -636,10 +638,10 @@ export const PAGE_GUIDES: PageGuide[] = [
       {
         icon: "image",
         title: "Spend them well",
-        detail: "1 image, or a 3s Grok video.",
+        detail: GROK_OFF_ON_FREE ? "1 image with the fast models." : "1 image, or a 3s Grok video.",
       },
     ],
-    note: "Every model is open. Free results carry a watermark and video is capped at 480p / 5s; Starter drops the watermark and goes to 1080p.",
+    note: `${GROK_OFF_ON_FREE ? "Every model but Grok is open." : "Every model is open."} Free results carry a watermark and video is capped at 480p / 5s; Starter drops the watermark and goes to 1080p.`,
     noteTone: "warn",
   },
   {
@@ -1035,6 +1037,32 @@ export const PAGE_GUIDES: PageGuide[] = [
       },
     ],
     note: "A code adds credits — it never changes the price Stripe charges.",
+  },
+  {
+    path: "/admin/ip-blocks",
+    title: "IP blocks",
+    what: "Addresses refused by the app",
+    plan: "staff",
+    art: "admin",
+    steps: [
+      {
+        icon: "users",
+        title: "Start from the user",
+        detail: "Their page lists every address they used.",
+      },
+      {
+        icon: "lock",
+        title: "Block for a while",
+        detail: "Addresses change hands, so prefer a time limit.",
+      },
+      {
+        icon: "search",
+        title: "Check who else is in it",
+        detail: "Accounts links to everyone seen at the address.",
+      },
+    ],
+    note: "A VPN gets around a block. It slows abuse down; it doesn't stop a determined person.",
+    noteTone: "warn",
   },
   {
     path: "/admin/presets",

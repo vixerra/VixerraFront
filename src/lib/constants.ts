@@ -37,13 +37,32 @@ const ESTIMATES_NOTE =
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
 
-// No model is locked to a plan: what the Free grant can make is decided by
-// its credits, inside Free's 480p / 5s caps. What Free makes carries the
-// Vixlens watermark (TIER_INFO.watermark).
-const ESTIMATES_NOTE_FREE =
-  "Estimates. Images are counted with the fast image models, videos with " +
-  "the cheapest video model at this plan's 480p cap. Every model is open; " +
-  "the credits are the only limit.";
+/**
+ * Grok is switched off on the Free plan for now (2026-10-12). Twin of
+ * GROK_OFF_ON_FREE in the API's lib/constants.ts, which is the one that
+ * matters: it refuses the models, and the composer's lock follows the
+ * tier_info the API sends (isModelLocked in lib/tier-limits.ts). This copy
+ * only decides the Free card's copy and where the Free composer opens. Flip
+ * both back to false together.
+ */
+export const GROK_OFF_ON_FREE = true;
+
+const GROK_MODELS = [
+  "xai/grok-imagine-image",
+  "xai/grok-imagine-image-quality",
+  "xai/grok-imagine-video",
+  "xai/grok-imagine-video-1.5-preview",
+] as const;
+
+// Apart from blockedModels, what the Free grant can make is decided by its
+// credits, inside Free's 480p / 5s caps. What Free makes carries the Vixlens
+// watermark (TIER_INFO.watermark).
+const ESTIMATES_NOTE_FREE = GROK_OFF_ON_FREE
+  ? "Estimates. Images are counted with the fast image models. Every model " +
+    "but Grok is open; the credits are the only limit."
+  : "Estimates. Images are counted with the fast image models, videos with " +
+    "the cheapest video model at this plan's 480p cap. Every model is open; " +
+    "the credits are the only limit.";
 
 export const TIER_INFO: Record<
   Tier,
@@ -86,6 +105,10 @@ export const TIER_INFO: Record<
      * all four.
      */
     creatorSuite: boolean;
+    /** Models this plan can't run at all, whatever its credits. The API's
+     *  copy is what counts: lib/generations.ts there refuses them, and the
+     *  composer locks the list the API sends in tier_info. */
+    blockedModels: readonly string[];
     /**
      * Whether this plan's results carry the Vixlens watermark, centered, on
      * screen and in the downloaded file (Free only, since 2026-09-27).
@@ -123,7 +146,9 @@ export const TIER_INFO: Record<
     // is a one-time row, written when the account first reads its balance,
     // and nothing re-issues it. 10 no longer buys a clip at Free's 5s cap on
     // any model (the cheapest, Grok 1.5 at 480p, is 15 credits for 5s), so
-    // the video line below is a 3s clip (9 credits).
+    // the video line below is a 3s clip (9 credits). With Grok off (see
+    // GROK_OFF_ON_FREE) no video fits at all: the cheapest left is Seedance
+    // 2.0 Mini at 13 credits for 4s, so the line goes.
     monthlyCredits: 10,
     renewsMonthly: false,
     maxResolution: "480p",
@@ -138,10 +163,11 @@ export const TIER_INFO: Record<
     creatorSuite: false,
     watermark: true,
     apiAccess: false,
+    blockedModels: GROK_OFF_ON_FREE ? GROK_MODELS : [],
     features: [
       "10 one-time credits, no monthly refill",
       "1 image",
-      "or 1 Grok video (3s, 480p)",
+      ...(GROK_OFF_ON_FREE ? [] : ["or 1 Grok video (3s, 480p)"]),
       "Credits never expire",
       "Vixlens watermark on results",
       "Standard queue",
@@ -167,6 +193,7 @@ export const TIER_INFO: Record<
     creatorSuite: false,
     watermark: false,
     apiAccess: false,
+    blockedModels: [],
     features: [
       "600 credits / month",
       "~200 images",
@@ -195,6 +222,7 @@ export const TIER_INFO: Record<
     creatorSuite: true,
     watermark: false,
     apiAccess: false,
+    blockedModels: [],
     features: [
       "2,500 credits / month",
       "~833 images",
@@ -230,6 +258,7 @@ export const TIER_INFO: Record<
     creatorSuite: true,
     watermark: false,
     apiAccess: true,
+    blockedModels: [],
     features: [
       "5,000 credits / month",
       "~1,666 images",

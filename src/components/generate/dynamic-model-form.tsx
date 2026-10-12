@@ -42,6 +42,8 @@ import {
   bestAllowedDuration,
   minTierForResolution,
   minTierForDuration,
+  isModelLocked,
+  minTierForModel,
   upgradeHint,
 } from "@/lib/tier-limits";
 import {
@@ -302,14 +304,19 @@ export function DynamicModelForm<T extends string>({
     isDurationLocked(durationOptionSeconds(duration as string), tierInfo)
       ? duration
       : undefined;
-  const blockedReason = lockedResolution
-    ? upgradeHint(minTierForResolution(lockedResolution), lockedResolution)
-    : lockedDuration !== undefined
-      ? upgradeHint(
-          minTierForDuration(durationOptionSeconds(lockedDuration as string)),
-          durationOptionLabel(lockedDuration as string) + " clips",
-        )
-      : undefined;
+  // A model the plan can't run at all (Grok on Free, for now). Read off the
+  // usage query rather than the tierInfo prop, which image forms may not get.
+  const lockedModel = isModelLocked(model, usage.data?.tier_info);
+  const blockedReason = lockedModel
+    ? upgradeHint(minTierForModel(model), config.label)
+    : lockedResolution
+      ? upgradeHint(minTierForResolution(lockedResolution), lockedResolution)
+      : lockedDuration !== undefined
+        ? upgradeHint(
+            minTierForDuration(durationOptionSeconds(lockedDuration as string)),
+            durationOptionLabel(lockedDuration as string) + " clips",
+          )
+        : undefined;
 
   /** Per-option tier gates. Resolution and duration are the only two fields a
    *  plan caps; everything else is the model's own business. */

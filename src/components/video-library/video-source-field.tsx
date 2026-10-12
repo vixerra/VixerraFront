@@ -35,6 +35,7 @@ export function VideoSourceField({
   badge,
   disabled,
   compact,
+  hideLibraryLink,
   minSeconds,
   maxSeconds,
   onPick,
@@ -50,6 +51,9 @@ export function VideoSourceField({
   /** A small grid tile (a reference list's "Add"): no Change/Edit row,
    *  since the tile never stays filled. */
   compact?: boolean;
+  /** Leaves out "My videos" under an empty slot, for a page where a click
+   *  on the slot (which opens the same picker) is the only way in. */
+  hideLibraryLink?: boolean;
   minSeconds?: number;
   maxSeconds?: number;
   onPick: (video: PickedVideo) => void;
@@ -117,7 +121,7 @@ export function VideoSourceField({
           onRemove();
         }}
       />
-      {!compact && (
+      {!compact && !(hideLibraryLink && !previewUrl) && (
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"

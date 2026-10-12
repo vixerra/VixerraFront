@@ -19,6 +19,7 @@ import {
   IMAGE_MODELS,
   SEEDANCE2_RESOLUTIONS,
   SEEDANCE2_ASPECT_RATIOS,
+  GROK_OFF_ON_FREE,
   type VideoModelId,
   type ImageModelId,
   type GenerationType,
@@ -29,10 +30,18 @@ import {
 // (9 of 10 credits for the clip, 10 for the image) instead of opening on a
 // flagship the grant can't cover. Matches the Free card's "1 image, or 1 Grok
 // video (3s, 480p)". Re-check against credit-estimate.ts if prices move.
-const FREE_START_VIDEO = {
-  model: "xai/grok-imagine-video-1.5-preview" as VideoModelId,
-  fields: { duration: 3, resolution: "480p" },
-};
+// While Grok is off on Free (GROK_OFF_ON_FREE) no video fits the grant, so it
+// opens on the cheapest one left, Seedance 2.0 Mini at 4s/480p (13 credits),
+// and the button shows the shortfall instead of a locked model.
+const FREE_START_VIDEO = GROK_OFF_ON_FREE
+  ? {
+      model: "bytedance/seedance-2.0-mini" as VideoModelId,
+      fields: { duration: 4, resolution: "480p" },
+    }
+  : {
+      model: "xai/grok-imagine-video-1.5-preview" as VideoModelId,
+      fields: { duration: 3, resolution: "480p" },
+    };
 const FREE_START_IMAGE = "bytedance/seedream-4.5" as ImageModelId;
 
 /**
