@@ -83,6 +83,24 @@ export function minTierForDuration(durationSeconds: number): Tier | undefined {
   return TIERS.find((t) => TIER_INFO[t].maxDurationSeconds >= durationSeconds);
 }
 
+/**
+ * Whether the plan can't run this model at all (TIER_INFO.blockedModels:
+ * today Grok on Free). Reads the tier_info the API sent, not this app's
+ * copy, so switching a model back on in the API unlocks it here with no
+ * frontend deploy. Optional chaining because an older API sends no list.
+ */
+export function isModelLocked(
+  model: string,
+  tierInfo: { blockedModels?: readonly string[] } | undefined,
+): boolean {
+  return tierInfo?.blockedModels?.includes(model) ?? false;
+}
+
+/** The cheapest plan that can run `model`, for the upgrade hint. */
+export function minTierForModel(model: string): Tier | undefined {
+  return TIERS.find((t) => !TIER_INFO[t].blockedModels.includes(model));
+}
+
 export function upgradeHint(minTier: Tier | undefined, what: string): string {
   if (!minTier) return `Not available on your plan.`;
   return `Upgrade to ${TIER_INFO[minTier].label} to unlock ${what}.`;

@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, ChevronRight } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Lock } from "lucide-react";
 import { DropdownRoot, DropdownTrigger, DropdownContent } from "@/components/ui/dropdown";
 import { ProviderLogo } from "./provider-logo";
 import { pillClass } from "./pill";
 import { cn } from "@/lib/utils";
 import { getModelBadges } from "@/lib/model-meta";
+import { isModelLocked, minTierForModel } from "@/lib/tier-limits";
+import { TIER_INFO } from "@/lib/constants";
+import { useUsage } from "@/hooks/use-credits";
 
 export type PickerModel<T extends string> = {
   id: T;
@@ -36,6 +39,11 @@ export function ProviderModelPicker<T extends string>({
   fullWidth?: boolean;
 }) {
   const selected = models?.find((m) => m.id === value) ?? models[0];
+  // Models the plan can't run (TIER_INFO.blockedModels: Grok on Free, for
+  // now) stay listed and pickable, marked with the plan that unlocks them;
+  // the form's submit button says the rest. A cache read of the usage query
+  // every composer form already runs.
+  const tierInfo = useUsage().data?.tier_info;
 
   const groups = useMemo(() => {
     const map = new Map<string, PickerModel<T>[]>();
@@ -99,6 +107,8 @@ export function ProviderModelPicker<T extends string>({
                 <div className="mt-1 ml-4 space-y-0.5 border-l border-line pl-3">
                   {providerModels.map((model) => {
                     const specBadges = getModelBadges(model.id);
+                    const locked = isModelLocked(model.id, tierInfo);
+                    const unlockTier = locked ? minTierForModel(model.id) : undefined;
                     return (
                       <button
                         key={model.id}
@@ -119,6 +129,15 @@ export function ProviderModelPicker<T extends string>({
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2">
                             <span className="truncate text-label text-ink-soft">{model.label}</span>
+                            {locked && (
+                              <span
+                                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-surface-2 px-1.5 py-0.5 text-[10px] leading-4 text-muted"
+                                title="Not available on your plan right now"
+                              >
+                                <Lock className="size-2.5" aria-hidden="true" />
+                                {unlockTier ? TIER_INFO[unlockTier].label : "Locked"}
+                              </span>
+                            )}
                           </span>
                           {specBadges.length > 0 ? (
                             <span className="mt-1 flex flex-wrap gap-1">
