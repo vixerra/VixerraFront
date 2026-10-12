@@ -25,7 +25,9 @@ import {
   ChevronLeft,
   Lock,
   UserRound,
+  Clapperboard,
 } from "lucide-react";
+import { GENJUTSU_NAME } from "@/lib/genjutsu";
 import { cn, formatCredits } from "@/lib/utils";
 import { hasCreatorSuite } from "@/lib/tier-limits";
 import { Logo } from "./logo";
@@ -100,6 +102,7 @@ const NAV_SECTIONS: { label: string; items: NavEntry[] }[] = [
       { href: "/generate", label: "Generate", icon: Sparkles },
       { href: "/presets", label: "Presets", icon: Wand2 },
       { href: "/influencer", label: "AI Influencer", icon: UserRound },
+      { href: "/genjutsu", label: GENJUTSU_NAME, icon: Clapperboard },
       { href: "/studio", label: "Marketing", icon: Megaphone, creatorSuite: true },
       // Sits in Workspace rather than Library because editing is something
       // you DO, like generating — Library is where finished things are kept.

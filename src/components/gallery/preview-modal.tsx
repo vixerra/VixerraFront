@@ -36,6 +36,7 @@ import { ResultWatermark, useResultWatermark } from "@/components/result-waterma
 import { IMAGE_MODELS, SEEDANCE_DURATION_AUTO, VIDEO_MODELS } from "@/lib/constants";
 import { EDIT_GENERATION_MODEL } from "@/lib/editor/types";
 import { INFLUENCER_INTERNAL_PARAMS, influencerModelLabel, MOTION_MODEL_LABELS } from "@/lib/influencer";
+import { GENJUTSU_MODEL_ID, GENJUTSU_MODES } from "@/lib/genjutsu";
 import { itemLabel, type GalleryItem } from "./generation-card";
 import { appHref } from "@/lib/hosts";
 
@@ -94,6 +95,18 @@ const HIDDEN_PARAM_KEYS = new Set([
 // model's parameters.
 const INFLUENCER_HIDDEN_PARAM_KEYS = new Set<string>(INFLUENCER_INTERNAL_PARAMS);
 
+// A Genjutsu run's own bookkeeping (aiVideo-backend's /generations/genjutsu).
+// Its direction is already the prompt row, and the rest is plumbing.
+const GENJUTSU_HIDDEN_PARAM_KEYS = new Set([
+  "kind",
+  "references",
+  "direction",
+  "soundtrack",
+  "referenceVideoSeconds",
+  "measuredDuration",
+  "orientation",
+]);
+
 const PARAM_LABELS: Record<string, string> = {
   duration: "Duration",
   resolution: "Quality",
@@ -118,6 +131,10 @@ function paramValue(key: string, value: unknown): string | null {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value === "boolean") return value ? "On" : "Off";
   if (typeof value === "object") return null;
+  if (key === "mode") {
+    const mode = GENJUTSU_MODES.find((m) => m.id === value);
+    if (mode) return mode.title;
+  }
   if (key === "duration") {
     const seconds = Number(value);
     if (Number.isFinite(seconds)) {
@@ -282,6 +299,7 @@ function PreviewBody({
   for (const [key, value] of Object.entries(item.parameters ?? {})) {
     if (HIDDEN_PARAM_KEYS.has(key)) continue;
     if (item.influencerId && INFLUENCER_HIDDEN_PARAM_KEYS.has(key)) continue;
+    if (item.model === GENJUTSU_MODEL_ID && GENJUTSU_HIDDEN_PARAM_KEYS.has(key)) continue;
     const formatted = paramValue(key, value);
     if (formatted !== null) details.push({ label: paramLabel(key), value: formatted });
   }

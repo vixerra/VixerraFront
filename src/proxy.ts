@@ -48,6 +48,7 @@ const APP_PREFIXES = [
   "/my-gallery",
   "/presets",
   "/influencer",
+  "/genjutsu",
   "/settings",
   "/studio",
   "/editor",

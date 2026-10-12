@@ -556,6 +556,11 @@ const SEEDANCE20_WITH_VIDEO_COST_USD: Record<string, number> = {
 // rates, and the output is as long as the clip.
 const WAN3_REPLACE_MODEL_ID = "wan/3.0-replace";
 
+// Vixlens Genjutsu (aiVideo-backend's lib/genjutsu.ts): the same Wan 3.0
+// reference task under a model id of its own, billed the same way and at the
+// same margin.
+const GENJUTSU_MODEL_ID = "vixlens/genjutsu";
+
 // The Editing Studio's AI edit (lib/video-edit.ts in aiVideo-backend). Billed
 // on the input stretch AND the output, which is as long as the input: kie's
 // page doesn't say how it meters the edit line, while every reseller of the
@@ -601,7 +606,7 @@ export function estimateVideoCredits(
 
   // A clip whose length wasn't passed is the output's own length here: the
   // route bills the output on the clip.
-  if (model === WAN3_REPLACE_MODEL_ID) {
+  if (model === WAN3_REPLACE_MODEL_ID || model === GENJUTSU_MODEL_ID) {
     const rates = VIDEO_COST_USD["alibaba/wan-3.0"].perSecond;
     const rate = rates[resolution] ?? Math.max(...Object.values(rates));
     const referenceSeconds = options.referenceVideoSeconds ?? effectiveDuration;

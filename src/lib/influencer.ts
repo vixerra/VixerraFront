@@ -26,6 +26,7 @@ import {
   VenusAndMars,
   type LucideIcon,
 } from "lucide-react";
+import { GENJUTSU_MODEL_ID, GENJUTSU_NAME } from "@/lib/genjutsu";
 
 export type TraitOption = { id: string; label: string; swatch?: string };
 export type TraitGroup = { id: string; label: string; multi?: number; options: TraitOption[] };
@@ -181,6 +182,9 @@ export const OPEN_BY_DEFAULT = new Set(["characterType", "comicLevel", "gender",
  *  raw model id — nor the provider's name: the studio sells "Low", "High"
  *  and "Replace", not the models behind them. */
 export const MOTION_MODEL_LABELS: Record<string, string> = {
+  // Not an influencer run, but the same kind of hidden model: shown as the
+  // feature it is (lib/genjutsu.ts), never as what runs it.
+  [GENJUTSU_MODEL_ID]: GENJUTSU_NAME,
   "kling/2.6-motion-control": "AI influencer motion · Low",
   "kling/3.0-motion-control": "AI influencer motion · High",
   "wan/2.2-animate-replace": "AI influencer motion · Replace",
