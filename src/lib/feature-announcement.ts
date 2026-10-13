@@ -1,28 +1,58 @@
 import { appHref } from "@/lib/hosts";
 
 /**
- * The current "new feature" launch — AI Influencer. Shared by the landing
- * banner and ReleaseAnnouncementModal (mounted once, in the root layout), so
- * the banner opens that same dialog instead of shipping a second player.
+ * "New feature" launches, shown by ReleaseAnnouncementModal (mounted once, in
+ * the root layout). The current one, Vixlens Genjutsu, is what the dialog
+ * opens with on its own; the AI Influencer landing banner still opens its
+ * own film through the same dialog instead of shipping a second player.
  */
 export const OPEN_ANNOUNCEMENT_EVENT = "vixlens:open-announcement";
 
-export function openFeatureAnnouncement() {
-  window.dispatchEvent(new Event(OPEN_ANNOUNCEMENT_EVENT));
+export type Announcement = "genjutsu" | "influencer";
+
+export const CURRENT_ANNOUNCEMENT: Announcement = "genjutsu";
+
+export function openFeatureAnnouncement(id: Announcement = CURRENT_ANNOUNCEMENT) {
+  window.dispatchEvent(new CustomEvent<Announcement>(OPEN_ANNOUNCEMENT_EVENT, { detail: id }));
 }
+
+export type LaunchFilm = {
+  webm: string;
+  mp4: string;
+  poster: string;
+  duration: string;
+};
 
 // 720p re-encodes of the 1080p launch film (silent, 26s): VP9 first at
 // ~1.7 MB, H.264 as the fallback for browsers without WebM. Nothing here is
 // fetched until the dialog mounts the <video>.
-export const INFLUENCER_FILM = {
+export const INFLUENCER_FILM: LaunchFilm = {
   webm: "/marketing/influencer/announcement.webm",
   mp4: "/marketing/influencer/announcement.mp4",
   poster: "/marketing/influencer/announcement-poster.webp",
   duration: "0:26",
-} as const;
+};
+
+// The 1080p VP9 master as delivered (silent, 15s, ~3 MB), and a 720p H.264
+// fallback (~2 MB) for browsers without WebM. The poster is its closing
+// frame, which carries the whole lockup: headline, both modes and the CTA.
+export const GENJUTSU_FILM: LaunchFilm = {
+  webm: "/marketing/genjutsu/announcement.webm",
+  mp4: "/marketing/genjutsu/announcement.mp4",
+  poster: "/marketing/genjutsu/announcement-poster.webp",
+  duration: "0:15",
+};
 
 /** Signed-out visitors sign up first; the app shell would otherwise send
  *  them to /login, which is the wrong door for someone new. */
+function launchHref(path: string, signedIn: boolean): string {
+  return appHref(signedIn ? path : `/signup?next=${encodeURIComponent(path)}`);
+}
+
 export function influencerHref(signedIn: boolean): string {
-  return appHref(signedIn ? "/influencer" : `/signup?next=${encodeURIComponent("/influencer")}`);
+  return launchHref("/influencer", signedIn);
+}
+
+export function genjutsuHref(signedIn: boolean): string {
+  return launchHref("/genjutsu", signedIn);
 }

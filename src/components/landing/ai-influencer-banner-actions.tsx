@@ -30,7 +30,7 @@ export function WatchFilmButton() {
   return (
     <button
       type="button"
-      onClick={openFeatureAnnouncement}
+      onClick={() => openFeatureAnnouncement("influencer")}
       aria-label={`Watch the AI Influencer launch film (${INFLUENCER_FILM.duration})`}
       className="group/play absolute inset-0 flex items-center justify-center"
     >
