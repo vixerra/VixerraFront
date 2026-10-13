@@ -9,10 +9,8 @@ import {
 import { keywords } from "@/lib/seo";
 import { Hero } from "@/components/landing/hero";
 import { PlansSection } from "@/components/landing/plans-section";
-import { LaunchOfferBanner, LaunchOfferStickyBar } from "@/components/landing/launch-offer";
-import { PriceComparison } from "@/components/landing/price-comparison";
 import { SeedancePromoBanner } from "@/components/landing/seedance-promo-banner";
-import { AiInfluencerBanner } from "@/components/landing/ai-influencer-banner";
+import { FeatureLaunches } from "@/components/landing/feature-launches";
 import { FeaturesShowcase } from "@/components/landing/features-showcase";
 import { CapabilityConcepts } from "@/components/landing/capability-concepts";
 import { HowItWorks } from "@/components/landing/how-it-works";
@@ -53,17 +51,12 @@ export default function LandingPage() {
           faqPageJsonLd(HOME_FAQS),
         ]}
       />
-      {/* Subscribe-first: the offer (hero), Starter's limited launch offer,
-          the plans, then the price check that backs the offer up — product
-          sections follow. The launch-offer pieces remove themselves once its
-          spots are gone. */}
+      {/* Product-first: what's new (the launch carousel) and what Vixlens
+          does lead; the plans come once, near the end, for visitors who've
+          seen enough to want them. */}
       <Hero />
+      <FeatureLaunches />
       <TrustBar />
-      <AiInfluencerBanner />
-      {/*<Reviews />*/}
-      <LaunchOfferBanner />
-      <PlansSection />
-      <PriceComparison />
       <SeedancePromoBanner />
       <FeaturesShowcase />
       {/*<CapabilityConcepts />*/}
@@ -92,10 +85,9 @@ export default function LandingPage() {
 
       <Personas />
       <CreatorUseCases />
-      
+      <PlansSection />
       <FaqAccordion />
       <CtaSection />
-      <LaunchOfferStickyBar />
     </>
   );
 }

@@ -3,8 +3,8 @@ import { appHref } from "@/lib/hosts";
 /**
  * "New feature" launches, shown by ReleaseAnnouncementModal (mounted once, in
  * the root layout). The current one, Vixlens Genjutsu, is what the dialog
- * opens with on its own; the AI Influencer landing banner still opens its
- * own film through the same dialog instead of shipping a second player.
+ * opens with on its own; the landing launch carousel opens each slide's
+ * film through the same dialog instead of shipping a second player.
  */
 export const OPEN_ANNOUNCEMENT_EVENT = "vixlens:open-announcement";
 
@@ -33,8 +33,9 @@ export const INFLUENCER_FILM: LaunchFilm = {
   duration: "0:26",
 };
 
-// The 1080p VP9 master as delivered (silent, 15s, ~3 MB), and a 720p H.264
-// fallback (~2 MB) for browsers without WebM. The poster is its closing
+// 720p re-encodes of the 1080p master (silent, 15s): VP9 at ~1.2 MB, and
+// H.264 (~1.3 MB, faststart) for browsers without WebM. The dialog is at most
+// 672px wide, so 1080p only cost bytes. The poster is its closing
 // frame, which carries the whole lockup: headline, both modes and the CTA.
 export const GENJUTSU_FILM: LaunchFilm = {
   webm: "/marketing/genjutsu/announcement.webm",
