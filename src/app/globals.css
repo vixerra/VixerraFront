@@ -187,7 +187,7 @@
   --animate-arrow-dip: arrow-dip 2.4s ease-in-out infinite;
   /* Launch-offer CTA glint (landing/launch-offer.tsx). */
   --animate-shine: shine 3.6s ease-in-out infinite;
-  /* AI Influencer banner cast pan (landing/ai-influencer-banner.tsx). */
+  /* Launch slide visual pan (landing/ai-influencer-banner.tsx, genjutsu-slide.tsx). */
   --animate-cast-drift: cast-drift 22s ease-in-out infinite alternate;
   /* Hero node-graph wires: a dash travelling along each connector. */
   --animate-wire-flow: wire-flow 1.6s linear infinite;
@@ -205,6 +205,17 @@
   }
   to {
     transform: scale(1.06) translate3d(-2.5%, -2%, 0);
+  }
+}
+
+/* Launch carousel tab: time left before it auto-advances
+   (landing/launch-carousel.tsx). */
+@keyframes launch-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 

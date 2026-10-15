@@ -4,28 +4,17 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { LaunchOfferPill } from "@/components/landing/launch-offer";
-import { LAUNCH_OFFER, SEEDANCE_MODEL_ID, TIER_INFO } from "@/lib/constants";
-import { useLaunchOffer } from "@/hooks/use-launch-offer";
+import { SEEDANCE_MODEL_ID } from "@/lib/constants";
 import { useMe } from "@/hooks/use-me";
-import { appHref, subscribeHref } from "@/lib/hosts";
-import { cn, formatCredits } from "@/lib/utils";
-import {
-  COMPETITORS,
-  ENTRY_PRICE_MONTHLY,
-  ENTRY_TIER,
-  PRICES_CHECKED_ON,
-  formatListPrice,
-  yearlySavings,
-} from "@/lib/competitor-pricing";
+import { appHref, GET_STARTED_HREF } from "@/lib/hosts";
+import { openFeatureAnnouncement } from "@/lib/feature-announcement";
+import { cn } from "@/lib/utils";
 
-// Price-led, subscribe-first: the headline IS the offer (every model, from
-// the entry plan's price), set as two narrow uppercase lines on slanted
-// yellow tags; the main CTA subscribes to the entry plan directly, and the
-// one object under it is the entry-price board.
-const TITLE_LINES = ["Every top AI model", "One plan"];
-const ENTRY_PRICE = formatListPrice(ENTRY_PRICE_MONTHLY);
-const ENTRY = TIER_INFO[ENTRY_TIER];
+// Product-led: the headline is what Vixlens is (every top model in one
+// studio), set as two narrow uppercase lines on slanted yellow tags; the
+// main CTA leads to the plans (there is no free plan since 2026-10-15), and
+// pricing itself is left to the plans further down.
+const TITLE_LINES = ["Every top AI model", "One studio"];
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 // Featured models, each a direct link into its workspace.
@@ -102,83 +91,9 @@ function Wire({ side }: { side: "left" | "right" }) {
   );
 }
 
-const BOARD_ROWS = [
-  { name: "Vixlens", price: ENTRY_PRICE_MONTHLY, savings: null, ours: true },
-  ...COMPETITORS.map((c) => ({
-    name: c.name,
-    price: c.entryPriceMonthly,
-    // Only where ours is cheaper (see COMPETITORS_UNDERCUT).
-    savings: yearlySavings(c) > 0 ? yearlySavings(c) : null,
-    ours: false,
-  })),
-];
-const BOARD_MAX = Math.max(...BOARD_ROWS.map((row) => row.price));
-
-/** Cheapest paid plan per month, as bars — ours in yellow, theirs in stone,
- *  with what theirs costs over a year beyond ours in amber. Styled as a
- *  graph node: header row with ports, body below. */
-function PriceBoard({ animate }: { animate: boolean }) {
-  return (
-    <div className="node-card mx-auto w-full max-w-xl text-left">
-      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5 sm:px-5">
-        <span className="flex items-center gap-2 text-[11px] font-bold tracking-[0.08em] text-muted uppercase">
-          <span className="size-2 rounded-full bg-brand" aria-hidden="true" />
-          Cheapest paid plan / month
-        </span>
-        <span className="text-[11px] text-text-tertiary">Public prices · {PRICES_CHECKED_ON}</span>
-      </div>
-      <ul className="space-y-3.5 p-4 sm:p-5">
-        {BOARD_ROWS.map((row, i) => (
-          <li key={row.name} className="grid grid-cols-[5rem_1fr_4.5rem] items-center gap-3">
-            <span
-              className={
-                row.ours ? "text-body-sm font-bold text-brand" : "text-body-sm text-muted"
-              }
-            >
-              {row.name}
-            </span>
-            <div className="h-2 overflow-hidden rounded-full bg-ink/[0.06]">
-              <motion.div
-                className={
-                  row.ours
-                    ? "h-full origin-left rounded-full bg-brand shadow-glow-sm"
-                    : "h-full origin-left rounded-full bg-silver/35"
-                }
-                style={{ width: `${(row.price / BOARD_MAX) * 100}%` }}
-                initial={animate ? { scaleX: 0 } : false}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.9, delay: 1.1 + i * 0.12, ease: EASE }}
-              />
-            </div>
-            <span className="flex flex-col items-end leading-tight">
-              <span
-                className={
-                  row.ours
-                    ? "text-body font-bold text-brand tabular-nums"
-                    : "text-body-sm font-semibold text-ink tabular-nums"
-                }
-              >
-                {formatListPrice(row.price)}
-              </span>
-              {row.savings !== null && (
-                <span className="text-[11px] text-accent-amber tabular-nums">+${row.savings}/yr</span>
-              )}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
   const { data: user } = useMe();
-  // While Starter's launch offer has spots, that is what a new subscriber
-  // pays; the list price once it sells out.
-  const { soldOut } = useLaunchOffer();
-  const entryPrice =
-    ENTRY_TIER === LAUNCH_OFFER.tier && !soldOut ? formatListPrice(LAUNCH_OFFER.priceMonthly) : ENTRY_PRICE;
   const rise = (delay: number, y = 20) =>
     shouldReduceMotion
       ? {}
@@ -233,7 +148,17 @@ export function Hero() {
       <div className="container-page relative py-14 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">
           <motion.div {...rise(0, 16)} className="mb-5 flex justify-center">
-            <LaunchOfferPill />
+            <button
+              type="button"
+              onClick={() => openFeatureAnnouncement("genjutsu")}
+              className="inline-flex items-center gap-2 rounded-full border border-accent-hot/30 bg-accent-hot/[0.08] py-1 pr-3 pl-1 font-mono text-[11px] leading-none tracking-[0.16em] text-accent-hot-ink uppercase transition-colors hover:border-accent-hot/60"
+            >
+              <span className="rounded-full bg-accent-hot-strong px-2 py-1 font-semibold tracking-[0.14em] text-white">
+                New
+              </span>
+              Genjutsu is live
+              <ArrowRight className="size-3.5" aria-hidden="true" />
+            </button>
           </motion.div>
 
           <h1 className="font-narrow flex flex-col items-center gap-1.5 text-[2.2rem] leading-none font-semibold tracking-[-0.01em] uppercase min-[400px]:text-5xl sm:gap-2 sm:text-6xl lg:text-[5.25rem]">
@@ -242,24 +167,14 @@ export function Hero() {
                 {line}
               </motion.span>
             ))}
-            <motion.span
-              {...rise(0.4, 30)}
-              className="mt-2 flex items-baseline gap-2 text-ink sm:mt-3"
-            >
-              From {entryPrice}
-              <span className="font-sans text-[0.3em] font-normal tracking-normal text-muted normal-case">
-                /mo
-              </span>
-            </motion.span>
           </h1>
 
           <motion.p
             {...rise(0.55, 24)}
             className="mx-auto mt-6 max-w-xl text-body-lg text-muted"
           >
-            Seedance 2.5, Kling 3.0, Veo 3.1, GPT Image 2 and Nano Banana Pro in one studio.
-            No watermark and a commercial license from {TIER_INFO.starter.label} up, cancel
-            anytime.
+            Seedance 2.5, Kling 3.0, Veo 3.1, GPT Image 2 and Nano Banana Pro, side by side,
+            plus Genjutsu and AI Influencers built in. Write a prompt, pick a model, ship it.
           </motion.p>
 
           <motion.div
@@ -285,36 +200,31 @@ export function Hero() {
             className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
           >
             <Link
-              href={subscribeHref(ENTRY_TIER, Boolean(user))}
+              href={user ? appHref("/generate") : GET_STARTED_HREF}
               prefetch={false}
               className={buttonVariants({ variant: "accent", size: "lg" })}
             >
-              Get {ENTRY.label} for {entryPrice}/mo
+              {user ? "Open the studio" : "Get started"}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
-            <a href="#compare" className={buttonVariants({ variant: "outline", size: "lg" })}>
-              Compare prices
+            <a href="#showcase" className={buttonVariants({ variant: "outline", size: "lg" })}>
+              See what it makes
             </a>
           </motion.div>
 
-          <motion.p
-            {...rise(0.9, 0)}
-            className="mt-4 text-caption text-text-tertiary"
-          >
-            {formatCredits(ENTRY.monthlyCredits)} credits every month. Just looking?{" "}
-            <Link
-              href="/gallery"
-              className="text-muted underline decoration-brand/50 underline-offset-4 transition-colors hover:text-brand"
-            >
-              Browse the gallery
-            </Link>{" "}
-            — no account needed.
-          </motion.p>
+          {!user && (
+            <motion.p {...rise(0.9, 0)} className="mt-4 text-caption text-text-tertiary">
+              Just looking?{" "}
+              <Link
+                href="/gallery"
+                className="text-muted underline decoration-brand/50 underline-offset-4 transition-colors hover:text-brand"
+              >
+                Browse the gallery
+              </Link>{" "}
+              — no account needed.
+            </motion.p>
+          )}
         </div>
-
-        <motion.div {...rise(0.95, 30)} className="relative z-10 mt-12">
-          <PriceBoard animate={!shouldReduceMotion} />
-        </motion.div>
       </div>
     </section>
   );

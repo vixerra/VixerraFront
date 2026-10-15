@@ -17,10 +17,11 @@ export function CtaSection() {
       <Reveal className="container-page flex flex-col items-center gap-7 text-center">
         <h2 className="font-narrow flex flex-col items-center gap-1.5 text-[2.2rem] leading-none font-semibold tracking-[-0.01em] uppercase min-[400px]:text-5xl sm:gap-2 sm:text-6xl lg:text-7xl">
           <span className="tag-slant">Every top model</span>
-          <span className="tag-slant">One subscription</span>
+          <span className="tag-slant">One studio</span>
         </h2>
         <p className="max-w-lg text-body-lg text-muted">
-          Plans from {formatListPrice(ENTRY_PRICE_MONTHLY)} a month, cancel anytime.
+          Video, images, Genjutsu and AI Influencers, all in one place. Plans from{" "}
+          {formatListPrice(ENTRY_PRICE_MONTHLY)} a month, cancel anytime.
         </p>
         <div className="flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
           <a href="#plans" className={buttonVariants({ variant: "accent", size: "lg" })}>
