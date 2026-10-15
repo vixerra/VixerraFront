@@ -8,9 +8,15 @@ import { Modal } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
-import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
+import { PAID_TIERS, TIERS, TIER_INFO, annualSavings, type BillingInterval, type Tier } from "@/lib/constants";
+import { formatListPrice } from "@/lib/competitor-pricing";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
-import { PlanPrice } from "@/components/pricing/plan-price";
+import {
+  BillingIntervalProvider,
+  BillingIntervalToggle,
+  PlanCardPrice,
+  intervalFor,
+} from "@/components/pricing/billing-interval";
 import { apiFetch } from "@/lib/api-client";
 import { cn, formatCredits } from "@/lib/utils";
 import { useInvalidateCredits } from "@/hooks/use-credits";
@@ -230,8 +236,14 @@ export function PlanSwitcher({
   promo = null,
   onPromoUsed,
   deferAutoCheckout = false,
+  initialInterval = null,
+  annualAvailable = true,
 }: {
   currentTier: string;
+  /** ?interval=annual from the pricing page: the period the visitor picked. */
+  initialInterval?: BillingInterval | null;
+  /** False until the annual Stripe Prices are set: Annual isn't offered. */
+  annualAvailable?: boolean;
   /** The plan picked on the landing page (?plan=), singled out and
    *  scrolled to — the visitor came here to buy that one. */
   highlightTier?: Tier | null;
@@ -265,6 +277,17 @@ export function PlanSwitcher({
   }, [highlightTier]);
 
   const hasLivePlan = subscription !== null && LIVE_STATUSES.includes(subscription.status);
+  // Monthly or annual for the whole grid. A live plan opens on its own
+  // period; a new buyer on what the pricing page had selected (annual by
+  // default there too).
+  const currentInterval: BillingInterval =
+    hasLivePlan && subscription?.billing_interval === "annual" ? "annual" : "monthly";
+  const [interval, setInterval] = useState<BillingInterval>(() =>
+    !annualAvailable ? "monthly" : hasLivePlan ? currentInterval : (initialInterval ?? "annual"),
+  );
+  /** On the plan already, on the period already. */
+  const isCurrentPlan = (tier: Tier) =>
+    tier === currentTier && (!hasLivePlan || intervalFor(tier, interval) === currentInterval);
   // Arrived from a "Subscribe to …" button (?plan=) with no plan to switch
   // from: the only next step is Stripe's payment page, which is its own
   // confirmation, so go straight there instead of making them find the card
@@ -277,7 +300,7 @@ export function PlanSwitcher({
     !hasLivePlan &&
     highlightTier !== null &&
     highlightTier !== "free" &&
-    highlightTier !== currentTier;
+    !isCurrentPlan(highlightTier);
 
   const pendingCancel = subscription?.cancel_at_period_end === true;
   const periodEnd = formatDate(subscription?.current_period_end);
@@ -289,13 +312,14 @@ export function PlanSwitcher({
   const liveTier = hasLivePlan ? (subscription?.tier as Tier) : null;
   const bonusFor = useCallback(
     (tier: Tier) => {
-      if (tier === "free" || tier === currentTier) return 0;
+      if (tier === "free" || isCurrentPlan(tier)) return 0;
       const startsNewPlan = paymentsEnabled && !liveTier;
       const from = liveTier ?? (currentTier as Tier);
       if (!startsNewPlan && TIERS.indexOf(tier) <= TIERS.indexOf(from)) return 0;
       return promoBonusFor(promo, tier);
     },
-    [promo, currentTier, liveTier, paymentsEnabled],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- isCurrentPlan reads interval and currentTier
+    [promo, currentTier, liveTier, paymentsEnabled, interval],
   );
 
   /** The confirm copy has to match what is actually about to happen —
@@ -328,6 +352,17 @@ export function PlanSwitcher({
           ? `You'll keep ${tierLabel(currentTier)} and everything on your account until ${periodEnd}, and you won't be charged again. You can restart any time.`
           : `You'll keep ${tierLabel(currentTier)} until the end of the period you've already paid for, and you won't be charged again.`,
         confirmLabel: "Cancel plan",
+      });
+    }
+
+    if (subscription && hasLivePlan && subscription.tier === tier && intervalFor(tier, interval) !== currentInterval) {
+      return confirm({
+        title: interval === "annual" ? "Switch to annual billing?" : "Switch to monthly billing?",
+        description:
+          interval === "annual"
+            ? `Your card is charged for a year of ${target.label} now, less what's left of the period you already paid for. You keep getting your credits every month, and save ${formatListPrice(annualSavings(tier))} a year.${bonusLine}`
+            : `${target.label} moves to monthly billing right away, and the unused part of your year is credited against your next invoices. Your balance is untouched.`,
+        confirmLabel: interval === "annual" ? "Switch to annual" : "Switch to monthly",
       });
     }
 
@@ -373,7 +408,11 @@ export function PlanSwitcher({
           headers: { "Content-Type": "application/json" },
           // Only where the code covers this move — the server refuses it
           // anywhere else, and the plan must stay buyable without it.
-          body: JSON.stringify({ tier, promoCode: bonusFor(tier) ? promo!.code : undefined }),
+          body: JSON.stringify({
+            tier,
+            interval: tier === "free" ? undefined : intervalFor(tier, interval),
+            promoCode: bonusFor(tier) ? promo!.code : undefined,
+          }),
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error ?? "Failed to switch plan");
@@ -406,7 +445,7 @@ export function PlanSwitcher({
       }
       return false;
     },
-    [paymentsEnabled, invalidateCredits, toast, promo, bonusFor, onPromoUsed],
+    [paymentsEnabled, invalidateCredits, toast, promo, bonusFor, onPromoUsed, interval],
   );
 
   async function switchTo(tier: Tier) {
@@ -440,7 +479,14 @@ export function PlanSwitcher({
   /** What the button on each card says, which is the only place the four
    *  possible relationships to a plan are visible at a glance. */
   function actionFor(tier: Tier) {
-    const isCurrent = tier === currentTier;
+    const isCurrent = isCurrentPlan(tier);
+    if (tier === currentTier && !isCurrent && paymentsEnabled) {
+      return {
+        label: interval === "annual" ? "Switch to annual" : "Switch to monthly",
+        disabled: unavailable,
+        primary: interval === "annual",
+      };
+    }
     if (!paymentsEnabled) {
       return { label: isCurrent ? "Current plan" : "Switch", disabled: isCurrent, primary: !isCurrent };
     }
@@ -470,10 +516,18 @@ export function PlanSwitcher({
           Plans can&apos;t be purchased right now — billing isn&apos;t fully set up on this server.
         </p>
       )}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {TIERS.map((tier) => {
+      <BillingIntervalProvider value={interval} onChange={setInterval}>
+      {annualAvailable && (
+        <div className="mb-4 flex justify-center sm:justify-start">
+          <BillingIntervalToggle />
+        </div>
+      )}
+      {/* The plans on sale. Free isn't one any more (2026-10-15); leaving a
+          paid plan is the "Cancel plan" link under the grid. */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {PAID_TIERS.map((tier) => {
           const info = TIER_INFO[tier];
-          const isCurrent = tier === currentTier;
+          const isCurrent = isCurrentPlan(tier);
           const action = actionFor(tier);
           const isPicked = tier === highlightTier && !isCurrent;
           return (
@@ -490,9 +544,12 @@ export function PlanSwitcher({
                 )}
                 {isPicked && <Badge variant="brand">Your pick</Badge>}
               </div>
-              <p className="mt-1 text-heading font-bold text-ink">
-                <PlanPrice priceMonthly={info.priceMonthly} showSuffix={false} />
-              </p>
+              <PlanCardPrice
+                tier={tier}
+                className="mt-1"
+                priceClassName="text-heading font-bold text-ink"
+                suffixClassName="text-caption text-muted"
+              />
               <PromoBonusBadge credits={bonusFor(tier)} />
               <PlanFeatureList
                 features={info.features.slice(0, 3)}
@@ -513,6 +570,19 @@ export function PlanSwitcher({
           );
         })}
       </div>
+      </BillingIntervalProvider>
+      {currentTier !== "free" && (!paymentsEnabled || (hasLivePlan && !pendingCancel)) && (
+        <div className="mt-3 flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            loading={loadingTier === "free"}
+            onClick={() => switchTo("free")}
+          >
+            Cancel plan
+          </Button>
+        </div>
+      )}
       {simulatedResult && (
         <SimulatedResultDialog result={simulatedResult} onClose={() => setSimulatedResult(null)} />
       )}

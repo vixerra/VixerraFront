@@ -684,7 +684,7 @@ function Welcome({ step, still }: SceneProps) {
 
       <Part on={at(2)} still={still} className="flex justify-center p-0.5">
         <span className="rounded-full bg-brand px-2.5 py-0.5 text-[8px] font-semibold text-on-brand">
-          Start free
+          Get started
         </span>
       </Part>
     </Plate>

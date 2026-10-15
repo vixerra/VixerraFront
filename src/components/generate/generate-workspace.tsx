@@ -92,6 +92,7 @@ export function GenerateStudio({ type }: { type: GenerationType }) {
   const { data: me } = useMe();
   const canGenerate = useCanGenerate(me?.organization);
   const freeStart = me?.effectiveTier === "free" && !requestedModel;
+  const needsPlan = me?.effectiveTier === "free" && usageQuery.data?.credit_balance === 0;
 
   const busy = generation.status === "queued" || generation.status === "processing";
   const hasJob = Boolean(activeJobId);
@@ -154,6 +155,21 @@ export function GenerateStudio({ type }: { type: GenerationType }) {
           <p className="mx-4 mt-3 flex gap-2 rounded-xl border border-warning/40 bg-warning/5 px-3.5 py-2.5 text-caption text-ink-soft sm:mx-5">
             <Lock className="mt-px size-3.5 shrink-0 text-warning" aria-hidden="true" />
             {canGenerate.reason}
+          </p>
+        )}
+
+        {/* No plan and nothing left to spend: since the Free plan was retired
+            (2026-10-15) a new account has to pick a plan before its first
+            generation, and the API refuses it until then. Said up front
+            rather than after a refused submit. Accounts that still hold old
+            Free credits keep generating until they run out. */}
+        {needsPlan && (
+          <p className="mx-4 mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-brand-ink/40 bg-brand/5 px-3.5 py-2.5 text-caption text-ink-soft sm:mx-5">
+            <Zap className="size-3.5 shrink-0 text-brand-ink" aria-hidden="true" />
+            Pick a plan to start generating.
+            <Link href="/settings/billing" className="font-semibold text-brand-ink underline underline-offset-4">
+              See plans
+            </Link>
           </p>
         )}
 

@@ -727,7 +727,7 @@ export const PAGE_GUIDES: PageGuide[] = [
         title: "Follow a try-it link",
         detail: "It opens the composer with that model selected.",
       },
-      { icon: "zap", title: "Start free", detail: "10 credits, no card." },
+      { icon: "zap", title: "Pick a plan", detail: "Every model, from Starter up." },
     ],
   },
   {

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import {
   featuredModelLabels,
-  freeVideoOffer,
   GeneratorLanding,
   generatorModels,
   listPhrase,
@@ -13,14 +12,11 @@ import { modelSpecs } from "@/lib/model-seo";
 import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 import { SEEDANCE25_SHOWCASE_VIDEOS } from "@/lib/showcase-media";
 
-// Targets "ai video generator", "ai video" and "free ai video generator". The
-// free claim rests on freeVideoOffer(): the Free grant covering a real clip
-// (watermarked, like everything Free makes). If that ever stops being true,
-// the title, tagline and FAQ fall back to saying video starts on Starter.
+// Targets "ai video generator" and "ai video". There is no free plan since
+// 2026-10-15, so nothing here may claim the generator is free.
 
-const { free, starter, creator, studio } = TIER_INFO;
+const { starter, creator, studio } = TIER_INFO;
 const models = generatorModels("video");
-const freeVideo = freeVideoOffer();
 const names = (list: typeof models) => list.map((m) => m.entry.label);
 
 const audioModels = models.filter(
@@ -29,13 +25,11 @@ const audioModels = models.filter(
 const imageToVideoModels = models.filter((m) => m.entry.category === "image-to-video");
 const featured = featuredModelLabels(models, 3);
 
-const TITLE = `${freeVideo ? "Free " : ""}AI Video Generator — Text & Image to Video`;
+const TITLE = "AI Video Generator — Text & Image to Video";
 const DESCRIPTION = metaDescription(
-  freeVideo
-    ? `Free AI video generator: create videos from text or images with ${featured.join(", ")} and more. ${free.monthlyCredits} free credits, no credit card.`
-    : `Create AI videos from text or images with ${featured.join(", ")} and more${
-        audioModels.length > 0 ? ", with native audio" : ""
-      }. One account and one credit balance for every model.`,
+  `Create AI videos from text or images with ${featured.join(", ")} and more${
+    audioModels.length > 0 ? ", with native audio" : ""
+  }. One account and one credit balance for every model.`,
 );
 
 export const metadata: Metadata = {
@@ -46,7 +40,6 @@ export const metadata: Metadata = {
   keywords: keywords(
     "text to video",
     "image to video",
-    ...(freeVideo ? ["free AI video generator"] : []),
     ...featured,
   ),
 };
@@ -54,9 +47,7 @@ export const metadata: Metadata = {
 const content: GeneratorLandingContent = {
   kind: "video",
   heading: "AI Video Generator",
-  tagline: `Turn a text prompt or a photo into a finished video clip, with ${models.length} AI video models in one studio${
-    freeVideo ? " — free to start" : ""
-  }.`,
+  tagline: `Turn a text prompt or a photo into a finished video clip, with ${models.length} AI video models in one studio.`,
   intro: `${SITE_NAME} is an AI video generator that runs ${models.length} video models — including ${listPhrase(
     featured,
   )} — from a single account. Describe a shot in words, or upload an image and describe how it should move, and get a clip back ready to download.${
@@ -98,10 +89,8 @@ const content: GeneratorLandingContent = {
       }`,
     },
     {
-      question: "Is the AI video generator free?",
-      answer: freeVideo
-        ? `Yes. A free account comes with ${free.monthlyCredits} credits and no credit card — enough for ${freeVideo.clips === 1 ? "a clip" : `${freeVideo.clips} clips`} with ${freeVideo.label} (${freeVideo.credits} credits${freeVideo.clips === 1 ? "" : " each"}, ${freeVideo.seconds}s at ${freeVideo.resolution}, with a Vixlens watermark). Every model is open on every plan; the credits are the only limit. For longer, sharper, watermark-free video and a commercial licence, ${starter.label} is $${starter.priceMonthly}/month with ${starter.monthlyCredits.toLocaleString("en-US")} credits.`
-        : `Signing up is free and comes with ${free.monthlyCredits} credits and no credit card, but those credits are sized for trying the image models and don't cover a video clip. Video starts on the ${starter.label} plan at $${starter.priceMonthly}/month, with ${starter.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence.`,
+      question: "How much does the AI video generator cost?",
+      answer: `Generating needs a plan — there is no free tier. Video starts on the ${starter.label} plan at $${starter.priceMonthly}/month, with ${starter.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence. The gallery is open without an account if you want to see results first.`,
     },
     ...(audioModels.length > 0
       ? [
@@ -119,7 +108,7 @@ const content: GeneratorLandingContent = {
     },
     {
       question: "Can I use the videos commercially?",
-      answer: `Yes, from the ${starter.label} plan up — paid plans include a commercial licence. The ${free.label} plan does not, and its videos carry a Vixlens watermark.`,
+      answer: `Yes. Every plan, from ${starter.label} up, includes a commercial licence.`,
     },
   ],
   sibling: {

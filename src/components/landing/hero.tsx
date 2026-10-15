@@ -5,7 +5,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { LaunchOfferPill } from "@/components/landing/launch-offer";
-import { SEEDANCE_MODEL_ID, TIER_INFO } from "@/lib/constants";
+import { LAUNCH_OFFER, SEEDANCE_MODEL_ID, TIER_INFO } from "@/lib/constants";
+import { useLaunchOffer } from "@/hooks/use-launch-offer";
 import { useMe } from "@/hooks/use-me";
 import { appHref, subscribeHref } from "@/lib/hosts";
 import { cn, formatCredits } from "@/lib/utils";
@@ -106,7 +107,8 @@ const BOARD_ROWS = [
   ...COMPETITORS.map((c) => ({
     name: c.name,
     price: c.entryPriceMonthly,
-    savings: yearlySavings(c),
+    // Only where ours is cheaper (see COMPETITORS_UNDERCUT).
+    savings: yearlySavings(c) > 0 ? yearlySavings(c) : null,
     ours: false,
   })),
 ];
@@ -172,6 +174,11 @@ function PriceBoard({ animate }: { animate: boolean }) {
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
   const { data: user } = useMe();
+  // While Starter's launch offer has spots, that is what a new subscriber
+  // pays; the list price once it sells out.
+  const { soldOut } = useLaunchOffer();
+  const entryPrice =
+    ENTRY_TIER === LAUNCH_OFFER.tier && !soldOut ? formatListPrice(LAUNCH_OFFER.priceMonthly) : ENTRY_PRICE;
   const rise = (delay: number, y = 20) =>
     shouldReduceMotion
       ? {}
@@ -239,7 +246,7 @@ export function Hero() {
               {...rise(0.4, 30)}
               className="mt-2 flex items-baseline gap-2 text-ink sm:mt-3"
             >
-              From {ENTRY_PRICE}
+              From {entryPrice}
               <span className="font-sans text-[0.3em] font-normal tracking-normal text-muted normal-case">
                 /mo
               </span>
@@ -282,7 +289,7 @@ export function Hero() {
               prefetch={false}
               className={buttonVariants({ variant: "accent", size: "lg" })}
             >
-              Get {ENTRY.label} for {ENTRY_PRICE}/mo
+              Get {ENTRY.label} for {entryPrice}/mo
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <a href="#compare" className={buttonVariants({ variant: "outline", size: "lg" })}>
@@ -296,13 +303,12 @@ export function Hero() {
           >
             {formatCredits(ENTRY.monthlyCredits)} credits every month. Just looking?{" "}
             <Link
-              href={appHref("/signup")}
-              prefetch={false}
+              href="/gallery"
               className="text-muted underline decoration-brand/50 underline-offset-4 transition-colors hover:text-brand"
             >
-              Try it with {TIER_INFO.free.monthlyCredits} free credits
+              Browse the gallery
             </Link>{" "}
-            — no card required.
+            — no account needed.
           </motion.p>
         </div>
 

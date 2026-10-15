@@ -36,13 +36,17 @@ function planFromNext(next: string | null): Tier | null {
   }
 }
 
+const NO_ERRAND_NEXT = "/settings/billing";
+
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Same ?next= contract as login: someone who reached a preset without an
   // account signs up and lands on that preset, not on a dashboard they then
   // have to navigate back out of.
-  const next = searchParams.get("next");
+  // With no errand, the plans: there is no free plan to start on (since
+  // 2026-10-15), so a new account picks one before it can generate.
+  const next = searchParams.get("next") || NO_ERRAND_NEXT;
   const plan = planFromNext(next);
   const [serverError, setServerError] = useState<string | null>(null);
   // Set once the backend has created the account but is holding the session
@@ -77,7 +81,7 @@ function SignupForm() {
         setPendingEmail(json.email ?? data.email);
         return;
       }
-      router.push(next || "/dashboard");
+      router.push(next);
       router.refresh();
     },
     onError: (err: Error) => setServerError(err.message),
@@ -121,7 +125,7 @@ function SignupForm() {
         </p>
       ) : (
         <p className="mt-2 text-body-sm text-muted">
-          Start with {formatCredits(TIER_INFO.free.monthlyCredits)} free credits — no card required.
+          Then pick a plan to start creating. Cancel anytime.
         </p>
       )}
 

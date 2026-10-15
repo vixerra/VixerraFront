@@ -3,13 +3,7 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
-import { getCloudflareModel, type DynamicField } from "@/lib/cloudflare-models";
-import { TIER_INFO, type TierInfo } from "@/lib/constants";
-import { estimateVideoCredits } from "@/lib/credit-estimate";
-import { durationSeconds } from "@/lib/marketing-models";
-import { bestAllowedDuration, bestAllowedResolution } from "@/lib/tier-limits";
 import { faqPageJsonLd, type Faq } from "@/lib/faqs";
-import { appHref } from "@/lib/hosts";
 import { CATEGORY_LABEL, MODEL_PAGES, modelCatalogEntry } from "@/lib/model-seo";
 import { SITE_NAME } from "@/lib/seo";
 
@@ -61,40 +55,6 @@ export function featuredModelLabels(models: ReturnType<typeof generatorModels>, 
     .map(({ entry }) => entry.label);
 }
 
-/** The longest clip a plan can submit on this duration field, if any. */
-function longestAllowedSeconds(field: DynamicField | undefined, tierInfo: TierInfo) {
-  if (!field) return undefined;
-  if (field.options) {
-    const option = bestAllowedDuration(field.options, durationSeconds, tierInfo);
-    return option === undefined ? undefined : durationSeconds(option);
-  }
-  if ((field.min ?? 0) > tierInfo.maxDurationSeconds) return undefined;
-  return Math.min(tierInfo.maxDurationSeconds, field.max ?? tierInfo.maxDurationSeconds);
-}
-
-/**
- * What the Free grant buys in video, or undefined when it buys none: the
- * cheapest video model at the longest clip Free's resolution and duration
- * caps allow. Every model is open to every plan, so this is purely a question
- * of credits. Priced by the same estimate the composer charges, so the page
- * can't promise more clips than the credits cover.
- */
-export function freeVideoOffer() {
-  const { free } = TIER_INFO;
-  const offers = generatorModels("video").flatMap(({ page, entry }) => {
-    const config = getCloudflareModel(page.id);
-    if (!config) return [];
-    const resolutionOptions = config.fields.find((f) => f.key === "resolution")?.options ?? [];
-    const resolution = bestAllowedResolution(resolutionOptions, free);
-    const seconds = longestAllowedSeconds(config.fields.find((f) => f.key === "duration"), free);
-    if (!resolution || seconds === undefined) return [];
-    const credits = estimateVideoCredits(page.id, seconds, resolution);
-    const clips = Math.floor(free.monthlyCredits / credits);
-    return clips > 0 ? [{ label: entry.label, credits, clips, seconds, resolution }] : [];
-  });
-  return offers.sort((a, b) => a.credits - b.credits)[0];
-}
-
 /** "a", "a and b", "a, b and c". */
 export function listPhrase(items: string[]) {
   return items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
@@ -125,8 +85,8 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
             <Sparkles className="size-4" aria-hidden="true" />
             {content.primaryCta.label}
           </Link>
-          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "secondary" })}>
-            Start free — {TIER_INFO.free.monthlyCredits} credits
+          <Link href="/pricing#plans" className={buttonVariants({ variant: "secondary" })}>
+            See plans
           </Link>
         </div>
       </header>
@@ -243,14 +203,14 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
       <section className="mt-20 rounded-2xl border border-line bg-surface-2 px-6 py-12 text-center sm:px-12">
         <h2 className="text-heading font-bold text-ink">Try the AI {content.kind} generator</h2>
         <p className="mx-auto mt-3 max-w-xl text-body text-muted">
-          {TIER_INFO.free.monthlyCredits} free credits on sign-up, no credit card required.
+          Every model on one credit balance — pick a plan and start creating.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
-            Create a free account
+          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
+            Get started
           </Link>
-          <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>
-            See pricing
+          <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
+            Browse the gallery
           </Link>
         </div>
       </section>

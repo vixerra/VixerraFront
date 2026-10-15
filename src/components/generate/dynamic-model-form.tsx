@@ -45,7 +45,14 @@ import {
   isModelLocked,
   minTierForModel,
   upgradeHint,
+  RESOLUTION_RANK,
 } from "@/lib/tier-limits";
+import { useUnlimited } from "@/hooks/use-unlimited";
+import {
+  UnlimitedEndedNote,
+  UnlimitedToggle,
+  unlimitedRecentlyEnded,
+} from "@/components/generate/unlimited-toggle";
 import {
   SIZE_FIELD_KEYS,
   choicesFor,
@@ -55,7 +62,7 @@ import {
   valueHint,
 } from "@/lib/composer-fields";
 import { applyImageStyle } from "@/lib/image-styles";
-import { IMAGE_STYLE_PRESETS, PROMPT_MAX_LENGTH, type TierInfo } from "@/lib/constants";
+import { IMAGE_STYLE_PRESETS, PROMPT_MAX_LENGTH, UNLIMITED_PROMO, type TierInfo } from "@/lib/constants";
 import {
   PanelSection,
   PanelPromptField,
@@ -171,6 +178,16 @@ export function DynamicModelForm<T extends string>({
   // plan limits still arrive as the tierInfo prop.
   const usage = useUsage();
   const creditBalance = usage.data?.credit_balance;
+  // Wan 3.0 Unlimited (aiVideo-backend's lib/unlimited.ts): while the
+  // window is open, the model it covers can run in the Relax queue for 0
+  // credits. On by default; off is an ordinary run paid in credits.
+  const unlimited = useUnlimited();
+  const unlimitedState = unlimited.data ?? null;
+  const coveredByUnlimited =
+    config.id === UNLIMITED_PROMO.videoModel ||
+    (unlimitedState?.image_model !== null && config.id === unlimitedState?.image_model);
+  const [relaxOn, setRelaxOn] = useState(true);
+  const relax = Boolean(unlimitedState?.active && coveredByUnlimited && relaxOn);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   // Image style is a composer-level control, not a model field: it folds into
@@ -317,6 +334,42 @@ export function DynamicModelForm<T extends string>({
             durationOptionLabel(lockedDuration as string) + " clips",
           )
         : undefined;
+
+  // Relax runs have their own, lower limits. The pick is clamped to them when
+  // the switch is on (effect below); anything above them is refused here
+  // instead of by a 403, without pointing at billing — turning the switch
+  // off is the fix.
+  const numericDuration =
+    typeof duration === "number" ? duration : durationOptionSeconds(String(duration ?? "")) || 0;
+  const relaxMaxResolution = unlimitedState?.max_resolution ?? null;
+  const relaxMaxSeconds = unlimitedState?.max_duration_seconds ?? null;
+  const relaxProblem =
+    relax && isVideoModel
+      ? relaxMaxResolution &&
+        typeof resolution === "string" &&
+        (RESOLUTION_RANK[resolution] ?? Infinity) > (RESOLUTION_RANK[relaxMaxResolution] ?? 0)
+        ? `Unlimited goes up to ${relaxMaxResolution} — turn it off to use credits.`
+        : relaxMaxSeconds && numericDuration > relaxMaxSeconds
+          ? `Unlimited clips are up to ${relaxMaxSeconds}s — turn it off to use credits.`
+          : undefined
+      : undefined;
+
+  useEffect(() => {
+    if (!relax || !isVideoModel) return;
+    const current = getValues("resolution");
+    if (
+      relaxMaxResolution &&
+      typeof current === "string" &&
+      (RESOLUTION_RANK[current] ?? Infinity) > (RESOLUTION_RANK[relaxMaxResolution] ?? 0) &&
+      resolutionOptions.includes(relaxMaxResolution)
+    ) {
+      setValue("resolution", relaxMaxResolution, { shouldValidate: true });
+    }
+    const currentDuration = getValues("duration");
+    if (relaxMaxSeconds && typeof currentDuration === "number" && currentDuration > relaxMaxSeconds) {
+      setValue("duration", relaxMaxSeconds, { shouldValidate: true });
+    }
+  }, [relax, isVideoModel, relaxMaxResolution, relaxMaxSeconds, resolutionOptions, getValues, setValue]);
 
   /** Per-option tier gates. Resolution and duration are the only two fields a
    *  plan caps; everything else is the model's own business. */
@@ -514,7 +567,9 @@ export function DynamicModelForm<T extends string>({
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
-      const res = await apiFetch(`${ENDPOINTS[mode]}${workspaceQuery()}`, {
+      const workspace = workspaceQuery();
+      const queue = relax ? `${workspace ? "&" : "?"}queue=relax` : "";
+      const res = await apiFetch(`${ENDPOINTS[mode]}${workspace}${queue}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, model: config.id }),
@@ -526,6 +581,7 @@ export function DynamicModelForm<T extends string>({
     onSuccess: (data) => {
       onCreated(data.id);
       invalidateCredits();
+      if (relax) void unlimited.refetch();
     },
     onError: (err: Error) => {
       toast({ title: "Couldn't start generation", description: err.message, variant: "error" });
@@ -800,13 +856,25 @@ export function DynamicModelForm<T extends string>({
       </div>
 
       <div className="shrink-0 border-t border-line p-4 sm:p-5">
+        {coveredByUnlimited && unlimitedState?.active && (
+          <UnlimitedToggle
+            state={unlimitedState}
+            checked={relaxOn}
+            onCheckedChange={setRelaxOn}
+            className="mb-3"
+          />
+        )}
+        {config.id === UNLIMITED_PROMO.videoModel && unlimitedRecentlyEnded(unlimitedState) && (
+          <UnlimitedEndedNote className="mb-3" />
+        )}
         <CreditsSubmitPill
           fullWidth
-          credits={estimatedCredits}
+          credits={relax ? 0 : estimatedCredits}
           loading={mutation.isPending || busy || uploading || uploadingEndFrame || uploadingReference}
           disabled={imageRequired && !image}
           balance={creditBalance}
           blockedReason={blockedReason}
+          incompleteReason={relaxProblem}
         />
       </div>
     </form>

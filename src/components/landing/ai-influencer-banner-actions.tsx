@@ -17,7 +17,7 @@ export function CreateInfluencerLink() {
       className="group/cta font-display inline-flex items-center gap-3 rounded-full border border-brand-ink/60 bg-surface py-2 pr-2 pl-5 text-label font-semibold text-ink shadow-glow-sm transition-[border-color,box-shadow] hover:border-brand-ink hover:shadow-glow-md"
     >
       <Sparkle className="size-4 fill-brand-ink text-brand-ink" aria-hidden="true" />
-      Create yours for free
+      Create yours
       <span className="flex size-9 items-center justify-center rounded-full bg-brand text-on-brand transition-transform group-hover/cta:translate-x-0.5">
         <ArrowRight className="size-4" aria-hidden="true" />
       </span>

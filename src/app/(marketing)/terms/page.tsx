@@ -100,7 +100,7 @@ const SECTIONS: LegalSection[] = [
       },
       {
         title: "Plan credits",
-        body: `Paid plans grant a credit allowance every month. ${list(EXPIRING_PLANS)} credits expire at the end of the month they were granted in; ${list(ROLLOVER_PLANS)} credits stay spendable for one further month and then expire. ${FREE.label} instead grants ${FREE.monthlyCredits} credits once, when the account is created — they do not renew and they do not expire.`,
+        body: `Paid plans grant a credit allowance every month. ${list(EXPIRING_PLANS)} credits expire at the end of the month they were granted in; ${list(ROLLOVER_PLANS)} credits stay spendable for one further month and then expire. Annual plans are billed once a year and grant the same allowance every month. Accounts opened before the ${FREE.label} plan was retired keep the one-time credits it granted; they do not renew and they do not expire.`,
       },
       {
         title: "Credit packs",
@@ -126,7 +126,7 @@ const SECTIONS: LegalSection[] = [
     clauses: [
       {
         title: "Automatic renewal",
-        body: "Paid plans are billed monthly in advance and renew automatically at the then-current price until you cancel.",
+        body: "Paid plans are billed monthly, or yearly on annual plans, in advance, and renew automatically at the then-current price until you cancel.",
       },
       {
         title: "Cancelling",
@@ -147,6 +147,12 @@ const SECTIONS: LegalSection[] = [
       {
         title: "Price changes",
         body: "We will tell you at least 30 days before the price of your plan changes. The new price applies from your first renewal after that notice period, and you can cancel before then if you don't want to continue.",
+      },
+      {
+        title: "Unlimited Promotions",
+        // The README's clause, word for word. Have it reviewed by a lawyer
+        // before relying on it, especially for EU customers.
+        body: "Certain plans include a time-limited unlimited access to specific models (“Unlimited Promotion”). Unlimited Promotions are granted once per customer and per payment method, are available only through the Vixlens web application, and are processed in a shared, lower-priority queue whose speed may vary. Unlimited Promotions are intended for personal and in-house creative use by the subscribing account or workspace. Automated access, scripts, account sharing outside the workspace, resale of outputs generated at scale, or any attempt to circumvent these limits may result in the suspension of the Unlimited Promotion or of the account. Vixlens may modify or end Unlimited Promotions at any time for new subscribers. Cancellation, refund or chargeback during the promotion period ends the Unlimited Promotion immediately.",
       },
       {
         title: "Failed payments",

@@ -5,16 +5,21 @@ import { ArrowRight, Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/marketing/reveal";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
-import { PlanPrice } from "@/components/pricing/plan-price";
-import { LaunchOfferMeter, LaunchOfferShine } from "@/components/landing/launch-offer";
+import {
+  BillingIntervalProvider,
+  BillingIntervalToggle,
+  PlanCardPrice,
+  intervalFor,
+  useBillingInterval,
+} from "@/components/pricing/billing-interval";
+import { LAUNCH_OFFER_BUTTON_CLASS, LaunchOfferMeter } from "@/components/landing/launch-offer";
 import { useLaunchOffer } from "@/hooks/use-launch-offer";
 import { useMe } from "@/hooks/use-me";
-import { LAUNCH_OFFER, TIERS, TIER_INFO, type Tier } from "@/lib/constants";
+import { LAUNCH_OFFER, PAID_TIERS, TIER_INFO, type Tier } from "@/lib/constants";
 import { COMPETITORS, ENTRY_TIER, formatListPrice } from "@/lib/competitor-pricing";
-import { appHref, subscribeHref } from "@/lib/hosts";
+import { subscribeHref } from "@/lib/hosts";
 import { cn, formatCredits } from "@/lib/utils";
 
-const PAID_TIERS = TIERS.filter((tier) => TIER_INFO[tier].priceMonthly > 0);
 const POPULAR_TIER: Tier = "creator";
 // The entry plan is the one the hero and the price check sell, so its card
 // gets its own flag too. Outlined rather than filled, so it doesn't compete
@@ -39,9 +44,18 @@ const RIVAL_ENTRY_PRICES = COMPETITORS.map(
 ).join(" · ");
 
 export function PlansSection() {
+  return (
+    <BillingIntervalProvider initial="annual">
+      <Plans />
+    </BillingIntervalProvider>
+  );
+}
+
+function Plans() {
   const { data: user } = useMe();
   const signedIn = Boolean(user);
   const offer = useLaunchOffer();
+  const gridInterval = useBillingInterval();
 
   return (
     <section id="plans" className="relative scroll-mt-16 border-t border-line py-20 sm:py-28">
@@ -57,9 +71,10 @@ export function PlansSection() {
           </span>
           <h2 className="mt-5 text-heading text-ink sm:text-5xl">Pick a plan, create today</h2>
           <p className="mt-4 text-body text-muted">
-            Every plan opens every model, and a credit costs the same cent on each of them. Pay
-            monthly, switch or cancel whenever you like.
+            Every plan opens every model. Pay monthly, or yearly with up to two months free — switch
+            or cancel whenever you like.
           </p>
+          <BillingIntervalToggle className="mt-8" />
         </Reveal>
 
         <div className="mt-16 grid items-stretch gap-6 lg:grid-cols-3">
@@ -114,13 +129,12 @@ export function PlansSection() {
                   <h3 className="text-feature-title text-ink">{info.label}</h3>
                   <p className="mt-1 text-body-sm text-muted">{TAGLINES[tier]}</p>
 
-                  <p className="mt-6 flex items-baseline gap-1">
-                    <PlanPrice
-                      priceMonthly={info.priceMonthly}
-                      className="font-display text-5xl font-bold tracking-tight text-ink"
-                      suffixClassName="text-body-sm text-muted"
-                    />
-                  </p>
+                  <PlanCardPrice
+                    tier={tier}
+                    className="mt-6"
+                    priceClassName="font-display text-5xl font-bold tracking-tight text-ink"
+                    suffixClassName="text-body-sm text-muted"
+                  />
                   {isEntry && (
                     <p className="mt-2 text-caption text-text-tertiary">
                       Entry plans elsewhere: {RIVAL_ENTRY_PRICES}
@@ -136,15 +150,16 @@ export function PlansSection() {
                     <span className="text-caption text-muted">every month</span>
                   </div>
 
+                  {/* Creator's is the only yellow button: Starter wears the
+                      launch badge's violet outline, Studio the plain grey. */}
                   <Link
-                    href={subscribeHref(tier, signedIn)}
+                    href={subscribeHref(tier, signedIn, null, intervalFor(tier, gridInterval))}
                     prefetch={false}
                     className={buttonVariants({
-                      variant: isPopular || isEntry ? "accent" : "primary",
-                      className: cn("mt-6 w-full", isOffer && "relative overflow-hidden"),
+                      variant: isPopular ? "accent" : "secondary",
+                      className: cn("mt-6 w-full", tier === LAUNCH_OFFER.tier && LAUNCH_OFFER_BUTTON_CLASS),
                     })}
                   >
-                    {isOffer && <LaunchOfferShine />}
                     Subscribe to {info.label}
                     <ArrowRight className="size-4" aria-hidden="true" />
                   </Link>
@@ -171,15 +186,14 @@ export function PlansSection() {
         <Reveal className="mt-10">
           <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-dashed border-line px-6 py-5 text-center sm:flex-row sm:text-left">
             <p className="text-body-sm text-muted">
-              <span className="font-medium text-ink">Not ready to subscribe?</span> Try it with{" "}
-              {TIER_INFO.free.monthlyCredits} free credits. No card required.
+              <span className="font-medium text-ink">Not ready to subscribe?</span> See what the
+              models make first — the gallery is open, no account needed.
             </p>
             <Link
-              href={appHref("/signup")}
-              prefetch={false}
+              href="/gallery"
               className={buttonVariants({ variant: "secondary", size: "sm" })}
             >
-              Start free
+              Browse the gallery
             </Link>
           </div>
         </Reveal>

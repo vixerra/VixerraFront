@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useMe } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { appHref } from "@/lib/hosts";
+import { appHref, GET_STARTED_HREF } from "@/lib/hosts";
 import { Logo } from "./logo";
 import { MobileNav } from "./mobile-nav";
 
@@ -17,8 +17,8 @@ const NAV_LINKS = [
   { href: "/gallery", label: "Gallery" },
 ];
 
-// Solid ink bar: logo left, small uppercase nav centered, the CTA trio on
-// the right (quiet sign-in, yellow-outline secondary, yellow-fill primary).
+// Solid ink bar: logo left, small uppercase nav centered, the CTAs on the
+// right (quiet sign-in, yellow-fill "Get started" to the plans).
 export function Header() {
   const { data: user } = useMe();
   const isAuthed = Boolean(user);
@@ -61,11 +61,9 @@ export function Header() {
               >
                 Log in
               </Link>
-              <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "sm" })}>
-                Pricing
-              </Link>
-              <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ size: "sm" })}>
-                Start free
+              {/* No free plan since 2026-10-15: "Get started" is the plan grid. */}
+              <Link href={GET_STARTED_HREF} className={buttonVariants({ size: "sm" })}>
+                Get started
               </Link>
             </>
           )}
@@ -74,11 +72,10 @@ export function Header() {
         <div className="flex items-center justify-end gap-2 lg:hidden">
           {!isAuthed && (
             <Link
-              href={appHref("/signup")}
-              prefetch={false}
+              href={GET_STARTED_HREF}
               className={buttonVariants({ size: "sm", className: "hidden min-[400px]:inline-flex" })}
             >
-              Start free
+              Get started
             </Link>
           )}
           <MobileNav isAuthed={isAuthed} />

@@ -569,6 +569,16 @@ const GENJUTSU_MODEL_ID = "vixlens/genjutsu";
 // otherwise. Standard margin: this is an ordinary generation.
 export const VIDEO_EDIT_MODEL_ID = "wan/2.7-videoedit";
 
+// Models sold at a published credit rate instead of one derived from cost
+// (2026-10-15 repricing). Wan 3.0 is the budget video option next to
+// Seedance and is advertised at 10 / 20 / 40 credits a second, so the rate
+// is the number on the pricing page rather than whatever the margin formula
+// lands on. Against kie's $0.04 / $0.08 / $0.16 that is a 60% gross margin at
+// $0.01 a credit, and ~33% on a Starter launch-offer credit ($0.006).
+const FIXED_CREDITS_PER_SECOND: Record<string, Record<string, number>> = {
+  "alibaba/wan-3.0": { "480p": 10, "720p": 20, "1080p": 40 },
+};
+
 function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
 }
@@ -641,6 +651,13 @@ export function estimateVideoCredits(
       creditsFor(SEEDANCE_DURATION_MIN, SEEDANCE25_KIE_AI_1080P_COST_USD),
       creditsFor(effectiveDuration, SEEDANCE25_KIE_AI_1080P_COST_USD),
     );
+  }
+
+  const fixedRates = FIXED_CREDITS_PER_SECOND[model];
+  if (fixedRates) {
+    const perSecond = fixedRates[resolution] ?? Math.max(...Object.values(fixedRates));
+    const minSeconds = VIDEO_COST_USD[model]?.minSeconds ?? 1;
+    return Math.ceil(Math.max(minSeconds, effectiveDuration) * perSecond - ROUNDING_EPSILON);
   }
 
   const clipRates = VIDEO_CLIP_COST_USD[model];

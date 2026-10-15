@@ -3,10 +3,12 @@
 import { MOTION_COMPOSER_MODELS } from "@/lib/motion-models";
 import { CLOUDFLARE_MODELS } from "@/lib/cloudflare-models";
 
-// The selling price of one credit. Every plan and pack below charges exactly
-// this ($5.99 → 600, $24 → 2,500, $49 → 5,000, packs likewise), so it is
-// also the honest figure to show users next to a credit amount (e.g. "this
-// generation costs ~$2.31").
+// The selling price of one credit, and the figure shown next to a credit
+// amount (e.g. "this generation costs ~$2.31"). The packs charge exactly
+// this. The plans no longer do since the 2026-10-15 repricing: Starter is
+// $0.01 at its $10 list price ($0.006 during the launch offer), Creator
+// $0.0096, Studio $0.0089. The rule kept from then on: a dearer plan never
+// sells a credit for more than a cheaper one.
 //
 // It is ALSO the base credit-estimate.ts prices generations from: a credit
 // may buy CREDIT_VALUE_USD × (1 - TARGET_GROSS_MARGIN) = $0.006 of provider
@@ -24,6 +26,22 @@ export const CREDIT_VALUE_USD = 0.01;
 export const TIERS = ["free", "starter", "creator", "studio"] as const;
 export type Tier = (typeof TIERS)[number];
 
+/**
+ * The Free plan was retired on 2026-10-15: Starter is the way in, and
+ * generating needs a paid plan. "free" stays a tier because it is still what
+ * an account without a subscription is, and accounts that signed up before
+ * this date keep their one-time Free credits (watermarked) until they run
+ * out. Twin of the API's constant, which is the one that decides.
+ */
+export const FREE_PLAN_RETIRED_AT = "2026-10-16T00:00:00Z";
+
+/** Plans the pricing page sells. Free is no longer one of them. */
+export const PAID_TIERS = ["starter", "creator", "studio"] as const satisfies readonly Tier[];
+export type PaidTier = (typeof PAID_TIERS)[number];
+
+export const BILLING_INTERVALS = ["monthly", "annual"] as const;
+export type BillingInterval = (typeof BILLING_INTERVALS)[number];
+
 // One disclosure per plan card. Every "~N" figure in a card is computed at the
 // cheapest settings the credits can be spent on, because that is the most the
 // plan can produce. That caveat used to sit inline in the bullets themselves
@@ -36,6 +54,14 @@ const ESTIMATES_NOTE =
   "credits buy at each model's cheapest settings — 480p for video, and the " +
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
+
+// The 7-day Wan 3.0 Unlimited line on the Creator and Studio cards, and the
+// tooltip on its badge. UNLIMITED_PROMO below describes the terms; the API's
+// copy is what enforces them.
+export const UNLIMITED_FEATURE = "Wan 3.0 — 7-day unlimited";
+export const UNLIMITED_TOOLTIP =
+  "Generate unlimited Wan 3.0 videos for your first 7 days in Relax mode. " +
+  "Creator: 480p (720p on annual). Studio: 720p.";
 
 /**
  * Grok is switched off on the Free plan for now (2026-10-12). Twin of
@@ -176,12 +202,11 @@ export const TIER_INFO: Record<
   },
   starter: {
     label: "Starter",
-    // $5.99 / 600 since 2026-09-26 (was $9.99 / 1,000): a lower entry price
-    // for conversion, still exactly CREDIT_VALUE_USD per credit. Nobody was
-    // subscribed to Starter when it changed, so no one is left paying the old
-    // price for the new grant — grants follow the tier, not the Stripe price.
-    priceMonthly: 5.99,
-    monthlyCredits: 600,
+    // $10 / 1,000 since 2026-10-15 (was $5.99 / 600). The first
+    // LAUNCH_OFFER.places subscribers pay LAUNCH_OFFER.priceMonthly instead,
+    // for as long as they stay subscribed.
+    priceMonthly: 10,
+    monthlyCredits: 1000,
     renewsMonthly: true,
     maxResolution: "1080p",
     maxDurationSeconds: 20,
@@ -195,10 +220,11 @@ export const TIER_INFO: Record<
     apiAccess: false,
     blockedModels: [],
     features: [
-      "600 credits / month",
-      "~200 images",
-      "~25s Seedance 2.0 video",
-      "~17s Seedance 2.5 video",
+      "1,000 credits / month",
+      "~333 images",
+      "~41s Seedance 2.0 video",
+      "~28s Seedance 2.5 video",
+      "~50s Wan 3.0 video (720p)",
       "Add credits as needed",
       "Up to 1080p",
       "No watermark",
@@ -225,9 +251,11 @@ export const TIER_INFO: Record<
     blockedModels: [],
     features: [
       "2,500 credits / month",
+      UNLIMITED_FEATURE,
       "~833 images",
-      "~105s Seedance 2.0 video",
+      "~104s Seedance 2.0 video",
       "~71s Seedance 2.5 video",
+      "~125s Wan 3.0 video (720p)",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
       "Publish to TikTok, Instagram, YouTube & Facebook",
@@ -242,7 +270,8 @@ export const TIER_INFO: Record<
   studio: {
     label: "Studio",
     priceMonthly: 49,
-    monthlyCredits: 5000,
+    // 5,500 since 2026-10-15 (was 5,000).
+    monthlyCredits: 5500,
     renewsMonthly: true,
     // Only tier allowed to spend credits on 4K (Seedance 2.0) generations.
     maxResolution: "4k",
@@ -260,11 +289,13 @@ export const TIER_INFO: Record<
     apiAccess: true,
     blockedModels: [],
     features: [
-      "5,000 credits / month",
-      "~1,666 images",
-      "~210s Seedance 2.0 video",
-      "~142s Seedance 2.5 video",
-      "~19s Seedance 2.0 video (4K, exclusive)",
+      "5,500 credits / month",
+      UNLIMITED_FEATURE,
+      "~1,833 images",
+      "~229s Seedance 2.0 video",
+      "~157s Seedance 2.5 video",
+      "~275s Wan 3.0 video (720p)",
+      "~21s Seedance 2.0 video (4K, exclusive)",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
       "Publish to TikTok, Instagram, YouTube & Facebook",
@@ -280,18 +311,26 @@ export const TIER_INFO: Record<
 };
 export type TierInfo = (typeof TIER_INFO)[Tier];
 
-// Display-only annual-billing prices ("1 month free" ≈ 8.3% off monthly,
-// pay 11 months for 12) — payments are simulated in this build, so this
-// isn't wired to any real billing cycle. Kept intentionally more modest than
-// a typical 17-20% annual discount: an annual discount cuts the price but
-// not the credits, so it comes straight out of margin. At the ~40% video
-// gross (2026-10-08) even this one takes a video-only annual plan to ~35%
-// gross, ~24-26% net; a 20% discount would leave ~25% gross.
-export const ANNUAL_PRICE_MONTHLY: Partial<Record<Tier, number>> = {
-  starter: 5.49,
-  creator: 22,
-  studio: 44.92,
+/**
+ * Annual billing (since 2026-10-15): Creator $240 a year (two months free),
+ * Studio $504 ($42 a month), charged once a year with the credits still granted monthly.
+ * Creator and Studio only. Twin of the API's ANNUAL_PRICE.
+ */
+export const ANNUAL_PRICE: Partial<Record<Tier, number>> = {
+  creator: 240,
+  studio: 504,
 };
+
+/** The annual price as a monthly figure, for "$20 /month, billed annually". */
+export const ANNUAL_PRICE_MONTHLY: Partial<Record<Tier, number>> = Object.fromEntries(
+  Object.entries(ANNUAL_PRICE).map(([tier, yearly]) => [tier, Math.round(((yearly ?? 0) / 12) * 100) / 100]),
+);
+
+/** How much less a year costs than twelve monthly payments ("Save $48"). */
+export function annualSavings(tier: Tier): number {
+  const yearly = ANNUAL_PRICE[tier];
+  return yearly === undefined ? 0 : Math.round((TIER_INFO[tier].priceMonthly * 12 - yearly) * 100) / 100;
+}
 
 /**
  * Starter's launch offer (since 2026-09-26): the first `places` accounts to
@@ -312,18 +351,39 @@ export const ANNUAL_PRICE_MONTHLY: Partial<Record<Tier, number>> = {
  * such Payment — need their own grant, or they'd get the new allowance at
  * the old price.
  */
+//
+// The card shows the list price struck through next to `priceMonthly` while
+// places remain, and the list price alone after. Never reset the count to
+// make places reappear: false scarcity is an unfair commercial practice in
+// the EU.
 export const LAUNCH_OFFER = {
   tier: "starter",
   places: 20,
+  priceMonthly: 6,
   startsAt: "2026-09-26T00:00:00Z",
-} as const satisfies { tier: Tier; places: number; startsAt: string };
+} as const satisfies { tier: Tier; places: number; priceMonthly: number; startsAt: string };
+
+/**
+ * Wan 3.0 Unlimited: 7 days of unlimited Wan 3.0 in Relax mode from the
+ * first Creator or Studio payment, once per account. Twin of the API's
+ * UNLIMITED_PROMO, which enforces it; this copy drives the composer's
+ * Unlimited toggle and what it offers.
+ */
+export const UNLIMITED_PROMO = {
+  days: 7,
+  videoModel: "alibaba/wan-3.0",
+  imageModel: "google/nano-banana-2-lite",
+} as const;
+
+/** Per-second credit price of Wan 3.0 outside Unlimited, for the copy. */
+export const WAN3_CREDITS_PER_SECOND_FROM = 10;
 
 // Pay-per-use top-ups — priced at exactly CREDIT_VALUE_USD, same as the
 // plans (2026-08-30): a credit costs a cent wherever you buy it. They used
 // to carry a ~70% premium ($0.017/credit), which stopped making sense once
-// plan credits were repriced to $0.01. Note pack_5000 grants the same 5,000
-// credits as Studio for the same $49 — the plan's draw is its features (4K,
-// API, seats, priority), not a better credit rate. These credits never
+// plan credits were repriced to $0.01. Since 2026-10-15 every plan but
+// Starter at list price sells a credit for less than a pack does. These
+// credits never
 // expire (see grantRecharge in aiVideo-backend's credits.ts), unlike the
 // monthly plan grants above.
 export const RECHARGE_PACKS = [

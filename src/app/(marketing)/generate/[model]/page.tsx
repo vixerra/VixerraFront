@@ -49,7 +49,7 @@ export async function generateMetadata(
   const isVideo = entry.category !== "text-to-image";
   const title = `${entry.label} — AI ${isVideo ? "video" : "image"} generator`;
   const description = metaDescription(
-    `${page.tagline} — ${entry.label} specs, example prompts and free credits on ${SITE_NAME}.`,
+    `${page.tagline} — ${entry.label} specs and example prompts on ${SITE_NAME}.`,
   );
 
   return {
@@ -129,8 +129,8 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           : `No — ${entry.label} generates picture only. Several other video models on ${SITE_NAME} do generate native audio.`,
     },
     {
-      question: `Is there a free way to try ${entry.label}?`,
-      answer: `Yes. The ${TIER_INFO.free.label} plan includes ${TIER_INFO.free.monthlyCredits} credits when you sign up, with no credit card required. Credits are spent per generation based on the model, resolution and duration, and the exact cost is shown before you generate.`,
+      question: `How much does ${entry.label} cost?`,
+      answer: `Generating needs a plan; ${TIER_INFO.starter.label} is $${TIER_INFO.starter.priceMonthly}/month for ${TIER_INFO.starter.monthlyCredits.toLocaleString("en-US")} credits. Credits are spent per generation based on the model, resolution and duration, and the exact cost is shown before you generate.`,
     },
   ].filter((f): f is { question: string; answer: string } => Boolean(f));
 
@@ -173,8 +173,8 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
             <Sparkles className="size-4" aria-hidden="true" />
             Generate with {entry.label}
           </Link>
-          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "secondary" })}>
-            Start free — {TIER_INFO.free.monthlyCredits} credits
+          <Link href="/pricing#plans" className={buttonVariants({ variant: "secondary" })}>
+            See plans
           </Link>
         </div>
       </header>
@@ -353,14 +353,14 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           Start generating with {entry.label}
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-body text-muted">
-          {TIER_INFO.free.monthlyCredits} free credits on sign-up, no credit card required.
+          Every model on one credit balance — pick a plan and start creating.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
-            Create a free account
+          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
+            Get started
           </Link>
-          <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>
-            See pricing
+          <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
+            Browse the gallery
           </Link>
         </div>
       </section>

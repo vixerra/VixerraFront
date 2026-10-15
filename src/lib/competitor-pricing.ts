@@ -66,10 +66,19 @@ export const ROLLOVER_TIER: Tier | undefined = PAID_TIERS.find(
 );
 
 /** How much less a year our entry plan costs than theirs. Rounded down so
- *  the page never overstates it ($108.12 reads as $108). */
+ *  the page never overstates it ($108.12 reads as $108). Negative when
+ *  theirs is cheaper — since Starter went to $10 (2026-10-15) Higgsfield's
+ *  $9 Basic is — so a caller showing savings must use COMPETITORS_UNDERCUT. */
 export function yearlySavings(competitor: Competitor): number {
   return Math.floor((competitor.entryPriceMonthly - ENTRY_PRICE_MONTHLY) * 12);
 }
+
+/** The competitors our list price actually undercuts: the only ones a
+ *  "$N less per year" claim may be made against. Compared at the list price,
+ *  not Starter's launch price, which only the first few subscribers get. */
+export const COMPETITORS_UNDERCUT: readonly Competitor[] = COMPETITORS.filter(
+  (competitor) => yearlySavings(competitor) > 0,
+);
 
 /** "$19" for a whole-dollar price, "$9.99" otherwise. */
 export function formatListPrice(usd: number): string {

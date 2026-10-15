@@ -77,11 +77,11 @@ export default function ModelsIndexPage() {
           credit balance, no per-provider subscriptions.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
-            Start free — {TIER_INFO.free.monthlyCredits} credits
+          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
+            Get started
           </Link>
-          <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>
-            See pricing
+          <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
+            Browse the gallery
           </Link>
         </div>
       </header>

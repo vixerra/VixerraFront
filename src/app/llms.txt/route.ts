@@ -29,7 +29,6 @@ const VIDEO = MODELS.filter((m) => m.entry.category !== "text-to-image");
 const IMAGE = MODELS.filter((m) => m.entry.category === "text-to-image");
 const PROVIDERS = [...new Set(MODELS.map((m) => m.entry.provider))];
 
-const FREE = TIER_INFO.free;
 const PAID = TIERS.filter((tier) => TIER_INFO[tier].priceMonthly > 0).map((tier) => TIER_INFO[tier]);
 const FIRST_COMMERCIAL = PAID.find((info) => info.commercialLicense);
 const FIRST_SUITE = PAID.find((info) => info.creatorSuite);
@@ -70,8 +69,8 @@ function buildLlmsTxt() {
     "- Text to video, image to video and text to image, in the browser — nothing to install.",
     `- Video models include ${VIDEO.slice(0, 6).map((m) => m.entry.label).join(", ")}.`,
     `- Image models include ${IMAGE.slice(0, 6).map((m) => m.entry.label).join(", ")}.`,
-    `- Free to start: ${FREE.monthlyCredits} credits, no credit card required.`,
-    `- ${FREE.label} results carry a Vixlens watermark; every paid plan exports without one.`,
+    `- Plans start with ${TIER_INFO.starter.label} at ${usd(TIER_INFO.starter.priceMonthly)}/month; there is no free plan. Every plan exports without a watermark.`,
+    `- Creator and Studio can be billed annually with up to two months free, and include 7 days of unlimited Wan 3.0 (Relax mode, web only) from the first payment.`,
     FIRST_COMMERCIAL
       ? `- Commercial use is licensed from the ${FIRST_COMMERCIAL.label} plan (${usd(FIRST_COMMERCIAL.priceMonthly)}/month).`
       : null,

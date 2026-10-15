@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { CreditCard, ExternalLink } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
-import { TIERS, TIER_INFO, type Tier } from "@/lib/constants";
+import { ANNUAL_PRICE, TIERS, TIER_INFO, type BillingInterval, type Tier } from "@/lib/constants";
+import { formatListPrice } from "@/lib/competitor-pricing";
+import type { UnlimitedState } from "@/hooks/use-unlimited";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +29,8 @@ export type SubscriptionState = {
    *  boolean — "past_due" needs different wording from "canceled". */
   status: string;
   tier: string;
+  /** monthly | annual. Absent from an API deployed before annual billing. */
+  billing_interval?: string;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
   canceled_at: string | null;
@@ -47,6 +51,10 @@ type SubscriptionResponse = {
   /** Names of Price ids the server is missing. Non-empty means the buy
    *  buttons would fail at the click, so they're disabled up front. */
   payments_misconfigured: string[];
+  /** Creator and Studio can be bought annually (their annual Prices are set). */
+  annual_available?: boolean;
+  /** The 7-day Wan 3.0 Unlimited window, null if the account never had one. */
+  unlimited?: UnlimitedState | null;
 };
 
 type PaymentRecord = {
@@ -292,6 +300,8 @@ export function BillingClient() {
   // A promo code entered on the pricing page, carried here with the plan.
   const promoParam = searchParams.get("promo");
   const pickedTier = TIERS.find((t) => t === planParam) ?? null;
+  // The period picked on the pricing page (?interval=annual).
+  const pickedInterval: BillingInterval | null = searchParams.get("interval") === "annual" ? "annual" : null;
   const [portalLoading, setPortalLoading] = useState(false);
   // One code for the whole page: it can cover plans, packs or both, and the
   // cards below show where it applies.
@@ -380,7 +390,14 @@ export function BillingClient() {
             </div>
           </div>
           <p className="text-heading font-bold text-ink">
-            <PlanPrice priceMonthly={info.priceMonthly} suffixClassName="text-body-sm text-muted" />
+            {subscription?.billing_interval === "annual" && ANNUAL_PRICE[tier as Tier] !== undefined ? (
+              <>
+                {formatListPrice(ANNUAL_PRICE[tier as Tier]!)}
+                <span className="text-body-sm text-muted">/year</span>
+              </>
+            ) : (
+              <PlanPrice priceMonthly={info.priceMonthly} suffixClassName="text-body-sm text-muted" />
+            )}
           </p>
         </div>
 
@@ -415,6 +432,15 @@ export function BillingClient() {
         </div>
 
         {subscription && <SubscriptionStatus subscription={subscription} />}
+
+        {data.unlimited?.active && data.unlimited.ends_at && (
+          <p className="relative mt-4 rounded-lg border border-accent-amber-ink/30 bg-accent-amber/5 px-4 py-3 text-caption text-ink-soft">
+            Wan 3.0 Unlimited is on until {formatDate(data.unlimited.ends_at)} — unlimited Wan 3.0
+            videos in Relax mode, up to {data.unlimited.max_resolution} and{" "}
+            {data.unlimited.max_duration_seconds}s a clip. Pick Wan 3.0 in the composer and keep
+            Unlimited switched on.
+          </p>
+        )}
 
         {paymentsEnabled && subscription && (
           <div className="relative mt-5">
@@ -464,6 +490,8 @@ export function BillingClient() {
         subscription={subscription}
         unavailable={misconfigured}
         highlightTier={pickedTier}
+        initialInterval={pickedInterval}
+        annualAvailable={data.annual_available ?? false}
         deferAutoCheckout={promoArrival !== "ok"}
         promo={promo}
         onPromoUsed={() => setPromo(null)}

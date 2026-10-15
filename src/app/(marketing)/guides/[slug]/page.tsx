@@ -131,14 +131,14 @@ export default async function GuidePage(props: PageProps<"/guides/[slug]">) {
           Put this into practice
         </h2>
         <p className="mx-auto mt-2 max-w-lg text-body-sm text-muted">
-          {TIER_INFO.free.monthlyCredits} free credits on sign-up, no credit card required.
+          Every model on one credit balance — pick a plan and start creating.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
-            Start generating
+          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
+            Get started
           </Link>
-          <Link href="/pricing" className={buttonVariants({ variant: "secondary" })}>
-            See pricing
+          <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
+            Browse the gallery
           </Link>
         </div>
       </section>

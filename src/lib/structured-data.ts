@@ -5,10 +5,11 @@
 // exactly what Google penalises, and this app has already been bitten once by
 // plan labels living in two places (see the note above FAQS in pricing/page).
 
-import { TIERS, TIER_INFO } from "@/lib/constants";
+import { PAID_TIERS, TIER_INFO } from "@/lib/constants";
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 
-const PLAN_OFFERS = TIERS.map((tier) => {
+// Paid plans only: Free is retired (2026-10-15) and no longer offered.
+const PLAN_OFFERS = PAID_TIERS.map((tier) => {
   const info = TIER_INFO[tier];
   return {
     "@type": "Offer",
@@ -32,7 +33,7 @@ const PLAN_OFFERS = TIERS.map((tier) => {
   };
 });
 
-const PRICES = TIERS.map((tier) => TIER_INFO[tier].priceMonthly);
+const PRICES = PAID_TIERS.map((tier) => TIER_INFO[tier].priceMonthly);
 
 export const aggregateOffer = {
   "@type": "AggregateOffer",

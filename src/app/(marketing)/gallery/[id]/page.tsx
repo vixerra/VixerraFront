@@ -261,7 +261,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
           </div>
 
           <p className="mt-4 text-caption text-muted">
-            {TIER_INFO.free.monthlyCredits} free credits on sign-up, no credit card required.
+            Every model on one credit balance — pick a plan and start creating.
           </p>
         </div>
       </div>

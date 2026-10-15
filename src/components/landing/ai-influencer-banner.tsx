@@ -23,7 +23,7 @@ export function AiInfluencerBanner() {
                   className="size-1.5 rounded-full bg-brand shadow-glow-sm motion-safe:animate-status-pulse"
                   aria-hidden="true"
                 />
-                New · <span className="text-brand-ink">For free</span>
+                New
               </span>
 
               <h2

@@ -11,6 +11,7 @@ import { CREDIT_VALUE_USD, TIER_INFO } from "@/lib/constants";
 import { formatMoney } from "@/lib/currency";
 import {
   COMPETITORS,
+  COMPETITORS_UNDERCUT,
   ENTRY_PRICE_MONTHLY,
   ENTRY_TIER,
   PRICES_CHECKED_ON,
@@ -60,7 +61,7 @@ const ROWS: Row[] = [
 ];
 
 const PERKS = [
-  `1 credit = ${formatMoney(CREDIT_VALUE_USD)} on every plan`,
+  `1 credit = ${formatMoney(CREDIT_VALUE_USD)} or less on every plan`,
   "Exact cost shown before you generate",
   "No watermark on any paid plan",
 ];
@@ -157,7 +158,7 @@ export function PriceComparison() {
           </span>
           <h2 className="mt-5 text-heading leading-[1.02] text-ink sm:text-display">
             Same top models.
-            <span className="block"><span className="mark-lime">Less to get in.</span></span>
+            <span className="block"><span className="mark-lime">Compare for yourself.</span></span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-body-lg text-muted">
             We read the public pricing pages of the AI studios we get compared with most. Here is
@@ -165,8 +166,13 @@ export function PriceComparison() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid grid-cols-3 gap-3 sm:gap-5">
-          {COMPETITORS.map((competitor, index) => (
+        <div
+          className={cn(
+            "mt-14 grid gap-3 sm:gap-5",
+            COMPETITORS_UNDERCUT.length >= 3 ? "grid-cols-3" : "grid-cols-2",
+          )}
+        >
+          {COMPETITORS_UNDERCUT.map((competitor, index) => (
             <SavingsCard key={competitor.name} competitor={competitor} index={index} />
           ))}
         </div>

@@ -93,12 +93,11 @@ export default function GuidesIndexPage() {
       <section className="mt-20 rounded-2xl border border-line bg-surface-2 px-6 py-12 text-center sm:px-12">
         <h2 className="text-heading font-bold text-ink">Try it rather than read about it</h2>
         <p className="mx-auto mt-3 max-w-xl text-body text-muted">
-          {TIER_INFO.free.monthlyCredits} free credits on sign-up, no credit card required, and
-          every model on one balance.
+          Every model on one credit balance, from one plan.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href={appHref("/signup")} prefetch={false} className={buttonVariants({ variant: "accent" })}>
-            Create a free account
+          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
+            Get started
           </Link>
           <Link href="/models" className={buttonVariants({ variant: "secondary" })}>
             Browse the models

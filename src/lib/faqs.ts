@@ -21,7 +21,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     question: "What's the pricing?",
-    answer: `${TIER_INFO.free.label} starts at $0 with ${TIER_INFO.free.monthlyCredits} one-time credits that never expire. ${TIER_INFO.starter.label} is $${TIER_INFO.starter.priceMonthly}/month, ${TIER_INFO.creator.label} is $${TIER_INFO.creator.priceMonthly}/month, and ${TIER_INFO.studio.label} is $${TIER_INFO.studio.priceMonthly}/month. ${TIER_INFO.creator.label} and above also unlock the marketing studio, the editing studio, and publishing straight to TikTok, Instagram, YouTube, and Facebook — see the full comparison on the Pricing page.`,
+    answer: `${TIER_INFO.starter.label} is $${TIER_INFO.starter.priceMonthly}/month, ${TIER_INFO.creator.label} is $${TIER_INFO.creator.priceMonthly}/month, and ${TIER_INFO.studio.label} is $${TIER_INFO.studio.priceMonthly}/month, with up to two months free on annual ${TIER_INFO.creator.label} and ${TIER_INFO.studio.label} plans. ${TIER_INFO.creator.label} and above also unlock the marketing studio, the editing studio, and publishing straight to TikTok, Instagram, YouTube, and Facebook — see the full comparison on the Pricing page.`,
   },
   {
     question: "Is there an API?",
@@ -38,8 +38,8 @@ export const HOME_FAQS: Faq[] = [
       "Typical turnaround is under 60 seconds for a finished clip, with live progress streamed to the page.",
   },
   {
-    question: "Do I need a credit card to start?",
-    answer: `No — sign up and start creating free with ${TIER_INFO.free.monthlyCredits} credits, no credit card required.`,
+    question: "Is there a free plan?",
+    answer: `No — generating starts with the ${TIER_INFO.starter.label} plan. The gallery is open without an account, so you can see what the models make before you subscribe.`,
   },
 ];
 

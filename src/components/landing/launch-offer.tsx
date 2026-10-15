@@ -33,7 +33,51 @@ import { cn, formatCredits } from "@/lib/utils";
  */
 
 const OFFER = TIER_INFO[LAUNCH_OFFER.tier];
-const OFFER_PRICE = formatListPrice(OFFER.priceMonthly);
+/** What the first LAUNCH_OFFER.places pay, and what everyone pays after. */
+const OFFER_PRICE = formatListPrice(LAUNCH_OFFER.priceMonthly);
+const LIST_PRICE = formatListPrice(OFFER.priceMonthly);
+
+/**
+ * The offer plan's price on a card: the list price struck through next to
+ * the launch price while spots remain, the list price alone once they're
+ * gone. Until the API answers it shows the offer, which is what it is until
+ * proven sold out (useLaunchOffer's soldOut).
+ */
+export function LaunchOfferPrice({
+  className,
+  suffixClassName,
+}: {
+  className?: string;
+  suffixClassName?: string;
+}) {
+  const { soldOut } = useLaunchOffer();
+  if (soldOut) {
+    return (
+      <>
+        <span className={className}>{LIST_PRICE}</span>
+        <span className={suffixClassName}>/month</span>
+      </>
+    );
+  }
+  return (
+    <>
+      <span className="text-subheading font-semibold text-muted line-through decoration-2">
+        <span className="sr-only">Was </span>
+        {LIST_PRICE}
+      </span>
+      <span className={className}>
+        <span className="sr-only">now </span>
+        {OFFER_PRICE}
+      </span>
+      <span className={suffixClassName}>/month</span>
+    </>
+  );
+}
+
+/** The Starter card's button style: the secondary pill in the launch badge's
+ *  violet, so Creator's yellow stays the only primary on the grid. */
+export const LAUNCH_OFFER_BUTTON_CLASS =
+  "border-accent-hot-ink/70 text-accent-hot-ink hover:border-accent-hot-ink hover:bg-accent-hot/10 hover:text-accent-hot-ink";
 
 /** The banner's id, which the hero pill jumps to. */
 export const LAUNCH_OFFER_ANCHOR = "launch-offer";
@@ -367,10 +411,11 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
   );
 }
 
-/** The offer's plan card on the pricing page: a hot ring and a badge, no
- *  count. The card must be `relative`; both go when the offer sells out. */
+/** The offer's plan card on the pricing page: a hot ring and a badge with
+ *  the live count of spots left (the offer's size until the API answers).
+ *  The card must be `relative`; both go when the offer sells out. */
 export function LaunchOfferPlanFlag() {
-  const { places, soldOut } = useLaunchOffer();
+  const { places, remaining, soldOut } = useLaunchOffer();
   if (soldOut) return null;
 
   return (
@@ -384,15 +429,15 @@ export function LaunchOfferPlanFlag() {
           className="size-1.5 rounded-full bg-white motion-safe:animate-status-pulse"
           aria-hidden="true"
         />
-        Launch offer · {places} spots
+        Launch offer · {remaining === null ? `${places} spots` : `${remaining} spots left`}
       </span>
     </>
   );
 }
 
 /** That card's button: straight into the plan's checkout path (see
- *  subscribeHref), with the glint while the offer runs and a plain "Get
- *  started" once it's over. */
+ *  subscribeHref). A secondary in the badge's violet, not the yellow: on the
+ *  pricing grid only Creator's button is primary. */
 export function LaunchOfferPlanCta({ className }: { className?: string }) {
   const { soldOut } = useLaunchOffer();
   const { data: user } = useMe();
@@ -404,12 +449,11 @@ export function LaunchOfferPlanCta({ className }: { className?: string }) {
       href={subscribeHref(LAUNCH_OFFER.tier, Boolean(user), promoCode)}
       prefetch={false}
       className={buttonVariants({
-        variant: soldOut ? "secondary" : "accent",
-        className: cn("relative overflow-hidden", className),
+        variant: "secondary",
+        className: cn("relative overflow-hidden", LAUNCH_OFFER_BUTTON_CLASS, className),
       })}
     >
-      {!soldOut && <LaunchOfferShine />}
-      {soldOut ? "Get started" : "Claim my spot"}
+      {soldOut ? `Get ${OFFER.label}` : "Claim my spot"}
     </Link>
   );
 }

@@ -4,12 +4,11 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/marketing/reveal";
-import { TIER_INFO } from "@/lib/constants";
 import { ENTRY_PRICE_MONTHLY, formatListPrice } from "@/lib/competitor-pricing";
-import { appHref } from "@/lib/hosts";
 
-// Subscribe-first like the hero: the plans are the ask, the free grant is
-// the fallback underneath it. Closes the page on the same slanted yellow
+// Subscribe-first like the hero: the plans are the ask, the gallery the
+// fallback for whoever is still looking (there is no free plan since
+// 2026-10-15). Closes the page on the same slanted yellow
 // tags the hero opens with.
 export function CtaSection() {
   return (
@@ -28,15 +27,10 @@ export function CtaSection() {
             Choose my plan
             <ArrowRight className="size-4" aria-hidden="true" />
           </a>
-          <Link
-            href={appHref("/signup")}
-            prefetch={false}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            Start free · {TIER_INFO.free.monthlyCredits} credits
+          <Link href="/gallery" className={buttonVariants({ variant: "outline", size: "lg" })}>
+            Browse the gallery
           </Link>
         </div>
-        <p className="text-caption text-text-tertiary">No card required for the free plan.</p>
       </Reveal>
     </section>
   );

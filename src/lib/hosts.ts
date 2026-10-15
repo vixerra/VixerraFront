@@ -1,4 +1,4 @@
-import type { Tier } from "@/lib/constants";
+import { ANNUAL_PRICE, type BillingInterval, type Tier } from "@/lib/constants";
 
 /**
  * Links that cross the two hostnames.
@@ -39,10 +39,23 @@ export function siteHref(path: string): string {
  * signup, whose ?next= survives both the email round trip and the Google
  * handoff (see post-verify-next.ts), and ?plan= makes billing single the card
  * out. A promo code entered on the pricing page rides along as ?promo=, and
- * billing applies it before opening Checkout.
+ * billing applies it before opening Checkout. ?interval=annual asks for the
+ * plan billed yearly (Creator and Studio only; billing ignores it elsewhere).
  */
-export function subscribeHref(tier: Tier, signedIn: boolean, promoCode?: string | null): string {
+export function subscribeHref(
+  tier: Tier,
+  signedIn: boolean,
+  promoCode?: string | null,
+  interval?: BillingInterval,
+): string {
   const promo = promoCode ? `&promo=${encodeURIComponent(promoCode)}` : "";
-  const billing = `/settings/billing?plan=${tier}${promo}`;
+  const yearly = interval === "annual" && ANNUAL_PRICE[tier] !== undefined ? "&interval=annual" : "";
+  const billing = `/settings/billing?plan=${tier}${yearly}${promo}`;
   return appHref(signedIn ? billing : `/signup?next=${encodeURIComponent(billing)}`);
 }
+
+/**
+ * Where "Get started" goes now that there is no free plan to sign up to
+ * (2026-10-15): the plan grid on the pricing page.
+ */
+export const GET_STARTED_HREF = siteHref("/pricing#plans");

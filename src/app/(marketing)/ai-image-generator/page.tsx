@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import {
   featuredModelLabels,
-  freeVideoOffer,
   GeneratorLanding,
   generatorModels,
   listPhrase,
@@ -12,21 +11,20 @@ import { GPT_IMAGE_2_IMAGES } from "@/lib/gpt-image-2-showcase";
 import { appHref } from "@/lib/hosts";
 import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 
-// Targets "ai image generator" / "ai image generator free". Unlike video, the
-// free claim holds here: the Free grant is sized for the fast image models.
+// Targets "ai image generator". There is no free plan since 2026-10-15, so
+// nothing here may claim the generator is free.
 
-const { free, starter } = TIER_INFO;
+const { starter } = TIER_INFO;
 const models = generatorModels("image");
-const freeVideo = freeVideoOffer();
 const featured = featuredModelLabels(models, 3);
 const vectorModel = models.find((m) => m.page.slug === "recraft-v4-1-vector");
-// The image line on the Free card ("~3 images", "1 image") — reused rather
-// than restated, so the two can't disagree when the grant changes.
-const freeImages = free.features.find((f) => / images?$/.test(f))?.replace("~", "about ");
+// The image line on the Starter card ("~333 images") — reused rather than
+// restated, so the two can't disagree when the grant changes.
+const starterImages = starter.features.find((f) => / images?$/.test(f))?.replace("~", "about ");
 
-const TITLE = "Free AI Image Generator — Text to Image";
+const TITLE = "AI Image Generator — Text to Image";
 const DESCRIPTION = metaDescription(
-  `Free AI image generator: turn text into images with ${featured.join(", ")} and more. ${free.monthlyCredits} free credits, no credit card.`,
+  `AI image generator: turn text into images with ${featured.join(", ")} and more. Every model on one credit balance.`,
 );
 
 export const metadata: Metadata = {
@@ -34,13 +32,13 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/ai-image-generator" },
   openGraph: openGraph({ title: TITLE, description: DESCRIPTION, path: "/ai-image-generator" }),
-  keywords: keywords("text to image", "free AI image generator", ...featured),
+  keywords: keywords("text to image", "AI image generator", ...featured),
 };
 
 const content: GeneratorLandingContent = {
   kind: "image",
   heading: "AI Image Generator",
-  tagline: `Create images from a text prompt with ${models.length} AI image models in one place — free to start.`,
+  tagline: `Create images from a text prompt with ${models.length} AI image models in one place.`,
   intro: `${SITE_NAME} is an AI image generator that runs ${models.length} image models — including ${listPhrase(
     featured,
   )} — from a single account. Write what you want to see and get finished images back, from quick drafts to high-resolution finals${
@@ -70,10 +68,10 @@ const content: GeneratorLandingContent = {
   primaryCta: { label: "Open the AI image generator", href: appHref("/generate/image") },
   faqs: [
     {
-      question: "Is the AI image generator free?",
-      answer: `Yes. A free account comes with ${free.monthlyCredits} credits and no credit card${
-        freeImages ? ` — enough for ${freeImages} with the fast image models` : ""
-      }, and those credits never expire. Free images carry a Vixlens watermark; when you need more, or need them clean, ${starter.label} is $${starter.priceMonthly}/month for ${starter.monthlyCredits.toLocaleString("en-US")} credits.`,
+      question: "How much does the AI image generator cost?",
+      answer: `Generating needs a plan — there is no free tier. ${starter.label} is $${starter.priceMonthly}/month for ${starter.monthlyCredits.toLocaleString("en-US")} credits${
+        starterImages ? `, ${starterImages} with the fast image models` : ""
+      }, with no watermark and a commercial licence. The gallery is open without an account if you want to see results first.`,
     },
     {
       question: "What is an AI image generator?",
@@ -93,14 +91,12 @@ const content: GeneratorLandingContent = {
       : []),
     {
       question: "Can I use the images commercially?",
-      answer: `Commercial use is included from the ${starter.label} plan up. The ${free.label} plan is for trying the models and does not include a commercial licence.`,
+      answer: `Yes. Every plan, from ${starter.label} up, includes a commercial licence.`,
     },
     {
       question: "Can I turn my images into video?",
       answer: `Yes — upload one to the ${SITE_NAME} AI video generator and describe how it should move.${
-        freeVideo
-          ? ` Your free credits cover ${freeVideo.clips === 1 ? "a short clip" : `${freeVideo.clips} short clips`} with ${freeVideo.label}.`
-          : ` Video starts on the ${starter.label} plan.`
+        " Every plan includes video."
       }`,
     },
   ],

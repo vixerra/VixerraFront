@@ -44,7 +44,6 @@ export type GuidePost = {
   keywords: string[];
 };
 
-const FREE_CREDITS = TIER_INFO.free.monthlyCredits;
 const STARTER = TIER_INFO.starter;
 const CREATOR = TIER_INFO.creator;
 const STUDIO = TIER_INFO.studio;
@@ -151,7 +150,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `Every generation costs credits based on the model, resolution and duration, and the exact cost is shown before you press generate. New accounts get ${FREE_CREDITS} credits to experiment with — see [pricing](/pricing) for what the paid plans include.`,
+        text: `Every generation costs credits based on the model, resolution and duration, and the exact cost is shown before you press generate. See [pricing](/pricing) for what each plan includes.`,
       },
       { type: "h2", text: "Common failure modes" },
       {
@@ -258,7 +257,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `New accounts start with ${FREE_CREDITS} credits and no credit card; what they make carries a Vixlens watermark. Watermark-free export and a commercial licence begin at the ${STARTER.label} plan ($${STARTER.priceMonthly}/month) — see [pricing](/pricing).`,
+        text: `Every plan, from ${STARTER.label} ($${STARTER.priceMonthly}/month) up, exports without a watermark and includes a commercial licence — see [pricing](/pricing).`,
       },
     ],
   },
@@ -303,7 +302,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `On Vixlens, the ${TIER_INFO.free.label} plan's results carry a Vixlens watermark in the center of the frame, and the plan leaves out the commercial licence. Both change at ${STARTER.label} ($${STARTER.priceMonthly}/month): ${TIER_INFO.free.label} is there to try the models, not to ship with.`,
+        text: `On Vixlens, every plan — from ${STARTER.label} at $${STARTER.priceMonthly}/month — exports without a watermark and includes a commercial licence.`,
       },
       { type: "h2", text: "What else to check alongside the watermark" },
       { type: "h3", text: "Resolution ceiling" },
@@ -552,7 +551,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       { type: "h2", text: "What it costs" },
       {
         type: "p",
-        text: `Generation is billed in credits, and the cost of a clip scales with the compute it consumes — model, resolution and duration. The exact figure is shown before you submit, so nothing is a surprise. A new account gets ${FREE_CREDITS} credits with no credit card; ${STARTER.label} is $${STARTER.priceMonthly}/month with ${STARTER.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence. Full detail is on [pricing](/pricing).`,
+        text: `Generation is billed in credits, and the cost of a clip scales with the compute it consumes — model, resolution and duration. The exact figure is shown before you submit, so nothing is a surprise. ${STARTER.label} is $${STARTER.priceMonthly}/month with ${STARTER.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence. Full detail is on [pricing](/pricing).`,
       },
       { type: "h2", text: "A first session that will go well" },
       {
