@@ -10,6 +10,7 @@ import { keywords } from "@/lib/seo";
 import { Hero } from "@/components/landing/hero";
 import { PlansSection } from "@/components/landing/plans-section";
 import { SeedancePromoBanner } from "@/components/landing/seedance-promo-banner";
+import { Wan3UnlimitedBanner } from "@/components/landing/wan3-unlimited-banner";
 import { FeatureLaunches } from "@/components/landing/feature-launches";
 import { FeaturesShowcase } from "@/components/landing/features-showcase";
 import { CapabilityConcepts } from "@/components/landing/capability-concepts";
@@ -55,6 +56,7 @@ export default function LandingPage() {
           does lead; the plans come once, near the end, for visitors who've
           seen enough to want them. */}
       <Hero />
+      <Wan3UnlimitedBanner />
       <FeatureLaunches />
       <TrustBar />
       <SeedancePromoBanner />
