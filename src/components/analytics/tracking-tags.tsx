@@ -47,9 +47,21 @@ export function TrackingTags() {
 
   return (
     <>
-      {/* Google Tag Manager. Its container also loads GA4 (G-FEEGSJGPZM), so
-          there is no separate gtag.js here: loading both fetched the same
-          175 KB twice and sent each page view twice. */}
+      {/* Google tag (gtag.js) — GA4. Shares GTM's `dataLayer`. Lives here
+          rather than in the GTM container, which has no tags: adding a Google
+          tag there as well would send every page view twice. */}
+      <Script
+        id="google-tag-loader"
+        src="https://www.googletagmanager.com/gtag/js?id=G-FEEGSJGPZM"
+        strategy="afterInteractive"
+      />
+      <Script id="google-tag" strategy="afterInteractive">
+        {`window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-FEEGSJGPZM');`}
+      </Script>
+      {/* Google Tag Manager. */}
       <Script id="google-tag-manager" strategy="afterInteractive">
         {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
