@@ -9,6 +9,7 @@ import { ConfirmProvider } from "@/components/ui/confirm";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReleaseAnnouncementModal } from "@/components/marketing/release-announcement-modal";
 import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { BUILD_SHA } from "@/lib/build-info";
 
 // One variable grotesk for every role — see the --font-* tokens in
 // globals.css. The wdth axis is what lets `font-narrow` set condensed
@@ -65,6 +66,8 @@ export const metadata: Metadata = {
   verification: {
     other: { "facebook-domain-verification": "mj9jz0e8nix5l4t89hxzuz8sxk00g2" },
   },
+  // The commit this page was built from — see lib/build-info.ts.
+  other: { "x-build": BUILD_SHA },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
