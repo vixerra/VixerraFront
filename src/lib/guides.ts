@@ -16,6 +16,7 @@
 // [label](/href), parsed in guide-body.tsx.
 
 import { TIER_INFO } from "@/lib/constants";
+import { ENTRY_PRICE_LABEL, entryPriceSentence } from "@/lib/pricing";
 
 export type GuideBlock =
   | { type: "p"; text: string }
@@ -257,7 +258,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `Every plan, from ${STARTER.label} ($${STARTER.priceMonthly}/month) up, exports without a watermark and includes a commercial licence — see [pricing](/pricing).`,
+        text: `Every plan, from ${STARTER.label} (${ENTRY_PRICE_LABEL}) up, exports without a watermark and includes a commercial licence — see [pricing](/pricing).`,
       },
     ],
   },
@@ -302,7 +303,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       },
       {
         type: "note",
-        text: `On Vixlens, every plan — from ${STARTER.label} at $${STARTER.priceMonthly}/month — exports without a watermark and includes a commercial licence.`,
+        text: `On Vixlens, every plan — from ${STARTER.label} at ${ENTRY_PRICE_LABEL} — exports without a watermark and includes a commercial licence.`,
       },
       { type: "h2", text: "What else to check alongside the watermark" },
       { type: "h3", text: "Resolution ceiling" },
@@ -551,7 +552,7 @@ export const GUIDE_POSTS: GuidePost[] = [
       { type: "h2", text: "What it costs" },
       {
         type: "p",
-        text: `Generation is billed in credits, and the cost of a clip scales with the compute it consumes — model, resolution and duration. The exact figure is shown before you submit, so nothing is a surprise. ${STARTER.label} is $${STARTER.priceMonthly}/month with ${STARTER.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence. Full detail is on [pricing](/pricing).`,
+        text: `Generation is billed in credits, and the cost of a clip scales with the compute it consumes — model, resolution and duration. The exact figure is shown before you submit, so nothing is a surprise. ${entryPriceSentence()} Plans include watermark-free export and a commercial licence. Full detail is on [pricing](/pricing).`,
       },
       { type: "h2", text: "A first session that will go well" },
       {

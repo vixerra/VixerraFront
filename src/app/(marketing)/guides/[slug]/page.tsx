@@ -6,11 +6,10 @@ import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { GuideBody } from "@/components/marketing/guide-body";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
-import { TIER_INFO } from "@/lib/constants";
 import { GUIDE_POSTS, guideBySlug, sortedGuides } from "@/lib/guides";
 import { modelCatalogEntry, modelPageBySlug } from "@/lib/model-seo";
-import { absoluteUrl, DEFAULT_OG_IMAGE, keywords, openGraph, SITE_NAME } from "@/lib/seo";
-import { appHref } from "@/lib/hosts";
+import { absoluteUrl, openGraph, SITE_NAME } from "@/lib/seo";
+import { PRIMARY_CTA } from "@/lib/hosts";
 
 export const dynamicParams = false;
 
@@ -28,6 +27,7 @@ export async function generateMetadata(props: PageProps<"/guides/[slug]">): Prom
     description: guide.description,
     alternates: { canonical: `/guides/${guide.slug}` },
     openGraph: openGraph({
+    images: "file",
       title: guide.metaTitle,
       description: guide.description,
       path: `/guides/${guide.slug}`,
@@ -35,7 +35,6 @@ export async function generateMetadata(props: PageProps<"/guides/[slug]">): Prom
       publishedTime: guide.published,
       modifiedTime: guide.updated ?? guide.published,
     }),
-    keywords: keywords(...guide.keywords),
   };
 }
 
@@ -78,7 +77,7 @@ export default async function GuidePage(props: PageProps<"/guides/[slug]">) {
           },
           author: { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") },
           publisher: { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") },
-          image: absoluteUrl(DEFAULT_OG_IMAGE),
+          image: absoluteUrl(`/guides/${guide.slug}/opengraph-image`),
         }}
       />
 
@@ -134,8 +133,8 @@ export default async function GuidePage(props: PageProps<"/guides/[slug]">) {
           Every model on one credit balance — pick a plan and start creating.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
-            Get started
+          <Link href={PRIMARY_CTA.href} className={buttonVariants({ variant: "accent" })}>
+            {PRIMARY_CTA.label}
           </Link>
           <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
             Browse the gallery

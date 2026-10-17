@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiUrl } from "@/lib/api-client";
 import { useInvalidateCredits } from "@/hooks/use-credits";
+import { trackFirstGeneration } from "@/lib/analytics";
 
 export type GenerationStatus = "idle" | "queued" | "processing" | "completed" | "failed";
 
@@ -72,6 +73,7 @@ export function useGeneration(jobId: string | null) {
         error: null,
       }));
       source.close();
+      if (data.firstForAccount) trackFirstGeneration(jobId);
     });
     source.addEventListener("failed", (event) => {
       const data = JSON.parse((event as MessageEvent).data);

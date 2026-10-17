@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { appHref, GET_STARTED_HREF } from "@/lib/hosts";
+import { appHref, PRIMARY_CTA } from "@/lib/hosts";
 
 const NAV_LINKS = [
   { href: "/features", label: "Features" },
@@ -74,8 +74,8 @@ export function MobileNav({ isAuthed }: { isAuthed: boolean }) {
             >
               Log in
             </Link>
-            <Link href={GET_STARTED_HREF} onClick={close} className={buttonVariants({ size: "lg", className: "w-full" })}>
-              Get started
+            <Link href={PRIMARY_CTA.href} onClick={close} className={buttonVariants({ size: "lg", className: "w-full" })}>
+              {PRIMARY_CTA.label}
             </Link>
           </>
         )}

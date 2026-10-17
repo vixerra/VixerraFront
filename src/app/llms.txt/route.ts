@@ -1,5 +1,6 @@
 import { TIERS, TIER_INFO, RECHARGE_PACKS, CREDIT_VALUE_USD } from "@/lib/constants";
 import { sortedGuides } from "@/lib/guides";
+import { howToStartSentence } from "@/lib/pricing";
 import { CATEGORY_LABEL, MODEL_PAGES, modelCatalogEntry } from "@/lib/model-seo";
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
@@ -69,7 +70,7 @@ function buildLlmsTxt() {
     "- Text to video, image to video and text to image, in the browser — nothing to install.",
     `- Video models include ${VIDEO.slice(0, 6).map((m) => m.entry.label).join(", ")}.`,
     `- Image models include ${IMAGE.slice(0, 6).map((m) => m.entry.label).join(", ")}.`,
-    `- Plans start with ${TIER_INFO.starter.label} at ${usd(TIER_INFO.starter.priceMonthly)}/month; there is no free plan. Every plan exports without a watermark.`,
+    `- ${howToStartSentence()} Every paid plan exports without a watermark.`,
     `- Creator and Studio can be billed annually with up to two months free, and include 7 days of unlimited Wan 3.0 (Relax mode, web only) from the first payment.`,
     FIRST_COMMERCIAL
       ? `- Commercial use is licensed from the ${FIRST_COMMERCIAL.label} plan (${usd(FIRST_COMMERCIAL.priceMonthly)}/month).`

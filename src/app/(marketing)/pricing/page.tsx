@@ -13,6 +13,7 @@ import {
   WAN3_CREDITS_PER_SECOND_FROM,
 } from "@/lib/constants";
 import { formatListPrice } from "@/lib/competitor-pricing";
+import { ENTRY_PRICE_LABEL, freePlanAnswer } from "@/lib/pricing";
 import {
   LaunchOfferPlanCta,
   LaunchOfferPlanFlag,
@@ -33,12 +34,16 @@ import {
 } from "@/components/pricing/pricing-promo";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqPageJsonLd } from "@/lib/faqs";
-import { pricingProductJsonLd } from "@/lib/structured-data";
-import { keywords, openGraph } from "@/lib/seo";
+import { pricingProductJsonLd, softwareApplicationJsonLd } from "@/lib/structured-data";
+import { openGraph } from "@/lib/seo";
 
+const STARTER_LABEL = TIER_INFO[LAUNCH_OFFER.tier].label;
+
+// The list price, with the launch price named as such — quoting $6 alone
+// made the FAQ's $10 look like a contradiction.
 const DESCRIPTION =
-  "Credit-based pricing for AI video and image generation, from Starter at " +
-  `${formatListPrice(LAUNCH_OFFER.priceMonthly)}/month. Watermark-free export, a commercial licence, ` +
+  `Credit-based pricing for AI video and image generation: ${STARTER_LABEL} from ${ENTRY_PRICE_LABEL} ` +
+  `(${formatListPrice(LAUNCH_OFFER.priceMonthly)} launch offer for the first ${LAUNCH_OFFER.places}), ` +
   "and up to two months free on annual Creator and Studio plans.";
 
 export const metadata: Metadata = {
@@ -46,16 +51,11 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/pricing" },
   openGraph: openGraph({
+    images: "file",
     title: "AI video generator pricing",
     description: DESCRIPTION,
     path: "/pricing",
   }),
-  keywords: keywords(
-    "AI video generator pricing",
-    "AI image generator pricing",
-    "AI video credits",
-    "Wan 3.0 unlimited",
-  ),
 };
 
 const STARTER = TIER_INFO[LAUNCH_OFFER.tier];
@@ -90,7 +90,7 @@ const FAQS = [
   },
   {
     q: "Is there a free plan?",
-    a: `Not any more: ${STARTER.label} is the way in. Its launch offer is ${formatListPrice(LAUNCH_OFFER.priceMonthly)} a month for ${STARTER.monthlyCredits.toLocaleString("en-US")} credits, kept for as long as you stay subscribed by the first ${LAUNCH_OFFER.places} subscribers; after that ${STARTER.label} is ${formatListPrice(STARTER.priceMonthly)} a month. The gallery is open without an account. If you already had free credits, they stay valid until you use them.`,
+    a: freePlanAnswer(),
   },
 ];
 
@@ -102,6 +102,7 @@ export default function PricingPage() {
           is a markup violation rather than a bonus. */}
       <JsonLd
         data={[
+          softwareApplicationJsonLd,
           pricingProductJsonLd,
           faqPageJsonLd(FAQS.map((faq) => ({ question: faq.q, answer: faq.a }))),
         ]}
@@ -236,6 +237,13 @@ export default function PricingPage() {
             </div>
           ))}
         </dl>
+        <p className="mt-8 text-center text-body-sm text-muted">
+          Payments are handled by Stripe. See the{" "}
+          <Link href="/refund-policy" className="text-brand-ink underline-offset-4 hover:underline">
+            refund policy
+          </Link>{" "}
+          for how cancellations and refunds work.
+        </p>
       </div>
     </div>
   );

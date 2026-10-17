@@ -11,7 +11,11 @@ import type { GalleryItem } from "@/components/gallery/generation-card";
 // rather than appearing after a client fetch — this rendered its own <h1> as
 // well, which left the page with two of them once the server one existed.
 
-function usePublicGenerations() {
+// The server page passes the feed it already read (initialItems), so the
+// grid is in the first HTML instead of a spinner — crawlers and no-JS
+// visitors see the thumbnails. The client still refetches on mount for the
+// viewer's own likes.
+function usePublicGenerations(initialItems?: GalleryItem[]) {
   return useQuery({
     queryKey: ["generations-public"],
     queryFn: async (): Promise<GalleryItem[]> => {
@@ -20,11 +24,13 @@ function usePublicGenerations() {
       const data = await res.json();
       return data.items;
     },
+    initialData: initialItems,
+    initialDataUpdatedAt: 0,
   });
 }
 
-export function PublicGalleryClient() {
-  const { data: generations, isLoading } = usePublicGenerations();
+export function PublicGalleryClient({ initialItems }: { initialItems?: GalleryItem[] }) {
+  const { data: generations, isLoading } = usePublicGenerations(initialItems);
 
   if (isLoading || !generations) {
     return (

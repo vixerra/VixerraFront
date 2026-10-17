@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/analytics";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -47,6 +48,9 @@ export default function AuthCallbackPage() {
         setError(json.error ?? "Something went wrong signing you in.");
         return;
       }
+
+      const json = (await res.json().catch(() => ({}))) as { created?: boolean };
+      if (json.created) track({ event: "sign_up", method: "google" });
 
       queryClient.clear();
       router.replace(takePostVerifyNext() ?? "/dashboard");

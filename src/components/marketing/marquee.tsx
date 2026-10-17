@@ -41,6 +41,9 @@ export function Marquee({
         <div
           className={vertical ? "flex shrink-0 flex-col items-center gap-3 pb-3" : "flex shrink-0 items-center gap-3 pr-3"}
           aria-hidden="true"
+          // The loop's second copy is decoration: inert keeps its links out
+          // of the tab order, so keyboard users don't walk every item twice.
+          inert
         >
           {children}
         </div>

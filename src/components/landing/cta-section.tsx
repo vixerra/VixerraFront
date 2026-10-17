@@ -4,11 +4,10 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/marketing/reveal";
-import { ENTRY_PRICE_MONTHLY, formatListPrice } from "@/lib/competitor-pricing";
+import { PLANS_FROM_LABEL } from "@/lib/pricing";
 
-// Subscribe-first like the hero: the plans are the ask, the gallery the
-// fallback for whoever is still looking (there is no free plan since
-// 2026-10-15). Closes the page on the same slanted yellow
+// Same ask as the hero: the plans; the gallery is the fallback for whoever
+// is still looking. Closes the page on the same slanted yellow
 // tags the hero opens with.
 export function CtaSection() {
   return (
@@ -20,8 +19,8 @@ export function CtaSection() {
           <span className="tag-slant">One studio</span>
         </h2>
         <p className="max-w-lg text-body-lg text-muted">
-          Video, images, Genjutsu and AI Influencers, all in one place. Plans from{" "}
-          {formatListPrice(ENTRY_PRICE_MONTHLY)} a month, cancel anytime.
+          Video, images, Genjutsu and AI Influencers, all in one place. {PLANS_FROM_LABEL},
+          cancel anytime.
         </p>
         <div className="flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:items-center">
           <a href="#plans" className={buttonVariants({ variant: "accent", size: "lg" })}>

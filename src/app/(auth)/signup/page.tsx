@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { track } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -72,6 +73,8 @@ function SignupForm() {
       return json as { pendingVerification?: boolean; email?: string };
     },
     onSuccess: (json, data) => {
+      // The account exists from here on, verified or not.
+      track({ event: "sign_up", method: "email" });
       // Two shapes from POST /auth/register: verification on (the default)
       // answers { pendingVerification, email } with no cookie; a deployment
       // with verification switched off answers { user } and is signed in,

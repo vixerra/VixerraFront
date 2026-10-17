@@ -164,8 +164,12 @@ function SeatGrid({
   );
 }
 
+// The count beside a "first N" line. Before the API answers it must not
+// repeat N: the two spans sit next to each other in the markup, so text
+// extraction (crawlers, screen readers, the audit) read "first 20" + "20
+// spots" as "first 2020 spots".
 function spotsLabel(places: number, remaining: number | null) {
-  return remaining === null ? `${places} spots` : `${remaining} left`;
+  return remaining === null ? "limited spots" : `${remaining} of ${places} left`;
 }
 
 /** Hero pill, above the model chips — the offer above the fold. */
@@ -181,7 +185,7 @@ export function LaunchOfferPill() {
       <LiveDot />
       <span className="font-bold tracking-wide text-accent-hot-ink uppercase">Launch offer</span>
       <span className="hidden sm:inline">
-        {OFFER_PRICE}/mo locked in for the first {places}
+        {OFFER_PRICE}/mo locked in for the first {places} subscribers ·
       </span>
       <span className="rounded-full bg-accent-hot-strong px-2 py-0.5 text-[11px] font-bold text-white tabular-nums">
         {spotsLabel(places, remaining)}
@@ -317,7 +321,7 @@ export function LaunchOfferMeter({ className }: { className?: string }) {
       <div className="flex items-center justify-between gap-2 text-caption">
         <span className="flex items-center gap-1.5 font-semibold text-accent-hot-ink">
           <Lock className="size-3.5" aria-hidden="true" />
-          Locked in for the first {places}
+          Locked in for the first {places} subscribers
         </span>
         <span className="text-muted tabular-nums">{spotsLabel(places, remaining)}</span>
       </div>

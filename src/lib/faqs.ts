@@ -9,24 +9,37 @@
 // real /settings/api-keys page, the CtaSection/StatsStrip copy) rather than
 // invented claims.
 
-import { TIER_INFO } from "@/lib/constants";
+import { IMAGE_MODELS, TIER_INFO, VIDEO_MODELS } from "@/lib/constants";
+import { freePlanAnswer, pricingSummary } from "@/lib/pricing";
+
+/** "A, B, and C" */
+function list(items: readonly string[]): string {
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+// Read off the same registry the composer and the model strip use, so the
+// answer can't name a model that isn't offered (it once listed Stable
+// Diffusion) or miss one that is.
+const MODELS_ANSWER =
+  `${VIDEO_MODELS.length} video models — ${list(VIDEO_MODELS.map((m) => m.label))} — ` +
+  `and ${IMAGE_MODELS.length} image models — ${list(IMAGE_MODELS.map((m) => m.label))}. ` +
+  "Every one runs from the same credit balance; the Models page has specs and example prompts for each.";
 
 export type Faq = { question: string; answer: string };
 
 export const HOME_FAQS: Faq[] = [
   {
     question: "What models does Vixlens support?",
-    answer:
-      "Several video models — Seedance 2.5 and 2.0, Google's Veo 3.1, and more from ByteDance, Black Forest Labs, and xAI — and several image models, including Recraft, Stable Diffusion, and Google's Nano Banana — the model behind the example images throughout this page.",
+    answer: MODELS_ANSWER,
   },
   {
     question: "What's the pricing?",
-    answer: `${TIER_INFO.starter.label} is $${TIER_INFO.starter.priceMonthly}/month, ${TIER_INFO.creator.label} is $${TIER_INFO.creator.priceMonthly}/month, and ${TIER_INFO.studio.label} is $${TIER_INFO.studio.priceMonthly}/month, with up to two months free on annual ${TIER_INFO.creator.label} and ${TIER_INFO.studio.label} plans. ${TIER_INFO.creator.label} and above also unlock the marketing studio, the editing studio, and publishing straight to TikTok, Instagram, YouTube, and Facebook — see the full comparison on the Pricing page.`,
+    answer: `${pricingSummary()} ${TIER_INFO.creator.label} and above also unlock the marketing studio, the editing studio, and publishing straight to TikTok, Instagram, YouTube, and Facebook — see the full comparison on the Pricing page.`,
   },
   {
     question: "Is there an API?",
-    answer:
-      "Yes. Generate an API key from Settings → API Keys once you're signed in, and call the same generation pipeline the web app uses.",
+    answer: `Yes, on the ${TIER_INFO.studio.label} plan. Generate an API key from Settings → API Keys once you're signed in, and call the same generation pipeline the web app uses — see the developer page for an example request.`,
   },
   {
     question: "What file formats are supported?",
@@ -39,7 +52,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     question: "Is there a free plan?",
-    answer: `No — generating starts with the ${TIER_INFO.starter.label} plan. The gallery is open without an account, so you can see what the models make before you subscribe.`,
+    answer: freePlanAnswer(),
   },
 ];
 

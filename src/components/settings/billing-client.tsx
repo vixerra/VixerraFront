@@ -1,5 +1,8 @@
 "use client";
 
+import { siteHref } from "@/lib/hosts";
+import { trackPurchaseFromCheckout } from "@/lib/analytics";
+
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -182,6 +185,7 @@ function useCheckoutReturn(refetch: () => Promise<{ data?: SubscriptionResponse 
       }
       if (signature !== baseline) {
         invalidateCredits();
+        trackPurchaseFromCheckout();
         toast({
           title: "Payment confirmed",
           description: "Your account is up to date.",
@@ -505,6 +509,14 @@ export function BillingClient() {
       />
 
       {paymentsEnabled && paymentsData && <PaymentHistory payments={paymentsData.payments} />}
+
+      <p className="text-caption text-muted">
+        Checkout is handled by Stripe. See the{" "}
+        <a href={siteHref("/refund-policy")} className="text-brand-ink underline-offset-4 hover:underline">
+          refund policy
+        </a>{" "}
+        before you subscribe.
+      </p>
     </div>
   );
 }

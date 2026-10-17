@@ -6,15 +6,17 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { SEEDANCE_MODEL_ID } from "@/lib/constants";
 import { useMe } from "@/hooks/use-me";
-import { appHref, GET_STARTED_HREF } from "@/lib/hosts";
+import { appHref, PRIMARY_CTA } from "@/lib/hosts";
 import { openFeatureAnnouncement } from "@/lib/feature-announcement";
 import { cn } from "@/lib/utils";
 
-// Product-led: the headline is what Vixlens is (every top model in one
-// studio), set as two narrow uppercase lines on slanted yellow tags; the
-// main CTA leads to the plans (there is no free plan since 2026-10-15), and
-// pricing itself is left to the plans further down.
-const TITLE_LINES = ["Every top AI model", "One studio"];
+// Differentiator-led: the headline is what only Vixlens does (Genjutsu's
+// video recast, locked-identity AI influencers), set as two narrow uppercase
+// lines on slanted yellow tags; "every top model" is the supporting line.
+// The main CTA is PRIMARY_CTA (the plans), and pricing itself is left to the
+// plans further down.
+// TODO(owner): final hero copy. This is the audit's suggested wording.
+const TITLE_LINES = ["Recast any video", "Create AI influencers"];
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 // Featured models, each a direct link into its workspace.
@@ -32,7 +34,7 @@ const NODES = [
     kind: "image" as const,
     label: "GPT Image 2",
     url: "/media/images/gpt-image-11.webp",
-    alt: "AI-generated image from GPT Image 2",
+    alt: "AI-generated photo of a tuxedo cat leaning into a wide-angle lens, its owner smiling behind",
     className: "left-[2.5%] top-[12%] w-44 xl:w-52",
     aspect: "aspect-[3/4]",
     side: "left" as const,
@@ -47,18 +49,18 @@ const NODES = [
   },
   {
     kind: "image" as const,
-    label: "Text render",
+    label: "Portrait",
     url: "/media/images/gpt-image-09.webp",
-    alt: "AI-generated image with production-ready text rendering from GPT Image 2",
+    alt: "AI-generated smartphone-style portrait of a young woman on a balcony at dusk",
     className: "left-[5%] top-[58%] w-36 xl:w-44",
     aspect: "aspect-[3/4]",
     side: "left" as const,
   },
   {
     kind: "image" as const,
-    label: "Product shot",
+    label: "Poster",
     url: "/media/images/gpt-image-06.webp",
-    alt: "Photorealistic AI-generated product image from GPT Image 2",
+    alt: "AI-generated editorial poster: a man in a record store under the headline LISTEN.",
     className: "right-[5%] top-[50%] w-36 xl:w-44",
     aspect: "aspect-[3/4]",
     side: "right" as const,
@@ -173,8 +175,8 @@ export function Hero() {
             {...rise(0.55, 24)}
             className="mx-auto mt-6 max-w-xl text-body-lg text-muted"
           >
-            Seedance 2.5, Kling 3.0, Veo 3.1, GPT Image 2 and Nano Banana Pro, side by side,
-            plus Genjutsu and AI Influencers built in. Write a prompt, pick a model, ship it.
+            Every top model in one studio — Seedance 2.5, Kling 3.0, Veo 3.1, GPT Image 2 and
+            Nano Banana Pro, side by side, with Genjutsu and AI Influencers built in.
           </motion.p>
 
           <motion.div
@@ -200,11 +202,11 @@ export function Hero() {
             className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
           >
             <Link
-              href={user ? appHref("/generate") : GET_STARTED_HREF}
+              href={user ? appHref("/generate") : PRIMARY_CTA.href}
               prefetch={false}
               className={buttonVariants({ variant: "accent", size: "lg" })}
             >
-              {user ? "Open the studio" : "Get started"}
+              {user ? "Open the studio" : PRIMARY_CTA.label}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <a href="#showcase" className={buttonVariants({ variant: "outline", size: "lg" })}>

@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "The terms that govern use of Vixlens, including accounts, credits, subscriptions, content ownership and commercial use.",
   alternates: { canonical: "/terms" },
   openGraph: openGraph({
+    images: "file",
     title: "Terms of Service",
     description:
       "The terms that govern use of Vixlens, including accounts, credits, subscriptions, content ownership and commercial use.",

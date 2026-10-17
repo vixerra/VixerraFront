@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useMe } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { appHref, GET_STARTED_HREF } from "@/lib/hosts";
+import { appHref, PRIMARY_CTA } from "@/lib/hosts";
 import { Logo } from "./logo";
 import { MobileNav } from "./mobile-nav";
 
@@ -61,9 +61,9 @@ export function Header() {
               >
                 Log in
               </Link>
-              {/* No free plan since 2026-10-15: "Get started" is the plan grid. */}
-              <Link href={GET_STARTED_HREF} className={buttonVariants({ size: "sm" })}>
-                Get started
+              {/* No free plan since 2026-10-15: PRIMARY_CTA is the plan grid. */}
+              <Link href={PRIMARY_CTA.href} className={buttonVariants({ size: "sm" })}>
+                {PRIMARY_CTA.label}
               </Link>
             </>
           )}
@@ -72,10 +72,10 @@ export function Header() {
         <div className="flex items-center justify-end gap-2 lg:hidden">
           {!isAuthed && (
             <Link
-              href={GET_STARTED_HREF}
+              href={PRIMARY_CTA.href}
               className={buttonVariants({ size: "sm", className: "hidden min-[400px]:inline-flex" })}
             >
-              Get started
+              {PRIMARY_CTA.label}
             </Link>
           )}
           <MobileNav isAuthed={isAuthed} />

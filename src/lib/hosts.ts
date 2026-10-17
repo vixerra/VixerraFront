@@ -59,3 +59,11 @@ export function subscribeHref(
  * (2026-10-15): the plan grid on the pricing page.
  */
 export const GET_STARTED_HREF = siteHref("/pricing#plans");
+
+/**
+ * The site's one primary call to action, used by every header, the mobile
+ * nav and every page-level CTA, so no layout can drift to a label of its own
+ * (the gallery once said "Start for Free" while the FAQ said there was no
+ * free plan).
+ */
+export const PRIMARY_CTA = { label: "Get started", href: GET_STARTED_HREF } as const;

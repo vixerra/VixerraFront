@@ -60,7 +60,11 @@ const REVIEWS: Review[] = [
   },
 ];
 
-const ACTIVE_USERS = { count: 1_000, verified: true };
+// TODO(owner): hidden in production until the figure is backed by real
+// data (the audit flagged "1,000+ active creators" as unsupported). Set
+// verified back to true only with a count you can show — e.g. distinct
+// accounts that generated in the last 30 days.
+const ACTIVE_USERS = { count: 1_000, verified: false };
 export function visibleReviews(): Review[] {
   return REVIEWS.filter((review) => review.verified || SHOW_UNVERIFIED);
 }

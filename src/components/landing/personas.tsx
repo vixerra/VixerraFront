@@ -29,7 +29,7 @@ const PERSONAS = [
   {
     title: "Marketers & brands",
     body: "Consistent product and brand imagery — accurate colors, logos, and packaging text every time.",
-    media: { kind: "image" as const, ...NANO_BANANA_IMAGES.find((i) => i.id === "hillside-house-viz")! },
+    media: { kind: "image" as const, ...NANO_BANANA_IMAGES.find((i) => i.id === "record-store-poster")! },
   },
   {
     title: "Video editors",

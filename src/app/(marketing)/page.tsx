@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqPageJsonLd, HOME_FAQS } from "@/lib/faqs";
-import {
-  organizationJsonLd,
-  softwareApplicationJsonLd,
-  webSiteJsonLd,
-} from "@/lib/structured-data";
-import { keywords } from "@/lib/seo";
+import { softwareApplicationJsonLd } from "@/lib/structured-data";
+
 import { Hero } from "@/components/landing/hero";
 import { PlansSection } from "@/components/landing/plans-section";
 import { SeedancePromoBanner } from "@/components/landing/seedance-promo-banner";
@@ -22,32 +18,24 @@ import { ShowcaseTabs } from "@/components/landing/showcase-tabs";
 import { Personas } from "@/components/landing/personas";
 import { CreatorUseCases } from "@/components/landing/creator-use-cases";
 import { TrustBar } from "@/components/landing/trust-bar";
-import { Reviews } from "@/components/landing/reviews";
+import { Testimonials } from "@/components/landing/testimonials";
 import { FaqAccordion } from "@/components/landing/faq-accordion";
 import { CtaSection } from "@/components/landing/cta-section";
+import { HOME_PROMO } from "@/lib/home-promo";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-  keywords: keywords(
-    "free AI video generator",
-    "free AI image generator",
-    "AI video and image generator",
-    "Seedance",
-    "Veo 3.1",
-    "GPT Image 2",
-  ),
 };
 
 export default function LandingPage() {
   return (
     <>
-      {/* Identity, product and pricing for the site as a whole, plus the FAQ
-          block further down this page — all emitted from the same data the
-          page renders (TIER_INFO, HOME_FAQS) rather than restated. */}
+      {/* Product and pricing, plus the FAQ block further down this page — all
+          emitted from the same data the page renders (TIER_INFO, HOME_FAQS)
+          rather than restated. Organization and WebSite come from the
+          marketing layout. */}
       <JsonLd
         data={[
-          organizationJsonLd,
-          webSiteJsonLd,
           softwareApplicationJsonLd,
           faqPageJsonLd(HOME_FAQS),
         ]}
@@ -56,10 +44,10 @@ export default function LandingPage() {
           does lead; the plans come once, near the end, for visitors who've
           seen enough to want them. */}
       <Hero />
-      <Wan3UnlimitedBanner />
+      {HOME_PROMO === "wan3-unlimited" && <Wan3UnlimitedBanner />}
       <FeatureLaunches />
       <TrustBar />
-      <SeedancePromoBanner />
+      {HOME_PROMO === "seedance" && <SeedancePromoBanner />}
       <FeaturesShowcase />
       {/*<CapabilityConcepts />*/}
       <HowItWorks />
@@ -87,6 +75,7 @@ export default function LandingPage() {
 
       <Personas />
       <CreatorUseCases />
+      <Testimonials />
       <PlansSection />
       <FaqAccordion />
       <CtaSection />

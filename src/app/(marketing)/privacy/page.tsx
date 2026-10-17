@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "What Vixlens collects when you generate video and images, why it is collected, who it is shared with, how long it is kept, and the choices and rights you have over it.",
   alternates: { canonical: "/privacy" },
   openGraph: openGraph({
+    images: "file",
     title: "Privacy Policy",
     description:
       "What Vixlens collects when you generate video and images, why it is collected, and how long it is kept.",

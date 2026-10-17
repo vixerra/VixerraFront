@@ -3,10 +3,9 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { buttonVariants } from "@/components/ui/button";
-import { TIER_INFO } from "@/lib/constants";
 import { CATEGORY_LABEL, MODEL_PAGES, modelCatalogEntry } from "@/lib/model-seo";
-import { keywords, openGraph, SITE_NAME } from "@/lib/seo";
-import { appHref } from "@/lib/hosts";
+import { openGraph, SITE_NAME } from "@/lib/seo";
+import { PRIMARY_CTA } from "@/lib/hosts";
 
 // The hub every /generate/[model] page links back to, and the reason those
 // pages aren't orphans: without it they'd be reachable only from the sitemap,
@@ -18,22 +17,12 @@ export const metadata: Metadata = {
     "Every AI video and image model on Vixlens — Seedance, Veo 3.1, Flux, Grok Imagine, GPT Image 2, Nano Banana, Recraft and more, with specs and prompts.",
   alternates: { canonical: "/models" },
   openGraph: openGraph({
+    images: "file",
     title: "All AI video and image models",
     description:
       "Every AI video and image model available on Vixlens, with specs and example prompts for each.",
     path: "/models",
   }),
-  keywords: keywords(
-    "AI video models",
-    "AI image models",
-    "Seedance",
-    "Veo 3.1",
-    "Flux",
-    "Grok Imagine",
-    "GPT Image 2",
-    "Nano Banana",
-    "Recraft",
-  ),
 };
 
 const GROUPS = [
@@ -77,8 +66,8 @@ export default function ModelsIndexPage() {
           credit balance, no per-provider subscriptions.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
-            Get started
+          <Link href={PRIMARY_CTA.href} className={buttonVariants({ variant: "accent" })}>
+            {PRIMARY_CTA.label}
           </Link>
           <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
             Browse the gallery

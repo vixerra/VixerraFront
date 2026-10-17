@@ -37,6 +37,12 @@ import {
   SEEDANCE2_ASPECT_RATIOS,
   SEEDANCE2_REFERENCE_IMAGES_MAX,
 } from "@/lib/constants";
+import {
+  MOTION_COMPOSER_MODELS,
+  MOTION_MAX_SECONDS,
+  MOTION_MIN_SECONDS,
+  getMotionComposerModel,
+} from "@/lib/motion-models";
 
 export type ModelPageContent = {
   /** URL segment under /generate. Must never equal an existing static
@@ -704,6 +710,261 @@ export const MODEL_PAGES: ModelPageContent[] = [
       "A cross-section illustration of a submarine, labelled compartments, technical drawing style",
     ],
   },
+  // ---------------------------------------------------------------- kling
+  {
+    slug: "kling-3-0",
+    id: "kling/3.0",
+    tagline: "Kling's flagship video model, up to 4K with native audio",
+    intro:
+      "Kling 3.0 is the top of Kling's line on Vixlens: text or a reference image in, a clip of 3 to 15 seconds out, at 720p, 1080p or 4K. Turn on native audio and the soundtrack is generated with the picture rather than added afterwards.",
+    strengths: [
+      "Three quality tiers in one model — 720p for drafts, 1080p for delivery, 4K for the hero shot",
+      "Optional reference image to fix the subject, product or set the clip starts from",
+      "Native audio generated together with the motion",
+      "Landscape, vertical and square framings without recropping",
+    ],
+    useCases: [
+      "Hero shots for ads and launches that need 4K masters",
+      "Vertical social clips with sound, straight out of the model",
+      "Bringing a product photo or key visual to life from a single still",
+    ],
+    prompts: [
+      "A slow push-in on a glass of iced coffee on a café terrace at golden hour, condensation running down the glass, ice shifting as it settles, soft street noise",
+      "A skateboarder drops into an empty concrete bowl at dusk, the camera follows low behind the board, wheels roaring on the transition",
+      "A paper boat drifting down a rain-filled gutter in a narrow cobbled street, streetlights reflecting in the water, gentle rain sound",
+    ],
+  },
+  {
+    slug: "kling-3-0-turbo",
+    id: "kling/3.0-turbo",
+    tagline: "A faster Kling 3.0 for iterating at 720p and 1080p",
+    intro:
+      "Kling 3.0 Turbo trades the 4K tier for turnaround. It takes the same kind of prompt as Kling 3.0 and renders at 720p or 1080p, which makes it the one to iterate on while a shot idea is still moving.",
+    strengths: [
+      "Faster turnaround than the full Kling 3.0",
+      "720p or 1080p output, 3 to 15 seconds",
+      "Landscape, vertical and square framings",
+      "Same prompt style as Kling 3.0, so a winning prompt carries straight over",
+    ],
+    useCases: [
+      "Testing several takes of a shot before rendering the final in Kling 3.0",
+      "Volume social content where speed matters more than 4K",
+      "Quick animatics and pitch visuals",
+    ],
+    prompts: [
+      "A barista pours latte art in slow motion, overhead shot, the milk folding into a rosetta",
+      "A vintage tram climbs a steep street in Lisbon at sunrise, handheld follow shot from the pavement",
+      "A golden retriever shakes off water on a beach, droplets frozen in the low sun",
+    ],
+  },
+  {
+    slug: "kling-3-0-omni",
+    id: "kling/3.0-omni",
+    tagline: "Text-to-video from Kling, 3 to 15 seconds up to 4K with audio",
+    intro:
+      "Kling 3.0 Omni is the text-only member of the Kling 3.0 family on Vixlens: no reference image, just a prompt, with any clip length from 3 to 15 seconds and output up to 4K. Native audio can be generated with the clip.",
+    strengths: [
+      "Any duration from 3 to 15 seconds, not just fixed steps",
+      "Up to 4K output",
+      "Native audio generated with the picture",
+      "Landscape, vertical and square framings",
+    ],
+    useCases: [
+      "Clips that need an exact length to fit an edit or a voiceover",
+      "Concept and mood films written entirely from text",
+      "4K b-roll for longer edits",
+    ],
+    prompts: [
+      "An aerial drift over a misty pine forest at dawn, a single road cutting through, soft birdsong",
+      "A chef plating a dessert in a dark restaurant kitchen, tight close-ups of tweezers placing petals, warm pass lights",
+      "A lighthouse beam sweeping across a stormy sea at night, waves breaking on the rocks below",
+    ],
+  },
+  {
+    slug: "kling-2-6",
+    id: "kling/2.6",
+    tagline: "Kling 2.6 text-to-video, 5 or 10 seconds with optional audio",
+    intro:
+      "Kling 2.6 is the previous generation of Kling's text-to-video model: a prompt in, a 5- or 10-second clip out, in square, landscape or vertical framing, with native audio as an option.",
+    strengths: [
+      "Simple fixed lengths — 5 or 10 seconds",
+      "Optional native audio",
+      "Square, landscape and vertical framings",
+      "A lower-cost way into the Kling look",
+    ],
+    useCases: [
+      "Short loops and social clips",
+      "Comparing Kling generations on the same prompt",
+      "Background motion for posts and stories",
+    ],
+    prompts: [
+      "A cat watching snow fall from a windowsill, warm room light behind it, slow push-in",
+      "Neon signs flicker on in a rainy Tokyo alley as night falls, camera tracking slowly forward",
+      "A hot-air balloon lifting off a field at sunrise, the burner flaring",
+    ],
+  },
+  {
+    slug: "kling-2-6-image",
+    id: "kling/2.6-image",
+    tagline: "Animate a single image with Kling 2.6, 5 or 10 seconds",
+    intro:
+      "Kling 2.6 Image is the image-to-video side of Kling 2.6. Upload one still, describe how it should move, and get a 5- or 10-second clip that starts from your picture, with native audio as an option.",
+    strengths: [
+      "Starts from your own image, so the subject is the one you supplied",
+      "5- or 10-second clips",
+      "Optional native audio",
+      "The prompt describes the motion rather than re-describing the picture",
+    ],
+    useCases: [
+      "Turning product photos into short motion ads",
+      "Animating illustrations, portraits and key art",
+      "Adding movement to stills for stories and reels",
+    ],
+    prompts: [
+      "The camera slowly orbits the product while soft light sweeps across its surface",
+      "Hair and clothing move gently in a breeze, the subject blinks and turns slightly toward the camera",
+      "Steam rises from the cup and the background lights twinkle out of focus",
+    ],
+  },
+  {
+    slug: "kling-2-1-pro",
+    id: "kling/2.1-pro",
+    tagline: "Image-to-video with a start frame and an end frame",
+    intro:
+      "Kling 2.1 Pro animates from an image and, unlike the other Kling models here, can also take a closing frame — so you choose where the clip starts and where it lands. A negative prompt and a prompt-adherence control are available too.",
+    strengths: [
+      "Start-frame and end-frame control",
+      "Negative prompt to rule out what you don't want",
+      "Prompt-adherence setting from loose to strict",
+      "5- or 10-second clips",
+    ],
+    useCases: [
+      "Transitions between two product shots or two scenes",
+      "Before-and-after reveals",
+      "Storyboard beats where both the first and last frame are fixed",
+    ],
+    prompts: [
+      "A smooth dolly from the closed box to the product standing unboxed on the table",
+      "The day scene gradually turns to night as the city lights come on",
+      "The sketch fills in with colour and becomes the finished illustration",
+    ],
+  },
+  {
+    slug: "kling-2-6-motion-control",
+    id: "kling/2.6-motion-control",
+    tagline: "Copy a clip's movement onto your character, at the lower price",
+    intro:
+      "Kling 2.6 Motion Control takes two inputs: an image of your character and a reference clip of someone moving. The character performs the clip's movement, in your image's scene. It is the lower-priced of the two Kling motion models.",
+    strengths: [
+      "Transfers dance, gesture and performance from a reference clip",
+      "Keeps the scene from your character image",
+      "Optional text prompt to steer the result",
+      "Can match the clip's facing or keep the photo's",
+    ],
+    useCases: [
+      "Putting a brand character or mascot through a dance",
+      "AI influencer clips driven by a real performance",
+      "Previsualising choreography on a designed character",
+    ],
+    prompts: [
+      "The character performs the dance from the reference clip, studio lighting, clean background",
+      "The character repeats the presenter's gestures while speaking to camera",
+      "The character walks toward the camera with the reference clip's stride and timing",
+    ],
+  },
+  {
+    slug: "kling-3-0-motion-control",
+    id: "kling/3.0-motion-control",
+    tagline: "The sharpest, most faithful copy of a clip's movement",
+    intro:
+      "Kling 3.0 Motion Control is the higher-end Kling motion model: an image of your character plus a reference clip, and the character performs the clip's movement in your image's scene, following the original motion more closely than Kling 2.6 Motion Control.",
+    strengths: [
+      "The most faithful motion transfer in the Kling line",
+      "Keeps the scene from your character image",
+      "Optional text prompt to steer the result",
+      "720p or 1080p output",
+    ],
+    useCases: [
+      "Final renders of dance and performance clips",
+      "Character content where timing has to match the source closely",
+      "Recasting a real performance with a designed character",
+    ],
+    prompts: [
+      "The character performs the full routine from the reference clip, matching every beat",
+      "The character mirrors the athlete's movement from the clip in a sunlit gym",
+      "The character delivers the presenter's performance, same pacing and hand movement",
+    ],
+  },
+  // ------------------------------------------------------------------ wan
+  {
+    slug: "wan-3-0",
+    id: "alibaba/wan-3.0",
+    tagline: "Wan 3.0: 2 to 30 seconds, up to 1080p, native audio",
+    intro:
+      "Wan 3.0 is the newest Wan video model and one of the longest-running on Vixlens, with clips from 2 to 30 seconds at up to 1080p and native audio. Start from text, from a first (and optional last) frame, or from up to ten reference images.",
+    strengths: [
+      "Clips from 2 to 30 seconds",
+      "Up to 10 reference images, referenced from the prompt",
+      "First- and last-frame control",
+      "Native audio generated with the clip",
+    ],
+    useCases: [
+      "Longer single takes without stitching clips together",
+      "Scenes that combine several references — a character, a product, a location",
+      "Transitions between a fixed start and end frame",
+    ],
+    prompts: [
+      "A 20-second single take following a cyclist through a city market in the morning, stalls and voices passing on both sides",
+      "A cosy bookshop on a rainy afternoon, the camera drifts between shelves and stops on a reader by the window",
+      "A product reveal: the bottle rises out of still water into soft studio light, ripples spreading outward",
+    ],
+  },
+  {
+    slug: "wan-2-2-animate-move",
+    id: "wan/2.2-animate-move",
+    tagline: "Animate your character with a clip's movement, in your image's scene",
+    intro:
+      "Wan 2.2 Animate Move is a motion-transfer model from Alibaba: give it a character image and a reference clip, and the character moves the way the person in the clip does, staying in the scene of your image.",
+    strengths: [
+      "Keeps the background and setting from your image",
+      "Follows full-body movement from the reference clip",
+      "480p or 720p output",
+      "No prompt needed — the clip drives the motion",
+    ],
+    useCases: [
+      "Quick dance and gesture clips for a character",
+      "Animating a mascot in its own setting",
+      "Lower-cost drafts before a Kling motion render",
+    ],
+    prompts: [
+      "A full-body character standing on a plain background, arms relaxed, facing the camera",
+      "A front-facing portrait of a presenter at a desk, ready to wave and talk",
+      "A character illustration in a park, full body, mid-stride",
+    ],
+  },
+  {
+    slug: "wan-2-2-animate-replace",
+    id: "wan/2.2-animate-replace",
+    tagline: "Put your character in place of the person in a clip",
+    intro:
+      "Wan 2.2 Animate Replace swaps the person in a reference clip for your character. Unlike Animate Move, it keeps the clip's own scene — the location, camera and lighting stay as filmed, and your character takes the performer's place.",
+    strengths: [
+      "Keeps the original clip's location, camera and lighting",
+      "Replaces the performer with your character",
+      "480p or 720p output",
+      "No prompt needed — the clip drives everything",
+    ],
+    useCases: [
+      "Recasting real footage with a designed character",
+      "Localising a clip with a different presenter",
+      "Putting an AI influencer into real-world scenes",
+    ],
+    prompts: [
+      "A full-body character in casual streetwear, neutral pose, plain background",
+      "A head-and-shoulders portrait of a presenter in a blazer, looking at the camera",
+      "A full-body dancer character in a tracksuit, arms at the sides",
+    ],
+  },
 ];
 
 const BY_SLUG = new Map(MODEL_PAGES.map((m) => [m.slug, m]));
@@ -739,6 +1000,18 @@ export function modelCatalogEntry(id: string): ModelCatalogEntry | undefined {
       provider: config.provider,
       description: config.description,
       category: config.category,
+    };
+  }
+  // Motion transfer models are hand-written in motion-models.ts: an image
+  // and a reference clip in, a video out.
+  const motion = getMotionComposerModel(id);
+  if (motion) {
+    return {
+      id: motion.id,
+      label: motion.label,
+      provider: motion.provider,
+      description: motion.description,
+      category: "image-to-video",
     };
   }
   // The two bespoke Seedance flagships aren't registry entries — they live
@@ -799,6 +1072,25 @@ export function modelSpecs(id: string): ModelSpec[] {
       { label: "Audio", value: "Generated with the clip" },
       { label: "Reference images", value: `Up to ${SEEDANCE2_REFERENCE_IMAGES_MAX}` },
       { label: "Fixed camera", value: "Supported" },
+    ];
+  }
+
+  const motion = getMotionComposerModel(id);
+  if (motion) {
+    return [
+      { label: "Inputs", value: "A character image and a reference clip" },
+      {
+        label: "Scene",
+        value: motion.kind === "move" ? "Kept from your image" : "Kept from the reference clip",
+      },
+      { label: "Resolution", value: motion.resolutions.join(", ") },
+      {
+        label: "Reference clip",
+        value: motion.orientation
+          ? `${MOTION_MIN_SECONDS}–${MOTION_MAX_SECONDS.video}s (up to ${MOTION_MAX_SECONDS.image}s when keeping the photo's facing)`
+          : `${MOTION_MIN_SECONDS}–${MOTION_MAX_SECONDS.video}s`,
+      },
+      { label: "Text prompt", value: motion.prompt ? "Optional" : "Not used" },
     ];
   }
 
@@ -906,7 +1198,9 @@ if (process.env.NODE_ENV !== "production") {
   if (duplicate) throw new Error(`Duplicate model slug "${duplicate}"`);
   const unknown = MODEL_PAGES.find((m) => !modelCatalogEntry(m.id));
   if (unknown) throw new Error(`Model page "${unknown.slug}" points at unknown model ${unknown.id}`);
-  const uncovered = CLOUDFLARE_MODELS.filter((m) => !BY_ID.has(m.id)).map((m) => m.id);
+  const uncovered = [...CLOUDFLARE_MODELS, ...MOTION_COMPOSER_MODELS]
+    .filter((m) => !BY_ID.has(m.id))
+    .map((m) => m.id);
   if (uncovered.length > 0) {
     console.warn(`[model-seo] registry models without a landing page: ${uncovered.join(", ")}`);
   }

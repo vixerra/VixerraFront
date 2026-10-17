@@ -9,7 +9,8 @@ import {
 import { TIER_INFO } from "@/lib/constants";
 import { GPT_IMAGE_2_IMAGES } from "@/lib/gpt-image-2-showcase";
 import { appHref } from "@/lib/hosts";
-import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
+import { howToStartSentence } from "@/lib/pricing";
+import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 
 // Targets "ai image generator". There is no free plan since 2026-10-15, so
 // nothing here may claim the generator is free.
@@ -31,8 +32,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/ai-image-generator" },
-  openGraph: openGraph({ title: TITLE, description: DESCRIPTION, path: "/ai-image-generator" }),
-  keywords: keywords("text to image", "AI image generator", ...featured),
+  openGraph: openGraph({
+    images: "file", title: TITLE, description: DESCRIPTION, path: "/ai-image-generator" }),
 };
 
 const content: GeneratorLandingContent = {
@@ -69,9 +70,9 @@ const content: GeneratorLandingContent = {
   faqs: [
     {
       question: "How much does the AI image generator cost?",
-      answer: `Generating needs a plan — there is no free tier. ${starter.label} is $${starter.priceMonthly}/month for ${starter.monthlyCredits.toLocaleString("en-US")} credits${
-        starterImages ? `, ${starterImages} with the fast image models` : ""
-      }, with no watermark and a commercial licence. The gallery is open without an account if you want to see results first.`,
+      answer: `${howToStartSentence()}${
+        starterImages ? ` On ${starter.label} that is ${starterImages} with the fast image models.` : ""
+      } Paid plans export with no watermark and a commercial licence. The gallery is open without an account if you want to see results first.`,
     },
     {
       question: "What is an AI image generator?",

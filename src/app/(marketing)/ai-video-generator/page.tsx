@@ -8,8 +8,9 @@ import {
 } from "@/components/marketing/generator-landing";
 import { TIER_INFO } from "@/lib/constants";
 import { appHref } from "@/lib/hosts";
+import { howToStartSentence } from "@/lib/pricing";
 import { modelSpecs } from "@/lib/model-seo";
-import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
+import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
 import { SEEDANCE25_SHOWCASE_VIDEOS } from "@/lib/showcase-media";
 
 // Targets "ai video generator" and "ai video". There is no free plan since
@@ -36,12 +37,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/ai-video-generator" },
-  openGraph: openGraph({ title: TITLE, description: DESCRIPTION, path: "/ai-video-generator" }),
-  keywords: keywords(
-    "text to video",
-    "image to video",
-    ...featured,
-  ),
+  openGraph: openGraph({
+    images: "file", title: TITLE, description: DESCRIPTION, path: "/ai-video-generator" }),
 };
 
 const content: GeneratorLandingContent = {
@@ -90,7 +87,7 @@ const content: GeneratorLandingContent = {
     },
     {
       question: "How much does the AI video generator cost?",
-      answer: `Generating needs a plan — there is no free tier. Video starts on the ${starter.label} plan at $${starter.priceMonthly}/month, with ${starter.monthlyCredits.toLocaleString("en-US")} credits, watermark-free export and a commercial licence. The gallery is open without an account if you want to see results first.`,
+      answer: `${howToStartSentence()} Paid plans export without a watermark and include a commercial licence. The gallery is open without an account if you want to see results first.`,
     },
     ...(audioModels.length > 0
       ? [

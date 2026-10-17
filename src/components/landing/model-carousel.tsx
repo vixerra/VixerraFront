@@ -35,7 +35,7 @@ const KLING_3_VIDEO_URL = "/media/videos/msc6H2R1htn6Mzjy_OPku_video.mp4";
 const KLING_3_PROMPT =
   "A man dancing alone on a rain-soaked city rooftop at night, neon signs reflecting in puddles, slow cinematic dolly-in, synchronized beat and ambient city sound";
 const NANO_BANANA_IMAGE =
-  NANO_BANANA_IMAGES.find((i) => i.id === "coffee-mug-product") ?? NANO_BANANA_IMAGES[0];
+  NANO_BANANA_IMAGES.find((i) => i.id === "fashion-studio-portrait") ?? NANO_BANANA_IMAGES[0];
 
 type ModelCard = {
   kind: "video" | "image";
