@@ -55,6 +55,21 @@ const ESTIMATES_NOTE =
   "fast image models. Higher resolutions and the quality image models cost " +
   "more per generation, so the same credits stretch proportionally less far.";
 
+/**
+ * AI influencer generations each plan gets free every calendar month (UTC).
+ * Twin of the API's FREE_INFLUENCER_PORTRAITS, which is the one that
+ * decides; this copy only writes the plan cards. Free (legacy accounts only)
+ * has a single free one, once ever, and its card doesn't advertise it.
+ */
+export const FREE_INFLUENCER_PORTRAITS: Record<Tier, number> = {
+  free: 1,
+  starter: 4,
+  creator: 8,
+  studio: 16,
+};
+const influencerFeature = (tier: Tier) =>
+  `${FREE_INFLUENCER_PORTRAITS[tier]} free AI influencer generations / month`;
+
 // The 7-day Wan 3.0 Unlimited line on the Creator and Studio cards, and the
 // tooltip on its badge. UNLIMITED_PROMO below describes the terms; the API's
 // copy is what enforces them.
@@ -221,6 +236,7 @@ export const TIER_INFO: Record<
     blockedModels: [],
     features: [
       "1,000 credits / month",
+      influencerFeature("starter"),
       "~333 images",
       "~41s Seedance 2.0 video",
       "~28s Seedance 2.5 video",
@@ -251,6 +267,7 @@ export const TIER_INFO: Record<
     blockedModels: [],
     features: [
       "2,500 credits / month",
+      influencerFeature("creator"),
       UNLIMITED_FEATURE,
       "~833 images",
       "~104s Seedance 2.0 video",
@@ -290,6 +307,7 @@ export const TIER_INFO: Record<
     blockedModels: [],
     features: [
       "5,500 credits / month",
+      influencerFeature("studio"),
       UNLIMITED_FEATURE,
       "~1,833 images",
       "~229s Seedance 2.0 video",
@@ -465,6 +483,8 @@ export const MODEL_POPULARITY: readonly string[] = [
   // image
   "google/nano-banana-2-lite",
   "google/nano-banana-pro",
+  // New on 2026-10-17: beside Pro, below 2 Lite so the composer default stays.
+  "google/nano-banana-2-1",
   "bytedance/seedream-4.5",
   "@cf/leonardo/lucid-origin",
   "recraft/recraftv4-1",

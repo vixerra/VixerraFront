@@ -99,7 +99,7 @@ function useUploadSlot() {
 /**
  * The AI influencer studio. Two modes over one canvas:
  *
- *   Create  pick traits, generate a portrait (Nano Banana Pro). The character
+ *   Create  pick traits, generate a portrait. The character
  *           is saved, so it can be reshot and animated later.
  *   Motion  pick a saved influencer and a reference clip; Kling Motion
  *           Control makes the influencer perform the clip's movement.
@@ -243,10 +243,16 @@ function CreatePanel({
   const face = useUploadSlot();
   const style = useUploadSlot();
 
-  // Portraits always render at the API's one size (2K). The first one a user
-  // ever makes is free; the API decides that again when it charges.
-  const firstFree = Boolean(options.portrait.firstFree);
-  const credits = firstFree
+  // Portraits always render at the API's one size (2K). The plan's free ones
+  // come first; the API decides that again when it charges.
+  const freeQuota = options.portrait.free;
+  const isFree = freeQuota ? freeQuota.remaining > 0 : Boolean(options.portrait.firstFree);
+  const freeNote = !isFree
+    ? null
+    : !freeQuota || freeQuota.period === "once"
+      ? "Your first influencer is on us."
+      : `${freeQuota.remaining} of ${freeQuota.allowance} free generations left this month`;
+  const credits = isFree
     ? 0
     : estimateCreditsForRequest({
         type: "text-to-image",
@@ -380,10 +386,10 @@ function CreatePanel({
 
       {/* The pill spells out why it is disabled itself, under the button. */}
       <div className="shrink-0 space-y-2 border-t border-border-subtle px-4 py-3 sm:px-5">
-        {firstFree && (
+        {freeNote && (
           <p className="flex items-center justify-center gap-1.5 text-caption text-muted">
             <Gift className="size-3.5 text-brand-ink" aria-hidden="true" />
-            Your first influencer is on us.
+            {freeNote}
           </p>
         )}
         <CreditsSubmitPill

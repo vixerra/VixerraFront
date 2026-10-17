@@ -67,8 +67,11 @@ export type InfluencerOptions = {
     /** Only ever ["2K"] now: the API renders every portrait at 2K. */
     imageSizes: string[];
     defaults: { aspectRatio: string; imageSize: string };
-    /** This user hasn't had an influencer portrait yet, so the next one is
-     *  free. Optional so a page ahead of the API still prices normally. */
+    /** The plan's free portraits (FREE_INFLUENCER_PORTRAITS) for the billing
+     *  account of this workspace: so many a month on a paid plan, one ever
+     *  on Free. Optional so a page ahead of the API still prices normally. */
+    free?: { allowance: number; remaining: number; period: "month" | "once" };
+    /** The next portrait is free. What an API older than `free` sends. */
     firstFree?: boolean;
   };
   motion: {
@@ -192,17 +195,23 @@ export const MOTION_MODEL_LABELS: Record<string, string> = {
 
 const REPLACE_LABEL = "AI influencer motion · Replace";
 
+/** Image models the API renders influencer portraits with. A portrait is
+ *  shown as the feature, like a motion clip, never as the model behind it. */
+const PORTRAIT_MODELS = new Set(["google/nano-banana-pro", "google/nano-banana-2-1"]);
+const PORTRAIT_LABEL = "AI influencer portrait";
+
 /**
- * What to call an influencer motion clip wherever its model is shown, or
- * null for anything else (a portrait, an ordinary generation), which keeps
- * its usual label. A "Replace" run is stored as a plain Seedance 2.5
- * generation, so it is told apart by the `kind` its route saved.
+ * What to call an influencer run wherever its model is shown, or null for
+ * an ordinary generation, which keeps its usual label. A "Replace" run is
+ * stored as a plain Seedance 2.5 generation and a portrait as a plain image
+ * one, so both are told apart by what their route saved.
  */
 export function influencerModelLabel(
   model: string,
   parameters?: Record<string, unknown> | null,
 ): string | null {
   if (parameters?.kind === "replace") return REPLACE_LABEL;
+  if (parameters?.influencer === true && PORTRAIT_MODELS.has(model)) return PORTRAIT_LABEL;
   return MOTION_MODEL_LABELS[model] ?? null;
 }
 
@@ -216,6 +225,7 @@ export const INFLUENCER_INTERNAL_PARAMS = [
   "measuredDuration",
   "layout",
   "firstPortraitFree",
+  "freePortrait",
   "background",
 ] as const;
 

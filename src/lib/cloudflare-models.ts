@@ -333,6 +333,33 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
     outputPath: ["image"],
     outputKind: "url",
   },
+  {
+    id: "google/nano-banana-2-1",
+    // kie.ai only (nano-banana-2-1, fields from
+    // docs.kie.ai/market/google/nanobanana-2-1, read 2026-10-17). Same wire
+    // shape as Nano Banana Pro; its ratio list adds 1:4 through 8:1 and auto.
+    runtime: "kie",
+    kieModel: "nano-banana-2-1",
+    label: "Nano Banana 2.1",
+    provider: "Google",
+    description: "Runs on kie.ai — Google's Gemini image model, up to 4K and 10 reference images",
+    category: "text-to-image",
+    promptRequired: true,
+    image: "optional",
+    imageCfParam: "image_input",
+    imageParamShape: "urlArray",
+    fields: [
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9", "1:4", "4:1", "1:8", "8:1", "auto"], defaultValue: "1:1" },
+      { key: "imageSize", cfParam: "resolution", label: "Resolution", type: "select", options: ["1K", "2K", "4K"], defaultValue: "2K" },
+      { key: "outputFormat", cfParam: "output_format", label: "Output format", type: "select", options: ["jpg", "png"], defaultValue: "png" },
+    ],
+    // kie.ai's own cap on image_input, the upload included. It is priced flat
+    // per image, so unlike Pro the references add nothing to the cost.
+    referenceImages: { max: 10, cfParam: "image_input" },
+    // Unused on this runtime (kie.ai answers with resultJson.resultUrls).
+    outputPath: ["image"],
+    outputKind: "url",
+  },
   // Verified live: returns a URL at result.result.image.
   {
     id: "openai/gpt-image-2",

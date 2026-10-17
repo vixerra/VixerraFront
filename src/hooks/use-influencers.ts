@@ -31,10 +31,15 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export function useInfluencerOptions() {
+  const { data: me } = useMe();
+  const workspace = useWorkspace(Boolean(me?.organization));
   return useQuery({
-    queryKey: ["influencer-options"],
-    queryFn: () => getJson<InfluencerOptions>("/api/influencers/options"),
-    // A catalogue, changed by a deploy, never by the user.
+    // Per workspace: the free portraits left belong to whoever that
+    // workspace bills (the team owner's plan, in a team).
+    queryKey: ["influencer-options", workspace],
+    queryFn: () => getJson<InfluencerOptions>(`/api/influencers/options?workspace=${workspace}`),
+    // Mostly a catalogue, changed by a deploy. The free count is refreshed
+    // by useInvalidateInfluencers after every portrait.
     staleTime: 30 * 60 * 1000,
   });
 }
@@ -69,8 +74,7 @@ export function useInvalidateInfluencers() {
   return useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["influencers"] });
     queryClient.invalidateQueries({ queryKey: ["influencer"] });
-    // Carries the per-user "first portrait is free" flag, which the first
-    // portrait just spent.
+    // Carries the free portraits left, which a portrait may just have spent.
     queryClient.invalidateQueries({ queryKey: ["influencer-options"] });
   }, [queryClient]);
 }

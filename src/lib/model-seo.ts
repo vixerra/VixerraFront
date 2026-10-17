@@ -452,6 +452,29 @@ export const MODEL_PAGES: ModelPageContent[] = [
     ],
   },
   {
+    slug: "nano-banana-2-1",
+    id: "google/nano-banana-2-1",
+    tagline: "Google's Gemini image model for multi-reference work, up to 4K",
+    intro:
+      "Nano Banana 2.1 is the everyday workhorse of Google's Gemini image line. It takes a stack of reference images alongside the prompt, so a character, product or palette can be carried from one render to the next, and it goes up to 4K for a fraction of what Nano Banana Pro costs per image.",
+    strengths: [
+      "Several reference images in one request, for consistent characters and products",
+      "Extreme banner and strip formats as well as the usual portrait and landscape ratios",
+      "Up to 4K output, at a much lower credit cost than Nano Banana Pro",
+      "Edits an uploaded image as well as generating from a prompt alone",
+    ],
+    useCases: [
+      "A recurring character or mascot kept on-model across a whole campaign",
+      "Product shots that combine the packshot, a logo and a mood reference",
+      "Web banners, story strips and other very wide or very tall formats",
+    ],
+    prompts: [
+      "The same red-haired explorer from the reference images, now standing on a glacier at sunrise, wind in her coat, cinematic wide shot",
+      "A minimalist web banner for a coffee brand, the product from the reference on the right, warm morning light, lots of empty space on the left",
+      "A comic-style vertical strip in four panels showing a cat stealing a croissant from a bakery counter",
+    ],
+  },
+  {
     slug: "nano-banana-2-lite",
     id: "google/nano-banana-2-lite",
     tagline: "Google's fastest Gemini image model",

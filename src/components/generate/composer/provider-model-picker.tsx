@@ -139,7 +139,7 @@ export function ProviderModelPicker<T extends string>({
                               </span>
                             )}
                           </span>
-                          {specBadges.length > 0 ? (
+                          {specBadges.length > 0 && (
                             <span className="mt-1 flex flex-wrap gap-1">
                               {specBadges.map((b) => (
                                 <span
@@ -150,10 +150,6 @@ export function ProviderModelPicker<T extends string>({
                                   {b.label}
                                 </span>
                               ))}
-                            </span>
-                          ) : (
-                            <span className="mt-0.5 line-clamp-1 block text-caption text-muted">
-                              {model.description}
                             </span>
                           )}
                         </span>

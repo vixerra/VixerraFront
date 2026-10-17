@@ -414,6 +414,9 @@ const IMAGE_COST_USD: Record<string, number | Record<string, number>> = {
   // $0.1344 and $0.24, against the $0.09/$0.12 kie.ai lists. Input tokens are
   // added on top, see IMAGE_PROMPT_COST_USD.
   "google/nano-banana-pro": { "1K": 0.1344, "2K": 0.1344, "4K": 0.24 },
+  // kie.ai only, flat per image whatever the references
+  // (kie.ai/nano-banana-2-1, read 2026-10-17).
+  "google/nano-banana-2-1": { "1K": 0.02, "2K": 0.03, "4K": 0.045 },
   // kie.ai quotes Grok Imagine at $0.02 — per call for two images on one
   // line, per image on its 2.0 line. The per-image reading is the dearer one.
   // Both resolutions cost the same.
@@ -474,6 +477,7 @@ const UNKNOWN_IMAGE_COST_USD = 0.05;
 // cloudflare-models.ts — what an unlisted or missing size prices at.
 const IMAGE_DEFAULT_SIZE: Record<string, string> = {
   "google/nano-banana-pro": "2K",
+  "google/nano-banana-2-1": "2K",
   "openai/gpt-image-2": "1024x1024",
   "bytedance/seedream-5-pro": "2K",
 };
