@@ -7,7 +7,8 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { TIER_INFO } from "@/lib/constants";
+import { howToStartSentence } from "@/lib/pricing";
+import { getMotionComposerModel } from "@/lib/motion-models";
 import { SEEDANCE_MODEL_ID } from "@/lib/constants";
 import { GPT_IMAGE_2_IMAGES } from "@/lib/gpt-image-2-showcase";
 import { SEEDANCE25_SHOWCASE_VIDEOS } from "@/lib/showcase-media";
@@ -20,8 +21,8 @@ import {
   modelWorkspaceHref,
   relatedModelPages,
 } from "@/lib/model-seo";
-import { keywords, metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
-import { appHref } from "@/lib/hosts";
+import { metaDescription, openGraph, SITE_NAME } from "@/lib/seo";
+import { PRIMARY_CTA } from "@/lib/hosts";
 
 // A public, statically generated landing page per model.
 //
@@ -56,13 +57,8 @@ export async function generateMetadata(
     title,
     description,
     alternates: { canonical: `/generate/${page.slug}` },
-    openGraph: openGraph({ title, description, path: `/generate/${page.slug}` }),
-    keywords: keywords(
-      entry.label,
-      `${entry.label} AI ${isVideo ? "video" : "image"} generator`,
-      isVideo ? "text to video" : "text to image",
-      CATEGORY_LABEL[entry.category],
-    ),
+    openGraph: openGraph({
+    images: "file", title, description, path: `/generate/${page.slug}` }),
   };
 }
 
@@ -102,6 +98,11 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
   const isVideo = entry.category !== "text-to-image";
   const kind = isVideo ? "video" : "image";
 
+  // Wan's Animate models take no text: their examples describe the
+  // character image to upload, and must not be sent to the composer as a
+  // prompt.
+  const takesPrompt = getMotionComposerModel(page.id)?.prompt ?? true;
+
   const specValue = (label: string) => specs.find((s) => s.label === label)?.value;
 
   // Grounded in the spec table above, so these answers can't drift from what
@@ -130,7 +131,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
     },
     {
       question: `How much does ${entry.label} cost?`,
-      answer: `Generating needs a plan; ${TIER_INFO.starter.label} is $${TIER_INFO.starter.priceMonthly}/month for ${TIER_INFO.starter.monthlyCredits.toLocaleString("en-US")} credits. Credits are spent per generation based on the model, resolution and duration, and the exact cost is shown before you generate.`,
+      answer: `${howToStartSentence()} Credits are spent per generation based on the model, resolution and duration, and the exact cost is shown before you generate.`,
     },
   ].filter((f): f is { question: string; answer: string } => Boolean(f));
 
@@ -184,7 +185,7 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
         <section className="mt-16">
           <h2 className="text-heading font-bold text-ink">Made with {entry.label}</h2>
           <p className="mt-3 max-w-2xl text-body text-muted">
-            Real output from {entry.label}, with the prompt that produced it.
+            Real output from {entry.label}, each with a prompt you can open in the composer.
           </p>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {showcase.items.map((item) => (
@@ -278,20 +279,22 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
       {/* ----------------------------------------------------- example prompts */}
       <section className="mt-16">
         <h2 className="text-heading font-bold text-ink">
-          Example prompts for {entry.label}
+          {takesPrompt ? `Example prompts for ${entry.label}` : `Example setups for ${entry.label}`}
         </h2>
         <p className="mt-3 max-w-2xl text-body text-muted">
-          Written for this model in particular. Open one in the composer and edit it from there.
+          {takesPrompt
+            ? "Written for this model in particular. Open one in the composer and edit it from there."
+            : `${entry.label} takes no text prompt — the reference clip drives the motion. These describe the kind of character image that works well.`}
         </p>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {page.prompts.map((prompt) => (
             <Card key={prompt} variant="compact" className="flex flex-col gap-4">
               <p className="text-body-sm text-ink-soft">&ldquo;{prompt}&rdquo;</p>
               <Link
-                href={modelWorkspaceHref(page.id, prompt)}
+                href={modelWorkspaceHref(page.id, takesPrompt ? prompt : undefined)}
                 className="mt-auto inline-flex w-fit items-center gap-1.5 text-label font-semibold text-brand-ink transition-transform hover:translate-x-0.5"
               >
-                Try this prompt
+                {takesPrompt ? "Try this prompt" : "Open in the composer"}
                 <ArrowUpRight className="size-4" aria-hidden="true" />
               </Link>
             </Card>
@@ -356,8 +359,8 @@ export default async function ModelLandingPage(props: PageProps<"/generate/[mode
           Every model on one credit balance — pick a plan and start creating.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
-            Get started
+          <Link href={PRIMARY_CTA.href} className={buttonVariants({ variant: "accent" })}>
+            {PRIMARY_CTA.label}
           </Link>
           <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
             Browse the gallery

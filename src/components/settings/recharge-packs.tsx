@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/currency";
 import { formatCredits } from "@/lib/utils";
 import { RECHARGE_PACKS, type RechargePackId } from "@/lib/constants";
 import { apiFetch } from "@/lib/api-client";
+import { trackBeginCheckout } from "@/lib/analytics";
 import { useInvalidateCredits } from "@/hooks/use-credits";
 import { PromoBonusBadge, promoBonusFor, type AppliedPromo } from "@/components/settings/promo-code";
 
@@ -84,6 +85,10 @@ export function RechargePacks({
 
       if (paymentsEnabled) {
         if (!json.url) throw new Error("Stripe didn't return a checkout page.");
+        const pack = RECHARGE_PACKS.find((p) => p.id === packId);
+        if (pack) {
+          trackBeginCheckout({ plan: pack.id, interval: "one_time", value: pack.priceUsd, currency: "USD" });
+        }
         // Leaves the app — the balance updates when the webhook lands, not
         // here, so there is nothing to invalidate on this side.
         window.location.assign(json.url);

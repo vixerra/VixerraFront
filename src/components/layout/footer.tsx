@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./logo";
 import { DISCORD_INVITE, DiscordIcon } from "./discord";
+import { COMPANY } from "@/lib/company";
 
 // Columned, comfy.org-style: identity + community on the left, grouped
 // links on the right. Every link the site needs (About/Contact/Terms/
@@ -14,6 +15,7 @@ const FOOTER_COLUMNS = [
       { href: "/features", label: "Features" },
       { href: "/models", label: "Models" },
       { href: "/pricing", label: "Pricing" },
+      { href: "/developers", label: "API" },
     ],
   },
   {
@@ -29,6 +31,7 @@ const FOOTER_COLUMNS = [
     links: [
       { href: "/about", label: "About" },
       { href: "/contact", label: "Contact" },
+      ...(COMPANY.statusPageUrl ? [{ href: COMPANY.statusPageUrl, label: "Status" }] : []),
     ],
   },
   {
@@ -36,6 +39,7 @@ const FOOTER_COLUMNS = [
     links: [
       { href: "/terms", label: "Terms" },
       { href: "/privacy", label: "Privacy" },
+      { href: "/refund-policy", label: "Refund policy" },
     ],
   },
 ];

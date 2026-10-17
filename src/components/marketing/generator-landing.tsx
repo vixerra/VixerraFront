@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PRIMARY_CTA } from "@/lib/hosts";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -95,7 +96,7 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
       <section className="mt-16">
         <h2 className="text-heading font-bold text-ink">Made with {content.showcase.label}</h2>
         <p className="mt-3 max-w-2xl text-body text-muted">
-          Real output from {content.showcase.label} on {SITE_NAME}, with the prompt that produced it.
+          Real output from {content.showcase.label} on {SITE_NAME}, each with a prompt you can open in the composer.
         </p>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {content.showcase.items.map((item) => (
@@ -206,8 +207,8 @@ export function GeneratorLanding({ content }: { content: GeneratorLandingContent
           Every model on one credit balance — pick a plan and start creating.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
-            Get started
+          <Link href={PRIMARY_CTA.href} className={buttonVariants({ variant: "accent" })}>
+            {PRIMARY_CTA.label}
           </Link>
           <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
             Browse the gallery

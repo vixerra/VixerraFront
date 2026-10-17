@@ -4,10 +4,9 @@ import { ArrowUpRight } from "lucide-react";
 import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
-import { TIER_INFO } from "@/lib/constants";
 import { sortedGuides } from "@/lib/guides";
-import { absoluteUrl, keywords, openGraph, SITE_NAME } from "@/lib/seo";
-import { appHref } from "@/lib/hosts";
+import { absoluteUrl, openGraph, SITE_NAME } from "@/lib/seo";
+import { PRIMARY_CTA } from "@/lib/hosts";
 
 export const metadata: Metadata = {
   title: "AI video and image generation guides",
@@ -15,12 +14,12 @@ export const metadata: Metadata = {
     "Practical guides to AI video and image generation — turning a photo into video, choosing between models, writing prompts that work, and producing ad creative.",
   alternates: { canonical: "/guides" },
   openGraph: openGraph({
+    images: "file",
     title: "AI video and image generation guides",
     description:
       "Practical guides to AI video and image generation — choosing a model, writing prompts that work, and the parameters that decide the result.",
     path: "/guides",
   }),
-  keywords: keywords("AI video generator guide", "how to use AI video generator", "AI prompt writing"),
 };
 
 const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {
@@ -96,8 +95,8 @@ export default function GuidesIndexPage() {
           Every model on one credit balance, from one plan.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/pricing#plans" className={buttonVariants({ variant: "accent" })}>
-            Get started
+          <Link href={PRIMARY_CTA.href} className={buttonVariants({ variant: "accent" })}>
+            {PRIMARY_CTA.label}
           </Link>
           <Link href="/models" className={buttonVariants({ variant: "secondary" })}>
             Browse the models

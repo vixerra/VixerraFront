@@ -48,7 +48,10 @@ export function openGraph({
   description: string;
   path: string;
   type?: "website" | "article";
-  images?: string[];
+  /** Explicit images, the site default when omitted, or "file" when the
+   *  route has its own opengraph-image file. Next only lets that file win
+   *  when the page's openGraph has no `images` key at all. */
+  images?: string[] | "file";
   publishedTime?: string;
   modifiedTime?: string;
 }) {
@@ -58,7 +61,7 @@ export function openGraph({
     title: `${title} · ${SITE_NAME}`,
     description,
     url: absoluteUrl(path),
-    images: images ?? [DEFAULT_OG_IMAGE],
+    ...(images === "file" ? {} : { images: images ?? [DEFAULT_OG_IMAGE] }),
     ...(publishedTime ? { publishedTime } : {}),
     ...(modifiedTime ? { modifiedTime } : {}),
   } as const;
@@ -71,32 +74,4 @@ export function metaDescription(text: string, max = 158) {
   if (clean.length <= max) return clean;
   const cut = clean.slice(0, max);
   return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
-}
-
-/** Terms every indexable page carries, however specific its own topic is —
- *  the words someone actually types when they're looking for this product
- *  rather than for one particular model or guide. */
-const BASE_KEYWORDS = [
-  "AI video generator",
-  "AI image generator",
-  "text to video AI",
-  "text to image AI",
-  SITE_NAME,
-];
-
-/**
- * `keywords` metadata for one page: its own terms first, the site-wide base
- * after, de-duplicated case-insensitively so a page that already mentions
- * "AI video generator" doesn't repeat it.
- */
-export function keywords(...terms: string[]): string[] {
-  const seen = new Set<string>();
-  const all: string[] = [];
-  for (const term of [...terms, ...BASE_KEYWORDS]) {
-    const key = term.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    all.push(term);
-  }
-  return all;
 }

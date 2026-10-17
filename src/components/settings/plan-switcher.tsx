@@ -8,7 +8,8 @@ import { Modal } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
-import { PAID_TIERS, TIERS, TIER_INFO, annualSavings, type BillingInterval, type Tier } from "@/lib/constants";
+import { ANNUAL_PRICE, PAID_TIERS, TIERS, TIER_INFO, annualSavings, type BillingInterval, type Tier } from "@/lib/constants";
+import { trackBeginCheckout } from "@/lib/analytics";
 import { formatListPrice } from "@/lib/competitor-pricing";
 import { PlanFeatureList } from "@/components/pricing/plan-feature-list";
 import {
@@ -426,6 +427,15 @@ export function PlanSwitcher({
 
         const result = json as CheckoutResult;
         if (result.outcome === "checkout" && result.url) {
+          const billed = intervalFor(tier, interval);
+          trackBeginCheckout({
+            plan: tier,
+            interval: billed,
+            // List price; a launch-offer or promo discount is applied by
+            // Stripe and isn't known here.
+            value: billed === "annual" ? (ANNUAL_PRICE[tier] ?? TIER_INFO[tier].priceMonthly) : TIER_INFO[tier].priceMonthly,
+            currency: "USD",
+          });
           // Leaves the app entirely — no state to clean up, and deliberately
           // no `finally` reset of the spinner, so the button stays busy for
           // the moment the redirect takes.

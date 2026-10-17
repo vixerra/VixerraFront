@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PresetsGallery } from "@/components/presets/presets-gallery";
 import { modelCatalogEntry, modelPageHref } from "@/lib/model-seo";
 import { fetchPublicPresets } from "@/lib/public-content";
-import { keywords, openGraph } from "@/lib/seo";
+import { openGraph } from "@/lib/seo";
 import { appHref } from "@/lib/hosts";
 
 // The public face of the preset catalogue. It keeps the /prompts URL the
@@ -30,12 +30,12 @@ export const metadata: Metadata = {
     "One-tap video recipes — pick a look, upload one photo, generate. No prompt writing, no settings. Browse them all; sign in to run one.",
   alternates: { canonical: "/prompts" },
   openGraph: openGraph({
+    images: "file",
     title: "Video presets",
     description:
       "One-tap video recipes — pick a look, upload one photo, generate. No prompt writing, no settings.",
     path: "/prompts",
   }),
-  keywords: keywords("AI video presets", "AI video templates", "AI video recipes"),
 };
 
 export default async function PromptsPage() {

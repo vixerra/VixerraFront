@@ -8,7 +8,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { ConfirmProvider } from "@/components/ui/confirm";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReleaseAnnouncementModal } from "@/components/marketing/release-announcement-modal";
-import { DEFAULT_OG_IMAGE, keywords, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 // One variable grotesk for every role — see the --font-* tokens in
 // globals.css. The wdth axis is what lets `font-narrow` set condensed
@@ -36,15 +36,6 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
-  keywords: keywords(
-    "AI video maker",
-    "AI image maker",
-    "image to video AI",
-    "Seedance",
-    "Veo 3.1",
-    "GPT Image 2",
-    "Nano Banana Pro",
-  ),
   // Deliberately no `alternates.canonical` here. Metadata is inherited, so a
   // canonical set on the root layout becomes the canonical of every page that
   // doesn't override it — pointing the whole site at "/" and de-indexing it.
@@ -58,11 +49,11 @@ export const metadata: Metadata = {
     url: SITE_URL,
     images: [DEFAULT_OG_IMAGE],
   },
+  // Card type only. Next.js fills twitter:title/description/image from the
+  // page's resolved openGraph whenever they're absent here; setting them on
+  // the root layout made every page share the homepage's Twitter card.
   twitter: {
     card: "summary_large_image",
-    title: "Vixlens — AI Video Generator & AI Image Generator",
-    description: SITE_DESCRIPTION,
-    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,

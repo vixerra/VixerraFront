@@ -7,7 +7,6 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { TIER_INFO } from "@/lib/constants";
 import { modelCatalogEntry, modelPageHref, modelWorkspaceHref } from "@/lib/model-seo";
 import {
   fetchPublicGeneration,
@@ -46,8 +45,13 @@ export async function generateMetadata(props: PageProps<"/gallery/[id]">): Promi
   // model behind it, and gets no model page to point at.
   const influencerLabel = influencerModelLabel(item.model, item.parameters);
   const entry = influencerLabel ? undefined : modelCatalogEntry(item.model);
-  const title = generationTitle(item, { max: 50, modelLabel: influencerLabel ?? entry?.label });
+  const label = influencerLabel ?? entry?.label;
   const kind = isVideoGeneration(item) ? "AI video" : "AI image";
+  // "<prompt excerpt> — <Model> AI video", so every item has a unique,
+  // descriptive <title> rather than leaning on its UUID. When there's no
+  // displayable prompt, generationTitle already names it after the model.
+  const excerpt = generationTitle(item, { max: 50, modelLabel: label });
+  const title = hasDisplayablePrompt(item) && label ? `${excerpt} — ${label} ${kind}` : excerpt;
   // The prompt only goes in the description when it reads as prose — a preset's
   // is never published, and a JSON brief truncated to 158 characters is noise.
   const description = metaDescription(
@@ -121,8 +125,15 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": "CreativeWork",
+          // ImageObject/VideoObject when there's a stored thumbnail to point
+          // at (it isn't signed, unlike resultUrl); a bare CreativeWork
+          // otherwise, since a VideoObject without a thumbnail is invalid.
+          "@type": item.thumbnailUrl ? (isVideo ? "VideoObject" : "ImageObject") : "CreativeWork",
           name: title,
+          description: alt,
+          ...(item.thumbnailUrl ? { thumbnailUrl: item.thumbnailUrl } : {}),
+          ...(item.thumbnailUrl && !isVideo ? { contentUrl: item.thumbnailUrl } : {}),
+          ...(item.thumbnailUrl && isVideo && item.createdAt ? { uploadDate: item.createdAt } : {}),
           ...(isPromptPrivate(item) ? {} : { text: item.prompt }),
           url: absoluteUrl(`/gallery/${item.id}`),
           ...(item.createdAt ? { dateCreated: item.createdAt } : {}),
@@ -252,7 +263,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
                 className={buttonVariants({ variant: "accent" })}
               >
                 <Sparkles className="size-4" aria-hidden="true" />
-                Recreate this
+                {item.fromPreset ? "Try this model" : "Remix this prompt"}
               </Link>
             )}
             <Link href="/gallery" className={buttonVariants({ variant: "secondary" })}>
