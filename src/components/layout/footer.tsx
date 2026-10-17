@@ -13,6 +13,7 @@ const FOOTER_COLUMNS = [
       { href: "/ai-video-generator", label: "AI Video Generator" },
       { href: "/ai-image-generator", label: "AI Image Generator" },
       { href: "/features", label: "Features" },
+      { href: "/for-brands", label: "For brands" },
       { href: "/models", label: "Models" },
       { href: "/pricing", label: "Pricing" },
       { href: "/developers", label: "API" },
@@ -39,7 +40,7 @@ const FOOTER_COLUMNS = [
     links: [
       { href: "/terms", label: "Terms" },
       { href: "/privacy", label: "Privacy" },
-      { href: "/refund-policy", label: "Refund policy" },
+      ...(COMPANY.refundPolicyReviewed ? [{ href: "/refund-policy", label: "Refund policy" }] : []),
     ],
   },
 ];

@@ -167,3 +167,16 @@ export function generationTitle(
   const lastSpace = cut.lastIndexOf(" ");
   return `${lastSpace > 0 ? cut.slice(0, lastSpace) : cut}…`;
 }
+
+/**
+ * The stable, same-origin URL of a shared generation's still (see
+ * app/media/gallery/[id]/route.ts), or null when it has none — a video
+ * without a poster frame. Use this, never thumbnailUrl/resultUrl, anywhere a
+ * URL outlives the request: og:image, structured data, server-rendered <img>.
+ * Those two are pre-signed and expire after six hours.
+ */
+export function galleryStillPath(item: PublicGeneration, { full = false } = {}): string | null {
+  const hasStill = isVideoGeneration(item) ? Boolean(item.thumbnailUrl) : Boolean(item.thumbnailUrl || item.resultUrl);
+  if (!hasStill) return null;
+  return `/media/gallery/${item.id}${full ? "?v=full" : ""}`;
+}

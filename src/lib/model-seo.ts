@@ -1041,6 +1041,15 @@ function fieldSpec(config: CloudflareModelConfig, key: string): string | undefin
   return undefined;
 }
 
+/** "3, 5, 10, 15" → "3s, 5s, 10s, 15s". Leaves values that already carry a
+ *  unit ("4s", "5–15s") alone, so every model's duration reads the same. */
+function withSeconds(value: string): string {
+  return value
+    .split(", ")
+    .map((part) => (/^\d+(\.\d+)?$/.test(part) ? `${part}s` : part))
+    .join(", ");
+}
+
 const IMAGE_SUPPORT_LABEL: Record<CloudflareModelConfig["image"], string> = {
   none: "Not used",
   optional: "Optional",
@@ -1099,7 +1108,7 @@ export function modelSpecs(id: string): ModelSpec[] {
 
   const specs: ModelSpec[] = [];
   const duration = fieldSpec(config, "duration");
-  if (duration) specs.push({ label: "Duration", value: duration });
+  if (duration) specs.push({ label: "Duration", value: withSeconds(duration) });
 
   const resolution =
     fieldSpec(config, "resolution") ?? fieldSpec(config, "imageSize") ?? fieldSpec(config, "size");

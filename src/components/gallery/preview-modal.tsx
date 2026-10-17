@@ -439,7 +439,11 @@ function PreviewBody({
               <div className="min-w-0">
                 <p className="truncate text-label font-semibold text-ink">Your creation</p>
                 <p className="flex items-center gap-1.5 text-caption text-text-tertiary">
-                  {item.isPublic ? (
+                  {item.isPublic && item.inReview ? (
+                    <>
+                      <Globe className="size-3" aria-hidden="true" /> Shared · waiting for review
+                    </>
+                  ) : item.isPublic ? (
                     <>
                       <Globe className="size-3" aria-hidden="true" /> Shared in the community
                       gallery

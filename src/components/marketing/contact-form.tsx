@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,7 +31,20 @@ export function ContactForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm<ContactInput>({ resolver: zodResolver(contactSchema) });
+
+  // "Report" on a gallery page lands here as /contact?report=<id>. Read on
+  // mount rather than through useSearchParams so the page itself stays
+  // static; the id only seeds the message, which the visitor can still edit.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("report");
+    if (!id || !/^[A-Za-z0-9-]{6,64}$/.test(id)) return;
+    setValue(
+      "message",
+      `I'd like to report this gallery item: ${window.location.origin}/gallery/${id}\n\nReason: `,
+    );
+  }, [setValue]);
 
   async function onSubmit(data: ContactInput) {
     const res = await apiFetch("/api/contact", {

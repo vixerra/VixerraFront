@@ -11,6 +11,7 @@ import { modelCatalogEntry, modelPageHref, modelWorkspaceHref } from "@/lib/mode
 import {
   fetchPublicGeneration,
   fetchPublicGenerations,
+  galleryStillPath,
   generationTitle,
   hasDisplayablePrompt,
   isPromptPrivate,
@@ -47,6 +48,7 @@ export async function generateMetadata(props: PageProps<"/gallery/[id]">): Promi
   const entry = influencerLabel ? undefined : modelCatalogEntry(item.model);
   const label = influencerLabel ?? entry?.label;
   const kind = isVideoGeneration(item) ? "AI video" : "AI image";
+  const still = galleryStillPath(item);
   // "<prompt excerpt> — <Model> AI video", so every item has a unique,
   // descriptive <title> rather than leaning on its UUID. When there's no
   // displayable prompt, generationTitle already names it after the model.
@@ -64,15 +66,16 @@ export async function generateMetadata(props: PageProps<"/gallery/[id]">): Promi
     title,
     description,
     alternates: { canonical: `/gallery/${item.id}` },
-    // Only the stored thumbnail is ever used as the card image, never
-    // `resultUrl`: that one is a signed link that dies in six hours, and a
-    // social card pointing at a 403 is worse than the site-wide default.
+    // The card image is the stable /media/gallery/<id> URL, never the feed's
+    // pre-signed links, which die after six hours and change per request.
+    // With no still (a video without a poster), the route's generated
+    // opengraph-image card stands in.
     openGraph: openGraph({
       title,
       description,
       path: `/gallery/${item.id}`,
       type: "article",
-      images: item.thumbnailUrl ? [item.thumbnailUrl] : undefined,
+      images: still ? [still] : "file",
     }),
   };
 }
@@ -116,24 +119,26 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
   // Alt text is a description, not a data dump — a preset's prompt is private
   // and a JSON brief describes nothing, so both fall back to the page's title.
   const alt = hasDisplayablePrompt(item) ? item.prompt : title;
+  const still = galleryStillPath(item);
+  const stillUrl = still ? absoluteUrl(still) : null;
 
   return (
     <div className="container-page py-14 sm:py-20">
-      {/* Media URLs are deliberately absent from the structured data: R2 signs
-          them for six hours, and a VideoObject whose contentUrl 403s is a
-          markup error rather than a richer result. */}
+      {/* Only the stable /media/gallery/<id> URL goes in the structured data:
+          the feed's R2 links are signed for six hours, and a VideoObject whose
+          thumbnail 403s is a markup error rather than a richer result. */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          // ImageObject/VideoObject when there's a stored thumbnail to point
-          // at (it isn't signed, unlike resultUrl); a bare CreativeWork
-          // otherwise, since a VideoObject without a thumbnail is invalid.
-          "@type": item.thumbnailUrl ? (isVideo ? "VideoObject" : "ImageObject") : "CreativeWork",
+          // ImageObject/VideoObject when there's a still to point at; a bare
+          // CreativeWork otherwise, since a VideoObject without a thumbnail
+          // is invalid.
+          "@type": stillUrl ? (isVideo ? "VideoObject" : "ImageObject") : "CreativeWork",
           name: title,
           description: alt,
-          ...(item.thumbnailUrl ? { thumbnailUrl: item.thumbnailUrl } : {}),
-          ...(item.thumbnailUrl && !isVideo ? { contentUrl: item.thumbnailUrl } : {}),
-          ...(item.thumbnailUrl && isVideo && item.createdAt ? { uploadDate: item.createdAt } : {}),
+          ...(stillUrl ? { thumbnailUrl: stillUrl } : {}),
+          ...(stillUrl && !isVideo ? { contentUrl: absoluteUrl(galleryStillPath(item, { full: true }) ?? still!) } : {}),
+          ...(stillUrl && isVideo && item.createdAt ? { uploadDate: item.createdAt } : {}),
           ...(isPromptPrivate(item) ? {} : { text: item.prompt }),
           url: absoluteUrl(`/gallery/${item.id}`),
           ...(item.createdAt ? { dateCreated: item.createdAt } : {}),
@@ -158,7 +163,7 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
                 <video
                   className="w-full"
                   src={`${item.resultUrl}#t=0.1`}
-                  poster={item.thumbnailUrl ?? undefined}
+                  poster={still ?? undefined}
                   controls
                   loop
                   playsInline
@@ -166,9 +171,9 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
                   aria-label={alt}
                 />
               ) : (
-                // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL, not a Next-optimizable asset
+                // eslint-disable-next-line @next/next/no-img-element -- streamed from R2 by /media/gallery, not a Next-optimizable asset
                 <img
-                  src={item.resultUrl}
+                  src={galleryStillPath(item, { full: true }) ?? item.resultUrl}
                   alt={alt}
                   loading="lazy"
                   decoding="async"
@@ -273,6 +278,17 @@ export default async function GalleryItemPage(props: PageProps<"/gallery/[id]">)
 
           <p className="mt-4 text-caption text-muted">
             Every model on one credit balance — pick a plan and start creating.
+          </p>
+          <p className="mt-2 text-caption text-muted">
+            Something wrong with this item — someone else&apos;s character, brand or likeness?{" "}
+            <Link
+              href={`/contact?report=${encodeURIComponent(item.id)}`}
+              rel="nofollow"
+              className="underline-offset-4 hover:text-ink-soft hover:underline"
+            >
+              Report it
+            </Link>
+            .
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, Heart } from "lucide-react";
+import { AlertCircle, Heart, Play } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { ResultWatermark } from "@/components/result-watermark";
@@ -22,11 +22,14 @@ function LazyVideoTile({
   poster,
   alt,
   playing,
+  onError,
 }: {
   src: string;
   poster: string | null;
   alt: string;
   playing: boolean;
+  /** The clip can't be loaded — the card hides itself rather than sit blank. */
+  onError: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -59,7 +62,19 @@ function LazyVideoTile({
   }, [playing, inView, hasLoadedOnce]);
 
   return (
-    <div ref={containerRef} className="h-full w-full bg-surface-3">
+    <div ref={containerRef} className="relative h-full w-full bg-surface-3">
+      {/* Something to look at before the clip loads, and in the server HTML:
+          the poster as a plain image when there is one, otherwise a play
+          mark — a tile with neither read as an empty card. */}
+      {!loaded &&
+        (poster ? (
+          // eslint-disable-next-line @next/next/no-img-element -- poster from R2 or /media/gallery
+          <img src={poster} alt="" className="absolute inset-0 size-full object-cover" />
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-surface-3 to-brand/10">
+            <Play className="size-8 text-muted" aria-hidden="true" />
+          </span>
+        ))}
       {hasLoadedOnce && (
         <video
           ref={videoRef}
@@ -72,6 +87,7 @@ function LazyVideoTile({
           preload="metadata"
           aria-label={alt}
           onLoadedData={() => setLoaded(true)}
+          onError={onError}
         />
       )}
     </div>
@@ -88,6 +104,9 @@ export type GalleryItem = {
   resultUrl: string | null;
   thumbnailUrl: string | null;
   isPublic: boolean;
+  /** Shared, but not yet approved for the public gallery (see the API's
+   *  publicApprovedAt). Absent on older API responses. */
+  inReview?: boolean;
   /** Which identity the community gallery credits for this one — chosen at
    *  share time, see ShareIdentityModal. */
   shareAsNickname?: boolean;
@@ -164,6 +183,11 @@ export function GenerationCard({
   // for moves between a node and its descendants, so drifting onto the like
   // button keeps the clip running instead of stuttering it.
   const [hovered, setHovered] = useState(false);
+  // On public surfaces (showAuthor), media that won't load hides the whole
+  // tile instead of leaving an avatar over an empty square. A creator's own
+  // gallery keeps it, so they can still open and delete it.
+  const [broken, setBroken] = useState(false);
+  if (broken && showAuthor) return null;
 
   return (
     <div
@@ -184,6 +208,7 @@ export function GenerationCard({
               poster={item.thumbnailUrl}
               alt={itemLabel(item)}
               playing={hovered}
+              onError={() => setBroken(true)}
             />
           ) : (
             // Plain <img>, not next/image: results are served from R2 behind
@@ -199,6 +224,7 @@ export function GenerationCard({
               loading="lazy"
               decoding="async"
               className="absolute inset-0 size-full object-cover"
+              onError={() => setBroken(true)}
             />
           )
         ) : item.status === "failed" ? (

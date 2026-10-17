@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { MarqueeEcho } from "./marquee-echo";
 
 /**
  * Pure-CSS infinite marquee: the track is rendered twice back-to-back and
@@ -45,7 +46,7 @@ export function Marquee({
           // of the tab order, so keyboard users don't walk every item twice.
           inert
         >
-          {children}
+          <MarqueeEcho>{children}</MarqueeEcho>
         </div>
       </div>
     </div>

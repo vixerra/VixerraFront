@@ -406,6 +406,8 @@ export type AdminContentItem = {
   thumbnailUrl: string | null;
   viewCount: number;
   likeCount: number;
+  /** Null while the share waits in the review queue. */
+  publicApprovedAt: string | null;
   createdAt: string;
 };
 
@@ -414,6 +416,8 @@ export type AdminContentParams = {
   kind?: string;
   range?: string;
   sort?: string;
+  /** "pending" (the review queue), "approved" (live), or "all". */
+  review?: string;
   limit: number;
   offset: number;
 };
@@ -428,6 +432,11 @@ export function useAdminContent(params: AdminContentParams) {
     retry: false,
     placeholderData: keepPreviousData,
   });
+}
+
+/** Lets a shared generation into the public gallery. */
+export function useApproveContent() {
+  return useAdminMutation((vars: { id: string }) => post(`/api/admin/content/${vars.id}/approve`, {}));
 }
 
 export function useUnpublish() {

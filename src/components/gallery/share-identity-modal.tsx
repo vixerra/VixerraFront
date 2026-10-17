@@ -135,7 +135,7 @@ export function ShareIdentityModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Share to the community"
-      description="Choose the name this appears under in the community gallery."
+      description="Choose the name this appears under in the community gallery. Shares are reviewed before they go live."
     >
       <div className="mt-4 space-y-2">
         <IdentityOption

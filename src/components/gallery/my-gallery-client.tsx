@@ -119,7 +119,12 @@ export function MyGalleryClient() {
       invalidate();
       setShareTarget(null);
       toast({
-        title: variables.isPublic ? "Shared to the community" : "Removed from the community",
+        title: variables.isPublic ? "Sent for review" : "Removed from the community",
+        // Shares go through a quick review before they appear in the public
+        // gallery (publicApprovedAt in the API).
+        description: variables.isPublic
+          ? "It appears in the community gallery once a moderator has approved it."
+          : undefined,
         variant: "success",
       });
     },

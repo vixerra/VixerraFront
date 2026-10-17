@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { EyeOff, Heart, Eye, ExternalLink } from "lucide-react";
-import { useAdminContent, useUnpublish } from "@/hooks/use-admin-data";
+import { Check, EyeOff, Heart, Eye, ExternalLink } from "lucide-react";
+import { useAdminContent, useApproveContent, useUnpublish } from "@/hooks/use-admin-data";
 import { useUrlFilters } from "@/hooks/use-url-filters";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +17,10 @@ import {
   PageHeader, Panel, Pagination, LoadingBlock, ErrorBlock, Mono, ActionDialog, CopyButton, When,
 } from "@/components/admin/ui";
 
-const DEFAULTS = { q: "", kind: "", range: "", sort: "newest" };
-const FILTER_KEYS = ["q", "kind", "range"] as const;
+// Opens on the review queue: a share reaches the public gallery only once
+// it is approved here (routes/admin-moderation.ts in the API).
+const DEFAULTS = { q: "", kind: "", range: "", sort: "newest", review: "pending" };
+const FILTER_KEYS = ["q", "kind", "range", "review"] as const;
 
 export default function AdminContentPage() {
   const { filters, offset, limit, update, reset } = useUrlFilters(DEFAULTS, { limit: 24, maxLimit: 60 });
@@ -27,17 +29,19 @@ export default function AdminContentPage() {
     kind: filters.kind || undefined,
     range: filters.range || undefined,
     sort: filters.sort,
+    review: filters.review,
     limit,
     offset,
   });
   const unpublish = useUnpublish();
+  const approve = useApproveContent();
   const filtered = FILTER_KEYS.some((k) => filters[k] !== DEFAULTS[k]);
 
   return (
     <div>
       <PageHeader
         title="Content"
-        subtitle="Public gallery only — private generations are the user's own business and aren't listed."
+        subtitle="Shared generations only — private ones are the user's own business and aren't listed. A share goes live once approved here."
       />
 
       <FilterBar>
@@ -69,6 +73,16 @@ export default function AdminContentPage() {
 
       <FilterBar>
         <ChipGroup
+          label="Review"
+          value={filters.review}
+          onChange={(review) => update({ review })}
+          options={[
+            { value: "pending", label: "Waiting for review" },
+            { value: "approved", label: "Live" },
+            { value: "all", label: "All shared" },
+          ]}
+        />
+        <ChipGroup
           label="Kind"
           value={filters.kind}
           onChange={(kind) => update({ kind })}
@@ -82,7 +96,7 @@ export default function AdminContentPage() {
 
       <ResultBar
         total={data?.total}
-        noun={data?.total === 1 ? "public item" : "public items"}
+        noun={data?.total === 1 ? "shared item" : "shared items"}
         fetching={isFetching && !isLoading}
         filtered={filtered}
         onClear={() => reset([...FILTER_KEYS])}
@@ -96,7 +110,11 @@ export default function AdminContentPage() {
       ) : data.items.length === 0 ? (
         <Panel className="p-12 text-center">
           <p className="text-body-sm text-muted">
-            {filtered ? "Nothing public matches these filters." : "Nothing is shared publicly right now."}
+            {filters.review === "pending"
+              ? "Nothing is waiting for review."
+              : filtered
+                ? "Nothing shared matches these filters."
+                : "Nothing is shared publicly right now."}
           </p>
         </Panel>
       ) : (
@@ -166,15 +184,26 @@ export default function AdminContentPage() {
                   </Link>
 
                   <div className="mt-auto flex gap-2 pt-1">
+                    {!item.publicApprovedAt && (
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        disabled={approve.isPending}
+                        onClick={() => approve.mutate({ id: item.id })}
+                      >
+                        <Check className="size-3.5" aria-hidden="true" />
+                        Approve
+                      </Button>
+                    )}
                     <ActionDialog
                       trigger={
                         <Button variant="secondary" size="sm" className="flex-1">
                           <EyeOff className="size-3.5" aria-hidden="true" />
-                          Remove from gallery
+                          {item.publicApprovedAt ? "Remove from gallery" : "Reject"}
                         </Button>
                       }
                       title="Remove from public gallery"
-                      description="Sets isPublic to false. The generation itself is kept — the user made it and paid for it, so this hides it rather than destroying it."
+                      description="Withdraws the share (isPublic and approval both cleared). The generation itself is kept — the user made it and paid for it, so this hides it rather than destroying it. Sharing it again sends it back to review."
                       confirmLabel="Unpublish"
                       destructive
                       pending={unpublish.isPending}

@@ -18,6 +18,13 @@ export const COMPANY = {
   team: [] as { name: string; role: string; href?: string }[],
   /** TODO(owner): public status page URL, if there is one. */
   statusPageUrl: null as string | null,
+  /**
+   * TODO(owner): legal review. Set to true once counsel has reviewed
+   * /refund-policy. Until then the page is noindex and left out of the
+   * footer and sitemap; pricing, contact and billing still link to it,
+   * because buyers need it either way.
+   */
+  refundPolicyReviewed: false,
 };
 
 /** Whether unfilled company facts render as a visible placeholder. */

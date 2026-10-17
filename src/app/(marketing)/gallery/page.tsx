@@ -7,6 +7,7 @@ import { modelCatalogEntry } from "@/lib/model-seo";
 import { influencerModelLabel } from "@/lib/influencer";
 import {
   fetchPublicGenerations,
+  galleryStillPath,
   generationTitle,
   isVideoGeneration,
   type PublicGeneration,
@@ -21,8 +22,8 @@ import { absoluteUrl, openGraph, SITE_NAME } from "@/lib/seo";
 // plain ?page= links. Without it the detail pages under /gallery/[id] were
 // reachable only from the sitemap, which is a hint rather than a link.
 //
-// Same hour of cache as the detail pages, and for the same reason — the feed
-// moves, and its media links are signed and short-lived.
+// Same hour of cache as the detail pages, because the feed moves. Media in
+// the HTML goes through /media/gallery/<id>, never the feed's signed links.
 export const revalidate = 3600;
 
 const PAGE_SIZE = 24;
@@ -43,8 +44,7 @@ export async function generateMetadata(props: PageProps<"/gallery">): Promise<Me
     title,
     description: DESCRIPTION,
     alternates: { canonical: path },
-    openGraph: openGraph({
-    images: "file", title, description: DESCRIPTION, path }),
+    openGraph: openGraph({ images: "file", title, description: DESCRIPTION, path }),
   };
 }
 
@@ -52,10 +52,24 @@ function modelLabel(item: PublicGeneration) {
   return influencerModelLabel(item.model, item.parameters) ?? modelCatalogEntry(item.model)?.label;
 }
 
-/** The feed as the interactive grid wants it. Everything here was shared and
- *  finished, which is all the server read keeps. */
+/**
+ * The feed as the interactive grid wants it. Everything here was shared and
+ * finished, which is all the server read keeps.
+ *
+ * Stills are swapped for their stable /media/gallery URLs, because this
+ * becomes server-rendered HTML that crawlers keep: the feed's own links are
+ * pre-signed for six hours and change on every request. A video keeps its
+ * signed resultUrl — the tile only loads it client-side, once in view.
+ */
 function toGalleryItem(item: PublicGeneration): GalleryItem {
-  return { ...item, progressPercent: 100, isPublic: true };
+  const isVideo = isVideoGeneration(item);
+  return {
+    ...item,
+    thumbnailUrl: galleryStillPath(item),
+    resultUrl: isVideo ? item.resultUrl : (galleryStillPath(item, { full: true }) ?? item.resultUrl),
+    progressPercent: 100,
+    isPublic: true,
+  };
 }
 
 export default async function PublicGalleryPage(props: PageProps<"/gallery">) {
@@ -121,10 +135,10 @@ export default async function PublicGalleryPage(props: PageProps<"/gallery">) {
                     href={`/gallery/${item.id}`}
                     className="flex h-full gap-3 rounded-xl border border-line bg-surface-2 p-3 transition-colors hover:border-border-strong hover:bg-surface-3"
                   >
-                    {item.thumbnailUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- stored thumbnail on R2, not a Next-optimizable asset
+                    {galleryStillPath(item) ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- streamed from R2 by /media/gallery, not a Next-optimizable asset
                       <img
-                        src={item.thumbnailUrl}
+                        src={galleryStillPath(item)!}
                         alt=""
                         loading="lazy"
                         decoding="async"

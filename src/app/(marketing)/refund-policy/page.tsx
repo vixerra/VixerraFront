@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LegalDraftNotice } from "@/components/marketing/legal-draft-notice";
 import { COMPANY } from "@/lib/company";
 import { openGraph } from "@/lib/seo";
 
@@ -16,6 +15,8 @@ export const metadata: Metadata = {
   title: "Refund policy",
   description: DESCRIPTION,
   alternates: { canonical: "/refund-policy" },
+  // Kept out of search until the text has had legal review (see COMPANY).
+  ...(COMPANY.refundPolicyReviewed ? {} : { robots: { index: false, follow: true } }),
   openGraph: openGraph({
     images: "file",
     title: "Refund policy",
@@ -65,8 +66,6 @@ export default function RefundPolicyPage() {
           </Link>
           .
         </p>
-
-        <LegalDraftNotice />
 
         <div className="space-y-8">
           {POINTS.map((point) => (
