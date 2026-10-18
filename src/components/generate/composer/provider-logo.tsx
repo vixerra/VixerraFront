@@ -179,19 +179,38 @@ const REAL_LOGOS: Record<string, { viewBox: string; content: ReactNode; padded?:
       </>
     ),
   },
-  // Traced by hand from the mark supplied for this integration, not exported
-  // from an official asset: a filled disc with two crossing lens outlines.
-  // Swap in the real file if one turns up — public/media/svg/kling.svg holds
-  // the same geometry standalone.
+  // Kling's official colour mark, via LobeHub's icon set (@lobehub/icons).
+  // public/media/svg/kling.svg holds the same file standalone.
   Kling: {
-    viewBox: "0 0 48 48",
+    viewBox: "0 0 24 24",
     content: (
       <>
-        <circle cx="24" cy="24" r="24" fill="#000" />
-        <g fill="none" stroke="#fff" strokeWidth="2.6">
-          <ellipse cx="24" cy="24" rx="17" ry="9.6" transform="rotate(-40 24 24)" />
-          <ellipse cx="24" cy="24" rx="17" ry="9.6" transform="rotate(40 24 24)" />
-        </g>
+        <path fill="url(#kling-a)" d="M5.412 13.775A23.193 23.193 0 017.41 9.32c3.17-5.492 7.795-8.757 10.33-7.294C12.038-1.266 4.598.944 1.122 6.964A13.378 13.378 0 00.085 9.22c-.259.739.092 1.534.77 1.926l4.557 2.63z" />
+        <path fill="url(#kling-b)" d="M18.588 10.164a23.188 23.188 0 01-1.999 4.455c-3.17 5.492-7.795 8.758-10.33 7.294 5.703 3.293 13.143 1.082 16.619-4.938a13.392 13.392 0 001.037-2.255c.259-.738-.092-1.534-.77-1.925l-4.557-2.63z" />
+        <path fill="url(#kling-c)" d="M16.59 14.62c3.17-5.492 3.686-11.13 1.15-12.594C15.207.563 10.582 3.83 7.41 9.32c2.074-3.59 5.809-5.315 8.344-3.852 2.534 1.464 2.908 5.56.835 9.151z" />
+        <path fill="url(#kling-d)" d="M7.41 9.32c-3.17 5.492-3.686 11.13-1.15 12.593 2.534 1.464 7.159-1.802 10.33-7.294-2.074 3.591-5.809 5.316-8.344 3.852-2.534-1.463-2.908-5.56-.835-9.15z" />
+        <defs>
+          <radialGradient id="kling-a" cx="0" cy="0" r="1" gradientTransform="matrix(7.47772 -12.51022 17.14368 10.24728 5.173 13.637)" gradientUnits="userSpaceOnUse">
+            <stop offset=".095" stopColor="#FFF959" />
+            <stop offset=".326" stopColor="#0DF35E" />
+            <stop offset=".64" stopColor="#0BF2F9" />
+            <stop offset="1" stopColor="#04A6F0" />
+          </radialGradient>
+          <radialGradient id="kling-b" cx="0" cy="0" r="1" gradientTransform="rotate(120.868 6.491 10.491) scale(14.5747 19.9728)" gradientUnits="userSpaceOnUse">
+            <stop offset=".095" stopColor="#FFF959" />
+            <stop offset=".326" stopColor="#0DF35E" />
+            <stop offset=".64" stopColor="#0BF2F9" />
+            <stop offset="1" stopColor="#04A6F0" />
+          </radialGradient>
+          <linearGradient id="kling-c" x1="15.578" x2="18.062" y1="1.798" y2="9.861" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#003EFF" />
+            <stop offset="1" stopColor="#0BFFE7" />
+          </linearGradient>
+          <linearGradient id="kling-d" x1="8.422" x2="5.938" y1="22.142" y2="14.079" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#003EFF" />
+            <stop offset="1" stopColor="#0BFFE7" />
+          </linearGradient>
+        </defs>
       </>
     ),
   },
@@ -219,9 +238,9 @@ function fallbackFor(provider: string) {
   return { initials: initials || "?", className: FALLBACK_CLASSES[hash % FALLBACK_CLASSES.length] };
 }
 
-const sizeClasses = { sm: "size-5", md: "size-7" } as const;
-const iconInsetClasses = { sm: "size-3.5", md: "size-5" } as const;
-const textSizeClasses = { sm: "text-[9px]", md: "text-[10px]" } as const;
+const sizeClasses = { sm: "size-5", md: "size-7", lg: "size-9" } as const;
+const iconInsetClasses = { sm: "size-3.5", md: "size-5", lg: "size-6" } as const;
+const textSizeClasses = { sm: "text-[9px]", md: "text-[10px]", lg: "text-[12px]" } as const;
 
 export function ProviderLogo({
   provider,
@@ -229,7 +248,7 @@ export function ProviderLogo({
   className,
 }: {
   provider: string;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   className?: string;
 }) {
   const real = REAL_LOGOS[provider];

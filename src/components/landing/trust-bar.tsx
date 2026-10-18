@@ -1,4 +1,5 @@
 import { Users } from "lucide-react";
+import { ProviderLogo } from "@/components/generate/composer/provider-logo";
 import { IMAGE_MODELS, VIDEO_MODELS } from "@/lib/constants";
 import { visibleActiveUsers } from "@/lib/social-proof";
 
@@ -29,12 +30,15 @@ export function TrustBar() {
         <p className="eyebrow">
           Built on models from
         </p>
+        {/* Each provider's real mark — the same ProviderLogo the composer's
+            model picker uses, so the landing page and the app show one set. */}
         <ul className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           {PROVIDERS.map((provider) => (
             <li
               key={provider}
-              className="flex h-14 min-w-[7.5rem] items-center justify-center rounded-2xl border border-line bg-ink/[0.04] px-5 text-body font-medium tracking-tight whitespace-nowrap text-muted transition-colors hover:border-border-strong hover:bg-ink/[0.08] hover:text-ink sm:h-16"
+              className="flex h-14 items-center gap-3 rounded-2xl border border-line bg-ink/[0.04] pr-5 pl-3 text-body font-medium tracking-tight whitespace-nowrap text-muted transition-colors hover:border-border-strong hover:bg-ink/[0.08] hover:text-ink sm:h-16 sm:pl-3.5"
             >
+              <ProviderLogo provider={provider} size="lg" />
               {provider}
             </li>
           ))}
