@@ -256,9 +256,9 @@ const VIDEO_COST_USD: Record<
   },
   // Wan 3.0 on kie.ai (wan/3-0-video), its own pricing table read
   // 2026-10-10: $0.04/s at 480p, $0.08 at 720p, $0.16 at 1080p, with or
-  // without sound. The composer entry sends no reference video, so output
-  // seconds are all it bills; the influencer "Replace" adds the clip's (see
-  // WAN3_REPLACE_MODEL_ID). Its shortest clip is 2s.
+  // without sound, on output seconds plus any reference clips' seconds (see
+  // FIXED_CREDITS_PER_SECOND for the composer, WAN3_REPLACE_MODEL_ID for the
+  // influencer "Replace"). Its shortest clip is 2s.
   "alibaba/wan-3.0": {
     perSecond: { "480p": 0.04, "720p": 0.08, "1080p": 0.16 },
     minSeconds: 2,
@@ -583,6 +583,14 @@ const FIXED_CREDITS_PER_SECOND: Record<string, Record<string, number>> = {
   "alibaba/wan-3.0": { "480p": 10, "720p": 20, "1080p": 40 },
 };
 
+// Reference clips on those models are sold at the same rate a second, as kie
+// bills them on top of the output (Wan 3.0's referenceVideos in
+// cloudflare-models.ts). A total the API couldn't measure is priced at the
+// combined ceiling, the only guess that can't undercharge.
+const FIXED_RATE_REFERENCE_MAX_SECONDS: Record<string, number> = {
+  "alibaba/wan-3.0": 15,
+};
+
 function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
 }
@@ -661,7 +669,11 @@ export function estimateVideoCredits(
   if (fixedRates) {
     const perSecond = fixedRates[resolution] ?? Math.max(...Object.values(fixedRates));
     const minSeconds = VIDEO_COST_USD[model]?.minSeconds ?? 1;
-    return Math.ceil(Math.max(minSeconds, effectiveDuration) * perSecond - ROUNDING_EPSILON);
+    const referenceMax = FIXED_RATE_REFERENCE_MAX_SECONDS[model] ?? 0;
+    const referenceSeconds = options.hasReferenceVideo
+      ? Math.min(referenceMax, options.referenceVideoSeconds ?? referenceMax)
+      : 0;
+    return Math.ceil((Math.max(minSeconds, effectiveDuration) + referenceSeconds) * perSecond - ROUNDING_EPSILON);
   }
 
   const clipRates = VIDEO_CLIP_COST_USD[model];

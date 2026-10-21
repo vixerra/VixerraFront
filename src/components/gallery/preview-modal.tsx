@@ -86,6 +86,7 @@ const HIDDEN_PARAM_KEYS = new Set([
   "images",
   "lastFrameImage",
   "referenceImages",
+  "referenceVideos",
   "video",
   "audio",
   "maskImage",

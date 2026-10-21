@@ -370,6 +370,15 @@ export function buildDynamicSchema(config: CloudflareModelConfig) {
         .max(slots, { error: shared ? `Up to ${slots} more images.` : `Up to ${slots} reference images.` })
         .optional();
     }
+    // Reference clips. Their lengths are the route's to check, once it has
+    // measured them; the list itself is bounded here.
+    const clips = config.referenceVideos;
+    if (clips) {
+      shape.referenceVideos = z
+        .array(z.string().min(1))
+        .max(clips.max, { error: `Up to ${clips.max} reference videos.` })
+        .optional();
+    }
   }
 
   for (const field of config.fields) {
@@ -426,6 +435,16 @@ export function buildDynamicSchema(config: CloudflareModelConfig) {
       {
         error: `Only one image is allowed at ${Object.values(blockedAt ?? {}).join(", ")}.`,
         path: ["referenceImages"],
+      },
+    )
+    // Clips are part of the references mode, so never beside a frame.
+    .refine(
+      (data) =>
+        !(Array.isArray(data.referenceVideos) && data.referenceVideos.length > 0) ||
+        (!data.image && !data.lastFrameImage),
+      {
+        error: "Use references or a first/last frame, not both.",
+        path: ["referenceVideos"],
       },
     );
 }

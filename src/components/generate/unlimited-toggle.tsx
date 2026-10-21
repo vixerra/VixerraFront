@@ -26,11 +26,15 @@ export function UnlimitedToggle({
   state,
   checked,
   onCheckedChange,
+  disabledReason,
   className,
 }: {
   state: UnlimitedState;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  /** Why this run can't go to Relax (reference videos, on Wan 3.0): the
+   *  switch is held off and the reason shown in place of the queue note. */
+  disabledReason?: string;
   className?: string;
 }) {
   const hoursLeft = state.secondsLeft === null ? null : Math.max(0, Math.round(state.secondsLeft / 3600));
@@ -49,7 +53,12 @@ export function UnlimitedToggle({
         className,
       )}
     >
-      <label className="flex cursor-pointer items-center justify-between gap-3">
+      <label
+        className={cn(
+          "flex items-center justify-between gap-3",
+          disabledReason ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+        )}
+      >
         <span className="flex min-w-0 items-center gap-2">
           <InfinityIcon className="size-4 shrink-0 text-accent-amber-ink" aria-hidden="true" />
           <span className="min-w-0">
@@ -60,8 +69,14 @@ export function UnlimitedToggle({
             </span>
           </span>
         </span>
-        <Switch checked={checked} onCheckedChange={onCheckedChange} aria-label="Generate in Relax mode for free" />
+        <Switch
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          disabled={Boolean(disabledReason)}
+          aria-label="Generate in Relax mode for free"
+        />
       </label>
+      {disabledReason && <p className="mt-2.5 text-caption text-muted">{disabledReason}</p>}
       {checked && state.queue && (
         <p className="mt-2.5 flex items-start gap-1.5 text-caption text-muted">
           <Timer className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />

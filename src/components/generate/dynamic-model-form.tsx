@@ -34,6 +34,9 @@ import {
 import { buildDynamicSchema } from "@/lib/validation";
 import { referenceImageSlots, type CloudflareModelConfig, type ImageLimits } from "@/lib/cloudflare-models";
 import { imageLimitProblem, readImageSize } from "@/lib/image-limits";
+import { measureMediaDuration, formatMediaDuration } from "@/lib/media-duration";
+import { uploadVideoToLibrary, type PickedVideo } from "@/lib/video-library";
+import { VideoSourceField } from "@/components/video-library/video-source-field";
 import { apiFetch } from "@/lib/api-client";
 import {
   isResolutionLocked,
@@ -115,6 +118,8 @@ const IMAGE_MODES = ["frames", "references"] as const;
 type ImageMode = (typeof IMAGE_MODES)[number];
 
 type UploadedReference = { url: string; preview: string };
+/** A reference clip, with its length when the browser could measure it. */
+type UploadedClip = UploadedReference & { seconds?: number };
 
 /** Duration is a *select* on some models rather than the numeric range the
  * slider handles — veo-3.1 spells its options "4s"/"6s"/"8s" and
@@ -187,7 +192,11 @@ export function DynamicModelForm<T extends string>({
     config.id === UNLIMITED_PROMO.videoModel ||
     (unlimitedState?.image_model !== null && config.id === unlimitedState?.image_model);
   const [relaxOn, setRelaxOn] = useState(true);
-  const relax = Boolean(unlimitedState?.active && coveredByUnlimited && relaxOn);
+  // Reference clips are paid in credits only (the API refuses them in
+  // Relax), so adding one sets the switch aside until they're removed.
+  const [clips, setClips] = useState<UploadedClip[]>([]);
+  const [uploadingClip, setUploadingClip] = useState(false);
+  const relax = Boolean(unlimitedState?.active && coveredByUnlimited && relaxOn && clips.length === 0);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   // Image style is a composer-level control, not a model field: it folds into
@@ -212,6 +221,16 @@ export function DynamicModelForm<T extends string>({
   const referenceSlots = hasImage ? referenceImageSlots(config) : 0;
   const referencesExclusive = referenceSlots > 0 && Boolean(config.referenceImages?.exclusiveWithFrames);
   const showingReferences = referencesExclusive && imageMode === "references";
+  // Reference clips (Wan 3.0) belong to the references mode. Their combined
+  // length is billed on top of the output and shares a ceiling with it, so
+  // it caps the duration below. An unmeasured clip leaves the total unknown,
+  // and the quote then takes the ceiling, as the API does.
+  const clipBounds = referencesExclusive ? config.referenceVideos : undefined;
+  const clipSeconds = clips.reduce((sum, clip) => sum + (clip.seconds ?? 0), 0);
+  const clipBilledSeconds =
+    clips.length > 0 && clips.every((clip) => clip.seconds !== undefined)
+      ? Math.ceil(clipSeconds - 0.05)
+      : undefined;
 
   const defaultValues: Record<string, unknown> = { prompt: initialPrompt };
   for (const field of config.fields) {
@@ -260,7 +279,12 @@ export function DynamicModelForm<T extends string>({
         // Kling charges for its soundtrack and Flux 3 / P-Video discount draft
         // mode, so the quote has to move with both switches — otherwise the
         // pill under the form disagrees with what the backend deducts.
-        { hasAudio: hasAudioFromParameters(values), isDraft: isDraftFromParameters(values) },
+        {
+          hasAudio: hasAudioFromParameters(values),
+          isDraft: isDraftFromParameters(values),
+          hasReferenceVideo: clips.length > 0,
+          referenceVideoSeconds: clipBilledSeconds,
+        },
       );
 
   const durationField = config.fields.find(
@@ -465,6 +489,42 @@ export function DynamicModelForm<T extends string>({
     }
   }
 
+  function setClipList(next: UploadedClip[]) {
+    setClips(next);
+    setValue("referenceVideos", next.length ? next.map((c) => c.url) : undefined, { shouldValidate: true });
+  }
+
+  /** `picked` carries what the video slot already knows about a clip: its
+   *  length, and its upload when it came from "My videos". Measured before
+   *  the upload, so a clip that can't fit never reaches the bucket; one we
+   *  can't measure goes on, for the API to read. */
+  async function handleClipPick({ file, ...picked }: PickedVideo) {
+    if (!clipBounds || clips.length >= clipBounds.max) return;
+    const seconds = picked.seconds ?? (await measureMediaDuration(file));
+    if (seconds !== undefined) {
+      const problem =
+        seconds < clipBounds.minSeconds - 0.05
+          ? `Reference videos must be at least ${clipBounds.minSeconds}s.`
+          : clipSeconds + seconds > clipBounds.maxTotalSeconds + 0.05
+            ? `Reference videos are limited to ${clipBounds.maxTotalSeconds}s in total — this one would take it to ${formatMediaDuration(clipSeconds + seconds)}.`
+            : undefined;
+      if (problem) {
+        toast({ title: "That clip doesn't fit", description: problem, variant: "error" });
+        return;
+      }
+    }
+    setUploadingClip(true);
+    try {
+      // Clips go through the library, so the next run can reuse them.
+      const url = picked.url ?? (await uploadVideoToLibrary(file, { seconds }));
+      setClipList([...clips, { url, preview: URL.createObjectURL(file), seconds }]);
+    } catch (err) {
+      reportUploadFailure(err);
+    } finally {
+      setUploadingClip(false);
+    }
+  }
+
   function clearEndFrame() {
     setEndFramePreview(null);
     setValue("lastFrameImage", undefined, { shouldValidate: true });
@@ -505,6 +565,7 @@ export function DynamicModelForm<T extends string>({
       clearEndFrame();
     } else {
       setReferenceList([]);
+      setClipList([]);
     }
   }
 
@@ -546,6 +607,54 @@ export function DynamicModelForm<T extends string>({
     );
   }
 
+  /** The reference clips, under the images. Each tile shows its length, and
+   *  the Add tile's trimmer is capped at what's left of the total, so a clip
+   *  that wouldn't fit can be cut down instead of refused. */
+  function renderClipGrid() {
+    if (!clipBounds) return null;
+    const left = clipBounds.maxTotalSeconds - clipSeconds;
+    return (
+      <>
+        <p className="mt-4 mb-1.5 flex items-center justify-between text-caption text-muted">
+          <span>Videos</span>
+          {clips.length > 0 && (
+            <span>
+              {formatMediaDuration(clipSeconds)} / {clipBounds.maxTotalSeconds}s
+            </span>
+          )}
+        </p>
+        <div className="grid grid-cols-3 gap-1.5">
+          {clips.map((clip, index) => (
+            <PanelDropzone
+              key={clip.url}
+              compact
+              className="h-20"
+              mediaKind="video"
+              label={`Video ${index + 1}`}
+              previewUrl={clip.preview}
+              badge={clip.seconds !== undefined ? formatMediaDuration(clip.seconds) : undefined}
+              onFile={() => {}}
+              onRemove={() => setClipList(clips.filter((_, i) => i !== index))}
+            />
+          ))}
+          {clips.length < clipBounds.max && left >= clipBounds.minSeconds && (
+            <VideoSourceField
+              compact
+              className="h-20"
+              label="Add"
+              uploading={uploadingClip}
+              minSeconds={clipBounds.minSeconds}
+              maxSeconds={left}
+              onPick={(picked) => void handleClipPick(picked)}
+              onRemove={() => {}}
+            />
+          )}
+        </div>
+        <FieldError>{errors.referenceVideos?.message as string | undefined}</FieldError>
+      </>
+    );
+  }
+
   /** What @ offers in the prompt, numbered as the tiles are: the images the
    *  model receives as a list, in the order it receives them. */
   const referencePreviews = references.map((r) => r.preview);
@@ -561,7 +670,9 @@ export function DynamicModelForm<T extends string>({
   }));
 
   const referenceHint = [
-    `Optional — up to ${referenceSlots} ${referencesExclusive ? "images" : "more images"} of the people, objects or places to keep.`,
+    clipBounds
+      ? `Optional — up to ${referenceSlots} images and ${clipBounds.max} videos (${clipBounds.maxTotalSeconds}s in total) of the people, objects, places or motion to keep. Videos are billed by the second, like the output.`
+      : `Optional — up to ${referenceSlots} ${referencesExclusive ? "images" : "more images"} of the people, objects or places to keep.`,
     config.referenceImages?.hint ?? "Refer to them in the prompt.",
   ].join(" ");
 
@@ -611,8 +722,19 @@ export function DynamicModelForm<T extends string>({
   // Clamps the duration slider to the current plan's limit (undefined
   // tierInfo — still loading — leaves the model's own max in place).
   const durationModelMax = durationField?.max ?? 0;
-  const durationCap = tierInfo ? Math.min(durationModelMax, tierInfo.maxDurationSeconds) : durationModelMax;
-  const durationCapped = tierInfo ? durationCap < durationModelMax : false;
+  const durationPlanCap = tierInfo ? Math.min(durationModelMax, tierInfo.maxDurationSeconds) : durationModelMax;
+  const durationCapped = tierInfo ? durationPlanCap < durationModelMax : false;
+  // Output and reference clips share one ceiling on these models.
+  const durationClipCap =
+    clipBounds && clips.length > 0 ? clipBounds.maxWithOutputSeconds - Math.ceil(clipSeconds - 0.05) : Infinity;
+  const durationCap = Math.max(durationField?.min ?? 1, Math.min(durationPlanCap, durationClipCap));
+
+  useEffect(() => {
+    const current = getValues("duration");
+    if (durationField && typeof current === "number" && current > durationCap) {
+      setValue("duration", durationCap, { shouldValidate: true });
+    }
+  }, [durationCap, durationField, getValues, setValue]);
 
   return (
     // Fills the studio panel: fields scroll in the middle, Generate stays
@@ -660,7 +782,11 @@ export function DynamicModelForm<T extends string>({
             }
           >
             {showingReferences ? (
-              renderReferenceGrid()
+              <>
+                {clipBounds && <p className="mb-1.5 text-caption text-muted">Images</p>}
+                {renderReferenceGrid()}
+                {renderClipGrid()}
+              </>
             ) : takesEndFrame ? (
               <div className="flex items-center gap-1.5">
                 <PanelDropzone
@@ -790,10 +916,17 @@ export function DynamicModelForm<T extends string>({
                       ]}
                       onValueChange={([v]) => setValue(field.key, v, { shouldValidate: true })}
                     />
-                    {durationCapped && (
+                    {durationClipCap < durationPlanCap ? (
                       <p className="mt-1.5 text-caption text-muted">
-                        {upgradeHint(minTierForDuration(durationModelMax), `up to ${durationModelMax}s`)}
+                        Up to {durationCap}s with your reference videos — output and videos share{" "}
+                        {clipBounds?.maxWithOutputSeconds}s.
                       </p>
+                    ) : (
+                      durationCapped && (
+                        <p className="mt-1.5 text-caption text-muted">
+                          {upgradeHint(minTierForDuration(durationModelMax), `up to ${durationModelMax}s`)}
+                        </p>
+                      )
                     )}
                   </div>
                 </div>
@@ -859,8 +992,13 @@ export function DynamicModelForm<T extends string>({
         {coveredByUnlimited && unlimitedState?.active && (
           <UnlimitedToggle
             state={unlimitedState}
-            checked={relaxOn}
+            checked={relax}
             onCheckedChange={setRelaxOn}
+            disabledReason={
+              clips.length > 0
+                ? "Reference videos are paid in credits. Remove them to generate for free."
+                : undefined
+            }
             className="mb-3"
           />
         )}
@@ -870,7 +1008,7 @@ export function DynamicModelForm<T extends string>({
         <CreditsSubmitPill
           fullWidth
           credits={relax ? 0 : estimatedCredits}
-          loading={mutation.isPending || busy || uploading || uploadingEndFrame || uploadingReference}
+          loading={mutation.isPending || busy || uploading || uploadingEndFrame || uploadingReference || uploadingClip}
           disabled={imageRequired && !image}
           balance={creditBalance}
           blockedReason={blockedReason}

@@ -160,6 +160,21 @@ export type CloudflareModelConfig = {
      *  for that list only. Absent means imageLimits applies. */
     limits?: ImageLimits;
   };
+  /** Reference clips, for the models that take a list of them beside the
+   *  reference images (Wan 3.0). Collected as `referenceVideos`, they belong
+   *  to the references mode, so referenceImages.exclusiveWithFrames applies
+   *  to them too. The API measures each clip: its length is checked against
+   *  these bounds and billed, since the provider bills it. */
+  referenceVideos?: {
+    max: number;
+    cfParam: string;
+    /** Shortest clip the provider takes. */
+    minSeconds: number;
+    /** Ceiling on the clips' combined length. */
+    maxTotalSeconds: number;
+    /** Ceiling on the output's duration plus the clips'. */
+    maxWithOutputSeconds: number;
+  };
   /** Bounds on every image the model receives, where its provider documents
    *  them. */
   imageLimits?: ImageLimits;
@@ -557,11 +572,11 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
   },
   // Wan 3.0, on kie.ai since 2026-10-10 (wan/3-0-video, fields from
   // docs.kie.ai/market/wan/3-0-video). Same exclusive modes as Seedance:
-  // text, a first (and last) frame, or up to 10 reference images. Its
-  // reference videos, audio, files and links aren't exposed here; the AI
-  // influencer studio sends a reference clip through its own path
-  // (lib/influencer-motion.ts in aiVideo-backend). kie also sells a faster
-  // "Prime" variant, not offered. Images: 240-8000px a side, at most 8:1.
+  // text, a first (and last) frame, or references: up to 10 images and up
+  // to 5 clips (each 1-15s, 15s in total, output plus clips at most 30s).
+  // kie bills the clips' seconds on top of the output's. Its reference
+  // audio, files and links aren't exposed. kie also sells a faster "Prime"
+  // variant, not offered. Images: 240-8000px a side, at most 8:1.
   {
     id: "alibaba/wan-3.0",
     runtime: "kie",
@@ -594,6 +609,13 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
       cfParam: "reference_image_urls",
       exclusiveWithFrames: true,
       hint: "Point at them from the prompt as Image1, Image2…",
+    },
+    referenceVideos: {
+      max: 5,
+      cfParam: "reference_video_urls",
+      minSeconds: 1,
+      maxTotalSeconds: 15,
+      maxWithOutputSeconds: 30,
     },
     outputPath: [],
     outputKind: "url",
