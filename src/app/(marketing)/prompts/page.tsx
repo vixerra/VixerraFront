@@ -62,46 +62,7 @@ export default async function PromptsPage() {
         <PresetsGallery />
       </div>
 
-      {presets.length > 0 && (
-        <section className="mt-20 border-t border-line pt-12">
-          <h2 className="text-feature-title font-semibold text-ink">
-            Every preset in the catalogue
-          </h2>
-          <p className="mt-2 max-w-2xl text-body-sm text-muted">
-            {presets.length} finished recipes, each pinned to the model it was tuned for.
-          </p>
-          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {presets.map((preset) => {
-              const entry = modelCatalogEntry(preset.model);
-              const modelHref = modelPageHref(preset.model);
-              return (
-                <li
-                  key={preset.slug}
-                  className="rounded-xl border border-line bg-surface-2 p-5"
-                >
-                  <span className="text-caption text-muted">{preset.category}</span>
-                  <h3 className="mt-1 text-label font-semibold text-ink">{preset.title}</h3>
-                  <p className="mt-1 text-body-sm text-muted">{preset.tagline}</p>
-                  <p className="mt-3 text-caption text-muted">
-                    Runs on{" "}
-                    {modelHref ? (
-                      <Link
-                        href={modelHref}
-                        className="text-brand-ink underline-offset-4 hover:underline"
-                      >
-                        {entry?.label ?? preset.model}
-                      </Link>
-                    ) : (
-                      (entry?.label ?? preset.model)
-                    )}
-                    {preset.requiresImage ? " · needs one photo" : ""}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
+      
     </div>
   );
 }
