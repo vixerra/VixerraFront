@@ -72,12 +72,14 @@ function creditsFor(seconds: number, usdPerSecond: number): number {
 }
 
 // The AI influencer studio's "Replace in the clip" — a Seedance 2.5 run
-// whose one reference video is the measured clip — sells at 30%, not
-// TARGET_GROSS_MARGIN (2026-10-08). kie bills the clip as reference AND as
-// output, so at 60% a 20s swap cost users well over a thousand credits.
-// Only that run, and its Wan 3.0 "Low" sibling (2026-10-10): Seedance and
-// Wan 3.0 in the composer keep the standard margin.
-const INFLUENCER_REPLACE_GROSS_MARGIN = 0.3;
+// whose one reference video is the measured clip — has a margin of its own
+// (2026-10-08): kie bills the clip as reference AND as output, so at 60% a
+// 20s swap cost users well over a thousand credits. It covers that run, its
+// Wan 3.0 "Low" sibling (2026-10-10) and Vixlens Genjutsu. Raised from 30%
+// to 40% on 2026-10-22: at 30%, a credit bought on the Starter launch offer
+// (~$0.006) sold these runs below kie's price. Seedance and Wan 3.0 in the
+// composer keep their own margins.
+const INFLUENCER_REPLACE_GROSS_MARGIN = 0.4;
 const INFLUENCER_REPLACE_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - INFLUENCER_REPLACE_GROSS_MARGIN);
 
 function imageCreditsFor(costUsd: number): number {
