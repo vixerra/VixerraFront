@@ -172,8 +172,11 @@ export type CloudflareModelConfig = {
     minSeconds: number;
     /** Ceiling on the clips' combined length. */
     maxTotalSeconds: number;
-    /** Ceiling on the output's duration plus the clips'. */
-    maxWithOutputSeconds: number;
+    /** Ceiling on the output's duration plus the clips', for a provider
+     *  that sets one (Wan 3.0). */
+    maxWithOutputSeconds?: number;
+    /** How the prompt points at the clips, for a provider with a syntax. */
+    hint?: string;
   };
   /** Bounds on every image the model receives, where its provider documents
    *  them. */
@@ -1036,6 +1039,54 @@ export const CLOUDFLARE_MODELS: CloudflareModelConfig[] = [
   // dynamic form cannot describe) and Kling 3.0's paired first/last frame,
   // which the API takes as two entries of one image_urls array rather than
   // the separate parameter lastFrameCfParam models.
+  //
+  // Kling 4.0, on kie.ai since 2026-10-16 as two tasks (fields from
+  // docs.kie.ai/market/kling/v4-reference-to-video and v4-keyframe-to-video,
+  // read 2026-10-23). Reference To Video is plain text-to-video without
+  // materials, so it carries the text runs and the reference images; a first
+  // frame switches the run to Keyframe To Video (kieImageModel), which also
+  // takes the last frame. Same exclusive modes as Wan 3.0, reference videos
+  // included. Native audio is always generated, so there is no switch;
+  // keep_original_sound is left at its default (off). Not exposed: elements,
+  // voices and middle keyframes. Reference images: 300-65536px a side,
+  // 0.4-2.5 aspect.
+  {
+    id: "kling/4.0",
+    runtime: "kie",
+    kieModel: "kling-4.0/reference-to-video",
+    kieImageModel: "kling-4.0/keyframe-to-video",
+    label: "Kling 4.0",
+    provider: "Kling",
+    description: "3 to 30s up to 1080p, native audio, references or keyframes",
+    category: "text-to-video",
+    promptRequired: true,
+    image: "optional",
+    imageCfParam: "first_frame_url",
+    lastFrameCfParam: "last_frame_url",
+    fields: [
+      { key: "duration", cfParam: "duration", label: "Duration", type: "number", defaultValue: 5, min: 3, max: 30, helperText: "seconds" },
+      { key: "resolution", cfParam: "resolution", label: "Resolution", type: "select", options: ["720p", "1080p"], defaultValue: "720p" },
+      { key: "aspectRatio", cfParam: "aspect_ratio", label: "Aspect ratio", type: "select", options: ["auto", "16:9", "9:16", "1:1", "21:9"], defaultValue: "16:9" },
+    ],
+    referenceImages: {
+      max: 10,
+      cfParam: "image_urls",
+      exclusiveWithFrames: true,
+      hint: "Point at them from the prompt as @image_1, @image_2…",
+      limits: { minSide: 300, maxSide: 65536, minAspect: 0.4, maxAspect: 2.5 },
+    },
+    // Up to 5 clips, each 2-30s and 30s combined. kie bills them on top of
+    // the output (see "kling/4.0" in credit-estimate.ts).
+    referenceVideos: {
+      max: 5,
+      cfParam: "video_urls",
+      minSeconds: 2,
+      maxTotalSeconds: 30,
+      hint: "Point at them as @video_1, @video_2…",
+    },
+    outputPath: [],
+    outputKind: "url",
+  },
   {
     id: "kling/3.0",
     runtime: "kie",

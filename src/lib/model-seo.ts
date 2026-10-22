@@ -712,6 +712,29 @@ export const MODEL_PAGES: ModelPageContent[] = [
   },
   // ---------------------------------------------------------------- kling
   {
+    slug: "kling-4-0",
+    id: "kling/4.0",
+    tagline: "Kling's newest model, clips up to 30 seconds with native audio",
+    intro:
+      "Kling 4.0 is the latest generation of Kling's video model, and the first on Vixlens to run a single clip as long as 30 seconds. Write a prompt on its own, guide it with reference images and clips, or pin the shot between a first and last frame — sound is generated with the picture every time.",
+    strengths: [
+      "Any length from 3 to 30 seconds in one clip",
+      "Up to ten reference images and five reference clips, called from the prompt as @image_1, @video_1…",
+      "First and last frame control for shots that must start and end on exact images",
+      "Native audio on every clip, at 720p or 1080p",
+    ],
+    useCases: [
+      "Longer story beats and product walk-throughs that don't fit in 10 seconds",
+      "Keeping the same character, outfit or product across a clip from reference stills",
+      "Transitions and reveals that have to land on a precise final frame",
+    ],
+    prompts: [
+      "A chef plates a dessert in a quiet restaurant kitchen, the camera circling slowly as sauce, crumble and a single mint leaf go down, low murmur of the dining room behind",
+      "A cyclist climbs a mountain pass in the early morning fog, switchbacks unfolding below, breathing and the click of gears as the sun breaks through",
+      "A street musician tunes a cello under a railway bridge at night, then starts to play as a train rumbles overhead",
+    ],
+  },
+  {
     slug: "kling-3-0",
     id: "kling/3.0",
     tagline: "Kling's flagship video model, up to 4K with native audio",

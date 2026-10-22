@@ -671,10 +671,13 @@ export function DynamicModelForm<T extends string>({
 
   const referenceHint = [
     clipBounds
-      ? `Optional — up to ${referenceSlots} images and ${clipBounds.max} videos (${clipBounds.maxTotalSeconds}s in total) of the people, objects, places or motion to keep. Videos are billed by the second, like the output.`
+      ? `Optional — up to ${referenceSlots} images and ${clipBounds.max} videos (${clipBounds.maxTotalSeconds}s in total) of the people, objects, places or motion to keep. Videos add their length to the price.`
       : `Optional — up to ${referenceSlots} ${referencesExclusive ? "images" : "more images"} of the people, objects or places to keep.`,
     config.referenceImages?.hint ?? "Refer to them in the prompt.",
-  ].join(" ");
+    clipBounds?.hint,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
@@ -726,7 +729,9 @@ export function DynamicModelForm<T extends string>({
   const durationCapped = tierInfo ? durationPlanCap < durationModelMax : false;
   // Output and reference clips share one ceiling on these models.
   const durationClipCap =
-    clipBounds && clips.length > 0 ? clipBounds.maxWithOutputSeconds - Math.ceil(clipSeconds - 0.05) : Infinity;
+    clipBounds?.maxWithOutputSeconds !== undefined && clips.length > 0
+      ? clipBounds.maxWithOutputSeconds - Math.ceil(clipSeconds - 0.05)
+      : Infinity;
   const durationCap = Math.max(durationField?.min ?? 1, Math.min(durationPlanCap, durationClipCap));
 
   useEffect(() => {

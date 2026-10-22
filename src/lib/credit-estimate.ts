@@ -208,6 +208,15 @@ const VIDEO_COST_USD: Record<
     perSecond: { "720p": 0.09, "1080p": 0.1125 },
     minSeconds: 3,
   },
+  // Kling 4.0 (kie.ai/pricing, 2026-10-23): 28.5 / 42.5 kie credits a second
+  // at 720p / 1080p, audio included, the same on Reference To Video without
+  // a video input and on Keyframe To Video. With reference videos, 17 / 25.5
+  // a second, on a different basis — see KLING4_MODEL_ID below.
+  "kling/4.0": {
+    perSecond: { "720p": 0.1425, "1080p": 0.2125 },
+    withReferenceVideo: { "720p": 0.085, "1080p": 0.1275 },
+    minSeconds: 3,
+  },
   // $0.275 for a silent 5s clip, $0.55 with sound — exactly double.
   "kling/2.6": {
     perSecond: { default: 0.055 },
@@ -575,6 +584,14 @@ const GENJUTSU_MODEL_ID = "vixlens/genjutsu";
 // otherwise. Standard margin: this is an ordinary generation.
 export const VIDEO_EDIT_MODEL_ID = "wan/2.7-videoedit";
 
+// Kling 4.0 with reference videos. kie bills "Unit Price × (Input + Output)
+// Duration", and an input shorter than the output counts as the output's
+// length (kie.ai/pricing, 2026-10-23). A total the API couldn't measure is
+// priced at the 30s the clips may add up to, the only guess that can't
+// undercharge.
+const KLING4_MODEL_ID = "kling/4.0";
+const KLING4_REFERENCE_VIDEO_MAX_SECONDS = 30;
+
 // Models sold at a published credit rate instead of one derived from cost
 // (2026-10-15 repricing). Wan 3.0 is the budget video option next to
 // Seedance and is advertised at 10 / 20 / 40 credits a second, so the rate
@@ -665,6 +682,18 @@ export function estimateVideoCredits(
       creditsFor(SEEDANCE_DURATION_MIN, SEEDANCE25_KIE_AI_1080P_COST_USD),
       creditsFor(effectiveDuration, SEEDANCE25_KIE_AI_1080P_COST_USD),
     );
+  }
+
+  if (model === KLING4_MODEL_ID && options.hasReferenceVideo) {
+    const entry = VIDEO_COST_USD[KLING4_MODEL_ID];
+    const rates = entry.withReferenceVideo!;
+    const rate = rates[resolution] ?? Math.max(...Object.values(rates));
+    const outputSeconds = Math.max(entry.minSeconds, effectiveDuration);
+    const inputSeconds = Math.max(
+      outputSeconds,
+      Math.min(KLING4_REFERENCE_VIDEO_MAX_SECONDS, options.referenceVideoSeconds ?? KLING4_REFERENCE_VIDEO_MAX_SECONDS),
+    );
+    return creditsForUsd((outputSeconds + inputSeconds) * rate, COST_USD_PER_CREDIT);
   }
 
   const fixedRates = FIXED_CREDITS_PER_SECOND[model];

@@ -457,6 +457,8 @@ export const MODEL_POPULARITY: readonly string[] = [
   // video
   "bytedance/seedance-2.5",
   "bytedance/seedance-2.0-mini",
+  // New on 2026-10-23: heads the Kling group, where Kling already sat.
+  "kling/4.0",
   "kling/2.6",
   "google/veo-3.1",
   "kling/3.0",
