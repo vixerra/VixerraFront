@@ -414,17 +414,19 @@ export function GenjutsuStudio() {
               {keepAudio ? "Original sound" : "No sound kept"}
             </button>
           </div>
+          {/* Same button as the influencer studio's: it spells out why it is
+              disabled itself, under it. */}
           <CreditsSubmitPill
             fullWidth
-            hideTooltip
             credits={credits}
+            // The price follows the clip's length, so there is none to show
+            // before one is added (it would be the 15s ceiling's).
+            hideCost={!clip}
             loading={mutation.isPending || busy}
             balance={usageQuery.data?.credit_balance}
             blockedReason={blockedReason}
             incompleteReason={incompleteReason}
-            className="h-14 rounded-2xl text-body"
           />
-          {reason && <p className="text-center text-caption text-text-tertiary">{reason}</p>}
         </div>
       </aside>
 
