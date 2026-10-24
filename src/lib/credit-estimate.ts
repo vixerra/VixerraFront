@@ -24,13 +24,13 @@ import {
 // A credit SELLS for CREDIT_VALUE_USD ($0.01 — see constants.ts, where
 // every plan and pack is priced at that rate). TARGET_GROSS_MARGIN is the
 // cut of that we keep, so a credit may only buy COST_USD_PER_CREDIT =
-// $0.006 of provider compute on video. Images use their own, steeper
+// $0.0045 of provider compute on video. Images use their own, steeper
 // IMAGE_GROSS_MARGIN (65%, so IMAGE_COST_USD_PER_CREDIT = $0.0035):
 //
 //   credits = ceil(seconds × usdPerSecond / COST_USD_PER_CREDIT)
 //
 // Both margins are measured against the provider's price, before Stripe's
-// fee: after it, ~34-37% survives on video and ~59-62% on images, depending
+// fee: after it, ~47-52% survives on video and ~59-62% on images, depending
 // on which plan or pack the credits were bought through.
 //
 // Before 2026-08-30 credits were sold and spent at par ($0.01 of compute
@@ -39,10 +39,12 @@ import {
 // were repriced to a flat 1000/2500/5000 credits — at par those grant more
 // compute than they cost — so the markup now lives on the generation side,
 // where it scales with actual usage instead of with the grant.
-// 50% until 2026-09-14, then 60% until 2026-10-08, when it was lowered to
-// 40% on purpose — below the 40% net floor constants.ts describes (see
-// TIER_INFO there for the net figures).
-const TARGET_GROSS_MARGIN = 0.4;
+// 50% until 2026-09-14, then 60% until 2026-10-08, then 40% until
+// 2026-10-24, when it was raised to 55%: at 40%, a credit bought on the
+// Starter launch offer (~$0.006) sold video at cost. Wan 3.0 keeps its own
+// fixed rate (FIXED_CREDITS_PER_SECOND). See TIER_INFO in constants.ts for
+// the net figures.
+const TARGET_GROSS_MARGIN = 0.55;
 const COST_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - TARGET_GROSS_MARGIN);
 
 // Images carry a steeper margin than video. A single image is cheap enough in
@@ -67,19 +69,23 @@ function creditsForUsd(costUsd: number, usdPerCredit: number): number {
 }
 
 
-function creditsFor(seconds: number, usdPerSecond: number): number {
-  return creditsForUsd(seconds * usdPerSecond, COST_USD_PER_CREDIT);
+function creditsFor(seconds: number, usdPerSecond: number, usdPerCredit = COST_USD_PER_CREDIT): number {
+  return creditsForUsd(seconds * usdPerSecond, usdPerCredit);
 }
+
+// Seedance 2.5 in the composer sells at 50% instead of TARGET_GROSS_MARGIN
+// (2026-10-24). Its influencer "Replace" keeps INFLUENCER_REPLACE_GROSS_MARGIN.
+const SEEDANCE25_GROSS_MARGIN = 0.5;
+const SEEDANCE25_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - SEEDANCE25_GROSS_MARGIN);
 
 // The AI influencer studio's "Replace in the clip" — a Seedance 2.5 run
 // whose one reference video is the measured clip — has a margin of its own
 // (2026-10-08): kie bills the clip as reference AND as output, so at 60% a
 // 20s swap cost users well over a thousand credits. It covers that run, its
-// Wan 3.0 "Low" sibling (2026-10-10) and Vixlens Genjutsu. Raised from 30%
-// to 40% on 2026-10-22: at 30%, a credit bought on the Starter launch offer
-// (~$0.006) sold these runs below kie's price. Seedance and Wan 3.0 in the
-// composer keep their own margins.
-const INFLUENCER_REPLACE_GROSS_MARGIN = 0.4;
+// Wan 3.0 "Low" sibling (2026-10-10) and Vixlens Genjutsu. 30% until
+// 2026-10-22, 40% until 2026-10-24, then 55%, level with the standard video
+// margin; kept apart so the two can be tuned separately again.
+const INFLUENCER_REPLACE_GROSS_MARGIN = 0.55;
 const INFLUENCER_REPLACE_USD_PER_CREDIT = CREDIT_VALUE_USD * (1 - INFLUENCER_REPLACE_GROSS_MARGIN);
 
 function imageCreditsFor(costUsd: number): number {
@@ -679,8 +685,8 @@ export function estimateVideoCredits(
 
   if (model === SEEDANCE_MODEL_ID && resolution === "1080p") {
     return Math.max(
-      creditsFor(SEEDANCE_DURATION_MIN, SEEDANCE25_KIE_AI_1080P_COST_USD),
-      creditsFor(effectiveDuration, SEEDANCE25_KIE_AI_1080P_COST_USD),
+      creditsFor(SEEDANCE_DURATION_MIN, SEEDANCE25_KIE_AI_1080P_COST_USD, SEEDANCE25_USD_PER_CREDIT),
+      creditsFor(effectiveDuration, SEEDANCE25_KIE_AI_1080P_COST_USD, SEEDANCE25_USD_PER_CREDIT),
     );
   }
 
@@ -735,9 +741,10 @@ export function estimateVideoCredits(
   const draftRate = options.isDraft && !useVideoRates ? entry.withDraft?.[resolution] : undefined;
   const perSecond = draftRate ?? rates[resolution] ?? Math.max(...Object.values(rates));
   const floorRates = draftRate !== undefined ? entry.withDraft! : rates;
+  const usdPerCredit = model === SEEDANCE_MODEL_ID ? SEEDANCE25_USD_PER_CREDIT : COST_USD_PER_CREDIT;
   return Math.max(
-    creditsFor(minSeconds, cheapestPerSecond(floorRates)),
-    creditsFor(effectiveDuration, perSecond),
+    creditsFor(minSeconds, cheapestPerSecond(floorRates), usdPerCredit),
+    creditsFor(effectiveDuration, perSecond, usdPerCredit),
   );
 }
 

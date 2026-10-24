@@ -168,13 +168,14 @@ export const TIER_INFO: Record<
   // Credits recalibrated 2026-08-30: every plan sells credits at a flat
   // CREDIT_VALUE_USD ($0.01) — $5.99 → 600, $24 → 2,500, $49 → 5,000 — and
   // the margin now comes from generation pricing instead (credit-estimate.ts
-  // bills video at a 40% gross margin over real provider cost, images at
-  // 65% — video was 50% until 2026-09-14 and 60% until 2026-10-08, images
-  // 55% until 2026-09-14).
-  // Spending a plan's credits in full on video therefore costs us 60% of its
-  // price: ~40% gross, ~29-31% net of the ~2.9%+$0.30 Stripe fee and the ~5%
-  // storage/support/hosting overhead — about ten points BELOW the 40% net
-  // floor the v2 pricing was built around, a deliberate choice (2026-10-08). That is the video-only worst
+  // bills video at a 55% gross margin over real provider cost (Seedance 2.5
+  // at 50%), images at
+  // 65% — video was 50% until 2026-09-14, 60% until 2026-10-08 and 40%
+  // until 2026-10-24, images 55% until 2026-09-14).
+  // Spending a plan's credits in full on video therefore costs us 45% of its
+  // price: ~55% gross, ~44-47% net of the ~2.9%+$0.30 Stripe fee and the ~5%
+  // storage/support/hosting overhead — above the 40% net floor the v2
+  // pricing was built around (Wan 3.0 sells at its own fixed rate, 60% gross). That is the video-only worst
   // case: images bill at a 65% gross margin (~54-56% net), so an image-heavy
   // user is the comfortable one. maxResolution/maxDurationSeconds/
   // concurrentGenerations/priorityQueue/apiAccess are enforced
@@ -238,8 +239,8 @@ export const TIER_INFO: Record<
       "1,000 credits / month",
       influencerFeature("starter"),
       "~333 images",
-      "~41s Seedance 2.0 video",
-      "~28s Seedance 2.5 video",
+      "~47s Seedance 2.0 video",
+      "~35s Seedance 2.5 video",
       "~50s Wan 3.0 video (720p)",
       "Add credits as needed",
       "Up to 1080p",
@@ -270,8 +271,8 @@ export const TIER_INFO: Record<
       influencerFeature("creator"),
       UNLIMITED_FEATURE,
       "~833 images",
-      "~104s Seedance 2.0 video",
-      "~71s Seedance 2.5 video",
+      "~118s Seedance 2.0 video",
+      "~89s Seedance 2.5 video",
       "~125s Wan 3.0 video (720p)",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
@@ -310,10 +311,10 @@ export const TIER_INFO: Record<
       influencerFeature("studio"),
       UNLIMITED_FEATURE,
       "~1,833 images",
-      "~229s Seedance 2.0 video",
-      "~157s Seedance 2.5 video",
+      "~260s Seedance 2.0 video",
+      "~196s Seedance 2.5 video",
       "~275s Wan 3.0 video (720p)",
-      "~21s Seedance 2.0 video (4K, exclusive)",
+      "~23s Seedance 2.0 video (4K, exclusive)",
       "Marketing studio for ad-ready campaigns",
       "Editing studio: trim, caption, export",
       "Publish to TikTok, Instagram, YouTube & Facebook",
