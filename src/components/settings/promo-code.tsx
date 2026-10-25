@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RECHARGE_PACKS, TIER_INFO, type Tier } from "@/lib/constants";
 import { cn, formatCredits } from "@/lib/utils";
 import { apiFetch } from "@/lib/api-client";
+import { forgetPromo } from "@/lib/promo-link";
 
 /** A code the server accepted (POST /api/subscription/promo/check). */
 export type AppliedPromo = {
@@ -66,6 +67,7 @@ export function PromoCodeField({
   disabled,
   preview = false,
   autoApply = null,
+  autoApplyRemembered = false,
   onAutoApplyDone,
   className,
 }: {
@@ -74,19 +76,24 @@ export function PromoCodeField({
   disabled?: boolean;
   /** Use the signed-out preview check (pricing page). */
   preview?: boolean;
-  /** A code from the URL (?promo=), checked once on arrival. */
+  /** A code from the URL (?promo=), or one a partner link left behind (see
+   *  lib/promo-link.ts), checked once on arrival. */
   autoApply?: string | null;
+  /** The arrival code came from that remembered link, not this page's URL:
+   *  if it's refused (most often: already used on a past purchase) it is
+   *  dropped quietly instead of greeting the customer with an error. */
+  autoApplyRemembered?: boolean;
   /** Reports how that arrival check went, so a page can wait for it. */
   onAutoApplyDone?: (ok: boolean) => void;
   className?: string;
 }) {
-  const [code, setCode] = useState(autoApply ?? "");
+  const [code, setCode] = useState(autoApplyRemembered ? "" : (autoApply ?? ""));
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const autoApplied = useRef(false);
 
   const apply = useCallback(
-    async (value: string) => {
+    async (value: string, quiet = false) => {
       setChecking(true);
       setError(null);
       try {
@@ -94,7 +101,7 @@ export function PromoCodeField({
         setCode("");
         return true;
       } catch (err) {
-        setError((err as Error).message);
+        if (!quiet) setError((err as Error).message);
         return false;
       } finally {
         setChecking(false);
@@ -106,8 +113,11 @@ export function PromoCodeField({
   useEffect(() => {
     if (!autoApply || autoApplied.current) return;
     autoApplied.current = true;
-    void apply(autoApply).then((ok) => onAutoApplyDone?.(ok));
-  }, [autoApply, apply, onAutoApplyDone]);
+    void apply(autoApply, autoApplyRemembered).then((ok) => {
+      if (!ok) forgetPromo();
+      onAutoApplyDone?.(ok);
+    });
+  }, [autoApply, autoApplyRemembered, apply, onAutoApplyDone]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -132,7 +142,10 @@ export function PromoCodeField({
         </span>
         <button
           type="button"
-          onClick={() => onApply(null)}
+          onClick={() => {
+            forgetPromo();
+            onApply(null);
+          }}
           aria-label="Remove promo code"
           className="flex size-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-ink/10"
         >

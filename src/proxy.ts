@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { normalizePromoParam, PROMO_COOKIE, PROMO_COOKIE_MAX_AGE } from "@/lib/promo-link";
 
 // Route protection does not happen here, and the reason has changed since
 // that was decided. It used to be a session-cookie presence check, which
@@ -111,7 +112,32 @@ function withClientGeo(req: NextRequest) {
 /** The API's session cookie (lib/session.ts there). */
 const SESSION_COOKIE = "session";
 
+/**
+ * A partner link (?promo=CODE on any page) is remembered for the pricing page
+ * and billing to apply — see src/lib/promo-link.ts. On the production hosts
+ * it goes on the parent domain, so a code picked up on the apex survives the
+ * hop to the app host for signup and billing.
+ */
+function rememberPromo(req: NextRequest, res: NextResponse, host: string | undefined): NextResponse {
+  const code = normalizePromoParam(req.nextUrl.searchParams.get("promo"));
+  if (!code) return res;
+  res.cookies.set(PROMO_COOKIE, code, {
+    path: "/",
+    maxAge: PROMO_COOKIE_MAX_AGE,
+    sameSite: "lax",
+    secure: req.nextUrl.protocol === "https:",
+    ...(host && KNOWN_HOSTS.has(host) ? { domain: `.${SITE_HOST}` } : {}),
+  });
+  return res;
+}
+
 export function proxy(req: NextRequest) {
+  const res = route(req);
+  if (req.nextUrl.pathname.startsWith("/edge-api")) return res;
+  return rememberPromo(req, res, req.headers.get("host")?.split(":")[0]?.toLowerCase());
+}
+
+function route(req: NextRequest) {
   // Same-origin API calls, served on every host — see the matcher note.
   if (REGISTRATION_ENDPOINTS.includes(req.nextUrl.pathname)) return withClientGeo(req);
 

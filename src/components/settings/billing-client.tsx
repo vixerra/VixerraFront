@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { CreditCard, ExternalLink } from "lucide-react";
 import { apiFetch } from "@/lib/api-client";
+import { forgetPromo, rememberedPromo } from "@/lib/promo-link";
 import { ANNUAL_PRICE, TIERS, TIER_INFO, type BillingInterval, type Tier } from "@/lib/constants";
 import { formatListPrice } from "@/lib/competitor-pricing";
 import type { UnlimitedState } from "@/hooks/use-unlimited";
@@ -301,8 +302,13 @@ export function BillingClient() {
   // Set by the landing page's "Subscribe to …" buttons (see plans-section.tsx).
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plan");
-  // A promo code entered on the pricing page, carried here with the plan.
-  const promoParam = searchParams.get("promo");
+  // A promo code entered on the pricing page, carried here with the plan —
+  // else one a partner link left on an earlier page (lib/promo-link.ts).
+  // Read once: the page renders a spinner until the subscription loads, so
+  // the cookie being invisible to the server render changes nothing on screen.
+  const urlPromo = searchParams.get("promo");
+  const [promoParam] = useState(() => urlPromo ?? rememberedPromo());
+  const promoRemembered = !urlPromo && !!promoParam;
   const pickedTier = TIERS.find((t) => t === planParam) ?? null;
   // The period picked on the pricing page (?interval=annual).
   const pickedInterval: BillingInterval | null = searchParams.get("interval") === "annual" ? "annual" : null;
@@ -317,7 +323,16 @@ export function BillingClient() {
   const [promoArrival, setPromoArrival] = useState<"checking" | "ok" | "failed">(
     promoParam ? "checking" : "ok",
   );
-  const onPromoArrival = useCallback((ok: boolean) => setPromoArrival(ok ? "ok" : "failed"), []);
+  // A remembered code that's refused is dropped quietly (PromoCodeField), so
+  // there's no reason on screen to stop for.
+  const promoUsed = useCallback(() => {
+    forgetPromo();
+    setPromo(null);
+  }, []);
+  const onPromoArrival = useCallback(
+    (ok: boolean) => setPromoArrival(ok || promoRemembered ? "ok" : "failed"),
+    [promoRemembered],
+  );
   const spotlight = useSpotlight<HTMLDivElement>();
 
   const paymentsEnabled = data?.payments_enabled ?? false;
@@ -485,6 +500,7 @@ export function BillingClient() {
         onApply={setPromo}
         disabled={misconfigured}
         autoApply={promoParam}
+        autoApplyRemembered={promoRemembered}
         onAutoApplyDone={onPromoArrival}
       />
 
@@ -498,14 +514,14 @@ export function BillingClient() {
         annualAvailable={data.annual_available ?? false}
         deferAutoCheckout={promoArrival !== "ok"}
         promo={promo}
-        onPromoUsed={() => setPromo(null)}
+        onPromoUsed={promoUsed}
       />
 
       <RechargePacks
         paymentsEnabled={paymentsEnabled}
         unavailable={misconfigured}
         promo={promo}
-        onPromoUsed={() => setPromo(null)}
+        onPromoUsed={promoUsed}
       />
 
       {paymentsEnabled && paymentsData && <PaymentHistory payments={paymentsData.payments} />}

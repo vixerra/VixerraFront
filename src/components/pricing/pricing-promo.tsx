@@ -1,8 +1,16 @@
 "use client";
 
-import { createContext, Suspense, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  Suspense,
+  useContext,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import type { Tier } from "@/lib/constants";
+import { rememberedPromo } from "@/lib/promo-link";
 import {
   PromoBonusBadge,
   PromoCodeField,
@@ -15,7 +23,8 @@ import {
  * preview (most visitors here have no account yet), the plan cards it covers
  * show the bonus, and their buttons carry it to billing as ?promo= — through
  * signup when needed — where it is checked again for this account and
- * applied to the Checkout. A link to /pricing?promo=CODE pre-fills it.
+ * applied to the Checkout. A link to /pricing?promo=CODE pre-fills it, and so
+ * does ?promo=CODE on any other page visited earlier (lib/promo-link.ts).
  */
 
 type PricingPromo = { promo: AppliedPromo | null; setPromo: (promo: AppliedPromo | null) => void };
@@ -42,7 +51,15 @@ export function PricingPromoBadge({ tier }: { tier: Tier }) {
   return <PromoBonusBadge credits={promoBonusFor(promo, tier)} />;
 }
 
-function Field({ className, fromUrl }: { className?: string; fromUrl: string | null }) {
+function Field({
+  className,
+  fromUrl,
+  remembered = false,
+}: {
+  className?: string;
+  fromUrl: string | null;
+  remembered?: boolean;
+}) {
   const context = useContext(PricingPromoContext);
   if (!context) return null;
   return (
@@ -51,13 +68,24 @@ function Field({ className, fromUrl }: { className?: string; fromUrl: string | n
       onApply={context.setPromo}
       preview
       autoApply={fromUrl}
+      autoApplyRemembered={remembered}
       className={className}
     />
   );
 }
 
+/** The cookie is only read, never watched: one look on arrival is enough. */
+const noSubscribe = () => () => {};
+
+/** This page's ?promo=, else the code a partner link left on an earlier page
+ *  (lib/promo-link.ts). The cookie is read on the client only (null in the
+ *  prerender, which never sees it). */
 function FieldWithUrlCode({ className }: { className?: string }) {
-  return <Field className={className} fromUrl={useSearchParams().get("promo")} />;
+  const fromUrl = useSearchParams().get("promo");
+  const remembered = useSyncExternalStore(noSubscribe, rememberedPromo, () => null);
+  return (
+    <Field className={className} fromUrl={fromUrl ?? remembered} remembered={!fromUrl && !!remembered} />
+  );
 }
 
 /** Suspense because ?promo= is read with useSearchParams, and the rest of the
