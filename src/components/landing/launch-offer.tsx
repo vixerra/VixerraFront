@@ -311,30 +311,21 @@ export function LaunchOfferBanner() {
   );
 }
 
-/** The plan card's version: how much of the offer is gone, as a bar. */
+/** The plan card's version: the offer's terms in one line, with no count of
+ *  spots left and no bar. */
 export function LaunchOfferMeter({ className }: { className?: string }) {
-  const { places, taken, remaining } = useLaunchOffer();
-  const claimed = taken === null ? 0 : (taken / places) * 100;
+  const { places } = useLaunchOffer();
 
   return (
-    <div className={cn("rounded-xl border border-accent-hot-ink/25 bg-accent-hot/5 px-3.5 py-3", className)}>
-      <div className="flex items-center justify-between gap-2 text-caption">
-        <span className="flex items-center gap-1.5 font-semibold text-accent-hot-ink">
-          <Lock className="size-3.5" aria-hidden="true" />
-          Locked in for the first {places} subscribers
-        </span>
-        <span className="text-muted tabular-nums">{spotsLabel(places, remaining)}</span>
-      </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/10">
-        <motion.div
-          className="h-full rounded-full bg-accent-hot"
-          initial={{ width: 0 }}
-          whileInView={{ width: `${claimed}%` }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        />
-      </div>
-    </div>
+    <p
+      className={cn(
+        "flex items-center gap-1.5 rounded-xl border border-accent-hot-ink/25 bg-accent-hot/5 px-3.5 py-3 text-caption font-semibold text-accent-hot-ink",
+        className,
+      )}
+    >
+      <Lock className="size-3.5 shrink-0" aria-hidden="true" />
+      Locked in for the first {places} subscribers
+    </p>
   );
 }
 
@@ -416,10 +407,10 @@ export function LaunchOfferStrip({ className }: { className?: string }) {
 }
 
 /** The offer's plan card on the pricing page: a hot ring and a badge with
- *  the live count of spots left (the offer's size until the API answers).
- *  The card must be `relative`; both go when the offer sells out. */
+ *  the offer's size, not a count of spots left. The card must be
+ *  `relative`; both go when the offer sells out. */
 export function LaunchOfferPlanFlag() {
-  const { places, remaining, soldOut } = useLaunchOffer();
+  const { places, soldOut } = useLaunchOffer();
   if (soldOut) return null;
 
   return (
@@ -433,7 +424,7 @@ export function LaunchOfferPlanFlag() {
           className="size-1.5 rounded-full bg-white motion-safe:animate-status-pulse"
           aria-hidden="true"
         />
-        Launch offer · {remaining === null ? `${places} spots` : `${remaining} spots left`}
+        Launch offer · first {places} only
       </span>
     </>
   );

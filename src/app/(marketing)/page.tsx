@@ -7,7 +7,6 @@ import { Hero } from "@/components/landing/hero";
 import { PlansSection } from "@/components/landing/plans-section";
 import { SeedancePromoBanner } from "@/components/landing/seedance-promo-banner";
 import { Wan3UnlimitedBanner } from "@/components/landing/wan3-unlimited-banner";
-import { Kling4LaunchBanner } from "@/components/landing/kling4-launch-banner";
 import { FeatureLaunches } from "@/components/landing/feature-launches";
 import { FeaturesShowcase } from "@/components/landing/features-showcase";
 import { CapabilityConcepts } from "@/components/landing/capability-concepts";
@@ -41,17 +40,17 @@ export default function LandingPage() {
           faqPageJsonLd(HOME_FAQS),
         ]}
       />
-      {/* Product-first: what's new (the launch carousel) and what Vixlens
-          does lead; the plans come once, near the end, for visitors who've
-          seen enough to want them. */}
+      {/* Proof first, then what's new, then the one current offer: who
+          already uses it and whose models it runs, the launches (new models
+          and features in one carousel), and a single promo. The plans come
+          once, near the end, for visitors who've seen enough to want them. */}
       <Hero />
-      {HOME_PROMO === "kling4-launch" && <Kling4LaunchBanner />}
-      {HOME_PROMO === "wan3-unlimited" && <Wan3UnlimitedBanner />}
-      <FeatureLaunches />
       <TrustBar />
+      <FeatureLaunches />
+      {HOME_PROMO === "wan3-unlimited" && <Wan3UnlimitedBanner />}
       {HOME_PROMO === "seedance" && <SeedancePromoBanner />}
-      <FeaturesShowcase />
-      {/*<CapabilityConcepts />*/}
+      {/*<FeaturesShowcase />
+      <CapabilityConcepts />*/}
       <HowItWorks />
 
       <LightBeam className="container-page" />
