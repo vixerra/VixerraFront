@@ -17,6 +17,11 @@ export type UnlimitedState = {
   max_resolution: string | null;
   max_duration_seconds: number | null;
   max_concurrent: number | null;
+  /** The daily free allowance in kie dollars over any 24 hours, and how much
+   *  of it is spent; the composer turns the rest into "N more like this".
+   *  Older deployments of the API don't send these. */
+  daily_budget_usd?: number | null;
+  spent_today_usd?: number | null;
   queue: {
     waiting: number;
     position: number;

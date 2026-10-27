@@ -70,7 +70,7 @@ const FAQS = [
   },
   {
     q: "What is Wan 3.0 Unlimited?",
-    a: `For your first ${UNLIMITED_PROMO.days} days on ${TIER_INFO.creator.label} or ${TIER_INFO.studio.label}, Wan 3.0 videos are unlimited in Relax mode: ${TIER_INFO.creator.label} at 480p (720p on annual), ${TIER_INFO.studio.label} at 720p, one job at a time (two on ${TIER_INFO.studio.label} annual). Relax runs share a queue whose speed varies with demand; your credits still buy instant runs in the priority queue at any time. It is available once per account, on vixlens.com only (not through the API). Afterwards Wan 3.0 costs credits, from ${WAN3_CREDITS_PER_SECOND_FROM} credits a second.`,
+    a: `For your first ${UNLIMITED_PROMO.days} days on ${TIER_INFO.creator.label} or ${TIER_INFO.studio.label}, Wan 3.0 videos are free in Relax mode: every day, ${TIER_INFO.creator.label} gets up to 8 free 5-second videos at 720p or 16 at 480p, in any mix, and ${TIER_INFO.studio.label} up to 5 free 5-second videos at 1080p, 10 at 720p or 20 at 480p, in any mix, with clips up to 15 seconds ("every day" meaning any 24 hours), one job at a time (two on ${TIER_INFO.studio.label} annual). Relax runs share a queue whose speed varies with demand; your credits still buy instant runs in the priority queue at any time. It is available once per account, on vixlens.com only (not through the API). Afterwards Wan 3.0 costs credits, from ${WAN3_CREDITS_PER_SECOND_FROM} credits a second.`,
   },
   {
     q: "Which plans include the marketing studio, editing studio, and social publishing?",

@@ -620,6 +620,30 @@ function cheapestPerSecond(rates: Record<string, number>): number {
   return Math.min(...Object.values(rates));
 }
 
+/**
+ * What the provider bills us for a run, in USD — not what the user pays.
+ *
+ * The Relax queue (aiVideo-backend's lib/unlimited.ts) spends a dollar
+ * budget, so it needs the cost itself. Plain per-second and per-image
+ * models only, which covers the two Unlimited runs (Wan 3.0 and the cheapest
+ * image model); anything else is quoted at the dearest rate its table has.
+ */
+export function providerCostUsd(input: {
+  type: GenerationType;
+  model: string;
+  durationSeconds?: number;
+  resolution?: string;
+  imageSize?: string;
+  imageQuality?: string;
+}): number {
+  if (input.type === "text-to-image") {
+    return imageCostUsd(input.model, input.imageSize, input.imageQuality);
+  }
+  const entry = VIDEO_COST_USD[input.model] ?? VIDEO_COST_USD[SEEDANCE2_MODEL_ID];
+  const rate = entry.perSecond[input.resolution ?? ""] ?? Math.max(...Object.values(entry.perSecond));
+  return Math.max(entry.minSeconds, input.durationSeconds ?? 5) * rate;
+}
+
 export function estimateVideoCredits(
   model: string,
   durationSeconds: number,

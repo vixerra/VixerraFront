@@ -454,10 +454,10 @@ export function BillingClient() {
 
         {data.unlimited?.active && data.unlimited.ends_at && (
           <p className="relative mt-4 rounded-lg border border-accent-amber-ink/30 bg-accent-amber/5 px-4 py-3 text-caption text-ink-soft">
-            Wan 3.0 Unlimited is on until {formatDate(data.unlimited.ends_at)} — unlimited Wan 3.0
-            videos in Relax mode, up to {data.unlimited.max_resolution} and{" "}
+            Wan 3.0 Unlimited is on until {formatDate(data.unlimited.ends_at)} — free Wan 3.0
+            videos every day in Relax mode, up to {data.unlimited.max_resolution} and{" "}
             {data.unlimited.max_duration_seconds}s a clip. Pick Wan 3.0 in the composer and keep
-            Unlimited switched on.
+            Unlimited switched on: it shows how many more free videos you have today.
           </p>
         )}
 

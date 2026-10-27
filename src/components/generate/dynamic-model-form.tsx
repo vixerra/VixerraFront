@@ -26,6 +26,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/components/ui/toast";
 import {
   estimateVideoCredits,
+  providerCostUsd,
   estimateImageCredits,
   imageSettingsFromParameters,
   hasAudioFromParameters,
@@ -54,6 +55,7 @@ import { useUnlimited } from "@/hooks/use-unlimited";
 import {
   UnlimitedEndedNote,
   UnlimitedToggle,
+  freeVideosLeft,
   unlimitedRecentlyEnded,
 } from "@/components/generate/unlimited-toggle";
 import {
@@ -367,9 +369,24 @@ export function DynamicModelForm<T extends string>({
     typeof duration === "number" ? duration : durationOptionSeconds(String(duration ?? "")) || 0;
   const relaxMaxResolution = unlimitedState?.max_resolution ?? null;
   const relaxMaxSeconds = unlimitedState?.max_duration_seconds ?? null;
+  // How many more free videos like this one fit today's allowance, which is
+  // kept in kie dollars so any mix of lengths and resolutions counts.
+  const relaxVideosLeft = isVideoModel
+    ? freeVideosLeft(
+        unlimitedState,
+        providerCostUsd({
+          type: "text-to-video",
+          model: config.id,
+          durationSeconds: numericDuration || undefined,
+          resolution: typeof resolution === "string" ? resolution : undefined,
+        }),
+      )
+    : null;
   const relaxProblem =
     relax && isVideoModel
-      ? relaxMaxResolution &&
+      ? relaxVideosLeft === 0
+        ? "Today's free videos don't cover this one — try shorter or lower resolution, or turn Unlimited off to use credits."
+        : relaxMaxResolution &&
         typeof resolution === "string" &&
         (RESOLUTION_RANK[resolution] ?? Infinity) > (RESOLUTION_RANK[relaxMaxResolution] ?? 0)
         ? `Unlimited goes up to ${relaxMaxResolution} — turn it off to use credits.`
@@ -1004,6 +1021,7 @@ export function DynamicModelForm<T extends string>({
                 ? "Reference videos are paid in credits. Remove them to generate for free."
                 : undefined
             }
+            videosLeft={relaxVideosLeft}
             className="mb-3"
           />
         )}

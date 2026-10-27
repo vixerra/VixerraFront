@@ -64,9 +64,9 @@ export function Wan3UnlimitedBanner() {
             </h2>
 
             <p className="mt-4 max-w-lg text-body text-white/80">
-              Generate as many Wan 3.0 videos as you want for {UNLIMITED_PROMO.days} days. Included
-              with {TIER_INFO.creator.label} and {TIER_INFO.studio.label}, in Relax mode, from your
-              first payment.
+              Free Wan 3.0 videos every day for {UNLIMITED_PROMO.days} days, in Relax mode from
+              your first payment: up to 8 a day at 720p on {TIER_INFO.creator.label}, up to 5 a day
+              at 1080p on {TIER_INFO.studio.label}.
             </p>
 
             <span className="font-display mt-6 inline-flex w-fit items-center gap-2 rounded-lg bg-brand px-5 py-3 text-[12px] font-bold tracking-[0.06em] uppercase text-on-brand transition-transform group-hover:translate-x-1">

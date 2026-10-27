@@ -76,7 +76,8 @@ const influencerFeature = (tier: Tier) =>
 export const UNLIMITED_FEATURE = "Wan 3.0 — 7-day unlimited";
 export const UNLIMITED_TOOLTIP =
   "Generate unlimited Wan 3.0 videos for your first 7 days in Relax mode. " +
-  "Creator: 480p (720p on annual). Studio: 720p.";
+  "Creator: up to 8 videos a day at 720p or 16 at 480p, 5s each. " +
+  "Studio: up to 5 videos a day at 1080p, 10 at 720p or 20 at 480p (5s each), clips up to 15s.";
 
 /**
  * Grok is switched off on the Free plan for now (2026-10-12). Twin of

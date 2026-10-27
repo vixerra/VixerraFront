@@ -10,6 +10,22 @@ import { cn } from "@/lib/utils";
  *  note in the composer. */
 const ENDED_NOTE_DAYS = 14;
 
+/**
+ * How many more free videos costing `costUsd` each (kie's price, see
+ * providerCostUsd) fit what's left of today's allowance, or null when the
+ * API didn't say. The allowance is in dollars so any mix of resolutions and
+ * lengths fits; the user sees it as a number of videos like the one being
+ * set up.
+ */
+export function freeVideosLeft(state: UnlimitedState | null | undefined, costUsd: number): number | null {
+  if (!state || typeof state.daily_budget_usd !== "number" || typeof state.spent_today_usd !== "number") {
+    return null;
+  }
+  if (!(costUsd > 0)) return null;
+  const left = state.daily_budget_usd - state.spent_today_usd;
+  return Math.max(0, Math.floor(left / costUsd + 1e-6));
+}
+
 /** Whether a window that is over ended recently enough to say so. */
 export function unlimitedRecentlyEnded(state: UnlimitedState | null | undefined): boolean {
   if (!state || state.active || state.secondsLeft === null) return false;
@@ -27,6 +43,7 @@ export function UnlimitedToggle({
   checked,
   onCheckedChange,
   disabledReason,
+  videosLeft,
   className,
 }: {
   state: UnlimitedState;
@@ -35,14 +52,17 @@ export function UnlimitedToggle({
   /** Why this run can't go to Relax (reference videos, on Wan 3.0): the
    *  switch is held off and the reason shown in place of the queue note. */
   disabledReason?: string;
+  /** Free videos like the one being set up still left today (freeVideosLeft). */
+  videosLeft?: number | null;
   className?: string;
 }) {
   const hoursLeft = state.secondsLeft === null ? null : Math.max(0, Math.round(state.secondsLeft / 3600));
   const waitMinutes = state.queue ? Math.ceil(state.queue.estimatedWaitSeconds / 60) : 0;
   const limits = [
+    typeof videosLeft === "number" ? `${videosLeft} more like this today` : null,
     state.max_resolution,
     state.max_duration_seconds ? `up to ${state.max_duration_seconds}s` : null,
-    state.max_concurrent ? `${state.max_concurrent} at a time` : null,
+    state.max_concurrent && state.max_concurrent > 1 ? `${state.max_concurrent} at a time` : null,
   ].filter(Boolean);
 
   return (
