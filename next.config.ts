@@ -17,6 +17,16 @@ const EDGE_API_URL = process.env.NEXT_PUBLIC_EDGE_API_URL ?? "";
 // have failed optimization with "hostname is not configured".
 const edgeApiHost = EDGE_API_URL ? new URL(EDGE_API_URL).hostname : "";
 
+// The public MCP endpoint: https://api.vixlens.com/mcp is the Edge Function's
+// /mcp route (routes/mcp.ts in the API), so agents get a stable URL that
+// doesn't name the Supabase project. The gateway's publishable key rides in
+// the destination's query string (the gateway takes it there as well as in
+// the `apikey` header), so MCP clients only send their own API key. Every
+// other path on this host is a 404 — see API_HOST in src/proxy.ts.
+const MCP_HOST = "api.vixlens.com";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const mcpDestination = `${EDGE_API_URL}/mcp${SUPABASE_ANON_KEY ? `?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}` : ""}`;
+
 // Sent on every route. No script-src CSP: GTM, the Meta and TikTok pixels and
 // whatever GTM injects would all need allow-listing, and a miss silently
 // breaks ad attribution — frame-ancestors is the part that costs nothing.
@@ -48,7 +58,12 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     if (!EDGE_API_URL) return [];
-    return [{ source: "/edge-api/:path*", destination: `${EDGE_API_URL}/:path*` }];
+    return {
+      // Before files, so no page can ever shadow the MCP endpoint.
+      beforeFiles: [{ source: "/mcp", has: [{ type: "host", value: MCP_HOST }], destination: mcpDestination }],
+      afterFiles: [{ source: "/edge-api/:path*", destination: `${EDGE_API_URL}/:path*` }],
+      fallback: [],
+    };
   },
 };
 

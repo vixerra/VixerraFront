@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "/pricing", label: "Pricing" },
   { href: "/prompts", label: "Presets" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/mcp", label: "MCP" },
 ];
 
 // Solid ink bar: logo left, small uppercase nav centered, the CTAs on the

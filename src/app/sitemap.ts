@@ -24,6 +24,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/pricing", priority: 0.9, changeFrequency: "monthly" },
   { path: "/features", priority: 0.8, changeFrequency: "monthly" },
   { path: "/developers", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/mcp", priority: 0.6, changeFrequency: "monthly" },
   { path: "/for-brands", priority: 0.8, changeFrequency: "monthly" },
   { path: "/guides", priority: 0.8, changeFrequency: "weekly" },
   { path: "/gallery", priority: 0.7, changeFrequency: "daily" },

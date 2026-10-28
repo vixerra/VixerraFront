@@ -40,6 +40,10 @@ import { normalizePromoParam, PROMO_COOKIE, PROMO_COOKIE_MAX_AGE } from "@/lib/p
 const APP_HOST = "app.vixlens.com";
 const ADMIN_HOST = "admins.vixlens.com";
 const SITE_HOST = "vixlens.com";
+// The API host serves exactly one thing, the MCP endpoint, which a
+// beforeFiles rewrite in next.config.ts sends to the Edge Function. Kept out
+// of KNOWN_HOSTS: it has no pages to redirect between and no promo cookie.
+const API_HOST = "api.vixlens.com";
 const KNOWN_HOSTS = new Set([SITE_HOST, `www.${SITE_HOST}`, APP_HOST, ADMIN_HOST]);
 
 /** Prefix match: the path itself, or anything under it. */
@@ -134,7 +138,10 @@ function rememberPromo(req: NextRequest, res: NextResponse, host: string | undef
 export function proxy(req: NextRequest) {
   const res = route(req);
   if (req.nextUrl.pathname.startsWith("/edge-api")) return res;
-  return rememberPromo(req, res, req.headers.get("host")?.split(":")[0]?.toLowerCase());
+  const host = req.headers.get("host")?.split(":")[0]?.toLowerCase();
+  // The API host is machine traffic; /mcp on the site host is the MCP page.
+  if (host === API_HOST) return res;
+  return rememberPromo(req, res, host);
 }
 
 function route(req: NextRequest) {
@@ -156,6 +163,13 @@ function route(req: NextRequest) {
   }
 
   const host = req.headers.get("host")?.split(":")[0]?.toLowerCase();
+
+  // /mcp passes on to the rewrite; anything else would render the marketing
+  // site under the API's name, so it 404s the same way /admin does elsewhere.
+  if (host === API_HOST) {
+    if (req.nextUrl.pathname === "/mcp") return NextResponse.next();
+    return NextResponse.rewrite(new URL("/_api-not-found", req.url));
+  }
 
   // Only the production hostnames are split. localhost and *.vercel.app
   // preview deploys keep serving the whole site from one origin, so

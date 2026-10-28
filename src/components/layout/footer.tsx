@@ -17,6 +17,7 @@ const FOOTER_COLUMNS = [
       { href: "/models", label: "Models" },
       { href: "/pricing", label: "Pricing" },
       { href: "/developers", label: "API" },
+      { href: "/mcp", label: "MCP" },
     ],
   },
   {
