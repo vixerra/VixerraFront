@@ -44,6 +44,9 @@ const SUPPRESSED_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/admin",
+  // The consent screen an MCP client (claude.ai) sends people to: they came to
+  // approve access, and a promo over it hides the decision they came to make.
+  "/oauth",
 ];
 
 const INFLUENCER_STEPS = [

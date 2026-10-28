@@ -40,10 +40,21 @@ import { normalizePromoParam, PROMO_COOKIE, PROMO_COOKIE_MAX_AGE } from "@/lib/p
 const APP_HOST = "app.vixlens.com";
 const ADMIN_HOST = "admins.vixlens.com";
 const SITE_HOST = "vixlens.com";
-// The API host serves exactly one thing, the MCP endpoint, which a
-// beforeFiles rewrite in next.config.ts sends to the Edge Function. Kept out
-// of KNOWN_HOSTS: it has no pages to redirect between and no promo cookie.
+// The API host serves the MCP endpoint and the OAuth server behind it (for
+// claude.ai connectors), which beforeFiles rewrites in next.config.ts send to
+// the Edge Function. Kept out of KNOWN_HOSTS: it has no pages to redirect
+// between and no promo cookie.
 const API_HOST = "api.vixlens.com";
+const API_HOST_PATHS = new Set([
+  "/mcp",
+  "/oauth/register",
+  "/oauth/token",
+  "/oauth/revoke",
+  "/.well-known/oauth-protected-resource",
+  "/.well-known/oauth-protected-resource/mcp",
+  "/.well-known/oauth-authorization-server",
+  "/.well-known/oauth-authorization-server/mcp",
+]);
 const KNOWN_HOSTS = new Set([SITE_HOST, `www.${SITE_HOST}`, APP_HOST, ADMIN_HOST]);
 
 /** Prefix match: the path itself, or anything under it. */
@@ -63,6 +74,9 @@ const APP_PREFIXES = [
   "/reset-password",
   "/invite",
   "/auth/callback",
+  // The OAuth consent screen (claude.ai connectors). The API advertises it on
+  // the app host, where the session cookie lives.
+  "/oauth",
 ];
 
 /**
@@ -164,10 +178,11 @@ function route(req: NextRequest) {
 
   const host = req.headers.get("host")?.split(":")[0]?.toLowerCase();
 
-  // /mcp passes on to the rewrite; anything else would render the marketing
-  // site under the API's name, so it 404s the same way /admin does elsewhere.
+  // The MCP and OAuth paths pass on to their rewrites; anything else would
+  // render the marketing site under the API's name, so it 404s the same way
+  // /admin does elsewhere.
   if (host === API_HOST) {
-    if (req.nextUrl.pathname === "/mcp") return NextResponse.next();
+    if (API_HOST_PATHS.has(req.nextUrl.pathname)) return NextResponse.next();
     return NextResponse.rewrite(new URL("/_api-not-found", req.url));
   }
 

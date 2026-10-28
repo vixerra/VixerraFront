@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 /**
  * The public MCP endpoint. A rewrite on the api host (next.config.ts) sends
  * it to the Edge Function's /mcp route and adds the gateway key, so a client
- * only ever sends its own API key — which is why no snippet below has an
- * `apikey` header, unlike the REST examples on /developers.
+ * only ever sends its own credential (an OAuth token, or an API key) — which
+ * is why no snippet below has an `apikey` header, unlike the REST examples on
+ * /developers.
  */
 export const MCP_ENDPOINT = "https://api.vixlens.com/mcp";
 
@@ -48,6 +49,16 @@ export function McpEndpoint() {
 
 const CLIENTS = [
   {
+    // OAuth, not a key: claude.ai sends the user to the consent screen
+    // (/oauth/authorize) and keeps the token itself — routes/oauth.ts in the API.
+    id: "claude-ai",
+    label: "Claude",
+    where:
+      "In claude.ai or the Claude app: Settings → Connectors → Add custom connector. Paste this URL, click Add, then Connect and allow access. No API key needed.",
+    language: "text",
+    code: MCP_ENDPOINT,
+  },
+  {
     id: "claude-code",
     label: "Claude Code",
     where: "Run once in your terminal.",
@@ -80,24 +91,6 @@ const CLIENTS = [
       "type": "http",
       "url": "${MCP_ENDPOINT}",
       "headers": { "Authorization": "Bearer sk_live_..." }
-    }
-  }
-}`,
-  },
-  {
-    // Claude Desktop's config file takes local (stdio) servers, so a remote
-    // one goes through mcp-remote. The header is passed through an env var
-    // because a space inside an args entry breaks on Windows.
-    id: "claude-desktop",
-    label: "Claude Desktop",
-    where: "Settings → Developer → Edit Config, then restart Claude. Needs Node.js.",
-    language: "json",
-    code: `{
-  "mcpServers": {
-    "vixlens": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "${MCP_ENDPOINT}", "--header", "Authorization:\${VIXLENS_AUTH}"],
-      "env": { "VIXLENS_AUTH": "Bearer sk_live_..." }
     }
   }
 }`,

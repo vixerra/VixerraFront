@@ -25,7 +25,33 @@ const edgeApiHost = EDGE_API_URL ? new URL(EDGE_API_URL).hostname : "";
 // other path on this host is a 404 — see API_HOST in src/proxy.ts.
 const MCP_HOST = "api.vixlens.com";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-const mcpDestination = `${EDGE_API_URL}/mcp${SUPABASE_ANON_KEY ? `?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}` : ""}`;
+const gatewayKey = SUPABASE_ANON_KEY ? `?apikey=${encodeURIComponent(SUPABASE_ANON_KEY)}` : "";
+const onMcpHost = [{ type: "host" as const, value: MCP_HOST }];
+
+// The MCP endpoint plus the OAuth server that lets claude.ai add it as a
+// connector (routes/oauth.ts in the API). The .well-known documents are
+// asked for at the host root, and some clients append the resource path
+// (/mcp) to them, so both spellings go to the same document.
+const MCP_HOST_REWRITES = [
+  { source: "/mcp", has: onMcpHost, destination: `${EDGE_API_URL}/mcp${gatewayKey}` },
+  ...["", "/mcp"].flatMap((suffix) => [
+    {
+      source: `/.well-known/oauth-protected-resource${suffix}`,
+      has: onMcpHost,
+      destination: `${EDGE_API_URL}/oauth/protected-resource${gatewayKey}`,
+    },
+    {
+      source: `/.well-known/oauth-authorization-server${suffix}`,
+      has: onMcpHost,
+      destination: `${EDGE_API_URL}/oauth/authorization-server${gatewayKey}`,
+    },
+  ]),
+  ...["register", "token", "revoke"].map((endpoint) => ({
+    source: `/oauth/${endpoint}`,
+    has: onMcpHost,
+    destination: `${EDGE_API_URL}/oauth/${endpoint}${gatewayKey}`,
+  })),
+];
 
 // Sent on every route. No script-src CSP: GTM, the Meta and TikTok pixels and
 // whatever GTM injects would all need allow-listing, and a miss silently
@@ -59,8 +85,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     if (!EDGE_API_URL) return [];
     return {
-      // Before files, so no page can ever shadow the MCP endpoint.
-      beforeFiles: [{ source: "/mcp", has: [{ type: "host", value: MCP_HOST }], destination: mcpDestination }],
+      // Before files, so no page can ever shadow the MCP endpoints.
+      beforeFiles: MCP_HOST_REWRITES,
       afterFiles: [{ source: "/edge-api/:path*", destination: `${EDGE_API_URL}/:path*` }],
       fallback: [],
     };

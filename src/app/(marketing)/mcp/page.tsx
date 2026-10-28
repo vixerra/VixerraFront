@@ -38,12 +38,12 @@ const EXAMPLES = [
 
 const STEPS = [
   {
-    title: "Create an API key",
-    body: "In Settings → API Keys. It acts as your account and spends your credits, and you can revoke it at any time.",
+    title: "Add Vixlens to your client",
+    body: "A custom connector in Claude, or one command or config block in Claude Code, Cursor or VS Code.",
   },
   {
-    title: "Add Vixlens to your client",
-    body: "One command or one config block for your client. The only secret it needs is your key.",
+    title: "Approve access",
+    body: "Claude sends you to Vixlens to sign in and allow it. Other clients use a key from Settings → API Keys.",
   },
   {
     title: "Ask for what you want",
@@ -76,11 +76,11 @@ const FAQ = [
   },
   {
     q: "Which clients work?",
-    a: "Any client that supports remote MCP servers over HTTP with a custom header: Claude Code, Cursor, VS Code, Windsurf, Claude Desktop through mcp-remote, and others.",
+    a: "Claude as a connector (web, desktop and mobile), plus any client that supports remote MCP servers over HTTP: Claude Code, Cursor, VS Code, Windsurf and others.",
   },
   {
-    q: "Can I add it as a connector on claude.ai?",
-    a: "Not yet. claude.ai connectors sign in with OAuth rather than an API key. Until we support that, use Claude Code or Claude Desktop.",
+    q: "Can I add it as a connector in Claude?",
+    a: "Yes. In Settings → Connectors, add a custom connector with the endpoint above, then sign in to Vixlens and allow access. No API key needed, and it works on claude.ai, desktop and mobile.",
   },
   {
     q: "Where do my results go?",
@@ -113,18 +113,22 @@ export default function McpPage() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={appHref("/settings/api-keys")} prefetch={false} className={buttonVariants()}>
-              Get your API key
-            </Link>
-            <a href="#setup" className={buttonVariants({ variant: "secondary" })}>
-              Set it up
+            <a href="#setup" className={buttonVariants()}>
+              Add to Claude
             </a>
+            <Link
+              href={appHref("/settings/api-keys")}
+              prefetch={false}
+              className={buttonVariants({ variant: "secondary" })}
+            >
+              Get an API key
+            </Link>
           </div>
 
           <p className="mt-5 text-body-sm text-muted">
             {API_TIER
-              ? `MCP uses API keys, included on the ${TIER_INFO[API_TIER].label} plan.`
-              : "MCP uses API keys, included on selected plans."}{" "}
+              ? `Connecting an agent is included on the ${TIER_INFO[API_TIER].label} plan.`
+              : "Connecting an agent is included on selected plans."}{" "}
             <Link href="/pricing" className="text-brand-ink underline-offset-4 hover:underline">
               See pricing
             </Link>
@@ -170,8 +174,9 @@ export default function McpPage() {
           <Card variant="compact" className="min-w-0">
             <McpClientSetup />
             <p className="mt-5 text-body-sm text-muted">
-              Replace <code className="font-mono text-ink-soft">sk_live_...</code> with your key. Keep it
-              out of shared repositories: anyone holding it can spend your credits.
+              For the other clients, replace <code className="font-mono text-ink-soft">sk_live_...</code> with
+              a key from Settings → API Keys. Keep it out of shared repositories: anyone holding it can
+              spend your credits.
             </p>
           </Card>
         </div>
@@ -250,11 +255,11 @@ export default function McpPage() {
         <Card variant="compact" className="flex flex-col items-start gap-6 p-8 sm:p-12 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-subheading text-ink">Start generating from your agent</h2>
-            <p className="mt-2 text-body text-muted">Create a key, paste one line, and ask.</p>
+            <p className="mt-2 text-body text-muted">Add the connector, approve it, and ask.</p>
           </div>
-          <Link href={appHref("/settings/api-keys")} prefetch={false} className={buttonVariants({ size: "lg" })}>
-            Get your API key
-          </Link>
+          <a href="#setup" className={buttonVariants({ size: "lg" })}>
+            Set it up
+          </a>
         </Card>
       </section>
     </div>
