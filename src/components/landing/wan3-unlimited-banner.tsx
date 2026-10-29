@@ -65,7 +65,7 @@ export function Wan3UnlimitedBanner() {
 
             <p className="mt-4 max-w-lg text-body text-white/80">
               Free Wan 3.0 videos every day for {UNLIMITED_PROMO.days} days, in Relax mode from
-              your first payment: up to 8 a day at 720p on {TIER_INFO.creator.label}, up to 5 a day
+              your first payment: up to 5 a day at 720p on {TIER_INFO.creator.label}, up to 4 a day
               at 1080p on {TIER_INFO.studio.label}.
             </p>
 
