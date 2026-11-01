@@ -49,12 +49,16 @@ export async function GET(
     return NextResponse.redirect(settingsUrl);
   }
 
+  const session = request.cookies.get("session")?.value;
   try {
     const res = await fetch(`${EDGE_API_URL}/social/callback/${platform}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(SUPABASE_ANON_KEY ? { apikey: SUPABASE_ANON_KEY } : {}),
+        // Only the session cookie, so the API can refuse a connect flow that
+        // someone else started and this browser is being made to finish.
+        ...(session ? { cookie: `session=${encodeURIComponent(session)}` } : {}),
       },
       body: JSON.stringify({ code, state }),
     });
