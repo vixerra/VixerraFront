@@ -56,7 +56,7 @@ export default function LandingPage() {
       <LightBeam className="container-page" />
       <ModelStrip />
 
-      <section id="showcase" className="container-page py-20 sm:py-28">
+      {/*<section id="showcase" className="container-page py-20 sm:py-28">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-heading font-bold text-ink">See it in action</h2>
           <p className="mt-4 text-body text-muted">
@@ -72,7 +72,7 @@ export default function LandingPage() {
         <div className="mt-14">
           <ShowcaseTabs />
         </div>
-      </section>
+      </section>*/}
 
       <Personas />
       <CreatorUseCases />
