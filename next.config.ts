@@ -55,11 +55,12 @@ const MCP_HOST_REWRITES = [
 
 // Sent on every route. No script-src CSP: GTM, the Meta and TikTok pixels and
 // whatever GTM injects would all need allow-listing, and a miss silently
-// breaks ad attribution — frame-ancestors is the part that costs nothing.
+// breaks ad attribution. What costs nothing is here: frame-ancestors, no
+// plugins, and no <base> tag pointing relative URLs somewhere else.
 const SECURITY_HEADERS = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'" },
   // allow-popups rather than same-origin: a third-party sign-in or checkout
   // window opened from here keeps working.
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
@@ -87,7 +88,11 @@ const nextConfig: NextConfig = {
     return {
       // Before files, so no page can ever shadow the MCP endpoints.
       beforeFiles: MCP_HOST_REWRITES,
-      afterFiles: [{ source: "/edge-api/:path*", destination: `${EDGE_API_URL}/:path*` }],
+      // Not on the API host, which serves only the MCP and OAuth paths above:
+      // without `missing`, api.vixlens.com/edge-api/* reached the whole API.
+      afterFiles: [
+        { source: "/edge-api/:path*", missing: onMcpHost, destination: `${EDGE_API_URL}/:path*` },
+      ],
       fallback: [],
     };
   },
