@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { FlaskConical, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,25 +23,6 @@ import { apiFetch } from "@/lib/api-client";
  * an email is a real account or merely lacks admin — the API returns one
  * indistinguishable error for every failure, and this page just shows it.
  */
-/** The seeded staff account, printed on the page below so nobody has to go
- *  hunting for it while the panel is being built. */
-const TEST_ADMIN = { email: "admin@vixlens.test", password: "Vx-Admin-2026!dev" };
-
-/**
- * Working admin credentials on a login page are a hole, so showing them is
- * opt-in everywhere it matters. Local `next dev` shows them with no setup;
- * any production build (which includes Vercel previews — they build with
- * NODE_ENV=production) hides them unless NEXT_PUBLIC_SHOW_TEST_ADMIN is
- * explicitly set to "true" on that deployment.
- *
- * So the failure mode is a staging box where someone set the flag and forgot,
- * not a live site that leaked by default. Delete this block and disable the
- * account (Admin.disabledAt) once real staff accounts exist.
- */
-const SHOW_TEST_CREDENTIALS =
-  process.env.NODE_ENV !== "production" ||
-  process.env.NEXT_PUBLIC_SHOW_TEST_ADMIN === "true";
-
 export default function AdminLoginPage() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -130,25 +111,6 @@ export default function AdminLoginPage() {
         <p className="mt-6 text-center text-caption text-muted">
           Admin access is granted by an operator. There is no self-serve signup.
         </p>
-
-        {SHOW_TEST_CREDENTIALS && (
-          <div className="mt-5 rounded-xl border border-warning/40 bg-warning/10 p-4">
-            <p className="flex items-center gap-1.5 text-caption font-semibold text-warning">
-              <FlaskConical className="size-3.5" aria-hidden="true" />
-              Test account — non-production builds only
-            </p>
-            <dl className="mt-2.5 space-y-1 font-mono text-caption text-ink-soft">
-              <div className="flex gap-2">
-                <dt className="w-20 shrink-0 text-muted">email</dt>
-                <dd className="break-all select-all">{TEST_ADMIN.email}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="w-20 shrink-0 text-muted">password</dt>
-                <dd className="break-all select-all">{TEST_ADMIN.password}</dd>
-              </div>
-            </dl>
-          </div>
-        )}
       </Card>
     </div>
   );
